@@ -1,0 +1,841 @@
+package com.drdisagree.teledrive.presentation.home
+
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CloudDone
+import androidx.compose.material.icons.filled.CloudOff
+import androidx.compose.material.icons.filled.CloudSync
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.CloudUpload
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.SwapVert
+import androidx.compose.material.icons.outlined.ErrorOutline
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LargeFlexibleTopAppBar
+import androidx.compose.material3.LinearWavyProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import com.drdisagree.teledrive.R
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.drdisagree.teledrive.core.telegram.TelegramConnectionState
+import com.drdisagree.teledrive.domain.model.BackupSessionStatus
+import com.drdisagree.teledrive.domain.model.SortDirection
+import com.drdisagree.teledrive.domain.model.FileSortField
+import com.drdisagree.teledrive.domain.model.TransferState
+import com.drdisagree.teledrive.presentation.collection.CollectionType
+import com.drdisagree.teledrive.presentation.common.Formatters
+import com.drdisagree.teledrive.presentation.common.add
+import com.drdisagree.teledrive.presentation.components.ConfirmDialog
+import com.drdisagree.teledrive.presentation.components.ConnectionDot
+import com.drdisagree.teledrive.presentation.components.ConnectionIndicator
+import com.drdisagree.teledrive.presentation.components.FileThumbnail
+import com.drdisagree.teledrive.presentation.components.GroupedList
+import com.drdisagree.teledrive.presentation.components.LoadingState
+import com.drdisagree.teledrive.presentation.components.PermissionWarningCard
+import com.drdisagree.teledrive.presentation.navigation.LocalBottomBarInset
+import com.drdisagree.teledrive.presentation.preview.PreviewSequence
+import com.drdisagree.teledrive.presentation.components.BottomBarSnackbarHost
+import com.drdisagree.teledrive.presentation.components.ChannelAvatar
+import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.runtime.saveable.rememberSaveable
+import kotlinx.coroutines.delay
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.res.pluralStringResource
+import com.drdisagree.teledrive.domain.model.StorageSlice
+import com.drdisagree.teledrive.presentation.components.chartColor
+import com.drdisagree.teledrive.presentation.components.label
+import kotlin.math.roundToInt
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.TextStyle
+import com.drdisagree.teledrive.presentation.common.AgeBucket
+import com.drdisagree.teledrive.presentation.common.CollectSnackbarMessages
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun HomeScreen(
+    onOpenFile: (String, PreviewSequence) -> Unit,
+    onOpenFolder: (String) -> Unit,
+    onOpenTransfers: () -> Unit,
+    onOpenTrash: () -> Unit,
+    onOpenChannels: () -> Unit,
+    onOpenCollection: (CollectionType) -> Unit,
+    onOpenBackupSettings: () -> Unit,
+    viewModel: HomeViewModel = hiltViewModel()
+) {
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    var lastConnectionStatus by remember { mutableStateOf<ConnectionStatus?>(null) }
+    val scanning by viewModel.scanning.collectAsStateWithLifecycle()
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { viewModel.refreshPermissions() }
+
+    var confirmCancelBackup by remember { mutableStateOf<String?>(null) }
+    confirmCancelBackup?.let { sessionId ->
+        ConfirmDialog(
+            title = stringResource(R.string.home_cancel_backup_title),
+            message = stringResource(R.string.home_queued_uploads_discarded_files),
+            confirmLabel = stringResource(R.string.home_cancel_backup_action),
+            destructive = true,
+            onConfirm = {
+                confirmCancelBackup = null
+                viewModel.cancelBackup(sessionId)
+            },
+            onDismiss = { confirmCancelBackup = null }
+        )
+    }
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) viewModel.refreshPermissions()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    CollectSnackbarMessages(viewModel.messages, snackbarHostState)
+
+    Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        snackbarHost = { BottomBarSnackbarHost(snackbarHostState) },
+        topBar = {
+            LargeFlexibleTopAppBar(
+                title = { Text(stringResource(R.string.app_name)) },
+                subtitle = {
+                    val status = rememberConnectionStatus(state.offline, state.connection)
+                    AnimatedVisibility(
+                        visible = status != null,
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically()
+                    ) {
+                        val shown = status ?: lastConnectionStatus
+                        if (shown != null) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                ConnectionDot(status = shown.indicator)
+                                Spacer(Modifier.width(4.dp))
+                                Text(stringResource(shown.labelRes))
+                            }
+                        }
+                    }
+                    lastConnectionStatus = status ?: lastConnectionStatus
+                },
+                actions = {
+                    if (state.appLockEnabled) {
+                        IconButton(onClick = viewModel::lockNow) {
+                            Icon(
+                                Icons.Filled.Lock,
+                                contentDescription = stringResource(R.string.home_lock_app)
+                            )
+                        }
+                    }
+                    state.activeChannel?.let { channel ->
+                        IconButton(
+                            onClick = onOpenChannels,
+                            modifier = Modifier.padding(end = 8.dp)
+                        ) {
+                            ChannelAvatar(
+                                channel = channel,
+                                size = AVATAR_SIZE,
+                                contentDescription = stringResource(
+                                    R.string.home_open_drives
+                                )
+                            )
+                        }
+                    }
+                },
+                scrollBehavior = scrollBehavior
+            )
+        }
+    ) { padding ->
+        if (state.loading) {
+            LoadingState(modifier = Modifier.padding(padding))
+            return@Scaffold
+        }
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = padding.add(
+                horizontal = 16.dp,
+                top = 8.dp,
+                bottom = 24.dp + LocalBottomBarInset.current
+            ),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            if (state.missingPermissions.isNotEmpty()) {
+                item {
+                    PermissionWarningCard(
+                        missing = state.missingPermissions,
+                        onGrant = {
+                            permissionLauncher.launch(
+                                state.missingPermissions
+                                    .mapNotNull { it.manifestPermission }
+                                    .distinct()
+                                    .toTypedArray()
+                            )
+                        }
+                    )
+                }
+            }
+            item {
+                BackupCard(
+                    state = state,
+                    scanning = scanning,
+                    onChooseFolders = onOpenBackupSettings,
+                    onScanNow = viewModel::scanNow,
+                    onPause = viewModel::pauseBackup,
+                    onResume = viewModel::resumeBackup,
+                    onCancel = { confirmCancelBackup = it }
+                )
+            }
+            if (state.favoriteFolders.isNotEmpty()) {
+                item {
+                    SectionHeader(stringResource(R.string.home_section_favorites))
+                    Spacer(Modifier.height(8.dp))
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        state.favoriteFolders.take(5).forEach { folder ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(MaterialTheme.shapes.medium)
+                                    .clickable { onOpenFolder(folder.id) }
+                                    .padding(vertical = 8.dp, horizontal = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    Icons.Filled.Folder,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                                Spacer(Modifier.width(12.dp))
+                                Text(
+                                    folder.name,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            if (state.showRecentSection && state.recentFiles.isNotEmpty()) {
+                item {
+                    SectionHeader(stringResource(R.string.home_section_recent))
+                    Spacer(Modifier.height(8.dp))
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        items(state.recentFiles, key = { it.id }) { file ->
+                            Column(
+                                modifier = Modifier
+                                    .width(112.dp)
+                                    .clip(MaterialTheme.shapes.large)
+                                    .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                                    .clickable { onOpenFile(
+                                        file.id,
+                                        PreviewSequence(
+                                            sortField = FileSortField.DATE_ADDED,
+                                            sortDirection = SortDirection.DESCENDING
+                                        )
+                                    ) }
+                                    .padding(6.dp)
+                            ) {
+                                FileThumbnail(
+                                    file = file,
+                                    modifier = Modifier
+                                        .size(100.dp)
+                                        .clip(MaterialTheme.shapes.medium)
+                                )
+                                Spacer(Modifier.height(6.dp))
+                                Text(
+                                    text = file.name,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.padding(horizontal = 2.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            if (state.storage.isNotEmpty()) {
+                item {
+                    SectionHeader(stringResource(R.string.home_section_storage))
+                    Spacer(Modifier.height(8.dp))
+                    StorageCard(slices = state.storage)
+                }
+            }
+            item {
+                CollectionLinks(
+                    showArchived = state.showArchivedSection,
+                    showHidden = state.showHiddenSection,
+                    activeTransferCount = state.activeTransferCount,
+                    onOpenCollection = onOpenCollection,
+                    onOpenTransfers = onOpenTransfers,
+                    onOpenTrash = onOpenTrash
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun CollectionLinks(
+    showArchived: Boolean,
+    showHidden: Boolean,
+    activeTransferCount: Int,
+    onOpenCollection: (CollectionType) -> Unit,
+    onOpenTransfers: () -> Unit,
+    onOpenTrash: () -> Unit
+) {
+    GroupedList(horizontalPadding = 0.dp) {
+        CollectionType.entries.forEach { collection ->
+            val visible = when (collection) {
+                CollectionType.ARCHIVED -> showArchived
+                CollectionType.HIDDEN -> showHidden
+                else -> true
+            }
+            add(visible = visible) {
+                CollectionRow(
+                    icon = collection.icon,
+                    title = stringResource(collection.titleRes),
+                    subtitle = stringResource(collection.subtitleRes),
+                    onClick = { onOpenCollection(collection) }
+                )
+            }
+        }
+        add {
+            CollectionRow(
+                icon = Icons.Filled.SwapVert,
+                title = stringResource(R.string.home_transfer_history),
+                subtitle = if (activeTransferCount > 0) {
+                    stringResource(R.string.home_active_transfers, activeTransferCount)
+                } else {
+                    stringResource(R.string.home_transfer_history_subtitle)
+                },
+                onClick = onOpenTransfers
+            )
+        }
+        add {
+            CollectionRow(
+                icon = Icons.Filled.Delete,
+                title = stringResource(R.string.trash),
+                subtitle = stringResource(R.string.home_deleted_files_kept_removal),
+                onClick = onOpenTrash
+            )
+        }
+    }
+}
+
+@Composable
+private fun CollectionRow(
+    icon: ImageVector,
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Spacer(Modifier.width(16.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(title, style = MaterialTheme.typography.bodyLarge)
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun SectionHeader(title: String) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun BackupCard(
+    state: HomeUiState,
+    scanning: Boolean,
+    onChooseFolders: () -> Unit,
+    onScanNow: () -> Unit,
+    onPause: (String) -> Unit,
+    onResume: (String) -> Unit,
+    onCancel: (String) -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        ),
+        shape = MaterialTheme.shapes.extraLarge
+    ) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = when {
+                        state.rebuilding -> Icons.Filled.CloudSync
+                        state.failedCount > 0 -> Icons.Outlined.ErrorOutline
+                        state.activeBackup?.status == BackupSessionStatus.PAUSED ->
+                            Icons.Filled.CloudSync
+
+                        state.pendingCount > 0 -> Icons.Filled.CloudUpload
+                        state.offline -> Icons.Filled.CloudOff
+                        else -> Icons.Filled.CloudDone
+                    },
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+                Spacer(Modifier.width(12.dp))
+                Column {
+                    Text(
+                        text = when {
+                            state.activeBackup?.status == BackupSessionStatus.RUNNING ->
+                                stringResource(R.string.home_backing_up)
+
+                            state.activeBackup?.status == BackupSessionStatus.PAUSED ->
+                                stringResource(R.string.home_backup_paused)
+
+                            state.rebuilding -> stringResource(R.string.home_status_rebuilding)
+                            state.totalFiles == 0 ->
+                                stringResource(R.string.home_backup_nothing_to_back_up)
+
+                            state.failedCount > 0 ->
+                                stringResource(R.string.home_failed_count, state.failedCount)
+
+                            state.pendingCount > 0 ->
+                                stringResource(R.string.home_waiting_count, state.pendingCount)
+
+                            state.backedUpCount < state.totalFiles -> stringResource(
+                                R.string.home_not_backed_up_count,
+                                state.totalFiles - state.backedUpCount
+                            )
+
+                            else -> stringResource(R.string.app_backed_up)
+                        },
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                    Text(
+                        text = backupFreshnessLabel(
+                            autoBackupEnabled = state.autoBackupEnabled,
+                            lastBackupAt = state.lastBackupAt,
+                            totalFiles = state.totalFiles,
+                            backedUpCount = state.backedUpCount
+                        ),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
+            state.activeBackup?.let { session ->
+                Spacer(Modifier.height(12.dp))
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val sessionButtonColors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        contentColor = MaterialTheme.colorScheme.primaryContainer
+                    )
+                    if (session.status == BackupSessionStatus.PAUSED) {
+                        Button(
+                            onClick = { onResume(session.id) },
+                            shapes = ButtonDefaults.shapes(),
+                            colors = sessionButtonColors
+                        ) { Text(stringResource(R.string.common_resume)) }
+                    } else {
+                        Button(
+                            onClick = { onPause(session.id) },
+                            shapes = ButtonDefaults.shapes(),
+                            colors = sessionButtonColors
+                        ) { Text(stringResource(R.string.common_pause)) }
+                    }
+                    OutlinedButton(
+                        onClick = { onCancel(session.id) },
+                        shapes = ButtonDefaults.shapes(),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        ),
+                        border = BorderStroke(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                                .copy(alpha = 0.5f)
+                        )
+                    ) { Text(stringResource(R.string.common_cancel)) }
+                }
+                Spacer(Modifier.height(12.dp))
+                LinearWavyProgressIndicator(
+                    progress = { session.progress },
+                    amplitude = {
+                        if (session.status == BackupSessionStatus.RUNNING) 1f else 0f
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    text = stringResource(
+                        R.string.home_session_progress,
+                        session.completedFiles,
+                        session.totalFiles
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+            if (state.rebuilding && state.activeBackup == null) {
+                Spacer(Modifier.height(12.dp))
+                LinearWavyProgressIndicator(modifier = Modifier.fillMaxWidth())
+            }
+            if (state.activeBackup == null) {
+                Spacer(Modifier.height(16.dp))
+                val foldersSelected = state.backupFoldersSelected
+                Button(
+                    onClick = if (foldersSelected) onScanNow else onChooseFolders,
+                    shapes = ButtonDefaults.shapes(),
+                    enabled = !scanning,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        contentColor = MaterialTheme.colorScheme.primaryContainer
+                    )
+                ) {
+                    Text(
+                        when {
+                            scanning -> stringResource(R.string.home_scanning)
+                            foldersSelected -> stringResource(R.string.home_scan_now)
+                            else -> stringResource(R.string.home_choose_folders)
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TransferCard(state: HomeUiState, onOpenTransfers: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onOpenTransfers),
+        shape = MaterialTheme.shapes.extraLarge
+    ) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            Text(
+                text = stringResource(
+                    R.string.home_active_transfers,
+                    state.activeTransfers.size
+                ),
+                style = MaterialTheme.typography.titleMedium
+            )
+            state.activeTransfers.take(2).forEach { transfer ->
+                Spacer(Modifier.height(10.dp))
+                Text(
+                    transfer.displayName,
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(Modifier.height(4.dp))
+                LinearWavyProgressIndicator(
+                    progress = { transfer.progress },
+                    amplitude = { if (transfer.state == TransferState.RUNNING) 1f else 0f },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+    }
+}
+
+/** Connection state worth showing, or null while everything is normal. */
+private data class ConnectionStatus(
+    val indicator: ConnectionIndicator,
+    @StringRes val labelRes: Int
+)
+
+/**
+ * Connectivity is only surfaced when it needs attention. A recovery shows
+ * briefly so the change is acknowledged, then the row disappears again.
+ */
+@Composable
+private fun rememberConnectionStatus(
+    offline: Boolean,
+    connection: TelegramConnectionState
+): ConnectionStatus? {
+    val settled = !offline && connection == TelegramConnectionState.READY
+    var wasSettled by rememberSaveable { mutableStateOf(settled) }
+    var showRecovered by remember { mutableStateOf(false) }
+
+    LaunchedEffect(settled) {
+        if (settled && !wasSettled) {
+            showRecovered = true
+            delay(RECOVERED_VISIBLE_MS)
+            showRecovered = false
+        }
+        wasSettled = settled
+    }
+
+    return when {
+        offline -> ConnectionStatus(
+            ConnectionIndicator.OFFLINE,
+            R.string.home_status_offline
+        )
+
+        connection == TelegramConnectionState.UPDATING -> ConnectionStatus(
+            ConnectionIndicator.WORKING,
+            R.string.home_status_syncing
+        )
+
+        connection != TelegramConnectionState.READY -> ConnectionStatus(
+            ConnectionIndicator.WORKING,
+            R.string.home_status_connecting
+        )
+
+        showRecovered -> ConnectionStatus(
+            ConnectionIndicator.CONNECTED,
+            R.string.home_status_connected
+        )
+
+        else -> null
+    }
+}
+
+
+@Composable
+private fun StorageCard(slices: List<StorageSlice>, modifier: Modifier = Modifier) {
+    val totalBytes = remember(slices) { slices.sumOf { it.totalBytes } }
+    val totalFiles = remember(slices) { slices.sumOf { it.fileCount } }
+    if (totalBytes <= 0L) return
+
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+        ),
+        shape = MaterialTheme.shapes.extraLarge
+    ) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            Text(
+                text = Formatters.bytes(totalBytes),
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = pluralStringResource(R.plurals.file_count, totalFiles, totalFiles),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.height(16.dp))
+            StorageBar(slices = slices, totalBytes = totalBytes)
+            Spacer(Modifier.height(16.dp))
+            StorageLegend(slices = slices, totalBytes = totalBytes)
+        }
+    }
+}
+
+/** Proportional bar. Every slice keeps a sliver so nothing vanishes entirely. */
+@Composable
+private fun StorageBar(slices: List<StorageSlice>, totalBytes: Long) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(BAR_HEIGHT),
+        horizontalArrangement = Arrangement.spacedBy(BAR_GAP)
+    ) {
+        slices.forEach { slice ->
+            val fraction = (slice.totalBytes.toFloat() / totalBytes).coerceAtLeast(MIN_SLICE)
+            Box(
+                modifier = Modifier
+                    .weight(fraction)
+                    .fillMaxHeight()
+                    .clip(CircleShape)
+                    .background(slice.category.chartColor())
+            )
+        }
+    }
+}
+
+private val LegendTextStyle: TextStyle
+    @Composable get() = MaterialTheme.typography.bodyLarge
+
+@Composable
+private fun StorageLegend(slices: List<StorageSlice>, totalBytes: Long) {
+    Row(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.weight(1f)) {
+            slices.forEach { slice ->
+                Row(
+                    modifier = Modifier.padding(vertical = LEGEND_ROW_GAP),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(LEGEND_DOT)
+                            .clip(CircleShape)
+                            .background(slice.category.chartColor())
+                    )
+                    Spacer(Modifier.width(12.dp))
+                    Text(
+                        text = slice.category.label(),
+                        style = LegendTextStyle,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        }
+        Spacer(Modifier.width(16.dp))
+        Column(horizontalAlignment = Alignment.End) {
+            slices.forEach { slice ->
+                val percent = slice.totalBytes * 100f / totalBytes
+                Text(
+                    text = if (percent < 1f) {
+                        stringResource(R.string.home_storage_percent_min)
+                    } else {
+                        stringResource(R.string.home_storage_percent, percent.roundToInt())
+                    },
+                    style = LegendTextStyle,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    modifier = Modifier.padding(vertical = LEGEND_ROW_GAP)
+                )
+            }
+        }
+        Spacer(Modifier.width(16.dp))
+        Column(horizontalAlignment = Alignment.End) {
+            slices.forEach { slice ->
+                Text(
+                    text = Formatters.bytes(slice.totalBytes),
+                    style = LegendTextStyle,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    modifier = Modifier.padding(vertical = LEGEND_ROW_GAP)
+                )
+            }
+        }
+    }
+}
+
+
+/**
+ * The backup card answers whether the drive is current, which the storage
+ * card cannot say. A stale timestamp means nothing while nothing is
+ * scheduled, so a disabled schedule outranks it.
+ */
+@Composable
+private fun backupFreshnessLabel(
+    autoBackupEnabled: Boolean,
+    lastBackupAt: Long?,
+    totalFiles: Int,
+    backedUpCount: Int
+): String = when {
+    !autoBackupEnabled -> stringResource(R.string.home_backup_auto_off)
+    /* Files indexed from an existing channel are already safe even though this
+       device never ran a session, so claiming "no backup yet" would be wrong. */
+    lastBackupAt == null && totalFiles > 0 && backedUpCount >= totalFiles ->
+        stringResource(R.string.home_backup_all_in_telegram)
+
+    lastBackupAt == null -> stringResource(R.string.home_backup_never)
+    else -> when (val age = Formatters.relativeAge(lastBackupAt)) {
+        AgeBucket.JustNow -> stringResource(R.string.home_backup_just_now)
+        is AgeBucket.Minutes -> stringResource(
+            R.string.home_backup_at,
+            pluralStringResource(R.plurals.backup_age_minutes, age.value, age.value)
+        )
+
+        is AgeBucket.Hours -> stringResource(
+            R.string.home_backup_at,
+            pluralStringResource(R.plurals.backup_age_hours, age.value, age.value)
+        )
+
+        is AgeBucket.Days -> stringResource(
+            R.string.home_backup_at,
+            pluralStringResource(R.plurals.backup_age_days, age.value, age.value)
+        )
+
+        is AgeBucket.Longer -> stringResource(
+            R.string.home_backup_at,
+            Formatters.date(age.epochMillis)
+        )
+    }
+}
+
+
+private val AVATAR_SIZE = 32.dp
+private const val RECOVERED_VISIBLE_MS = 2_000L
+private val BAR_HEIGHT = 14.dp
+private val BAR_GAP = 3.dp
+private val LEGEND_DOT = 12.dp
+private const val MIN_SLICE = 0.02f
+private val LEGEND_ROW_GAP = 6.dp

@@ -1,0 +1,1393 @@
+package com.drdisagree.teledrive.presentation.onboarding
+
+import android.Manifest
+import android.content.Intent
+import androidx.core.content.ContextCompat
+import android.content.pm.PackageManager
+import android.content.Context
+import android.net.Uri
+import android.os.Build
+import android.os.Environment
+import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import com.drdisagree.teledrive.domain.model.DriveChannel
+import com.drdisagree.teledrive.presentation.components.ChannelAvatar
+import androidx.compose.material3.RadioButton
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.semantics.Role
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material.icons.filled.CloudDone
+import androidx.compose.material.icons.filled.Key
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.PhoneAndroid
+import androidx.compose.material.icons.filled.CloudQueue
+import androidx.compose.material.icons.filled.Photo
+import androidx.compose.material.icons.filled.Sms
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.LoadingIndicator
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearWavyProgressIndicator
+import androidx.compose.material3.MaterialShapes
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.toShape
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.drdisagree.teledrive.core.telegram.CodeDeliveryChannel
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.painterResource
+import com.drdisagree.teledrive.R
+import androidx.compose.ui.draw.clip
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.animation.core.snap
+import androidx.compose.runtime.DisposableEffect
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.compose.runtime.remember
+import androidx.compose.ui.res.stringResource
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.runtime.LaunchedEffect
+import com.drdisagree.teledrive.domain.model.Country
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.QrCode2
+import androidx.compose.ui.graphics.Color
+import com.drdisagree.teledrive.presentation.components.QrCode
+import androidx.core.net.toUri
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun OnboardingScreen(
+    onFinished: () -> Unit,
+    viewModel: OnboardingViewModel = hiltViewModel()
+) {
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    if (state.step == OnboardingStep.DONE) {
+        onFinished()
+        return
+    }
+
+    Scaffold { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = padding.calculateTopPadding())
+                .imePadding()
+        ) {
+            Spacer(Modifier.height(20.dp))
+            StepHeader(
+                step = state.step,
+                modifier = Modifier.padding(horizontal = PAGE_PADDING)
+            )
+            BoxWithConstraints(modifier = Modifier.weight(1f)) {
+                val availableHeight = maxHeight
+                Column(
+                    modifier = Modifier
+                        .verticalScroll(rememberScrollState())
+                        .heightIn(min = availableHeight),
+                    verticalArrangement = Arrangement.Center
+                ) {
+            AnimatedContent(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center,
+                targetState = state.step,
+                transitionSpec = {
+                    val forward = targetState.ordinal >= initialState.ordinal
+                    val spec = tween<IntOffset>(
+                        durationMillis = STEP_SLIDE_MS,
+                        easing = EmphasizedEasing
+                    )
+                    slideInHorizontally(spec) { width ->
+                        if (forward) width else -width
+                    }.togetherWith(
+                        slideOutHorizontally(spec) { width ->
+                            if (forward) -width else width
+                        }
+                    ).using(SizeTransform(clip = true) { _, _ -> snap() })
+                },
+                label = stringResource(R.string.onboarding_step)
+            ) { step ->
+                when (step) {
+                    OnboardingStep.WELCOME -> WelcomeStep(onContinue = viewModel::start)
+                    OnboardingStep.API_CREDENTIALS -> CredentialsStep(
+                        working = state.working,
+                        error = state.error,
+                        onSubmit = viewModel::submitCredentials
+                    )
+                    OnboardingStep.EMAIL_ADDRESS -> EmailAddressStep(
+                        working = state.working,
+                        error = state.error,
+                        onSubmit = viewModel::submitEmailAddress
+                    )
+
+                    OnboardingStep.EMAIL_CODE -> EmailCodeStep(
+                        working = state.working,
+                        error = state.error,
+                        emailPattern = state.codePhoneNumber,
+                        codeLength = state.codeLength,
+                        onSubmit = viewModel::submitEmailCode
+                    )
+
+                    OnboardingStep.PHONE -> if (state.qrMode) {
+                        QrStep(
+                            working = state.working,
+                            error = state.error,
+                            link = state.qrLink,
+                            onCancel = viewModel::cancelQrLogin
+                        )
+                    } else PhoneStep(
+                        countries = state.countries,
+                        selectedCountry = state.selectedCountry,
+                        countryLoadState = state.countryLoadState,
+                        onLoadCountries = viewModel::loadCountries,
+                        onSelectCountry = viewModel::selectCountry,
+                        onUseQrCode = viewModel::startQrLogin,
+                        working = state.working,
+                        error = state.error,
+                        registrationRequired = state.registrationRequired,
+                        onSubmit = viewModel::submitPhone
+                    )
+                    OnboardingStep.CODE -> CodeStep(
+                        working = state.working,
+                        error = state.error,
+                        phoneNumber = state.codePhoneNumber,
+                        channel = state.codeChannel,
+                        codeLength = state.codeLength,
+                        onSubmit = viewModel::submitCode,
+                        onResend = viewModel::resendCode
+                    )
+                    OnboardingStep.PASSWORD -> PasswordStep(
+                        working = state.working,
+                        error = state.error,
+                        hint = state.passwordHint,
+                        onSubmit = viewModel::submitPassword
+                    )
+                    OnboardingStep.PERMISSIONS -> PermissionsStep(
+                        working = state.working,
+                        onResolved = viewModel::onPermissionsResolved
+                    )
+                    OnboardingStep.CHANNEL_SELECT -> ChannelSelectStep(
+                        channels = state.channels,
+                        selectedChatId = state.selectedChatId,
+                        justCreated = state.channelCreated,
+                        working = state.working,
+                        onSelect = viewModel::selectChannel,
+                        onContinue = viewModel::confirmChannel
+                    )
+                    OnboardingStep.BACKUP_SETUP -> BackupSetupStep(
+                        state = state,
+                        onDcim = viewModel::setBackupDcim,
+                        onPictures = viewModel::setBackupPictures,
+                        onMovies = viewModel::setBackupMovies,
+                        onAutoBackup = viewModel::setAutoBackup,
+                        onWifiOnly = viewModel::setWifiOnly,
+                        onFinish = viewModel::finishSetup,
+                        finishing = state.finishing
+                    )
+                    OnboardingStep.DONE -> Unit
+                }
+            }
+                    Spacer(Modifier.height(32.dp + padding.calculateBottomPadding()))
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Shown only when the account already holds more than one drive, so the user
+ * says which one this device opens before anything is indexed.
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun ChannelSelectStep(
+    channels: List<DriveChannel>,
+    selectedChatId: Long?,
+    justCreated: Boolean,
+    working: Boolean,
+    onSelect: (Long) -> Unit,
+    onContinue: () -> Unit
+) {
+    OnboardingPage(
+        icon = Icons.Filled.CloudQueue,
+        title = if (justCreated) stringResource(R.string.onboarding_drive_ready) else stringResource(R.string.onboarding_choose_drive),
+        description = when {
+            justCreated -> stringResource(R.string.onboarding_drive_created_desc)
+
+            channels.size > 1 -> stringResource(R.string.onboarding_pick_drive_desc)
+
+            else -> stringResource(R.string.onboarding_single_drive_desc)
+        }
+    ) {
+        channels.forEach { channel ->
+            val selected = channel.chatId == selectedChatId
+            val single = channels.size == 1
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+                    .clip(MaterialTheme.shapes.extraLarge)
+                    .background(
+                        if (selected) {
+                            MaterialTheme.colorScheme.secondaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.surfaceContainerLow
+                        }
+                    )
+                    .selectable(
+                        selected = selected,
+                        enabled = !single,
+                        role = Role.RadioButton,
+                        onClick = { onSelect(channel.chatId) }
+                    )
+                    .padding(horizontal = 16.dp, vertical = 14.dp)
+            ) {
+                if (single) {
+                    ChannelAvatar(channel = channel, size = 40.dp)
+                } else {
+                    RadioButton(selected = selected, onClick = null)
+                }
+                Column(modifier = Modifier.padding(start = 12.dp)) {
+                    Text(
+                        text = channel.label,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = stringResource(
+                            R.string.onboarding_channel_files_in_channel,
+                            channel.remoteFileCount
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+        Spacer(Modifier.height(16.dp))
+        BigButton(
+            label = stringResource(
+                if (working) R.string.onboarding_opening else R.string.onboarding_continue
+            ),
+            onClick = onContinue,
+            enabled = selectedChatId != null && !working,
+            loading = working
+        )
+    }
+}
+
+/** True when every media permission this release asks for is already granted. */
+private fun hasMediaAccess(context: Context, permissions: List<String>): Boolean =
+    permissions.all { permission ->
+        ContextCompat.checkSelfPermission(context, permission) == PermissionGranted
+    }
+
+private const val PermissionGranted = PackageManager.PERMISSION_GRANTED
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun StepHeader(step: OnboardingStep, modifier: Modifier = Modifier) {
+    val stepNumber = step.displayNumber
+    val totalSteps = OnboardingStep.displayTotal
+    Column(modifier = modifier) {
+        Surface(
+            shape = RoundedCornerShape(100),
+            color = MaterialTheme.colorScheme.secondaryContainer
+        ) {
+            Text(
+                text = stringResource(R.string.onboarding_step_counter, stepNumber, totalSteps),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
+            )
+        }
+        Spacer(Modifier.height(14.dp))
+        LinearWavyProgressIndicator(
+            progress = { stepNumber.toFloat() / totalSteps },
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+/**
+ * Every onboarding step is laid out the same way: hero shape, title, supporting
+ * line, then whatever that step needs. Only the content block differs.
+ */
+@Composable
+private fun OnboardingPage(
+    icon: ImageVector? = null,
+    iconPainter: Painter? = null,
+    title: String,
+    description: String,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = PAGE_PADDING, vertical = PAGE_VERTICAL_PADDING)
+    ) {
+        HeroShape(icon = icon, iconPainter = iconPainter)
+        Spacer(Modifier.height(24.dp))
+        StepTitle(title = title, description = description)
+        Spacer(Modifier.height(28.dp))
+        content()
+    }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun HeroShape(icon: ImageVector?, iconPainter: Painter?) {
+    Box(
+        modifier = Modifier
+            .size(96.dp)
+            .clip(MaterialShapes.Cookie9Sided.toShape())
+            .background(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = MaterialShapes.Cookie9Sided.toShape()
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        when {
+            iconPainter != null -> Icon(
+                painter = iconPainter,
+                contentDescription = null,
+                modifier = Modifier.size(128.dp),
+                tint = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+
+            icon != null -> Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(44.dp),
+                tint = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun StepTitle(title: String, description: String) {
+    Column {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.displaySmallEmphasized,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(Modifier.height(12.dp))
+        Text(
+            text = description,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun WelcomeStep(onContinue: () -> Unit) {
+    OnboardingPage(
+        iconPainter = painterResource(R.mipmap.ic_launcher_monochrome),
+        title = stringResource(R.string.app_name),
+        description = stringResource(R.string.onboarding_files_live_own_private)
+    ) {
+        BigButton(label = stringResource(R.string.onboarding_get_started), onClick = onContinue)
+    }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun CredentialsStep(
+    working: Boolean,
+    error: String?,
+    onSubmit: (String, String) -> Unit
+) {
+    var apiId by rememberSaveable { mutableStateOf("") }
+    var apiHash by rememberSaveable { mutableStateOf("") }
+    var showGuide by rememberSaveable { mutableStateOf(false) }
+
+    OnboardingPage(
+        icon = Icons.Filled.Key,
+        title = stringResource(R.string.onboarding_api_access),
+        description = stringResource(R.string.onboarding_one_time_setup_keys)
+    ) {
+        FilledTonalButton(
+            onClick = { showGuide = true },
+            shapes = ButtonDefaults.shapes()
+        ) {
+            Icon(
+                Icons.AutoMirrored.Filled.HelpOutline,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp)
+            )
+            Spacer(Modifier.size(8.dp))
+            Text(stringResource(R.string.onboarding_where_i_get_these))
+        }
+        Spacer(Modifier.height(20.dp))
+        OnboardingField(
+            value = apiId,
+            onChange = { apiId = it },
+            label = stringResource(R.string.onboarding_api_id),
+            keyboardType = KeyboardType.Number,
+            enabled = !working
+        )
+        Spacer(Modifier.height(12.dp))
+        OnboardingField(
+            value = apiHash,
+            onChange = { apiHash = it },
+            label = stringResource(R.string.onboarding_api_hash),
+            enabled = !working
+        )
+        ErrorAndAction(
+            working = working,
+            error = error,
+            actionLabel = stringResource(R.string.onboarding_action_continue),
+            enabled = apiId.isNotBlank() && apiHash.isNotBlank(),
+            onAction = { onSubmit(apiId, apiHash) }
+        )
+    }
+
+    if (showGuide) {
+        ApiGuideDialog(onDismiss = { showGuide = false })
+    }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun ApiGuideDialog(onDismiss: () -> Unit) {
+    val uriHandler = LocalUriHandler.current
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.onboarding_get_api_keys)) },
+        text = {
+            Column {
+                InstructionCard(number = 1) {
+                    Column {
+                        Text(
+                            stringResource(R.string.onboarding_open_dev_page),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Spacer(Modifier.height(10.dp))
+                        FilledTonalButton(
+                            onClick = { uriHandler.openUri("https://my.telegram.org") },
+                            shapes = ButtonDefaults.shapes()
+                        ) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.OpenInNew,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(Modifier.size(8.dp))
+                            Text(stringResource(R.string.onboarding_my_telegram_org))
+                        }
+                    }
+                }
+                InstructionCard(number = 2) {
+                    Text(
+                        "Choose “API development tools” and create an app. Any name works.",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+                InstructionCard(number = 3) {
+                    Text(
+                        "Copy the api_id and api_hash into TeleDrive.",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = onDismiss,
+                shapes = ButtonDefaults.shapes()
+            ) { Text(stringResource(R.string.onboarding_got)) }
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun InstructionCard(number: Int, content: @Composable () -> Unit) {
+    Surface(
+        shape = MaterialTheme.shapes.extraLarge,
+        color = MaterialTheme.colorScheme.surfaceContainerLowest,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 5.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.Top
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = CircleShape
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = number.toString(),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            }
+            Spacer(Modifier.size(14.dp))
+            Box(modifier = Modifier.weight(1f)) { content() }
+        }
+    }
+}
+
+
+@Composable
+private fun QrStep(
+    working: Boolean,
+    error: String?,
+    link: String?,
+    onCancel: () -> Unit
+) {
+    val context = LocalContext.current
+    var openFailed by remember { mutableStateOf(false) }
+
+    /* The QR payload is a tg: link, so a Telegram app on this same phone can
+       confirm the login directly. Scanning is only needed across devices. */
+    val telegramIntent = remember(link) {
+        link?.let { Intent(Intent.ACTION_VIEW, it.toUri()) }
+    }
+    /* Probed from the scheme alone, not from the login link, so the right mode
+       is known on the first frame instead of after TDLib answers. */
+    val canConfirmHere = remember {
+        Intent(Intent.ACTION_VIEW, TELEGRAM_PROBE_URI.toUri())
+            .resolveActivity(context.packageManager) != null
+    }
+    /* One route at a time: showing both at once reads like two required steps. */
+    var scanning by rememberSaveable(canConfirmHere) { mutableStateOf(!canConfirmHere) }
+
+    OnboardingPage(
+        icon = Icons.Filled.QrCode2,
+        title = stringResource(R.string.onboarding_qr_title),
+        description = if (scanning) {
+            stringResource(R.string.onboarding_qr_description)
+        } else {
+            stringResource(R.string.onboarding_qr_same_device_description)
+        }
+    ) {
+        if (scanning) {
+            Surface(
+                color = QR_SURFACE,
+                shape = MaterialTheme.shapes.extraLarge,
+                modifier = Modifier
+                    .fillMaxWidth(QR_WIDTH_FRACTION)
+                    .align(Alignment.CenterHorizontally)
+            ) {
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(QR_PADDING)) {
+                    if (link == null) {
+                        CircularProgressIndicator(modifier = Modifier.padding(QR_PADDING))
+                    } else {
+                        QrCode(
+                            content = link,
+                            contentDescription = stringResource(
+                                R.string.onboarding_qr_code_description
+                            ),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
+            }
+            Spacer(Modifier.height(20.dp))
+            QrInstruction(1, stringResource(R.string.onboarding_qr_step_1))
+            QrInstruction(2, stringResource(R.string.onboarding_qr_step_2))
+            QrInstruction(3, stringResource(R.string.onboarding_qr_step_3))
+        } else {
+            BigButton(
+                label = stringResource(R.string.onboarding_qr_open_telegram),
+                enabled = !working && telegramIntent != null,
+                onClick = {
+                    openFailed = telegramIntent == null ||
+                        runCatching { context.startActivity(telegramIntent) }.isFailure
+                }
+            )
+            if (openFailed) {
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    text = stringResource(R.string.onboarding_qr_open_failed),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+        }
+
+        Spacer(Modifier.height(16.dp))
+        if (error != null) {
+            Text(
+                text = error,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error
+            )
+            Spacer(Modifier.height(8.dp))
+        } else {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(SPINNER_SIZE),
+                    strokeWidth = SPINNER_STROKE
+                )
+                Spacer(Modifier.width(10.dp))
+                Text(
+                    text = stringResource(R.string.onboarding_qr_waiting),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Spacer(Modifier.height(8.dp))
+        }
+
+        if (canConfirmHere) {
+            TextButton(
+                onClick = { scanning = !scanning },
+                enabled = !working,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            ) {
+                Text(
+                    stringResource(
+                        if (scanning) {
+                            R.string.onboarding_qr_confirm_instead
+                        } else {
+                            R.string.onboarding_qr_scan_instead
+                        }
+                    )
+                )
+            }
+        }
+        TextButton(
+            onClick = onCancel,
+            enabled = !working,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) { Text(stringResource(R.string.onboarding_qr_use_phone)) }
+    }
+}
+
+@Composable
+private fun QrInstruction(number: Int, text: String) {
+    Row(
+        modifier = Modifier.padding(vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Surface(
+            color = MaterialTheme.colorScheme.secondaryContainer,
+            shape = CircleShape,
+            modifier = Modifier.size(QR_STEP_BADGE)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Text(
+                    text = "$number",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+            }
+        }
+        Spacer(Modifier.width(14.dp))
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun PhoneStep(
+    working: Boolean,
+    error: String?,
+    registrationRequired: Boolean,
+    countries: List<Country>,
+    selectedCountry: Country?,
+    countryLoadState: CountryLoadState,
+    onLoadCountries: () -> Unit,
+    onSelectCountry: (Country) -> Unit,
+    onUseQrCode: () -> Unit,
+    onSubmit: (String) -> Unit
+) {
+    var national by rememberSaveable { mutableStateOf("") }
+    var picking by rememberSaveable { mutableStateOf(false) }
+    val unavailable = countryLoadState == CountryLoadState.FAILED
+    val callingCode = selectedCountry?.callingCode.orEmpty()
+
+    LaunchedEffect(Unit) { onLoadCountries() }
+
+    OnboardingPage(
+        icon = Icons.Filled.PhoneAndroid,
+        title = stringResource(R.string.onboarding_number),
+        description = stringResource(R.string.onboarding_phone_number_telegram_account)
+    ) {
+        if (!unavailable) {
+            CountryField(
+                country = selectedCountry,
+                loading = countryLoadState == CountryLoadState.LOADING,
+                enabled = !working && countries.isNotEmpty(),
+                onClick = { picking = true }
+            )
+            Spacer(Modifier.height(12.dp))
+        }
+        OnboardingField(
+            value = national,
+            onChange = { entry -> national = entry.filter { it.isDigit() } },
+            label = stringResource(R.string.onboarding_phone_number),
+            supportingText = if (unavailable) {
+                stringResource(R.string.onboarding_include_country_code_like)
+            } else {
+                null
+            },
+            keyboardType = KeyboardType.Phone,
+            /* Typing before the dial code lands would leave the number
+               prefixed with whatever country resolves a moment later. */
+            enabled = !working && countryLoadState != CountryLoadState.LOADING,
+            prefix = "+$callingCode"
+        )
+        ErrorAndAction(
+            working = working,
+            error = error,
+            actionLabel = stringResource(R.string.onboarding_send_code),
+            enabled = national.isNotBlank() && !registrationRequired,
+            onAction = { onSubmit("+$callingCode$national") }
+        )
+        TextButton(
+            onClick = onUseQrCode,
+            enabled = !working,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) {
+            Icon(
+                imageVector = Icons.Filled.QrCode2,
+                contentDescription = null,
+                modifier = Modifier.size(QR_BUTTON_ICON)
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(stringResource(R.string.onboarding_qr_sign_in))
+        }
+    }
+
+    if (picking) {
+        CountryPickerSheet(
+            countries = countries,
+            onDismiss = { picking = false },
+            onSelect = { country ->
+                onSelectCountry(country)
+                picking = false
+            }
+        )
+    }
+}
+
+@Composable
+private fun CountryField(
+    country: Country?,
+    loading: Boolean,
+    enabled: Boolean,
+    onClick: () -> Unit
+) {
+    Box {
+        OutlinedTextField(
+            value = country?.name.orEmpty(),
+            onValueChange = {},
+            readOnly = true,
+            enabled = enabled,
+            label = { Text(stringResource(R.string.onboarding_country)) },
+            trailingIcon = {
+                if (loading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(SPINNER_SIZE),
+                        strokeWidth = SPINNER_STROKE
+                    )
+                } else {
+                    Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
+                }
+            },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .clip(OutlinedTextFieldDefaults.shape)
+                .clickable(enabled = enabled, onClick = onClick)
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CountryPickerSheet(
+    countries: List<Country>,
+    onDismiss: () -> Unit,
+    onSelect: (Country) -> Unit
+) {
+    var query by rememberSaveable { mutableStateOf("") }
+    val matches = remember(countries, query) {
+        val trimmed = query.trim()
+        if (trimmed.isEmpty()) {
+            countries
+        } else {
+            countries.filter { country ->
+                country.name.contains(trimmed, ignoreCase = true) ||
+                    country.callingCode.contains(trimmed) ||
+                    country.isoCode.equals(trimmed, ignoreCase = true)
+            }
+        }
+    }
+
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+            Text(
+                text = stringResource(R.string.onboarding_choose_country),
+                style = MaterialTheme.typography.titleLarge
+            )
+            Spacer(Modifier.height(12.dp))
+            OnboardingField(
+                value = query,
+                onChange = { query = it },
+                label = stringResource(R.string.onboarding_search_country)
+            )
+            Spacer(Modifier.height(12.dp))
+            if (matches.isEmpty()) {
+                Text(
+                    text = stringResource(R.string.onboarding_no_country_match),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(vertical = 24.dp)
+                )
+            }
+            LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                items(matches, key = { "${it.isoCode}_${it.callingCode}" }) { country ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(MaterialTheme.shapes.large)
+                            .clickable { onSelect(country) }
+                            .padding(horizontal = 8.dp, vertical = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = country.flag, style = MaterialTheme.typography.titleMedium)
+                        Spacer(Modifier.width(14.dp))
+                        Text(
+                            text = country.name,
+                            style = MaterialTheme.typography.bodyLarge,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Spacer(Modifier.width(12.dp))
+                        Text(
+                            text = "+${country.callingCode}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+/** Explains where the code actually went, as Telegram reported it. */
+@Composable
+private fun codeDeliveryText(channel: CodeDeliveryChannel, target: String): String = when (channel) {
+    CodeDeliveryChannel.TELEGRAM_APP -> stringResource(R.string.onboarding_code_via_telegram)
+    CodeDeliveryChannel.SMS -> stringResource(R.string.onboarding_code_via_sms, target)
+    CodeDeliveryChannel.SMS_WORD -> stringResource(R.string.onboarding_code_via_sms_word, target)
+    CodeDeliveryChannel.SMS_PHRASE ->
+        stringResource(R.string.onboarding_code_via_sms_phrase, target)
+
+    CodeDeliveryChannel.CALL -> stringResource(R.string.onboarding_code_via_call, target)
+    CodeDeliveryChannel.FLASH_CALL ->
+        stringResource(R.string.onboarding_code_via_flash_call, target)
+
+    CodeDeliveryChannel.MISSED_CALL ->
+        stringResource(R.string.onboarding_code_via_missed_call, target)
+
+    CodeDeliveryChannel.FRAGMENT -> stringResource(R.string.onboarding_code_via_fragment, target)
+    CodeDeliveryChannel.FIREBASE -> stringResource(R.string.onboarding_code_via_sms, target)
+    CodeDeliveryChannel.EMAIL -> stringResource(R.string.onboarding_code_via_email, target)
+    CodeDeliveryChannel.OTHER -> stringResource(R.string.onboarding_code_sent)
+}
+
+@Composable
+private fun EmailAddressStep(
+    working: Boolean,
+    error: String?,
+    onSubmit: (String) -> Unit
+) {
+    var email by rememberSaveable { mutableStateOf("") }
+    OnboardingPage(
+        icon = Icons.Filled.Email,
+        title = stringResource(R.string.onboarding_email_title),
+        description = stringResource(R.string.onboarding_email_description)
+    ) {
+        OnboardingField(
+            value = email,
+            onChange = { email = it },
+            label = stringResource(R.string.onboarding_email_label),
+            keyboardType = KeyboardType.Email,
+            enabled = !working
+        )
+        ErrorAndAction(
+            working = working,
+            error = error,
+            actionLabel = stringResource(R.string.onboarding_email_continue),
+            enabled = email.isNotBlank(),
+            onAction = { onSubmit(email) }
+        )
+    }
+}
+
+@Composable
+private fun EmailCodeStep(
+    working: Boolean,
+    error: String?,
+    emailPattern: String,
+    codeLength: Int?,
+    onSubmit: (String) -> Unit
+) {
+    var code by rememberSaveable { mutableStateOf("") }
+    OnboardingPage(
+        icon = Icons.Filled.Email,
+        title = stringResource(R.string.onboarding_email_code_title),
+        description = codeDeliveryText(CodeDeliveryChannel.EMAIL, emailPattern)
+    ) {
+        OnboardingField(
+            value = code,
+            onChange = { input ->
+                code = input.filter(Char::isDigit).let {
+                    if (codeLength != null) it.take(codeLength) else it
+                }
+            },
+            label = stringResource(R.string.onboarding_code),
+            keyboardType = KeyboardType.NumberPassword,
+            enabled = !working
+        )
+        ErrorAndAction(
+            working = working,
+            error = error,
+            actionLabel = stringResource(R.string.onboarding_verify),
+            enabled = code.isNotBlank(),
+            onAction = { onSubmit(code) }
+        )
+    }
+}
+
+@Composable
+private fun CodeStep(
+    working: Boolean,
+    error: String?,
+    phoneNumber: String,
+    channel: CodeDeliveryChannel,
+    codeLength: Int?,
+    onSubmit: (String) -> Unit,
+    onResend: () -> Unit
+) {
+    var code by rememberSaveable { mutableStateOf("") }
+    OnboardingPage(
+        icon = Icons.Filled.Sms,
+        title = stringResource(R.string.onboarding_enter_code),
+        description = codeDeliveryText(channel, phoneNumber)
+    ) {
+        OnboardingField(
+            value = code,
+            onChange = { input ->
+                code = input.filter(Char::isDigit).let {
+                    if (codeLength != null) it.take(codeLength) else it
+                }
+            },
+            label = stringResource(R.string.onboarding_code),
+            keyboardType = KeyboardType.NumberPassword,
+            enabled = !working
+        )
+        ErrorAndAction(
+            working = working,
+            error = error,
+            actionLabel = stringResource(R.string.onboarding_verify),
+            enabled = code.isNotBlank(),
+            onAction = { onSubmit(code) }
+        )
+        TextButton(
+            onClick = onResend,
+            enabled = !working,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) { Text(stringResource(R.string.onboarding_resend_code)) }
+    }
+}
+
+@Composable
+private fun PasswordStep(
+    working: Boolean,
+    error: String?,
+    hint: String?,
+    onSubmit: (String) -> Unit
+) {
+    var password by rememberSaveable { mutableStateOf("") }
+    OnboardingPage(
+        icon = Icons.Filled.Lock,
+        title = stringResource(R.string.onboarding_two_step_verification),
+        description = hint?.let { "Enter your Telegram password. Hint: $it" }
+            ?: stringResource(R.string.onboarding_enter_password)
+    ) {
+        OnboardingField(
+            value = password,
+            onChange = { password = it },
+            label = stringResource(R.string.onboarding_password),
+            keyboardType = KeyboardType.Password,
+            password = true,
+            enabled = !working
+        )
+        ErrorAndAction(
+            working = working,
+            error = error,
+            actionLabel = stringResource(R.string.onboarding_sign),
+            enabled = password.isNotEmpty(),
+            onAction = { onSubmit(password) }
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun PermissionsStep(working: Boolean, onResolved: () -> Unit) {
+    val context = LocalContext.current
+    var mediaRequested by rememberSaveable { mutableStateOf(false) }
+    val permissions = buildList {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            add(Manifest.permission.READ_MEDIA_IMAGES)
+            add(Manifest.permission.READ_MEDIA_VIDEO)
+            add(Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            add(Manifest.permission.READ_EXTERNAL_STORAGE)
+        }
+    }
+    val launcher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { mediaRequested = true }
+
+    var mediaGranted by remember { mutableStateOf(hasMediaAccess(context, permissions)) }
+
+    var allFilesGranted by remember { mutableStateOf(hasAllFilesAccess()) }
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                mediaGranted = hasMediaAccess(context, permissions)
+                allFilesGranted = hasAllFilesAccess()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+    OnboardingPage(
+        icon = Icons.Filled.Photo,
+        title = stringResource(R.string.onboarding_storage_access),
+        description = stringResource(R.string.onboarding_teledrive_needs_media_files)
+    ) {
+        val askForMedia = !mediaGranted && !mediaRequested
+        BigButton(
+            label = when {
+                working -> stringResource(R.string.onboarding_looking_for_drives)
+                askForMedia -> stringResource(R.string.onboarding_allow_media)
+                !allFilesGranted -> stringResource(R.string.onboarding_allow_all_files)
+                else -> stringResource(R.string.onboarding_continue)
+            },
+            enabled = !working,
+            loading = working,
+            onClick = {
+                when {
+                    askForMedia -> launcher.launch(permissions.toTypedArray())
+                    !allFilesGranted -> runCatching {
+                        context.startActivity(
+                            Intent(
+                                Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
+                                Uri.parse("package:${context.packageName}")
+                            )
+                        )
+                    }
+                    else -> onResolved()
+                }
+            }
+        )
+        if ((mediaRequested || mediaGranted) && !allFilesGranted) {
+            Spacer(Modifier.height(12.dp))
+            Text(
+                text = stringResource(R.string.onboarding_files_access_covers_documents),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.height(4.dp))
+            OutlinedButton(
+                onClick = onResolved,
+                shapes = ButtonDefaults.shapes(),
+                enabled = !working,
+                modifier = Modifier.fillMaxWidth()
+            ) { Text(stringResource(R.string.onboarding_continue_without)) }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun BackupSetupStep(
+    state: OnboardingUiState,
+    onDcim: (Boolean) -> Unit,
+    onPictures: (Boolean) -> Unit,
+    onMovies: (Boolean) -> Unit,
+    onAutoBackup: (Boolean) -> Unit,
+    onWifiOnly: (Boolean) -> Unit,
+    onFinish: () -> Unit,
+    finishing: Boolean
+) {
+    OnboardingPage(
+        icon = Icons.Filled.CloudDone,
+        title = stringResource(R.string.backup),
+        description = stringResource(R.string.onboarding_choose_what_back_change)
+    ) {
+        SectionLabel(stringResource(R.string.onboarding_section_folders))
+        ToggleCard(stringResource(R.string.onboarding_toggle_camera), state.backupDcim, onDcim)
+        ToggleCard(stringResource(R.string.onboarding_toggle_pictures), state.backupPictures, onPictures)
+        ToggleCard(stringResource(R.string.onboarding_toggle_movies), state.backupMovies, onMovies)
+        Spacer(Modifier.height(16.dp))
+        SectionLabel(stringResource(R.string.onboarding_section_behavior))
+        ToggleCard(stringResource(R.string.onboarding_toggle_auto_backup), state.autoBackupEnabled, onAutoBackup)
+        ToggleCard(stringResource(R.string.onboarding_toggle_wifi_only), state.wifiOnly, onWifiOnly)
+        Spacer(Modifier.height(32.dp))
+        BigButton(
+            label = if (finishing) "Syncing your drive…" else "Finish setup",
+            onClick = onFinish,
+            enabled = !finishing,
+            loading = finishing
+        )
+    }
+}
+
+@Composable
+private fun SectionLabel(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.padding(start = 4.dp, bottom = 6.dp)
+    )
+}
+
+@Composable
+private fun ToggleCard(label: String, checked: Boolean, onChange: (Boolean) -> Unit) {
+    Surface(
+        shape = MaterialTheme.shapes.large,
+        color = if (checked) {
+            MaterialTheme.colorScheme.secondaryContainer
+        } else {
+            MaterialTheme.colorScheme.surfaceContainerHigh
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 3.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.weight(1f)
+            )
+            Spacer(Modifier.width(16.dp))
+            Switch(checked = checked, onCheckedChange = onChange)
+        }
+    }
+}
+
+@Composable
+private fun OnboardingField(
+    value: String,
+    onChange: (String) -> Unit,
+    label: String,
+    supportingText: String? = null,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    password: Boolean = false,
+    enabled: Boolean = true,
+    prefix: String? = null
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onChange,
+        enabled = enabled,
+        label = { Text(label) },
+        prefix = prefix?.let {
+            {
+                Text(text = it, modifier = Modifier.padding(end = PREFIX_GAP))
+            }
+        },
+        supportingText = supportingText?.let { { Text(it) } },
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+        visualTransformation = if (password) {
+            PasswordVisualTransformation()
+        } else {
+            VisualTransformation.None
+        },
+        modifier = Modifier.fillMaxWidth()
+    )
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun BigButton(
+    label: String,
+    onClick: () -> Unit,
+    enabled: Boolean = true,
+    loading: Boolean = false
+) {
+    Button(
+        onClick = onClick,
+        shapes = ButtonDefaults.shapes(),
+        enabled = enabled,
+        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 14.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        if (loading) {
+            LoadingIndicator(
+                color = LocalContentColor.current,
+                modifier = Modifier.size(26.dp)
+            )
+            Spacer(Modifier.size(10.dp))
+        }
+        Text(label, style = MaterialTheme.typography.titleMedium)
+    }
+}
+
+@Composable
+private fun ErrorAndAction(
+    working: Boolean,
+    error: String?,
+    actionLabel: String,
+    enabled: Boolean,
+    onAction: () -> Unit
+) {
+    Column {
+        error?.let {
+            Spacer(Modifier.height(14.dp))
+            Surface(
+                shape = MaterialTheme.shapes.large,
+                color = MaterialTheme.colorScheme.errorContainer,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+                )
+            }
+        }
+        Spacer(Modifier.height(28.dp))
+        BigButton(
+            label = actionLabel,
+            onClick = onAction,
+            enabled = enabled && !working,
+            loading = working
+        )
+    }
+}
+
+private val EmphasizedEasing = CubicBezierEasing(0.2f, 0f, 0f, 1f)
+private const val STEP_SLIDE_MS = 420
+
+private val PAGE_PADDING = 28.dp
+private val PAGE_VERTICAL_PADDING = 24.dp
+
+private fun hasAllFilesAccess(): Boolean =
+    Build.VERSION.SDK_INT < Build.VERSION_CODES.R || Environment.isExternalStorageManager()
+
+private val PREFIX_GAP = 4.dp
+private val SPINNER_SIZE = 20.dp
+private val SPINNER_STROKE = 2.dp
+
+/* White frame behind the code: scanners expect dark modules on light. */
+private val QR_SURFACE = Color.White
+private const val QR_WIDTH_FRACTION = 0.8f
+private val QR_PADDING = 16.dp
+private val QR_STEP_BADGE = 28.dp
+private val QR_BUTTON_ICON = 18.dp
+private const val TELEGRAM_PROBE_URI = "tg://login"

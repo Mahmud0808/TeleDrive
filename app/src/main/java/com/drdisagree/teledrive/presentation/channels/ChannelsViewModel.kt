@@ -1,0 +1,74 @@
+package com.drdisagree.teledrive.presentation.channels
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.drdisagree.teledrive.core.common.AppResult
+import com.drdisagree.teledrive.domain.model.DriveChannel
+import com.drdisagree.teledrive.domain.repository.ChannelRepository
+import com.drdisagree.teledrive.presentation.common.toUserMessage
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import android.content.Context
+import com.drdisagree.teledrive.R
+import dagger.hilt.android.qualifiers.ApplicationContext
+
+@HiltViewModel
+class ChannelsViewModel @Inject constructor(
+    @param:ApplicationContext private val context: Context,
+    private val channelRepository: ChannelRepository
+) : ViewModel() {
+
+    val channels: StateFlow<List<DriveChannel>> = channelRepository.observeChannels()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    private val _working = MutableStateFlow<String?>(null)
+    val working: StateFlow<String?> = _working.asStateFlow()
+
+    private val _messages = MutableSharedFlow<String>(extraBufferCapacity = 4)
+    val messages = _messages.asSharedFlow()
+
+    init {
+        refresh()
+    }
+
+    fun refresh() = run(context.getString(R.string.channels_looking_for_drives)) { channelRepository.refresh() }
+
+    fun create(label: String) = run(context.getString(R.string.channels_creating_drive)) {
+        when (val result = channelRepository.create(label)) {
+            is AppResult.Success -> {
+                _messages.tryEmit(context.getString(R.string.message_created_drive, result.value.label))
+                channelRepository.switchTo(result.value.chatId)
+            }
+
+            is AppResult.Failure -> result
+        }
+    }
+
+    fun switchTo(chatId: Long) = run(context.getString(R.string.channels_opening_drive)) { channelRepository.switchTo(chatId) }
+
+    fun rename(chatId: Long, label: String) = run(context.getString(R.string.channels_renaming)) {
+        channelRepository.rename(chatId, label)
+    }
+
+    fun deleteRemotely(chatId: Long) = run(context.getString(R.string.channels_deleting)) {
+        channelRepository.deleteRemotely(chatId)
+    }
+
+    private fun run(label: String, block: suspend () -> AppResult<*>) {
+        if (_working.value != null) return
+        _working.value = label
+        viewModelScope.launch {
+            val result = block()
+            _working.value = null
+            if (result is AppResult.Failure) _messages.tryEmit(result.error.toUserMessage(context))
+        }
+    }
+}

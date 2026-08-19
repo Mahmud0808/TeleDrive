@@ -1,0 +1,54 @@
+package com.drdisagree.teledrive.data.local.database
+
+import android.content.Context
+import androidx.room.Room
+import com.drdisagree.teledrive.data.local.dao.BackupDao
+import com.drdisagree.teledrive.data.local.dao.CacheDao
+import com.drdisagree.teledrive.data.local.dao.ExclusionDao
+import com.drdisagree.teledrive.data.local.dao.FileDao
+import com.drdisagree.teledrive.data.local.dao.FolderDao
+import com.drdisagree.teledrive.data.local.dao.StorageChannelDao
+import com.drdisagree.teledrive.data.local.dao.ThumbnailDao
+import com.drdisagree.teledrive.data.local.dao.TransferDao
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
+
+@Module
+@InstallIn(SingletonComponent::class)
+object DatabaseModule {
+
+    @Provides
+    @Singleton
+    fun provideDatabase(@ApplicationContext context: Context): TeleDriveDatabase =
+        Room.databaseBuilder(context, TeleDriveDatabase::class.java, TeleDriveDatabase.NAME)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+            .build()
+
+    @Provides
+    fun provideStorageChannelDao(db: TeleDriveDatabase): StorageChannelDao = db.storageChannelDao()
+
+    @Provides
+    fun provideFileDao(db: TeleDriveDatabase): FileDao = db.fileDao()
+
+    @Provides
+    fun provideFolderDao(db: TeleDriveDatabase): FolderDao = db.folderDao()
+
+    @Provides
+    fun provideTransferDao(db: TeleDriveDatabase): TransferDao = db.transferDao()
+
+    @Provides
+    fun provideBackupDao(db: TeleDriveDatabase): BackupDao = db.backupDao()
+
+    @Provides
+    fun provideExclusionDao(db: TeleDriveDatabase): ExclusionDao = db.exclusionDao()
+
+    @Provides
+    fun provideThumbnailDao(db: TeleDriveDatabase): ThumbnailDao = db.thumbnailDao()
+
+    @Provides
+    fun provideCacheDao(db: TeleDriveDatabase): CacheDao = db.cacheDao()
+}
