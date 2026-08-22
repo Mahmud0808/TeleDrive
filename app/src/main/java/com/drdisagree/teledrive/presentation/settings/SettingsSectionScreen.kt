@@ -346,6 +346,7 @@ private fun BackupSection(
         add {
             SettingsSwitchRow(
                 title = stringResource(R.string.settings_wi_fi_only),
+                subtitle = stringResource(R.string.settings_wi_fi_only_summary),
                 checked = prefs.backupWifiOnly,
                 onChange = { value -> viewModel.update { it.copy(backupWifiOnly = value) } }
             )
@@ -932,10 +933,11 @@ private fun AdvancedSection(state: SettingsUiState, viewModel: SettingsViewModel
         }
         add {
             SettingsSwitchRow(
-                title = stringResource(R.string.settings_transfers_mobile_data),
-                checked = prefs.allowMeteredTransfers,
+                title = stringResource(R.string.settings_transfers_wi_fi_only),
+                subtitle = stringResource(R.string.settings_transfers_wi_fi_only_summary),
+                checked = !prefs.allowMeteredTransfers,
                 onChange = { value ->
-                    viewModel.update { it.copy(allowMeteredTransfers = value) }
+                    viewModel.update { it.copy(allowMeteredTransfers = !value) }
                 }
             )
         }

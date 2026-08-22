@@ -25,6 +25,6 @@ data class OnboardingUiState(
     val backupPictures: Boolean = true,
     val backupMovies: Boolean = false,
     val autoBackupEnabled: Boolean = true,
-    val wifiOnly: Boolean = true,
+    val wifiOnly: Boolean = false,
     val finishing: Boolean = false
 )

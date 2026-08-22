@@ -389,13 +389,15 @@
     <string name="settings_switch_drives_create_another">Switch drives, create another, or remove one</string>
     <string name="settings_theme">Theme</string>
     <string name="settings_tighter_list_rows_without">Tighter list rows without the size and date line</string>
-    <string name="settings_transfers_mobile_data">Transfers on mobile data</string>
+    <string name="settings_transfers_wi_fi_only">Transfer on Wi-Fi only</string>
+    <string name="settings_transfers_wi_fi_only_summary">Applies to uploads and downloads you start yourself</string>
     <string name="settings_turn_off_app_lock">Turn off app lock</string>
     <string name="settings_unlock_files_encrypted_earlier">Unlock files encrypted with an earlier passphrase, on this device or another one</string>
     <string name="settings_uploads_photos_videos_soon">Uploads photos and videos as soon as they appear</string>
     <string name="settings_uploads_stay_unencrypted_set">Uploads stay unencrypted until you set one. Files already encrypted on this device can still be covered.</string>
     <string name="settings_use_wallpaper_colors_available">Use wallpaper colors when available</string>
-    <string name="settings_wi_fi_only">Wi-Fi only</string>
+    <string name="settings_wi_fi_only">Back up on Wi-Fi only</string>
+    <string name="settings_wi_fi_only_summary">Automatic backups wait for an unmetered network</string>
 
     <!-- Backup folders -->
     <string name="backup">Backup</string>

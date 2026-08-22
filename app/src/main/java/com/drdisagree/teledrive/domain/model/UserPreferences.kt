@@ -7,7 +7,7 @@ data class UserPreferences(
     val autoBackupEnabled: Boolean = false,
     val instantBackupEnabled: Boolean = true,
     val backupFolders: Set<String> = emptySet(),
-    val backupWifiOnly: Boolean = true,
+    val backupWifiOnly: Boolean = false,
     val backupChargingOnly: Boolean = false,
     val backupIntervalHours: Int = 24,
     val backupMaxFileSizeMb: Int = 0,
@@ -45,6 +45,6 @@ data class UserPreferences(
 
     val transferConcurrency: Int = 2,
     val transferRetryCount: Int = 3,
-    val allowMeteredTransfers: Boolean = false,
+    val allowMeteredTransfers: Boolean = true,
     val debugLogging: Boolean = false
 )
