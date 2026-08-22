@@ -33,6 +33,8 @@ object MimeTypes {
 
     fun isPdf(mimeType: String): Boolean = mimeType == "application/pdf"
 
+    fun isMarkdown(mimeType: String): Boolean = mimeType == "text/markdown"
+
     fun isText(mimeType: String): Boolean =
         mimeType.startsWith("text/") ||
             mimeType == "application/json" ||

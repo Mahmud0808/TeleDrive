@@ -24,6 +24,7 @@ import javax.inject.Singleton
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
+import com.drdisagree.teledrive.core.files.Urls
 
 /**
  * Generates and caches thumbnails. Cache files are AES-GCM sealed when
@@ -45,6 +46,10 @@ class ThumbnailStore @Inject constructor(
     private val generationSemaphore = Semaphore(3)
 
     suspend fun thumbnailBytes(fileId: String): ByteArray? {
+        if (!settingsRepository.preferences.first().linkPreviews && isNote(fileId)) {
+            thumbnailDao.delete(fileId)
+            return null
+        }
         thumbnailDao.byFileId(fileId)?.let { cached ->
             val file = File(cached.path)
             if (file.exists()) {
@@ -71,11 +76,18 @@ class ThumbnailStore @Inject constructor(
         }.getOrNull()
     }
 
+    private suspend fun isNote(fileId: String): Boolean =
+        fileDao.byId(fileId)?.let { MimeTypes.isText(it.mimeType) } == true
+
     private suspend fun generate(fileId: String): ByteArray? {
         val entity = fileDao.byId(fileId) ?: return null
         val bitmap = entity.localPath?.let { path ->
             val file = File(path)
-            if (file.exists()) decodeThumbnail(file, entity.mimeType) else null
+            when {
+                !file.exists() -> null
+                MimeTypes.isText(entity.mimeType) -> linkThumbnail(file)
+                else -> decodeThumbnail(file, entity.mimeType)
+            }
         }
 
         val jpegBytes = if (bitmap != null) {
@@ -88,6 +100,11 @@ class ThumbnailStore @Inject constructor(
             val chatId = entity.chatId
             val messageId = entity.messageId
             if (chatId == null || messageId == null) return null
+            // The link image travels with the upload, so the server still holds
+            // one after previews are switched off.
+            if (MimeTypes.isText(entity.mimeType) &&
+                !settingsRepository.preferences.first().linkPreviews
+            ) return null
             runCatching { telegramClient.fetchThumbnail(chatId, messageId) }.getOrNull()
                 ?: return null
         }
@@ -115,6 +132,18 @@ class ThumbnailStore @Inject constructor(
             )
         )
         return jpegBytes
+    }
+
+    /** A note holding just a link previews as that link's image. */
+    private suspend fun linkThumbnail(file: File): Bitmap? {
+        if (file.length() > LINK_NOTE_LIMIT) return null
+        if (!settingsRepository.preferences.first().linkPreviews) return null
+        val url = Urls.sole(file.readText()) ?: return null
+        val imagePath = telegramClient
+            .linkPreview(Urls.normalize(url), withImage = true)
+            ?.imagePath
+            ?: return null
+        return File(imagePath).takeIf { it.exists() }?.let(::decodeImageThumbnail)
     }
 
     private fun decodeThumbnail(file: File, mimeType: String): Bitmap? = runCatching {
@@ -158,6 +187,7 @@ class ThumbnailStore @Inject constructor(
         wrappedKeyRepository.getOrCreate(CryptoKeys.THUMBNAIL)
 
     companion object {
+        private const val LINK_NOTE_LIMIT = 8L * 1024
         private const val MAX_DIMENSION = 512
         private const val JPEG_QUALITY = 82
     }

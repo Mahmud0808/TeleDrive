@@ -24,6 +24,16 @@ interface ThumbnailDao {
     @Query("SELECT COALESCE(SUM(sizeBytes), 0) FROM thumbnails")
     suspend fun totalSizeBytes(): Long
 
+    @Query(
+        """
+        SELECT t.* FROM thumbnails t
+        INNER JOIN files f ON f.id = t.fileId
+        WHERE f.mimeType LIKE 'text/%'
+            OR f.mimeType IN ('application/json', 'application/xml', 'application/yaml')
+        """
+    )
+    suspend fun textFileThumbnails(): List<ThumbnailEntity>
+
     @Query("DELETE FROM thumbnails WHERE fileId = :fileId")
     suspend fun delete(fileId: String)
 

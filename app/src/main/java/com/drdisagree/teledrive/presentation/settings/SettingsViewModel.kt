@@ -110,7 +110,12 @@ class SettingsViewModel @Inject constructor(
 
     fun update(transform: (UserPreferences) -> UserPreferences) {
         viewModelScope.launch {
+            val previous = settingsRepository.preferences.first()
             settingsRepository.update(transform)
+            val current = settingsRepository.preferences.first()
+            if (current.linkPreviews != previous.linkPreviews) {
+                cacheRepository.clearLinkThumbnails()
+            }
             backupRepository.syncActiveSessionWithSelection()
             rescheduleWork()
         }

@@ -814,6 +814,14 @@ private fun AppearanceSection(state: SettingsUiState, viewModel: SettingsViewMod
             }
             add {
                 SettingsSwitchRow(
+                    title = stringResource(R.string.settings_link_previews),
+                    subtitle = stringResource(R.string.settings_link_previews_subtitle),
+                    checked = prefs.linkPreviews,
+                    onChange = { value -> viewModel.update { it.copy(linkPreviews = value) } }
+                )
+            }
+            add {
+                SettingsSwitchRow(
                     title = stringResource(R.string.settings_recent_files),
                     subtitle = stringResource(R.string.settings_recent_files_subtitle),
                     checked = prefs.showRecentFiles,

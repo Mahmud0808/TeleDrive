@@ -24,7 +24,7 @@ object MediaModule {
     ): ImageLoader = ImageLoader.Builder(context)
         .components {
             add(ThumbnailFetcher.Factory(thumbnailStore))
-            add(Keyer<ThumbnailModel> { data, _: Options -> "thumb:${data.fileId}" })
+            add(Keyer<ThumbnailModel> { data, _: Options -> thumbnailCacheKey(data.fileId) })
         }
         .crossfade(true)
         .build()

@@ -39,6 +39,15 @@ import com.drdisagree.teledrive.domain.usecase.FolderCycleCheck
 import com.drdisagree.teledrive.domain.model.StorageSlice
 import com.drdisagree.teledrive.domain.model.FileSortField
 import com.drdisagree.teledrive.domain.model.SortDirection
+import com.drdisagree.teledrive.core.files.NoteStore
+import java.net.URI
+import com.drdisagree.teledrive.domain.model.LinkMetadata
+import com.drdisagree.teledrive.domain.repository.SettingsRepository
+import kotlinx.coroutines.flow.first
+import com.drdisagree.teledrive.core.crypto.CryptoKeys
+import com.drdisagree.teledrive.core.crypto.StreamCrypto
+import com.drdisagree.teledrive.core.crypto.WrappedKeyRepository
+import com.drdisagree.teledrive.core.telegram.TelegramDownloadEvent
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @Singleton
@@ -51,7 +60,11 @@ class FileRepositoryImpl @Inject constructor(
     private val telegramClient: TelegramClient,
     private val manifestCodec: ManifestCodec,
     private val folderPathResolver: FolderPathResolver,
-    private val activeChannel: ActiveChannel
+    private val activeChannel: ActiveChannel,
+    private val noteStore: NoteStore,
+    private val streamCrypto: StreamCrypto,
+    private val wrappedKeyRepository: WrappedKeyRepository,
+    private val settingsRepository: SettingsRepository
 ) : FileRepository {
 
     override fun pagedFiles(spec: FileQueryBuilder.Spec): Flow<PagingData<DriveFile>> =
@@ -450,6 +463,98 @@ class FileRepositoryImpl @Inject constructor(
             .forEach { entity -> fileDao.setLocalPath(entity.id, null, now) }
     }
 
+    override suspend fun saveNote(
+        fileId: String?,
+        folderId: String?,
+        title: String,
+        body: String
+    ): AppResult<String> {
+        val name = noteStore.fileName(title.ifBlank { fallbackTitle(body) })
+        val existing = fileId?.let { fileDao.byId(it) }
+        val file = noteStore.write(name, body, existing?.localPath)
+        val now = System.currentTimeMillis()
+
+        if (existing == null) {
+            return when (val imported = importLocalFile(file.absolutePath, folderId, name)) {
+                is AppResult.Success -> AppResult.Success(imported.value.id)
+                is AppResult.Failure -> AppResult.Failure(imported.error)
+            }
+        }
+
+        val chatId = existing.chatId
+        val messageId = existing.messageId
+        if (chatId != null && messageId != null) {
+            runCatching { telegramClient.deleteMessages(chatId, listOf(messageId)) }
+        }
+        fileDao.upsert(
+            existing.copy(
+                name = name,
+                localPath = file.absolutePath,
+                sizeBytes = file.length(),
+                contentHash = null,
+                messageId = null,
+                remoteFileId = null,
+                remoteUniqueId = null,
+                backupState = BackupState.NONE,
+                modifiedAt = now
+            )
+        )
+        return AppResult.Success(existing.id)
+    }
+
+    override suspend fun linkPreview(url: String): LinkMetadata? {
+        if (!settingsRepository.preferences.first().linkPreviews) return null
+        return telegramClient.linkPreview(url, withImage = true)
+    }
+
+    override suspend fun readNote(fileId: String): AppResult<String> {
+        val entity = fileDao.byId(fileId) ?: return AppResult.Failure(AppError.NotFound)
+        entity.localPath?.let(noteStore::read)?.let { return AppResult.Success(it) }
+        // Saving replaces the file, but the editor still has to show what is there.
+        val fetched = fetchNoteBody(entity) ?: return AppResult.Failure(AppError.NoRemoteCopy)
+        return AppResult.Success(fetched)
+    }
+
+    private suspend fun fetchNoteBody(entity: FileEntity): String? {
+        val remoteFileId = entity.remoteFileId ?: return null
+        var downloaded: String? = null
+        telegramClient.downloadDocument(remoteFileId).collect { event ->
+            if (event is TelegramDownloadEvent.Completed) downloaded = event.localPath
+        }
+        val source = downloaded?.let(::File)?.takeIf { it.exists() } ?: return null
+
+        val target = File(source.parentFile, "note-${entity.id}.tmp")
+        val body = runCatching {
+            if (entity.isEncrypted) {
+                val key = wrappedKeyRepository.get(CryptoKeys.CONTENT) ?: return null
+                source.inputStream().buffered().use { input ->
+                    target.outputStream().buffered().use { output ->
+                        streamCrypto.decryptStream(key, input, output)
+                    }
+                }
+                target.readText()
+            } else {
+                source.readText()
+            }
+        }.getOrNull()
+        target.delete()
+        return body
+    }
+
+    /** A note with no title borrows the link's host, or its first line. */
+    private fun fallbackTitle(body: String): String {
+        val trimmed = body.trim()
+        val firstLine = trimmed.lineSequence().firstOrNull { it.isNotBlank() }.orEmpty().trim()
+        val single = trimmed.lineSequence().count { it.isNotBlank() } == 1
+        if (single && firstLine.startsWith("http", ignoreCase = true)) {
+            runCatching { URI(firstLine).host }.getOrNull()
+                ?.removePrefix("www.")
+                ?.takeIf { it.isNotEmpty() }
+                ?.let { return it }
+        }
+        return firstLine.take(NOTE_TITLE_LIMIT)
+    }
+
     override suspend fun findDuplicate(localPath: String): DriveFile? {
         val source = File(localPath)
         if (!source.exists() || !source.isFile) return null
@@ -510,6 +615,7 @@ class FileRepositoryImpl @Inject constructor(
     companion object {
         private const val MAX_FOLDER_DEPTH = 64
         private const val FOLDER_SEARCH_LIMIT = 200
+        private const val NOTE_TITLE_LIMIT = 60
     }
 
     private fun escapeLike(value: String): String =

@@ -21,6 +21,8 @@ interface CacheRepository {
 
     suspend fun clearThumbnails()
 
+    suspend fun clearLinkThumbnails()
+
     suspend fun clearTemp()
 
     suspend fun clearAll()

@@ -25,6 +25,7 @@ import com.drdisagree.teledrive.presentation.trash.TrashScreen
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.res.stringResource
 import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.presentation.note.NoteEditorScreen
 
 @Composable
 fun AppNavHost(
@@ -97,6 +98,14 @@ fun AppNavHost(
                         navController.navigateOnce(sequence.routeFor(id))
                     },
                     onOpenSearch = { navController.navigateOnce(Route.Search) },
+                onNewNote = { folderId ->
+                    navController.navigateOnce(Route.NoteEditor(folderId = folderId))
+                },
+                onEditNote = { fileId, title ->
+                    navController.navigateOnce(
+                        Route.NoteEditor(fileId = fileId, title = title)
+                    )
+                },
                     onBack = if (isRoot) null else ({ navController.popBackStackOnce() })
                 )
             }
@@ -130,7 +139,14 @@ fun AppNavHost(
             popEnterTransition = { NavigationTransitions.fadeThroughEnter() },
             popExitTransition = { NavigationTransitions.previewExit() }
         ) {
-            PreviewScreen(onBack = { navController.popBackStackOnce() })
+            PreviewScreen(
+                onBack = { navController.popBackStackOnce() },
+                onEditNote = { fileId, title ->
+                    navController.navigateOnce(
+                        Route.NoteEditor(fileId = fileId, title = title)
+                    )
+                }
+            )
         }
         composable<Route.Transfers> {
             TransfersScreen(onBack = { navController.popBackStackOnce() })
@@ -151,6 +167,9 @@ fun AppNavHost(
                     navController.navigateOnce(sequence.routeFor(id))
                 }
             )
+        }
+        composable<Route.NoteEditor> {
+            NoteEditorScreen(onBack = { navController.popBackStackOnce() })
         }
         composable<Route.Channels> {
             ChannelsScreen(onBack = { navController.popBackStackOnce() })

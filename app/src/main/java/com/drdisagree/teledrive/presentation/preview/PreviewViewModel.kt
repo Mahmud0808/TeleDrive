@@ -39,6 +39,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
+import com.drdisagree.teledrive.domain.model.LinkMetadata
 
 data class PreviewUiState(
     val files: List<DriveFile> = emptyList(),
@@ -288,6 +289,23 @@ class PreviewViewModel @Inject constructor(
             }
         }
     }
+
+    /** Pinch sizing is a reading preference, so it outlives the screen. */
+    val textScale: StateFlow<Float> = settingsRepository.preferences
+        .map { it.textPreviewScale }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 1f)
+
+    fun setTextScale(scale: Float) {
+        viewModelScope.launch {
+            settingsRepository.update { it.copy(textPreviewScale = scale) }
+        }
+    }
+
+    private val linkCache = mutableMapOf<String, LinkMetadata?>()
+
+    /** Metadata is fetched once per link and reused for this screen. */
+    suspend fun linkPreview(url: String): LinkMetadata? =
+        linkCache.getOrPut(url) { fileRepository.linkPreview(url) }
 
     fun showInfo(file: DriveFile) {
         viewModelScope.launch {

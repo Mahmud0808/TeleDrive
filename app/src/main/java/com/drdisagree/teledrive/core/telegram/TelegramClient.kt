@@ -3,6 +3,7 @@ package com.drdisagree.teledrive.core.telegram
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import com.drdisagree.teledrive.domain.model.Country
+import com.drdisagree.teledrive.domain.model.LinkMetadata
 
 /**
  * Telegram abstraction used by the rest of the app. No TDLib types cross this
@@ -27,6 +28,17 @@ interface TelegramClient {
      * several channels stay distinguishable in Telegram and in the app.
      */
     suspend fun createStorageChannel(label: String): StorageChannel
+
+    /** Replaces a message's document in place, keeping its id and manifest. */
+    suspend fun editDocument(
+        chatId: Long,
+        messageId: Long,
+        localPath: String,
+        caption: String
+    ): RemoteDocument
+
+    /** Link metadata fetched by Telegram, so the device never calls the site. */
+    suspend fun linkPreview(url: String, withImage: Boolean): LinkMetadata?
 
     /** Renames a drive channel, keeping the name recognizable as a drive. */
     suspend fun renameStorageChannel(chatId: Long, label: String): String

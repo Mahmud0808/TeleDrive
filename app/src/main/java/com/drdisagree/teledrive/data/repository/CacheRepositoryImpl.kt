@@ -1,7 +1,10 @@
 package com.drdisagree.teledrive.data.repository
 
 import android.content.Context
+import coil3.ImageLoader
+import coil3.memory.MemoryCache
 import com.drdisagree.teledrive.core.files.StorageInspector
+import com.drdisagree.teledrive.core.media.thumbnailCacheKey
 import com.drdisagree.teledrive.data.local.dao.CacheDao
 import com.drdisagree.teledrive.data.local.dao.ThumbnailDao
 import com.drdisagree.teledrive.data.local.entity.CacheEntryType
@@ -18,7 +21,8 @@ class CacheRepositoryImpl @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val cacheDao: CacheDao,
     private val thumbnailDao: ThumbnailDao,
-    private val storageInspector: StorageInspector
+    private val storageInspector: StorageInspector,
+    private val imageLoader: ImageLoader
 ) : CacheRepository {
 
     private val stats = MutableStateFlow(CacheRepository.CacheStats(0, 0, 0, 0, 0))
@@ -38,6 +42,16 @@ class CacheRepositoryImpl @Inject constructor(
     override suspend fun clearThumbnails() {
         thumbnailDir().deleteRecursively()
         thumbnailDao.deleteAll()
+        imageLoader.memoryCache?.clear()
+        refreshStats()
+    }
+
+    override suspend fun clearLinkThumbnails() {
+        for (thumbnail in thumbnailDao.textFileThumbnails()) {
+            File(thumbnail.path).delete()
+            thumbnailDao.delete(thumbnail.fileId)
+            imageLoader.memoryCache?.remove(MemoryCache.Key(thumbnailCacheKey(thumbnail.fileId)))
+        }
         refreshStats()
     }
 

@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
+import androidx.datastore.preferences.core.floatPreferencesKey
 
 object PreferenceKeys {
     val ONBOARDING_COMPLETE = booleanPreferencesKey("onboarding_complete")
@@ -39,6 +40,8 @@ object PreferenceKeys {
     val SHOW_HIDDEN_FILES = booleanPreferencesKey("show_hidden_files")
     val SHOW_ARCHIVED_FILES = booleanPreferencesKey("show_archived_files")
     val SHOW_RECENT_FILES = booleanPreferencesKey("show_recent_files")
+    val LINK_PREVIEWS = booleanPreferencesKey("link_previews")
+    val TEXT_PREVIEW_SCALE = floatPreferencesKey("text_preview_scale")
 
     val SORT_FIELD = stringPreferencesKey("sort_field")
     val SORT_DIRECTION = stringPreferencesKey("sort_direction")

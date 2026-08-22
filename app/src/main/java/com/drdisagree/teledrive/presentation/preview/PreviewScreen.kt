@@ -114,6 +114,21 @@ import androidx.compose.ui.res.stringResource
 import com.drdisagree.teledrive.R
 import androidx.compose.ui.res.pluralStringResource
 import com.drdisagree.teledrive.presentation.common.CollectSnackbarMessages
+import com.drdisagree.teledrive.presentation.common.LinkedText
+import androidx.core.net.toUri
+import androidx.compose.material.icons.filled.Edit
+import com.drdisagree.teledrive.presentation.common.soleUrlOf
+import com.drdisagree.teledrive.presentation.common.normalizeUrl
+import androidx.compose.material.icons.filled.Link
+import com.drdisagree.teledrive.domain.model.LinkMetadata
+import com.drdisagree.teledrive.presentation.common.MarkdownText
+import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.text.TextStyle
+import com.drdisagree.teledrive.presentation.common.scaledBy
+import kotlinx.coroutines.delay
 
 @EntryPoint
 @InstallIn(SingletonComponent::class)
@@ -128,11 +143,13 @@ interface PreviewEntryPoint {
 @Composable
 fun PreviewScreen(
     onBack: () -> Unit,
+    onEditNote: (String, String) -> Unit,
     viewModel: PreviewViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val infoTarget by viewModel.infoTarget.collectAsStateWithLifecycle()
     val backgroundPlayback by viewModel.backgroundPlayback.collectAsStateWithLifecycle()
+    val storedTextScale by viewModel.textScale.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
     val dataSourceFactory = remember {
@@ -175,7 +192,12 @@ fun PreviewScreen(
         initialPage = state.initialIndex.coerceAtMost(state.files.lastIndex),
         pageCount = { state.files.size }
     )
-    val currentFile = state.files[pagerState.currentPage.coerceAtMost(state.files.lastIndex)]
+    val pagedFile = state.files[pagerState.currentPage.coerceAtMost(state.files.lastIndex)]
+    /* The pager holds a snapshot, so the open row is read live: a rename or an
+       edit made elsewhere shows without reopening. */
+    val liveFile by viewModel.observeFile(pagedFile.id)
+        .collectAsStateWithLifecycle(initialValue = pagedFile)
+    val currentFile = liveFile ?: pagedFile
 
     val immersive = currentFile.category == FileCategory.IMAGE ||
         currentFile.category == FileCategory.VIDEO
@@ -218,6 +240,9 @@ fun PreviewScreen(
                 val file = state.files[page]
                 val content by viewModel.contentFor(file).collectAsStateWithLifecycle()
                 PreviewPage(
+                    loadLinkMetadata = { url -> viewModel.linkPreview(url) },
+                    storedTextScale = storedTextScale,
+                    onTextScaleChange = viewModel::setTextScale,
                     file = file,
                     content = content,
                     isActivePage = pagerState.currentPage == page,
@@ -251,6 +276,22 @@ fun PreviewScreen(
                         }
                     },
                     actions = {
+                        // Only text has anything the note editor can open.
+                        if (MimeTypes.isText(currentFile.mimeType)) {
+                            IconButton(
+                                onClick = {
+                                    onEditNote(
+                                        currentFile.id,
+                                        currentFile.name.substringBeforeLast('.')
+                                    )
+                                }
+                            ) {
+                                Icon(
+                                    Icons.Filled.Edit,
+                                    contentDescription = stringResource(R.string.note_edit_action)
+                                )
+                            }
+                        }
                         IconButton(onClick = { viewModel.showInfo(currentFile) }) {
                             Icon(Icons.Filled.Info, contentDescription = stringResource(R.string.preview_file_info))
                         }
@@ -407,8 +448,29 @@ private fun PreviewPage(
     chromeVisible: Boolean,
     allowBackgroundPlayback: Boolean,
     onToggleChrome: () -> Unit,
-    onChromeRequested: (Boolean) -> Unit
+    onChromeRequested: (Boolean) -> Unit,
+    loadLinkMetadata: suspend (String) -> LinkMetadata?,
+    storedTextScale: Float,
+    onTextScaleChange: (Float) -> Unit
 ) {
+    /* One state for the screen's life: re-creating it on save would leave the
+       gesture handler writing to a state nothing renders. */
+    var textScale by remember { mutableFloatStateOf(storedTextScale) }
+    LaunchedEffect(storedTextScale) {
+        if (storedTextScale != textScale) textScale = storedTextScale
+    }
+    val pinchToScale = Modifier.pointerInput(file.id) {
+        detectTransformGestures { _, _, zoom, _ ->
+            textScale = (textScale * zoom).coerceIn(TEXT_SCALE_MIN, TEXT_SCALE_MAX)
+        }
+    }
+    // Written once the pinch settles, not on every frame of the gesture.
+    LaunchedEffect(textScale) {
+        if (textScale != storedTextScale) {
+            delay(TEXT_SCALE_SAVE_DELAY_MS)
+            onTextScaleChange(textScale)
+        }
+    }
     when (content) {
         is PreviewContent.Loading -> LoadingState()
         is PreviewContent.DownloadProgress -> Column(
@@ -467,16 +529,48 @@ private fun PreviewPage(
                 onControlsVisibilityChanged = onChromeRequested
             )
         is PreviewContent.Pdf -> PdfPreview(path = content.path)
-        is PreviewContent.PlainText -> Column(
+        is PreviewContent.PlainText -> if (soleUrlOf(content.text) != null) {
+            val url = normalizeUrl(soleUrlOf(content.text).orEmpty())
+            val linkContext = LocalContext.current
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .then(pinchToScale)
+                    .padding(previewContentPadding())
+            ) {
+                SavedLink(
+                    textScale = textScale,
+                    url = url,
+                    onOpen = { openUrl(linkContext, url) },
+                    loadMetadata = loadLinkMetadata
+                )
+            }
+        } else Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
+                .then(pinchToScale)
                 .padding(previewContentPadding())
         ) {
-            Text(
-                text = content.text,
-                style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace)
-            )
+            val linkContext = LocalContext.current
+            if (MimeTypes.isMarkdown(file.mimeType)) {
+                MarkdownText(
+                    text = content.text,
+                    textScale = textScale,
+                    onOpenUrl = { url -> openUrl(linkContext, url) }
+                )
+            } else {
+                LinkedText(
+                    text = content.text,
+                    style = MaterialTheme.typography.bodySmall
+                        .copy(fontFamily = FontFamily.Monospace)
+                        .copy(color = MaterialTheme.colorScheme.onSurface)
+                        .scaledBy(textScale),
+                    linkColor = MaterialTheme.colorScheme.primary,
+                    onOpenUrl = { url -> openUrl(linkContext, url) }
+                )
+            }
             if (content.truncated) {
                 Text(
                     text = stringResource(R.string.preview_truncated_download_view),
@@ -821,3 +915,13 @@ private fun shareFile(context: Context, file: DriveFile) {
 
 /** Height the overlaid preview toolbar covers at the top of the screen. */
 val PreviewTopBarHeight = 64.dp
+
+private fun openUrl(context: Context, url: String) {
+    runCatching {
+        context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
+    }
+}
+
+private const val TEXT_SCALE_MIN = 0.7f
+private const val TEXT_SCALE_MAX = 3f
+private const val TEXT_SCALE_SAVE_DELAY_MS = 400L

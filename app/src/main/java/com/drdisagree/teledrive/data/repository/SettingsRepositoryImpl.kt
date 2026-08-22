@@ -113,6 +113,9 @@ class SettingsRepositoryImpl @Inject constructor(
             showArchivedFiles = this[PreferenceKeys.SHOW_ARCHIVED_FILES]
                 ?: defaults.showArchivedFiles,
             showRecentFiles = this[PreferenceKeys.SHOW_RECENT_FILES] ?: defaults.showRecentFiles,
+            linkPreviews = this[PreferenceKeys.LINK_PREVIEWS] ?: defaults.linkPreviews,
+            textPreviewScale = this[PreferenceKeys.TEXT_PREVIEW_SCALE]
+                ?: defaults.textPreviewScale,
             sortField = enumOrDefault(this[PreferenceKeys.SORT_FIELD], defaults.sortField),
             sortDirection = enumOrDefault(
                 this[PreferenceKeys.SORT_DIRECTION],
@@ -164,6 +167,8 @@ class SettingsRepositoryImpl @Inject constructor(
         this[PreferenceKeys.SHOW_HIDDEN_FILES] = prefs.showHiddenFiles
         this[PreferenceKeys.SHOW_ARCHIVED_FILES] = prefs.showArchivedFiles
         this[PreferenceKeys.SHOW_RECENT_FILES] = prefs.showRecentFiles
+        this[PreferenceKeys.LINK_PREVIEWS] = prefs.linkPreviews
+        this[PreferenceKeys.TEXT_PREVIEW_SCALE] = prefs.textPreviewScale
         this[PreferenceKeys.SORT_FIELD] = prefs.sortField.name
         this[PreferenceKeys.SORT_DIRECTION] = prefs.sortDirection.name
         this[PreferenceKeys.BACKGROUND_PLAYBACK] = prefs.backgroundPlayback

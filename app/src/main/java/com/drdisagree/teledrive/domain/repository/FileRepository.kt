@@ -11,6 +11,7 @@ import com.drdisagree.teledrive.domain.model.MediaAlbum
 import kotlinx.coroutines.flow.Flow
 import com.drdisagree.teledrive.domain.model.FileSortField
 import com.drdisagree.teledrive.domain.model.SortDirection
+import com.drdisagree.teledrive.domain.model.LinkMetadata
 
 interface FileRepository {
 
@@ -106,6 +107,22 @@ interface FileRepository {
      * user deleted outside the app stops looking downloaded.
      */
     suspend fun reconcileLocalCopies(ids: List<String>)
+
+    /**
+     * Writes a note as a Markdown file. Editing replaces the stored copy and
+     * its message, so the upload path keeps owning encryption and manifests.
+     */
+    suspend fun saveNote(
+        fileId: String?,
+        folderId: String?,
+        title: String,
+        body: String
+    ): AppResult<String>
+
+    suspend fun readNote(fileId: String): AppResult<String>
+
+    /** Link metadata for a saved URL, or null when previews are off. */
+    suspend fun linkPreview(url: String): LinkMetadata?
 
     suspend fun findDuplicate(localPath: String): DriveFile?
 

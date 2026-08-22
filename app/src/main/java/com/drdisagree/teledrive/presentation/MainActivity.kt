@@ -89,11 +89,14 @@ class MainActivity : FragmentActivity() {
     /** A share lands on the files screen, where the destination is chosen. */
     private fun handleIntent(intent: Intent?) {
         val shared = sharedUris(intent)
+        val sharedText = intent?.takeIf { it.action == Intent.ACTION_SEND }
+            ?.getStringExtra(Intent.EXTRA_TEXT)
         pendingShare.offer(shared)
-        destination.value = if (shared.isNotEmpty()) {
-            AppNotifications.DESTINATION_FILES
-        } else {
-            destinationOf(intent)
+        pendingShare.offerText(sharedText)
+        destination.value = when {
+            shared.isNotEmpty() -> AppNotifications.DESTINATION_FILES
+            !sharedText.isNullOrBlank() -> AppNotifications.DESTINATION_NOTE
+            else -> destinationOf(intent)
         }
     }
 
@@ -127,6 +130,7 @@ class MainActivity : FragmentActivity() {
         handleIntent(intent)
         setContent {
             TeleDriveApp(
+                pendingShare = pendingShare,
                 notificationDestination = destination.collectAsStateWithLifecycle().value,
                 onDestinationHandled = { destination.value = null }
             )

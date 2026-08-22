@@ -131,6 +131,10 @@ import kotlinx.coroutines.launch
 import androidx.compose.ui.platform.LocalContext
 import com.drdisagree.teledrive.presentation.common.shareLocalFiles
 import com.drdisagree.teledrive.presentation.common.CollectSnackbarMessages
+import androidx.compose.material.icons.filled.EditNote
+import androidx.compose.material3.FloatingActionButtonMenu
+import androidx.compose.material3.FloatingActionButtonMenuItem
+import androidx.compose.material3.ToggleFloatingActionButton
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -139,6 +143,8 @@ fun FilesScreen(
     onOpenCrumb: (String?) -> Unit,
     onOpenFile: (String, PreviewSequence) -> Unit,
     onOpenSearch: () -> Unit,
+    onNewNote: (String?) -> Unit,
+    onEditNote: (String, String) -> Unit,
     onBack: (() -> Unit)?,
     viewModel: FilesViewModel = hiltViewModel()
 ) {
@@ -153,6 +159,7 @@ fun FilesScreen(
     var showCreateFolder by remember { mutableStateOf(false) }
     var confirmDeleteLocal by remember { mutableStateOf(false) }
     var showSortMenu by remember { mutableStateOf(false) }
+    var showAddMenu by remember { mutableStateOf(false) }
     var showMovePicker by remember { mutableStateOf(false) }
     var showCopyPicker by remember { mutableStateOf(false) }
     var showSelectionOverflow by remember { mutableStateOf(false) }
@@ -268,6 +275,15 @@ fun FilesScreen(
                                     onClick = {
                                         showSelectionOverflow = false
                                         viewModel.uploadSelected()
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.note_edit_action)) },
+                                    enabled = state.selectionCount == 1 &&
+                                        state.folderSelection.isEmpty(),
+                                    onClick = {
+                                        showSelectionOverflow = false
+                                        viewModel.editSelectedNote()
                                     }
                                 )
                                 DropdownMenuItem(
@@ -397,14 +413,54 @@ fun FilesScreen(
                 enter = scaleIn() + fadeIn(),
                 exit = scaleOut() + fadeOut()
             ) {
-                ExtendedFloatingActionButton(
-                    onClick = { uploadPicker.launch(arrayOf("*/*")) },
-                    icon = { Icon(Icons.Filled.Upload, contentDescription = null) },
-                    text = { Text(stringResource(R.string.common_upload)) },
+                FloatingActionButtonMenu(
+                    expanded = showAddMenu,
                     modifier = Modifier.padding(
-                        bottom = if (LocalBottomBarInset.current > 0.dp) FabBottomBarInset else 0.dp
+                        bottom = if (LocalBottomBarInset.current > 0.dp) {
+                            FabBottomBarInset
+                        } else {
+                            0.dp
+                        }
+                    ),
+                    button = {
+                        ToggleFloatingActionButton(
+                            checked = showAddMenu,
+                            onCheckedChange = { showAddMenu = it }
+                        ) {
+                            Icon(
+                                imageVector = if (showAddMenu) {
+                                    Icons.Filled.Close
+                                } else {
+                                    Icons.Filled.Add
+                                },
+                                contentDescription = stringResource(R.string.common_add),
+                                // The container animates to primary when checked.
+                                tint = if (showAddMenu) {
+                                    MaterialTheme.colorScheme.onPrimary
+                                } else {
+                                    MaterialTheme.colorScheme.onPrimaryContainer
+                                }
+                            )
+                        }
+                    }
+                ) {
+                    FloatingActionButtonMenuItem(
+                        onClick = {
+                            showAddMenu = false
+                            uploadPicker.launch(arrayOf("*/*"))
+                        },
+                        icon = { Icon(Icons.Filled.Upload, contentDescription = null) },
+                        text = { Text(stringResource(R.string.files_add_files)) }
                     )
-                )
+                    FloatingActionButtonMenuItem(
+                        onClick = {
+                            showAddMenu = false
+                            onNewNote(state.folderId)
+                        },
+                        icon = { Icon(Icons.Filled.EditNote, contentDescription = null) },
+                        text = { Text(stringResource(R.string.note_new)) }
+                    )
+                }
             }
         }
     ) { padding ->
@@ -469,8 +525,6 @@ fun FilesScreen(
                 if (moving) R.string.files_move_here else R.string.files_copy_here
             ),
             viewModel = viewModel,
-            /* A folder cannot contain itself, and hiding it also hides the
-               subtree, since the picker only descends through what it lists. */
             excludedFolderIds = state.folderSelection,
             onConfirm = { target ->
                 showMovePicker = false
@@ -533,6 +587,12 @@ fun FilesScreen(
             onDismiss = { confirmDeleteLocal = false }
         )
     }
+    LaunchedEffect(Unit) {
+        viewModel.editRequests.collect { request ->
+            onEditNote(request.fileId, request.title)
+        }
+    }
+
     val shareContext = LocalContext.current
     LaunchedEffect(Unit) {
         viewModel.shareRequests.collect { request ->

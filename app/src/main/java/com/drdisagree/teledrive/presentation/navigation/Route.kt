@@ -51,6 +51,14 @@ sealed interface Route {
     data object Channels : Route
 
     @Serializable
+    data class NoteEditor(
+        val fileId: String? = null,
+        val folderId: String? = null,
+        val title: String? = null,
+        val sharedText: String? = null
+    ) : Route
+
+    @Serializable
     data class Collection(val type: String) : Route
 
     @Serializable

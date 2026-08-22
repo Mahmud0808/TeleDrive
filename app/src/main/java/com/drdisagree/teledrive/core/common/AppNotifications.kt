@@ -105,6 +105,7 @@ class AppNotifications @Inject constructor(
         const val EXTRA_DESTINATION = "destination"
         const val DESTINATION_TRANSFERS = "transfers"
         const val DESTINATION_FILES = "files"
+        const val DESTINATION_NOTE = "note"
         private const val REQUEST_FAILURE = 1
         private const val REQUEST_BACKUP = 2
         private const val REQUEST_QUEUE = 3

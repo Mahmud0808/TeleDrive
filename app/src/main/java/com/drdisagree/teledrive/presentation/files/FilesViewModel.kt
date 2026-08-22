@@ -56,6 +56,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import com.drdisagree.teledrive.core.files.PendingShare
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.emitAll
+import com.drdisagree.teledrive.core.files.MimeTypes
 
 data class RenameTarget(
     val id: String,
@@ -114,6 +115,9 @@ class FilesViewModel @Inject constructor(
 
     private val _folderInfoTarget = MutableStateFlow<DriveFolder?>(null)
     val folderInfoTarget: StateFlow<DriveFolder?> = _folderInfoTarget.asStateFlow()
+
+    private val _editRequests = MutableSharedFlow<EditNoteRequest>(extraBufferCapacity = 2)
+    val editRequests = _editRequests.asSharedFlow()
 
     private val _shareRequests = MutableSharedFlow<ShareRequest>(extraBufferCapacity = 2)
     val shareRequests = _shareRequests.asSharedFlow()
@@ -614,6 +618,22 @@ class FilesViewModel @Inject constructor(
         else -> context.getString(R.string.files_import_uploading_failed, imported, failed)
     }
 
+    /** Opens the selected text file in the note editor. */
+    fun editSelectedNote() {
+        val fileId = selection.value.singleOrNull() ?: return
+        clearSelection()
+        viewModelScope.launch {
+            val file = fileRepository.getFiles(listOf(fileId)).firstOrNull() ?: return@launch
+            if (!MimeTypes.isText(file.mimeType)) {
+                _messages.tryEmit(context.getString(R.string.note_not_editable))
+                return@launch
+            }
+            _editRequests.tryEmit(
+                EditNoteRequest(fileId = file.id, title = file.name.substringBeforeLast('.'))
+            )
+        }
+    }
+
     /** Only files with a local copy can leave the app, so the rest are reported. */
     fun shareSelected() {
         val ids = selection.value.toList()
@@ -672,3 +692,6 @@ class FilesViewModel @Inject constructor(
 
 /** Local copies bound for another app. */
 data class ShareRequest(val paths: List<String>, val mimeType: String)
+
+/** A text file bound for the note editor. */
+data class EditNoteRequest(val fileId: String, val title: String)

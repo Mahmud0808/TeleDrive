@@ -90,9 +90,11 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.flow.Flow
+import com.drdisagree.teledrive.core.files.PendingShare
 
 @Composable
 fun TeleDriveApp(
+    pendingShare: PendingShare,
     notificationDestination: String? = null,
     onDestinationHandled: () -> Unit = {},
     viewModel: AppViewModel = hiltViewModel()
@@ -124,6 +126,7 @@ fun TeleDriveApp(
                 state.loading -> LoadingState()
                 state.locked -> LockScreen(onUnlocked = viewModel::unlock)
                 else -> MainScaffold(
+                    pendingShare = pendingShare,
                     onboardingComplete = state.onboardingComplete,
                     notificationDestination = notificationDestination,
                     onDestinationHandled = onDestinationHandled,
@@ -136,6 +139,7 @@ fun TeleDriveApp(
 
 @Composable
 private fun MainScaffold(
+    pendingShare: PendingShare,
     onboardingComplete: Boolean,
     notificationDestination: String?,
     onDestinationHandled: () -> Unit,
@@ -178,6 +182,9 @@ private fun MainScaffold(
         when (target) {
             AppNotifications.DESTINATION_TRANSFERS -> navController.navigate(Route.Transfers)
             AppNotifications.DESTINATION_FILES -> navController.navigate(Route.Files())
+            AppNotifications.DESTINATION_NOTE -> navController.navigate(
+                Route.NoteEditor(sharedText = pendingShare.text.value)
+            )
             else -> Unit
         }
         onDestinationHandled()

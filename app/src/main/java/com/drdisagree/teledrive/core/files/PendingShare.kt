@@ -25,4 +25,14 @@ class PendingShare @Inject constructor() {
     }
 
     fun clear() = _uris.update { emptyList() }
+
+    private val _text = MutableStateFlow<String?>(null)
+    val text: StateFlow<String?> = _text.asStateFlow()
+
+    fun offerText(incoming: String?) {
+        if (incoming.isNullOrBlank()) return
+        _text.update { incoming }
+    }
+
+    fun clearText() = _text.update { null }
 }

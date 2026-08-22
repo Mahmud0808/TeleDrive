@@ -28,10 +28,12 @@ import com.drdisagree.teledrive.core.media.ThumbnailModel
 import com.drdisagree.teledrive.domain.model.DriveFile
 import com.drdisagree.teledrive.domain.model.FileCategory
 import com.drdisagree.teledrive.presentation.common.Formatters
+import com.drdisagree.teledrive.core.files.MimeTypes
 
 /**
- * Thumbnail with an icon fallback. Only image/video files attempt thumbnail
- * loading; everything else renders its category icon on a tonal background.
+ * Thumbnail with an icon fallback. Image, video and text files attempt
+ * thumbnail loading; everything else renders its category icon on a tonal
+ * background.
  * Videos carry a play badge so they are distinguishable from stills.
  */
 @Composable
@@ -40,8 +42,10 @@ fun FileThumbnail(
     modifier: Modifier = Modifier,
     contentScale: ContentScale = ContentScale.Crop
 ) {
+    // Text can carry one too: a note holding a link previews as that link.
     val supportsThumbnail = file.category == FileCategory.IMAGE ||
-        file.category == FileCategory.VIDEO
+        file.category == FileCategory.VIDEO ||
+        MimeTypes.isText(file.mimeType)
     var failed by remember(file.id) { mutableStateOf(false) }
 
     BoxWithConstraints(

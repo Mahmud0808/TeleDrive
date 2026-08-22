@@ -36,6 +36,7 @@ import javax.inject.Singleton
 import org.drinkless.tdlib.Client
 import org.drinkless.tdlib.TdApi
 import com.drdisagree.teledrive.domain.model.Country
+import com.drdisagree.teledrive.domain.model.LinkMetadata
 
 @Singleton
 class TdLibTelegramClient @Inject constructor(
@@ -337,6 +338,59 @@ class TdLibTelegramClient @Inject constructor(
         return StorageChannel(chatId = chat.id, title = title, documentCount = 0)
     }
 
+    override suspend fun editDocument(
+        chatId: Long,
+        messageId: Long,
+        localPath: String,
+        caption: String
+    ): RemoteDocument {
+        awaitAuthorized()
+        val edited = send<TdApi.Message>(
+            TdApi.EditMessageMedia(
+                chatId,
+                messageId,
+                null,
+                TdApi.InputMessageDocument(
+                    TdApi.InputFileLocal(localPath),
+                    null,
+                    true,
+                    TdApi.FormattedText(caption, emptyArray())
+                )
+            )
+        )
+        return edited.toRemoteDocument()
+            ?: throw TelegramException(500, "Edited message is not a document")
+    }
+
+    override suspend fun linkPreview(url: String, withImage: Boolean): LinkMetadata? = runCatching {
+        awaitAuthorized()
+        val preview = send<TdApi.LinkPreview>(
+            TdApi.GetLinkPreview(TdApi.FormattedText(url, emptyArray()), null)
+        )
+        LinkMetadata(
+            url = url,
+            siteName = preview.siteName.takeIf { it.isNotEmpty() },
+            title = preview.title.takeIf { it.isNotEmpty() },
+            description = preview.description?.text?.takeIf { it.isNotEmpty() },
+            imagePath = if (withImage) previewImagePath(preview) else null
+        )
+    }.getOrNull()
+
+    private suspend fun previewImagePath(preview: TdApi.LinkPreview): String? {
+        val photo = when (val type = preview.type) {
+            is TdApi.LinkPreviewTypeArticle -> type.photo
+            is TdApi.LinkPreviewTypePhoto -> type.photo
+            else -> null
+        } ?: return null
+        val size = photo.sizes.lastOrNull() ?: return null
+        val local = size.photo.local
+        if (local?.isDownloadingCompleted == true) return local.path
+        val file = send<TdApi.File>(
+            TdApi.DownloadFile(size.photo.id, PREVIEW_PRIORITY, 0, 0, true)
+        )
+        return file.local?.path?.takeIf { it.isNotEmpty() }
+    }
+
     override suspend fun renameStorageChannel(chatId: Long, label: String): String {
         awaitAuthorized()
         val title = driveTitle(label)
@@ -371,7 +425,8 @@ class TdLibTelegramClient @Inject constructor(
         SafeLog.d(TAG, "Deleted a storage channel")
     }
 
-    /** "TeleDrive" alone, or "TeleDrive <label>" once the user names it. */
+
+
     private fun driveTitle(label: String): String {
         val trimmed = label.trim()
             .removePrefix(STORAGE_CHAT_TITLE)
@@ -1020,6 +1075,7 @@ class TdLibTelegramClient @Inject constructor(
         private const val MAX_LABEL_LENGTH = 48
         private const val STORAGE_CHAT_TITLE = "TeleDrive"
         private const val CLOSE_WAIT_LIMIT_MS = 5_000L
+        private const val PREVIEW_PRIORITY = 1
         const val STORAGE_CHAT_MARKER = "#teledrive-storage"
     }
 }
