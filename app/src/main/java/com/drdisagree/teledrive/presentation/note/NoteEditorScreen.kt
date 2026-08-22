@@ -4,10 +4,9 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
@@ -71,6 +70,7 @@ fun NoteEditorScreen(
     LaunchedEffect(Unit) { viewModel.saved.collect { onBack() } }
 
     Scaffold(
+        modifier = Modifier.imePadding(),
         snackbarHost = { BottomBarSnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
@@ -160,8 +160,8 @@ fun NoteEditorScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
+                    .padding(bottom = SAVE_BUTTON_CLEARANCE)
             )
-            Spacer(Modifier.height(8.dp))
         }
     }
 }
@@ -231,3 +231,4 @@ private fun borderlessColors() = TextFieldDefaults.colors(
 )
 
 private const val DISABLED_ALPHA = 0.38f
+private val SAVE_BUTTON_CLEARANCE = 88.dp
