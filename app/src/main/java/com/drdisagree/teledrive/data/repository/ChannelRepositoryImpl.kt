@@ -146,7 +146,14 @@ class ChannelRepositoryImpl @Inject constructor(
         AppResult.Success(Unit)
     }
 
-    override suspend fun deleteRemotely(chatId: Long): AppResult<Unit> = runTelegram {
+    override suspend fun deleteRemotely(chatId: Long): AppResult<Unit> {
+        if (channelDao.all().size <= 1) {
+            return AppResult.Failure(AppError.LastDriveRemaining)
+        }
+        return deleteConfirmed(chatId)
+    }
+
+    private suspend fun deleteConfirmed(chatId: Long): AppResult<Unit> = runTelegram {
         telegramClient.deleteStorageChannel(chatId)
         forget(chatId)
         AppResult.Success(Unit)

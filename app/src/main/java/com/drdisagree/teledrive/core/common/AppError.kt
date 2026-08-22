@@ -36,6 +36,8 @@ sealed interface AppError {
 
     data object NoLocalCopy : AppError
 
+    data object LastDriveRemaining : AppError
+
     data object InvalidApiCredentials : AppError
 
     data object InvalidPhoneNumber : AppError

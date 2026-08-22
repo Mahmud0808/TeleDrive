@@ -663,4 +663,5 @@
     <string name="preview_read_failed">Could not read file</string>
     <string name="preview_archive_failed">Could not open archive</string>
     <string name="preview_only_zip">Only ZIP archives can be browsed.</string>
+    <string name="error_last_drive">This is your only drive. Create another one before deleting it.</string>
 </resources>

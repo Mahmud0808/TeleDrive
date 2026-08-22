@@ -191,6 +191,7 @@ fun ChannelsScreen(
                     onOpen = { viewModel.switchTo(channel.chatId) },
                     onRename = { renameTarget = channel },
                     onDelete = { deleteTarget = channel },
+                    canDelete = channels.size > 1,
                     modifier = Modifier.animateItem(
                         fadeInSpec = tween(ROW_FADE_MS),
                         fadeOutSpec = tween(ROW_FADE_MS),
@@ -211,6 +212,7 @@ private fun ChannelRow(
     onOpen: () -> Unit,
     onRename: () -> Unit,
     onDelete: () -> Unit,
+    canDelete: Boolean,
     modifier: Modifier = Modifier
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -284,6 +286,7 @@ private fun ChannelRow(
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.channels_delete_telegram)) },
                     leadingIcon = { Icon(Icons.Filled.Delete, contentDescription = null) },
+                    enabled = canDelete,
                     onClick = {
                         showMenu = false
                         onDelete()
