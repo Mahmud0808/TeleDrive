@@ -15,9 +15,13 @@ data class DriveChannel(
     val lastOpenedAt: Long
 ) {
 
-    /** Name without the shared drive prefix, which is what tells drives apart. */
+    /** The part the user chose, empty for a drive that was never named. */
     val label: String
-        get() = title.removePrefix(DRIVE_PREFIX).trim().ifEmpty { title }
+        get() = title.removePrefix(DRIVE_PREFIX).trim()
+
+    /** What to show in lists, falling back to the bare drive name. */
+    val displayName: String
+        get() = label.ifEmpty { DRIVE_PREFIX }
 
     companion object {
         const val DRIVE_PREFIX = "TeleDrive"

@@ -61,7 +61,7 @@ class ChannelsViewModel @Inject constructor(
     fun create(label: String) = run(context.getString(R.string.channels_creating_drive)) {
         when (val result = channelRepository.create(label)) {
             is AppResult.Success -> {
-                _messages.tryEmit(context.getString(R.string.message_created_drive, result.value.label))
+                _messages.tryEmit(context.getString(R.string.message_created_drive, result.value.displayName))
                 channelRepository.switchTo(result.value.chatId)
             }
 

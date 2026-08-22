@@ -319,7 +319,7 @@ private fun ChannelSelectStep(
                 }
                 Column(modifier = Modifier.padding(start = 12.dp)) {
                     Text(
-                        text = channel.label,
+                        text = channel.displayName,
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,

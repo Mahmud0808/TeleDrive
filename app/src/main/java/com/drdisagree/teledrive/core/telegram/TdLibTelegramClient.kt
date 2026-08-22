@@ -373,7 +373,10 @@ class TdLibTelegramClient @Inject constructor(
 
     /** "TeleDrive" alone, or "TeleDrive <label>" once the user names it. */
     private fun driveTitle(label: String): String {
-        val trimmed = label.trim().take(MAX_LABEL_LENGTH)
+        val trimmed = label.trim()
+            .removePrefix(STORAGE_CHAT_TITLE)
+            .trim()
+            .take(MAX_LABEL_LENGTH)
         return if (trimmed.isEmpty()) STORAGE_CHAT_TITLE else "$STORAGE_CHAT_TITLE $trimmed"
     }
 

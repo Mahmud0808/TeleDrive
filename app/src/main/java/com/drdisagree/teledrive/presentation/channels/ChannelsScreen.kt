@@ -242,7 +242,7 @@ private fun ChannelRow(
                 .padding(start = 14.dp)
         ) {
             Text(
-                text = channel.label,
+                text = channel.displayName,
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
@@ -330,11 +330,11 @@ private fun DeleteChannelDialog(
     onDismiss: () -> Unit
 ) {
     var typed by remember { mutableStateOf("") }
-    val matches = typed.trim().equals(channel.label, ignoreCase = true)
+    val matches = typed.trim().equals(channel.displayName, ignoreCase = true)
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.channels_delete_title, channel.label)) },
+        title = { Text(stringResource(R.string.channels_delete_title, channel.displayName)) },
         text = {
             Column {
                 Text(
@@ -351,7 +351,7 @@ private fun DeleteChannelDialog(
                     value = typed,
                     onValueChange = { typed = it },
                     label = {
-                        Text(stringResource(R.string.channels_delete_confirm_hint, channel.label))
+                        Text(stringResource(R.string.channels_delete_confirm_hint, channel.displayName))
                     },
                     singleLine = true,
                     isError = typed.isNotEmpty() && !matches,

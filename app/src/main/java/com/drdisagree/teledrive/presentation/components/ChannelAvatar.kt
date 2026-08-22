@@ -63,7 +63,7 @@ fun ChannelAvatar(
                 .background(Brush.verticalGradient(gradient))
         ) {
             Text(
-                text = initialsOf(channel.label),
+                text = initialsOf(channel.displayName),
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
                 fontSize = (size.value * INITIALS_RATIO).sp,
