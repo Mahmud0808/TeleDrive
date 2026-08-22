@@ -32,6 +32,12 @@ import java.io.File
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.withTimeoutOrNull
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Executes one transfer end to end: staging (optional encryption), the
@@ -55,6 +61,30 @@ class TransferExecutor @Inject constructor(
     private val downloadWriter: DownloadWriter,
     private val settingsRepository: SettingsRepository
 ) {
+
+    /**
+     * Telegram reports transfers through updates, so a connection that dies
+     * without an error simply stops emitting. Without this the collector waits
+     * forever and the row stays RUNNING with no way back.
+     */
+    private fun <T> Flow<T>.failWhenIdle(messageRes: Int): Flow<T> = channelFlow {
+        val relay = Channel<T>(Channel.BUFFERED)
+        launch {
+            try {
+                collect { relay.send(it) }
+                relay.close()
+            } catch (e: Throwable) {
+                relay.close(e)
+            }
+        }
+        while (true) {
+            val received = withTimeoutOrNull(STALL_TIMEOUT_MS.milliseconds) { relay.receiveCatching() }
+                ?: throw TelegramException(STALL_CODE, context.getString(messageRes))
+            received.exceptionOrNull()?.let { throw it }
+            if (received.isClosed) break
+            send(received.getOrThrow())
+        }
+    }
 
     sealed interface Outcome {
         data object Completed : Outcome
@@ -147,7 +177,7 @@ class TransferExecutor @Inject constructor(
                 mimeType = if (encrypt) "application/octet-stream" else entity.mimeType,
                 caption = caption,
                 thumbnailPath = previewPath
-            ).collect { event ->
+            ).failWhenIdle(R.string.transfer_error_upload_stalled).collect { event ->
                 currentCoroutineContext().ensureActive()
                 when (event) {
                     is TelegramUploadEvent.Started -> Unit
@@ -223,7 +253,9 @@ class TransferExecutor @Inject constructor(
         return try {
             var outcome: Outcome =
                 Outcome.Failed(context.getString(R.string.transfer_error_download_ended))
-            telegramClient.downloadDocument(remoteFileId).collect { event ->
+            telegramClient.downloadDocument(remoteFileId)
+                .failWhenIdle(R.string.transfer_error_download_stalled)
+                .collect { event ->
                 currentCoroutineContext().ensureActive()
                 when (event) {
                     is TelegramDownloadEvent.Progress -> {
@@ -317,5 +349,7 @@ class TransferExecutor @Inject constructor(
 
     companion object {
         private const val PROGRESS_INTERVAL_MS = 400L
+        private const val STALL_TIMEOUT_MS = 180_000L
+        private const val STALL_CODE = 408
     }
 }

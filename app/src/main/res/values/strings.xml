@@ -457,6 +457,7 @@
     <!-- Transfer failures -->
     <string name="transfer_error_decryption_failed">Decryption failed</string>
     <string name="transfer_error_download_ended">Download ended unexpectedly</string>
+    <string name="transfer_error_download_stalled">Download stopped responding</string>
     <string name="transfer_error_downloaded_missing">Downloaded file missing</string>
     <string name="transfer_error_file_record_missing">File record missing</string>
     <string name="transfer_error_key_missing">Encryption key missing. Restore it in Settings.</string>
@@ -466,6 +467,7 @@
     <string name="transfer_error_no_remote_copy">File has no remote copy</string>
     <string name="transfer_error_save_failed">Could not save the download</string>
     <string name="transfer_error_upload_ended">Upload ended unexpectedly</string>
+    <string name="transfer_error_upload_stalled">Upload stopped responding</string>
 
     <!-- Error messages -->
     <string name="error_authentication_failed">Authentication failed</string>

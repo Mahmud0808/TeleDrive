@@ -38,6 +38,11 @@ import javax.inject.Singleton
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.onSubscription
 
 @Singleton
 class TdLibTelegramClient @Inject constructor(
@@ -687,16 +692,16 @@ class TdLibTelegramClient @Inject constructor(
             true,
             TdApi.FormattedText(caption, emptyArray())
         )
-        val pending: TdApi.Message =
-            send(TdApi.SendMessage(chatId, null, null, null, null, content))
-        val pendingFileId = (pending.content as? TdApi.MessageDocument)
-            ?.document?.document?.id
         var finished = false
-        var sentMessageId = pending.id
-        trySend(TelegramUploadEvent.Started(pending.id))
+        var sentMessageId = 0L
+        val subscribed = CompletableDeferred<Unit>()
+        val pendingMessageId = CompletableDeferred<Long>()
+        val pendingFile = CompletableDeferred<Int?>()
 
         val job = launch {
-            updates.collect { update ->
+            updates.onSubscription { subscribed.complete(Unit) }.collect { update ->
+                val pendingId = pendingMessageId.await()
+                val pendingFileId = pendingFile.await()
                 when (update) {
                     is TdApi.UpdateFile -> {
                         if (pendingFileId != null && update.file.id == pendingFileId) {
@@ -712,7 +717,7 @@ class TdLibTelegramClient @Inject constructor(
                     }
 
                     is TdApi.UpdateMessageSendSucceeded -> {
-                        if (update.oldMessageId == pending.id) {
+                        if (update.oldMessageId == pendingId) {
                             sentMessageId = update.message.id
                             val document = update.message.toRemoteDocument()
                             if (document != null) {
@@ -729,7 +734,7 @@ class TdLibTelegramClient @Inject constructor(
                     }
 
                     is TdApi.UpdateMessageSendFailed -> {
-                        if (update.oldMessageId == pending.id) {
+                        if (update.oldMessageId == pendingId) {
                             finished = true
                             close(
                                 TelegramException.from(update.error.code, update.error.message)
@@ -739,6 +744,14 @@ class TdLibTelegramClient @Inject constructor(
                 }
             }
         }
+
+        subscribed.await()
+        val pending: TdApi.Message =
+            send(TdApi.SendMessage(chatId, null, null, null, null, content))
+        sentMessageId = pending.id
+        pendingFile.complete((pending.content as? TdApi.MessageDocument)?.document?.document?.id)
+        pendingMessageId.complete(pending.id)
+        trySend(TelegramUploadEvent.Started(pending.id))
 
         awaitClose {
             job.cancel()
@@ -763,16 +776,26 @@ class TdLibTelegramClient @Inject constructor(
             false,
             TdApi.FormattedText(caption, emptyArray())
         )
-        val pending: TdApi.Message =
-            send(TdApi.SendMessage(chatId, null, null, null, null, content))
+        val subscribed = CompletableDeferred<Unit>()
+        val pendingMessageId = CompletableDeferred<Long>()
 
-        val sent = withTimeoutOrNull(COPY_TIMEOUT_MS.milliseconds) {
-            updates.first { update ->
-                (update is TdApi.UpdateMessageSendSucceeded &&
-                        update.oldMessageId == pending.id) ||
-                        (update is TdApi.UpdateMessageSendFailed &&
-                                update.oldMessageId == pending.id)
+        val sent = coroutineScope {
+            val outcome = async {
+                withTimeoutOrNull(COPY_TIMEOUT_MS.milliseconds) {
+                    updates.onSubscription { subscribed.complete(Unit) }.first { update ->
+                        val pendingId = pendingMessageId.await()
+                        (update is TdApi.UpdateMessageSendSucceeded &&
+                                update.oldMessageId == pendingId) ||
+                                (update is TdApi.UpdateMessageSendFailed &&
+                                        update.oldMessageId == pendingId)
+                    }
+                }
             }
+            subscribed.await()
+            val pending: TdApi.Message =
+                send(TdApi.SendMessage(chatId, null, null, null, null, content))
+            pendingMessageId.complete(pending.id)
+            outcome.await() ?: pending
         }
         return when (sent) {
             is TdApi.UpdateMessageSendSucceeded ->
@@ -782,26 +805,23 @@ class TdLibTelegramClient @Inject constructor(
             is TdApi.UpdateMessageSendFailed ->
                 throw TelegramException.from(sent.error.code, sent.error.message)
 
-            else -> pending.toRemoteDocument()
+            is TdApi.Message -> sent.toRemoteDocument()
                 ?: throw TelegramException(500, "Copy did not complete")
+
+            else -> throw TelegramException(500, "Copy did not complete")
         }
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     override fun downloadDocument(remoteFileId: String): Flow<TelegramDownloadEvent> =
         callbackFlow<TelegramDownloadEvent> {
-            val file: TdApi.File =
-                send(TdApi.GetRemoteFile(remoteFileId, TdApi.FileTypeDocument()))
-            file.readyPath()?.let { path ->
-                trySend(TelegramDownloadEvent.Completed(path, file.size))
-                close()
-                awaitClose { }
-                return@callbackFlow
-            }
+            val subscribed = CompletableDeferred<Unit>()
+            val downloadedFileId = CompletableDeferred<Int>()
 
-            val fileId = file.id
             val job = launch {
-                updates.filterIsInstance<TdApi.UpdateFile>()
-                    .filter { it.file.id == fileId }
+                updates.onSubscription { subscribed.complete(Unit) }
+                    .filterIsInstance<TdApi.UpdateFile>()
+                    .filter { it.file.id == downloadedFileId.await() }
                     .collect { update ->
                         val local = update.file.local
                         val readyPath = update.file.readyPath()
@@ -822,15 +842,27 @@ class TdLibTelegramClient @Inject constructor(
                     }
             }
 
-            if (file.local?.isDownloadingCompleted == true) {
-                send<TdApi.Ok>(TdApi.DeleteFile(fileId))
+            subscribed.await()
+            val file: TdApi.File =
+                send(TdApi.GetRemoteFile(remoteFileId, TdApi.FileTypeDocument()))
+            val fileId = file.id
+            downloadedFileId.complete(fileId)
+
+            file.readyPath()?.let { path ->
+                trySend(TelegramDownloadEvent.Completed(path, file.size))
+                close()
             }
 
-            val started: TdApi.File =
-                send(TdApi.DownloadFile(fileId, DOWNLOAD_PRIORITY, 0, 0, false))
-            started.readyPath()?.let { path ->
-                trySend(TelegramDownloadEvent.Completed(path, started.size))
-                close()
+            if (!isClosedForSend) {
+                if (file.local?.isDownloadingCompleted == true) {
+                    send<TdApi.Ok>(TdApi.DeleteFile(fileId))
+                }
+                val started: TdApi.File =
+                    send(TdApi.DownloadFile(fileId, DOWNLOAD_PRIORITY, 0, 0, false))
+                started.readyPath()?.let { path ->
+                    trySend(TelegramDownloadEvent.Completed(path, started.size))
+                    close()
+                }
             }
 
             awaitClose {

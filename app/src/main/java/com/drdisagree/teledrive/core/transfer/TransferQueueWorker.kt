@@ -82,7 +82,11 @@ class TransferQueueWorker @AssistedInject constructor(
                 }
             }.joinAll()
         }
-        return if (interrupted) Result.retry() else Result.success()
+        if (interrupted) {
+            withContext(NonCancellable) { transferDao.requeueRunning() }
+            return Result.retry()
+        }
+        return Result.success()
     }
 
     /**
