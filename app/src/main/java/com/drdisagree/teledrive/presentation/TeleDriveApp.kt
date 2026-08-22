@@ -89,6 +89,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.ui.res.stringResource
+import kotlinx.coroutines.flow.Flow
 
 @Composable
 fun TeleDriveApp(
@@ -125,7 +126,8 @@ fun TeleDriveApp(
                 else -> MainScaffold(
                     onboardingComplete = state.onboardingComplete,
                     notificationDestination = notificationDestination,
-                    onDestinationHandled = onDestinationHandled
+                    onDestinationHandled = onDestinationHandled,
+                    driveMissing = viewModel.driveMissing
                 )
             }
         }
@@ -136,7 +138,8 @@ fun TeleDriveApp(
 private fun MainScaffold(
     onboardingComplete: Boolean,
     notificationDestination: String?,
-    onDestinationHandled: () -> Unit
+    onDestinationHandled: () -> Unit,
+    driveMissing: Flow<Unit>
 ) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -151,6 +154,16 @@ private fun MainScaffold(
     )
 
     val startDestination: Route = if (onboardingComplete) Route.Home else Route.Onboarding
+
+    LaunchedEffect(Unit) {
+        driveMissing.collect {
+            val graphReady = withTimeoutOrNull(NAV_READY_TIMEOUT_MS) {
+                while (navController.currentBackStackEntry == null) delay(NAV_READY_POLL_MS)
+                true
+            } == true
+            if (graphReady) navController.navigate(Route.Channels)
+        }
+    }
 
     LaunchedEffect(notificationDestination, onboardingComplete) {
         val target = notificationDestination ?: return@LaunchedEffect

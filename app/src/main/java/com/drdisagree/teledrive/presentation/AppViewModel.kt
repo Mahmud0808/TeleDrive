@@ -25,6 +25,8 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import com.drdisagree.teledrive.domain.model.BackupTrigger
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 
 data class AppUiState(
     val loading: Boolean = true,
@@ -44,6 +46,9 @@ class AppViewModel @Inject constructor(
     private val channelRepository: ChannelRepository,
     private val appLockManager: AppLockManager
 ) : ViewModel() {
+
+    private val _driveMissing = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val driveMissing = _driveMissing.asSharedFlow()
 
     val uiState: StateFlow<AppUiState> = combine(
         settingsRepository.preferences,
@@ -73,6 +78,10 @@ class AppViewModel @Inject constructor(
             .filter { it }
             .onEach {
                 channelRepository.refreshKnown()
+                if (channelRepository.activeDriveMissing()) {
+                    _driveMissing.tryEmit(Unit)
+                    return@onEach
+                }
                 syncRepository.syncOnStart()
                 catchUpBackup()
             }

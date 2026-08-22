@@ -16,6 +16,12 @@ interface ChannelRepository {
     /** Updates what is already known without scanning the account for drives. */
     suspend fun refreshKnown(): AppResult<Unit>
 
+    /** True only when the active drive's channel is confirmed gone. */
+    suspend fun activeDriveMissing(): Boolean
+
+    /** Drops drives whose channel no longer exists. Returns how many went. */
+    suspend fun pruneDeleted(): AppResult<Int>
+
     /** Creates a channel named after [label] and records it. */
     suspend fun create(label: String): AppResult<DriveChannel>
 

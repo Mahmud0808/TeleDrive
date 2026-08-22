@@ -28,11 +28,14 @@ interface TelegramClient {
      */
     suspend fun createStorageChannel(label: String): StorageChannel
 
-    /** Renames a drive channel, keeping the name recognisable as a drive. */
+    /** Renames a drive channel, keeping the name recognizable as a drive. */
     suspend fun renameStorageChannel(chatId: Long, label: String): String
 
     /** Deletes the channel and everything in it, for every member. */
     suspend fun deleteStorageChannel(chatId: Long)
+
+    /** True when the chat is reachable, false when gone, null when unclear. */
+    suspend fun chatExists(chatId: Long): Boolean?
 
     /** Downloads the channel picture, returning its local path or null. */
     suspend fun fetchChannelPhoto(chatId: Long): String?

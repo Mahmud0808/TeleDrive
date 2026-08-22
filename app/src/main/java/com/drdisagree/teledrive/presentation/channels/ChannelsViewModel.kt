@@ -39,7 +39,24 @@ class ChannelsViewModel @Inject constructor(
         refresh()
     }
 
-    fun refresh() = run(context.getString(R.string.channels_looking_for_drives)) { channelRepository.refresh() }
+    fun refresh() = run(context.getString(R.string.channels_looking_for_drives)) {
+        val pruned = channelRepository.pruneDeleted()
+        if (pruned is AppResult.Success && pruned.value > 0) {
+            _messages.tryEmit(
+                context.getString(R.string.channels_removed_missing, pruned.value)
+            )
+        }
+        val result = channelRepository.refresh()
+        if (result is AppResult.Success && result.value.isEmpty()) {
+            channelRepository.create(DEFAULT_DRIVE_LABEL).let { created ->
+                if (created is AppResult.Success) {
+                    channelRepository.switchTo(created.value.chatId)
+                    _messages.tryEmit(context.getString(R.string.app_drive_recreated))
+                }
+            }
+        }
+        result
+    }
 
     fun create(label: String) = run(context.getString(R.string.channels_creating_drive)) {
         when (val result = channelRepository.create(label)) {
@@ -70,5 +87,9 @@ class ChannelsViewModel @Inject constructor(
             _working.value = null
             if (result is AppResult.Failure) _messages.tryEmit(result.error.toUserMessage(context))
         }
+    }
+
+    private companion object {
+        const val DEFAULT_DRIVE_LABEL = ""
     }
 }

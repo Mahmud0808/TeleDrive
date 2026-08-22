@@ -101,6 +101,29 @@ class ChannelRepositoryImpl @Inject constructor(
         AppResult.Success(Unit)
     }
 
+    override suspend fun activeDriveMissing(): Boolean {
+        val activeId = settingsRepository.preferences.first().storageChatId ?: return false
+        return runCatching { telegramClient.chatExists(activeId) }.getOrNull() == false
+    }
+
+    override suspend fun pruneDeleted(): AppResult<Int> = runTelegram {
+        var removed = 0
+        for (channel in channelDao.all()) {
+            if (telegramClient.chatExists(channel.chatId) == false) {
+                forget(channel.chatId)
+                removed++
+                SafeLog.d(TAG, "Dropped a drive whose channel is gone")
+            }
+        }
+        val activeId = settingsRepository.preferences.first().storageChatId
+        if (removed > 0 && activeId != null && channelDao.fileCount(activeId) == 0) {
+            channelDao.touch(activeId, System.currentTimeMillis())
+            seedDefaultsOnce(activeId)
+            syncRepository.fullResync()
+        }
+        AppResult.Success(removed)
+    }
+
     override suspend fun create(label: String): AppResult<DriveChannel> = runTelegram {
         val created = telegramClient.createStorageChannel(label)
         val now = System.currentTimeMillis()

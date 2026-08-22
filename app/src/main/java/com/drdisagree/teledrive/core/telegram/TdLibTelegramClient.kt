@@ -357,6 +357,14 @@ class TdLibTelegramClient @Inject constructor(
         }.getOrNull()
     }
 
+    override suspend fun chatExists(chatId: Long): Boolean? = try {
+        awaitAuthorized()
+        send<TdApi.Chat>(TdApi.GetChat(chatId))
+        true
+    } catch (e: TelegramException) {
+        if (e.code == 400) false else null
+    }
+
     override suspend fun deleteStorageChannel(chatId: Long) {
         awaitAuthorized()
         send<TdApi.Ok>(TdApi.DeleteChat(chatId))

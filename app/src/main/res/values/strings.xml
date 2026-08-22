@@ -659,4 +659,6 @@
     <string name="preview_archive_failed">Could not open archive</string>
     <string name="preview_only_zip">Only ZIP archives can be browsed.</string>
     <string name="error_last_drive">This is your only drive. Create another one before deleting it.</string>
+    <string name="channels_removed_missing">Removed %1$d drive whose channel no longer exists</string>
+    <string name="app_drive_recreated">Your drive was deleted in Telegram, so a new empty one was created</string>
 </resources>
