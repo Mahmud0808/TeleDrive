@@ -87,7 +87,6 @@
 
     <!-- Home -->
     <string name="home_active_transfers">%1$d active transfers</string>
-    <string name="home_backup_summary">%1$s of %2$s files \u00b7 %3$s in Telegram</string>
     <string name="home_cancel_backup_action">Cancel backup</string>
     <string name="home_cancel_backup_title">Cancel backup?</string>
     <string name="home_deleted_files_kept_removal">Deleted files kept before removal</string>
@@ -177,8 +176,6 @@
     <string name="onboarding_qr_waiting">Waiting for the scan</string>
 
     <string name="onboarding_qr_open_telegram">Confirm in Telegram</string>
-    <string name="onboarding_qr_same_device">Telegram is on this phone</string>
-    <string name="onboarding_qr_other_device">Or scan from another device</string>
     <string name="onboarding_qr_open_failed">Could not open Telegram on this device.</string>
 
     <string name="onboarding_qr_scan_instead">Scan from another device instead</string>
@@ -513,7 +510,6 @@
     <string name="info_backup_failed">Failed</string>
     <string name="info_backup_none">Not backed up</string>
     <string name="info_contents">Contents</string>
-    <string name="info_location">Location</string>
     <string name="info_favorite">Favorite</string>
     <string name="info_details">Info</string>
     <string name="files_import_uploading">Uploading %1$d</string>
@@ -657,7 +653,6 @@
     <string name="onboarding_toggle_wifi_only">Wi-Fi only</string>
     <string name="preview_no_copy_available">No local or remote copy available</string>
     <string name="preview_no_preview_for_type">No preview for this file type</string>
-    <string name="onboarding_opening_2">Opening</string>
     <string name="date_days_ago">%1$d days ago</string>
     <string name="preview_fetch_failed">Could not fetch file</string>
     <string name="preview_read_failed">Could not read file</string>

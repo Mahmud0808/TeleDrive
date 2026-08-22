@@ -26,6 +26,7 @@ import com.drdisagree.teledrive.core.media.ThumbnailModel
 import com.drdisagree.teledrive.domain.model.MediaAlbum
 import androidx.compose.ui.res.pluralStringResource
 import com.drdisagree.teledrive.R
+import androidx.compose.ui.res.stringResource
 
 @Composable
 fun AlbumCard(
@@ -33,6 +34,7 @@ fun AlbumCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val albumName = album.name ?: stringResource(R.string.album_not_in_folder)
     Column(
         modifier = modifier
             .clip(MaterialTheme.shapes.large)
@@ -51,7 +53,7 @@ fun AlbumCard(
             if (album.coverFileId != null) {
                 AsyncImage(
                     model = ThumbnailModel(album.coverFileId),
-                    contentDescription = album.name,
+                    contentDescription = albumName,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
                 )
@@ -66,7 +68,7 @@ fun AlbumCard(
         }
         Column(modifier = Modifier.padding(horizontal = 2.dp, vertical = 6.dp)) {
             Text(
-                text = album.name,
+                text = albumName,
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis

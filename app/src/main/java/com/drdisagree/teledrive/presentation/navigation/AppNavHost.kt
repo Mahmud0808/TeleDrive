@@ -23,6 +23,8 @@ import com.drdisagree.teledrive.presentation.channels.ChannelsScreen
 import com.drdisagree.teledrive.presentation.transfers.TransfersScreen
 import com.drdisagree.teledrive.presentation.trash.TrashScreen
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.res.stringResource
+import com.drdisagree.teledrive.R
 
 @Composable
 fun AppNavHost(
@@ -101,12 +103,15 @@ fun AppNavHost(
         }
         composable<Route.Gallery> {
             UnderBottomBar {
-                GalleryScreen(
+                val unfiledAlbumName = stringResource(R.string.album_not_in_folder)
+            GalleryScreen(
                     onOpenFile = { id, sequence ->
                         navController.navigateOnce(sequence.routeFor(id))
                     },
                     onOpenAlbum = { album ->
-                        navController.navigateOnce(Route.GalleryAlbum(album.folderId, album.name))
+                        navController.navigateOnce(
+                            Route.GalleryAlbum(album.folderId, album.name ?: unfiledAlbumName)
+                        )
                     }
                 )
             }

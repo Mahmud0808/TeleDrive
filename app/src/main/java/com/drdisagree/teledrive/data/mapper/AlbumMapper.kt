@@ -5,10 +5,8 @@ import com.drdisagree.teledrive.domain.model.MediaAlbum
 
 fun AlbumSummary.toDomain(): MediaAlbum = MediaAlbum(
     folderId = folderId,
-    name = name ?: UNFILED_ALBUM_NAME,
+    name = name,
     itemCount = itemCount,
     coverFileId = coverFileId,
     latestAt = latestAt
 )
-
-private const val UNFILED_ALBUM_NAME = "Not in a folder"
