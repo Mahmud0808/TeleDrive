@@ -48,14 +48,14 @@ import java.net.URI
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
+import com.drdisagree.teledrive.core.publish.PublishScheduler
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @Singleton
 class FileRepositoryImpl @Inject constructor(
     private val fileDao: FileDao,
     private val folderDao: FolderDao,
-    private val manifestPublisher: FileManifestPublisher,
-    private val folderStateSynchronizer: FolderStateSynchronizer,
+    private val publishScheduler: PublishScheduler,
     private val localCopyDeleter: LocalCopyDeleter,
     private val telegramClient: TelegramClient,
     private val manifestCodec: ManifestCodec,
@@ -203,7 +203,7 @@ class FileRepositoryImpl @Inject constructor(
             modifiedAt = now
         )
         folderDao.upsert(folder)
-        folderStateSynchronizer.schedulePush()
+        markFolderStateDirty()
         return AppResult.Success(folder.toDomain())
     }
 
@@ -227,14 +227,15 @@ class FileRepositoryImpl @Inject constructor(
                 }
             }
         }
-        return manifestPublisher.publish(id)
+        markFilesDirty(listOf(id))
+        return AppResult.Success(Unit)
     }
 
     override suspend fun renameFolder(id: String, newName: String): AppResult<Unit> {
         folderDao.byId(id) ?: return AppResult.Failure(AppError.NotFound)
         folderDao.rename(id, FileNameUtils.sanitize(newName), System.currentTimeMillis())
-        folderStateSynchronizer.schedulePush()
-        republishFolderContents(id)
+        markFolderStateDirty()
+        markFolderContentsDirty(id)
         return AppResult.Success(Unit)
     }
 
@@ -243,7 +244,8 @@ class FileRepositoryImpl @Inject constructor(
             return AppResult.Failure(AppError.NotFound)
         }
         fileDao.move(ids, targetFolderId, System.currentTimeMillis())
-        return manifestPublisher.publishAll(ids)
+        markFilesDirty(ids)
+        return AppResult.Success(Unit)
     }
 
     override suspend fun copyFiles(
@@ -362,8 +364,8 @@ class FileRepositoryImpl @Inject constructor(
             )
         }
         folderDao.move(id, targetParentId, System.currentTimeMillis())
-        folderStateSynchronizer.schedulePush()
-        republishFolderContents(id)
+        markFolderStateDirty()
+        markFolderContentsDirty(id)
         return AppResult.Success(Unit)
     }
 
@@ -383,38 +385,52 @@ class FileRepositoryImpl @Inject constructor(
         return chain
     }
 
-    /** Rewrites captions for every file under [folderId], including subfolders. */
-    private suspend fun republishFolderContents(folderId: String) {
+    /**
+     * Queues a caption rewrite for every file under [folderId], subfolders
+     * included, without walking the files themselves: a folder rename can
+     * cover thousands of captions and none of them block the caller.
+     */
+    private suspend fun markFolderContentsDirty(folderId: String) {
         var frontier = listOf(folderId)
         var guard = 0
         while (frontier.isNotEmpty() && guard++ < MAX_FOLDER_DEPTH) {
-            for (id in frontier) {
-                manifestPublisher.publishAll(fileDao.filesInFolder(id).map { it.id })
-            }
+            fileDao.markPendingPublishInFolders(frontier)
             frontier = frontier.flatMap { parent ->
                 folderDao.childrenOf(parent).map { it.id }
             }
         }
+        publishScheduler.kick()
+    }
+
+    private suspend fun markFilesDirty(ids: List<String>) {
+        if (ids.isEmpty()) return
+        ids.chunked(SQL_BATCH).forEach { fileDao.markPendingPublish(it) }
+        publishScheduler.kick()
+    }
+
+    private suspend fun markFolderStateDirty() {
+        folderDao.markPendingPublish()
+        publishScheduler.kick()
     }
 
     override suspend fun setFilesFavorite(ids: List<String>, favorite: Boolean) {
         fileDao.setFavorite(ids, favorite)
-        manifestPublisher.publishAll(ids)
+        markFilesDirty(ids)
     }
 
     override suspend fun setFilesHidden(ids: List<String>, hidden: Boolean) {
         fileDao.setHidden(ids, hidden)
-        manifestPublisher.publishAll(ids)
+        markFilesDirty(ids)
     }
 
     override suspend fun setFilesArchived(ids: List<String>, archived: Boolean) {
         fileDao.setArchived(ids, archived)
-        manifestPublisher.publishAll(ids)
+        markFilesDirty(ids)
     }
 
     override suspend fun setFolderFavorite(id: String, favorite: Boolean) {
         folderDao.setFavorite(id, favorite)
-        folderStateSynchronizer.schedulePush()
+        markFolderStateDirty()
     }
 
     override suspend fun importLocalFile(
@@ -587,7 +603,7 @@ class FileRepositoryImpl @Inject constructor(
         fileDao.restoreFromTrash(listOf(match.id))
         fileDao.move(listOf(match.id), folderId, now)
         fileDao.setLocalPath(match.id, source.absolutePath, now)
-        manifestPublisher.publishAll(listOf(match.id))
+        markFilesDirty(listOf(match.id))
         return fileDao.byId(match.id)?.toDomain()
     }
 
@@ -615,6 +631,7 @@ class FileRepositoryImpl @Inject constructor(
 
     companion object {
         private const val MAX_FOLDER_DEPTH = 64
+        private const val SQL_BATCH = 500
         private const val FOLDER_SEARCH_LIMIT = 200
         private const val NOTE_TITLE_LIMIT = 60
     }

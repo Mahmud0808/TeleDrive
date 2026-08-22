@@ -269,24 +269,32 @@ class SyncRepositoryImpl @Inject constructor(
         val existing = manifest?.let { known.byId[it.fileId] }
             ?: known.byUniqueId[document.uniqueFileId]
 
-        val folderId = manifest?.let { resolveFolder(it, folderCache) } ?: existing?.folderId
+        /* A row waiting on the outbox holds the newer organisational state, so
+           the caption it has not reached yet must not overwrite it. */
+        val local = existing?.takeIf {
+            it.pendingPublish && (manifest == null || it.modifiedAt >= manifest.modifiedAt)
+        }
+
+        val remoteFolderId = manifest?.let { resolveFolder(it, folderCache) } ?: existing?.folderId
+        val folderId = if (local != null) {
+            local.folderId ?: local.preTrashFolderId
+        } else {
+            remoteFolderId
+        }
         val folderTrashedAt = folderId?.let { folderDao.byId(it)?.trashedAt }
 
-        val name = manifest?.name ?: existing?.name ?: document.fileName.ifBlank {
-            "file-${document.messageId}"
-        }
+        val name = local?.name ?: manifest?.name ?: existing?.name
+        ?: document.fileName.ifBlank { "file-${document.messageId}" }
         val mime = manifest?.mimeType ?: document.mimeType.ifBlank {
             MimeTypes.fromFileName(name)
         }
 
         val now = System.currentTimeMillis()
+        val trashedAt = local?.trashedAt
+            ?: manifest?.trashedAt ?: folderTrashedAt ?: existing?.trashedAt
         val entity = FileEntity(
             id = manifest?.fileId ?: existing?.id ?: UUID.randomUUID().toString(),
-            folderId = if (manifest?.trashedAt != null || folderTrashedAt != null) {
-                null
-            } else {
-                folderId
-            },
+            folderId = if (trashedAt != null) null else folderId,
             name = name,
             sizeBytes = manifest?.sizeBytes ?: document.sizeBytes,
             mimeType = mime,
@@ -298,23 +306,24 @@ class SyncRepositoryImpl @Inject constructor(
             remoteFileId = document.remoteFileId,
             remoteUniqueId = document.uniqueFileId,
             backupState = BackupState.BACKED_UP,
-            isHidden = manifest?.hidden ?: existing?.isHidden ?: false,
-            isArchived = manifest?.archived ?: existing?.isArchived ?: false,
-            isFavorite = manifest?.favorite ?: existing?.isFavorite ?: false,
+            isHidden = local?.isHidden ?: manifest?.hidden ?: existing?.isHidden ?: false,
+            isArchived = local?.isArchived ?: manifest?.archived ?: existing?.isArchived ?: false,
+            isFavorite = local?.isFavorite ?: manifest?.favorite ?: existing?.isFavorite ?: false,
             isEncrypted = manifest?.encrypted
                 ?: manifestCodec.isEncryptedManifest(document.caption),
             width = manifest?.width ?: existing?.width,
             height = manifest?.height ?: existing?.height,
             durationMs = manifest?.durationMs ?: existing?.durationMs,
-            trashedAt = manifest?.trashedAt ?: folderTrashedAt ?: existing?.trashedAt,
-            preTrashFolderId = if (manifest?.trashedAt != null || folderTrashedAt != null) {
+            trashedAt = trashedAt,
+            preTrashFolderId = if (trashedAt != null) {
                 folderId ?: existing?.preTrashFolderId
             } else {
                 existing?.preTrashFolderId
             },
+            pendingPublish = existing?.pendingPublish == true,
             createdAt = manifest?.createdAt ?: existing?.createdAt
             ?: (document.dateSeconds * 1000L),
-            modifiedAt = manifest?.modifiedAt ?: existing?.modifiedAt
+            modifiedAt = local?.modifiedAt ?: manifest?.modifiedAt ?: existing?.modifiedAt
             ?: (document.dateSeconds * 1000L),
             addedAt = existing?.addedAt ?: now
         )

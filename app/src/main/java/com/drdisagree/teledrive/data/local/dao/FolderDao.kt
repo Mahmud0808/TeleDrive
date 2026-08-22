@@ -17,6 +17,15 @@ interface FolderDao {
     @Update
     suspend fun update(folder: FolderEntity)
 
+    @Query("UPDATE folders SET pendingPublish = 1")
+    suspend fun markPendingPublish()
+
+    @Query("UPDATE folders SET pendingPublish = 0")
+    suspend fun clearPendingPublish()
+
+    @Query("SELECT COUNT(*) FROM folders WHERE pendingPublish = 1")
+    suspend fun pendingPublishCount(): Int
+
     @Query("SELECT * FROM folders WHERE id = :id")
     suspend fun byId(id: String): FolderEntity?
 

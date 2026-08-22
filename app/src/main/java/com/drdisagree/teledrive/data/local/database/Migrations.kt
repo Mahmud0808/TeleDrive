@@ -4,6 +4,21 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
 /**
+ * Adds the publish outbox. Rows start clean: whatever is already in Telegram
+ * is what the captions and the folder state document describe.
+ */
+val MIGRATION_4_5 = object : Migration(4, 5) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE files ADD COLUMN pendingPublish INTEGER NOT NULL DEFAULT 0")
+        db.execSQL("ALTER TABLE folders ADD COLUMN pendingPublish INTEGER NOT NULL DEFAULT 0")
+        db.execSQL(
+            "CREATE INDEX IF NOT EXISTS index_files_pendingPublish " +
+                    "ON files(pendingPublish)"
+        )
+    }
+}
+
+/**
  * Adds multichannel support. Existing rows all belong to the single drive the
  * app used before, so they are left with a null owner and adopted by the first
  * channel that opens, which keeps a wiped local index in step with the cloud.

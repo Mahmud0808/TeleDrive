@@ -15,20 +15,13 @@ import com.drdisagree.teledrive.data.local.entity.FolderEntity
 import com.drdisagree.teledrive.data.remote.telegram.RemoteFolderState
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Mirrors the folder tree into a single document in the storage chat. File
@@ -47,21 +40,8 @@ class FolderStateSynchronizer @Inject constructor(
     private val wrappedKeyRepository: WrappedKeyRepository
 ) {
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val json = Json { ignoreUnknownKeys = true; encodeDefaults = false }
     private val pushMutex = Mutex()
-
-    @Volatile
-    private var pendingPush: Job? = null
-
-    fun schedulePush() {
-        pendingPush?.cancel()
-        pendingPush = scope.launch {
-            delay(PUSH_DEBOUNCE_MS.milliseconds)
-            runCatching { push() }
-                .onFailure { SafeLog.w(TAG, "Folder state push failed", it) }
-        }
-    }
 
     suspend fun push() = pushMutex.withLock {
         val chatId = storageChatId()
@@ -158,6 +138,7 @@ class FolderStateSynchronizer @Inject constructor(
                     isFavorite = entry.favorite,
                     trashedAt = entry.trashedAt,
                     preTrashParentId = entry.preTrashParentId,
+                    pendingPublish = existing?.pendingPublish == true,
                     createdAt = entry.createdAt,
                     modifiedAt = entry.modifiedAt
                 )
@@ -213,7 +194,6 @@ class FolderStateSynchronizer @Inject constructor(
     companion object {
         private const val TAG = "FolderStateSync"
         private val MAGIC = byteArrayOf(0x54, 0x44, 0x46, 0x53) // "TDFS"
-        private const val PUSH_DEBOUNCE_MS = 3_000L
         private const val PAGE_SIZE = 100
         private const val MAX_PAGES = 200
         private const val MAX_DEPTH = 64

@@ -19,7 +19,6 @@ import androidx.room.PrimaryKey
 )
 data class FolderEntity(
     @PrimaryKey val id: String,
-    /** Channel that owns this folder; rows of other drives stay hidden. */
     val chatId: Long?,
     val parentId: String?,
     val name: String,
@@ -28,6 +27,7 @@ data class FolderEntity(
     val isFavorite: Boolean = false,
     val trashedAt: Long? = null,
     val preTrashParentId: String? = null,
+    val pendingPublish: Boolean = false,
     val createdAt: Long,
     val modifiedAt: Long
 )

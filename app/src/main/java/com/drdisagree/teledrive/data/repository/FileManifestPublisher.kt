@@ -4,16 +4,9 @@ import com.drdisagree.teledrive.core.common.AppError
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.core.telegram.TelegramException
-import com.drdisagree.teledrive.data.local.dao.FileDao
 import com.drdisagree.teledrive.data.local.entity.FileEntity
 import com.drdisagree.teledrive.data.remote.telegram.ManifestCodec
 import com.drdisagree.teledrive.data.remote.telegram.RemoteFileManifest
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.sync.Semaphore
-import kotlinx.coroutines.sync.withPermit
-import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -25,36 +18,10 @@ import javax.inject.Singleton
  */
 @Singleton
 class FileManifestPublisher @Inject constructor(
-    private val fileDao: FileDao,
     private val telegramClient: TelegramClient,
     private val manifestCodec: ManifestCodec,
     private val folderPathResolver: FolderPathResolver
 ) {
-
-    suspend fun publish(fileId: String): AppResult<Unit> {
-        val entity = fileDao.byId(fileId) ?: return AppResult.Failure(AppError.NotFound)
-        return publish(entity)
-    }
-
-    suspend fun publishAll(fileIds: List<String>): AppResult<Unit> {
-        if (fileIds.isEmpty()) return AppResult.Success(Unit)
-        val failure = AtomicReference<AppResult.Failure?>(null)
-        val gate = Semaphore(PUBLISH_CONCURRENCY)
-        for (chunk in fileIds.chunked(SQL_BATCH)) {
-            val entities = fileDao.byIds(chunk)
-            coroutineScope {
-                entities.map { entity ->
-                    async {
-                        gate.withPermit {
-                            val result = publish(entity)
-                            if (result is AppResult.Failure) failure.set(result)
-                        }
-                    }
-                }.awaitAll()
-            }
-        }
-        return failure.get() ?: AppResult.Success(Unit)
-    }
 
     suspend fun publish(entity: FileEntity): AppResult<Unit> {
         val chatId = entity.chatId ?: return AppResult.Success(Unit)
@@ -93,8 +60,4 @@ class FileManifestPublisher @Inject constructor(
         }
     }
 
-    private companion object {
-        const val SQL_BATCH = 500
-        const val PUBLISH_CONCURRENCY = 4
-    }
 }

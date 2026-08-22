@@ -39,6 +39,18 @@ interface FileDao {
     )
     fun observeUsageByCategory(chatId: Long?): Flow<List<CategoryUsage>>
 
+    @Query("UPDATE files SET pendingPublish = 1 WHERE id IN (:ids)")
+    suspend fun markPendingPublish(ids: List<String>)
+
+    @Query("UPDATE files SET pendingPublish = 1 WHERE folderId IN (:folderIds)")
+    suspend fun markPendingPublishInFolders(folderIds: List<String>)
+
+    @Query("UPDATE files SET pendingPublish = 0 WHERE id = :id")
+    suspend fun clearPendingPublish(id: String)
+
+    @Query("SELECT * FROM files WHERE pendingPublish = 1 LIMIT :limit")
+    suspend fun pendingPublish(limit: Int): List<FileEntity>
+
     @Query("SELECT * FROM files WHERE id = :id")
     suspend fun byId(id: String): FileEntity?
 

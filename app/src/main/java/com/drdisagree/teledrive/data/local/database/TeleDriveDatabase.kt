@@ -32,7 +32,7 @@ import com.drdisagree.teledrive.data.local.entity.TransferEntity
         CacheEntryEntity::class,
         StorageChannelEntity::class
     ],
-    version = 4,
+    version = 5,
     exportSchema = true
 )
 abstract class TeleDriveDatabase : RoomDatabase() {

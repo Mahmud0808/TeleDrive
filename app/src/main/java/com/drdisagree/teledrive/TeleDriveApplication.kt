@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
+import com.drdisagree.teledrive.core.publish.PublishScheduler
 
 @HiltAndroidApp
 class TeleDriveApplication : Application(), Configuration.Provider, SingletonImageLoader.Factory {
@@ -53,6 +54,9 @@ class TeleDriveApplication : Application(), Configuration.Provider, SingletonIma
     @Inject
     lateinit var mediaStoreWatcher: MediaStoreWatcher
 
+    @Inject
+    lateinit var publishScheduler: PublishScheduler
+
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     override val workManagerConfiguration: Configuration
@@ -74,6 +78,7 @@ class TeleDriveApplication : Application(), Configuration.Provider, SingletonIma
                 .onEach { SafeLog.verbose = it || BuildConfig.DEBUG }
                 .launchIn(applicationScope)
             transferRepository.recoverOrphanedTransfers()
+            publishScheduler.kick()
             trashRepository.repairTrashTree()
             val prefs = settingsRepository.preferences.first()
             maintenanceScheduler.scheduleAll(

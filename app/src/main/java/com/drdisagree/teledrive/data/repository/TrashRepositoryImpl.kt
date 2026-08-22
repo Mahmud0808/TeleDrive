@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
+import com.drdisagree.teledrive.core.publish.PublishScheduler
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @Singleton
@@ -34,8 +35,7 @@ class TrashRepositoryImpl @Inject constructor(
     private val thumbnailDao: ThumbnailDao,
     private val telegramClient: TelegramClient,
     private val secureFileDeleter: SecureFileDeleter,
-    private val manifestPublisher: FileManifestPublisher,
-    private val folderStateSynchronizer: FolderStateSynchronizer,
+    private val publishScheduler: PublishScheduler,
     private val activeChannel: ActiveChannel,
     private val transferRepository: TransferRepository
 ) : TrashRepository {
@@ -76,7 +76,8 @@ class TrashRepositoryImpl @Inject constructor(
 
     override suspend fun moveFilesToTrash(ids: List<String>): AppResult<Unit> {
         fileDao.moveToTrash(ids, System.currentTimeMillis())
-        return manifestPublisher.publishAll(ids)
+        markFilesDirty(ids)
+        return AppResult.Success(Unit)
     }
 
     override suspend fun moveFolderToTrash(id: String): AppResult<Unit> {
@@ -85,8 +86,19 @@ class TrashRepositoryImpl @Inject constructor(
         val trashedAt = System.currentTimeMillis()
         fileIds.chunked(SQL_BATCH).forEach { fileDao.moveToTrash(it, trashedAt) }
         descendants.reversed().forEach { folderDao.moveToTrash(it, trashedAt) }
-        folderStateSynchronizer.schedulePush()
+        markFolderStateDirty()
         return AppResult.Success(Unit)
+    }
+
+    private suspend fun markFilesDirty(ids: List<String>) {
+        if (ids.isEmpty()) return
+        ids.chunked(SQL_BATCH).forEach { fileDao.markPendingPublish(it) }
+        publishScheduler.kick()
+    }
+
+    private suspend fun markFolderStateDirty() {
+        folderDao.markPendingPublish()
+        publishScheduler.kick()
     }
 
     override suspend fun repairTrashTree() {
@@ -112,8 +124,9 @@ class TrashRepositoryImpl @Inject constructor(
         if (orphaned.isNotEmpty()) {
             fileDao.move(orphaned.map { it.id }, null, System.currentTimeMillis())
         }
-        folderStateSynchronizer.schedulePush()
-        return manifestPublisher.publishAll(ids)
+        markFolderStateDirty()
+        markFilesDirty(ids)
+        return AppResult.Success(Unit)
     }
 
     override suspend fun restoreFolder(id: String): AppResult<Unit> {
@@ -126,7 +139,8 @@ class TrashRepositoryImpl @Inject constructor(
             folderDao.move(id, null, System.currentTimeMillis())
         }
         fileIds.chunked(SQL_BATCH).forEach { fileDao.restoreFromTrash(it) }
-        folderStateSynchronizer.schedulePush()
+        markFolderStateDirty()
+        markFilesDirty(fileIds)
         return AppResult.Success(Unit)
     }
 

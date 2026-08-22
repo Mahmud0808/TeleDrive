@@ -25,7 +25,8 @@ import com.drdisagree.teledrive.domain.model.FileCategory
         Index("trashedAt"),
         Index("remoteUniqueId"),
         Index(value = ["localPath"], unique = false),
-        Index(value = ["contentHash"])
+        Index(value = ["contentHash"]),
+        Index("pendingPublish")
     ]
 )
 data class FileEntity(
@@ -35,9 +36,7 @@ data class FileEntity(
     val sizeBytes: Long,
     val mimeType: String,
     val category: FileCategory,
-    /** Absolute path of the local copy, null when the file exists only remotely. */
     val localPath: String?,
-    /** SHA-256 of local content, used for duplicate and incremental backup detection. */
     val contentHash: String?,
     val chatId: Long?,
     val messageId: Long?,
@@ -52,8 +51,8 @@ data class FileEntity(
     val height: Int? = null,
     val durationMs: Long? = null,
     val trashedAt: Long? = null,
-    /** Folder the file lived in before being trashed, for restore. */
     val preTrashFolderId: String? = null,
+    val pendingPublish: Boolean = false,
     val createdAt: Long,
     val modifiedAt: Long,
     val addedAt: Long
