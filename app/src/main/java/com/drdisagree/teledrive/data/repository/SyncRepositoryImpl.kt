@@ -30,6 +30,7 @@ import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.milliseconds
+import com.drdisagree.teledrive.data.local.dao.PendingDeleteDao
 
 /**
  * Reconciles local metadata with the storage chat. The chat is the source of
@@ -42,6 +43,7 @@ class SyncRepositoryImpl @Inject constructor(
     private val telegramClient: TelegramClient,
     private val fileDao: FileDao,
     private val manifestCodec: ManifestCodec,
+    private val pendingDeleteDao: PendingDeleteDao,
     private val folderDao: FolderDao,
     private val folderPathResolver: FolderPathResolver,
     private val activeChannel: ActiveChannel,
@@ -105,6 +107,7 @@ class SyncRepositoryImpl @Inject constructor(
                 .onFailure { SafeLog.w(TAG, "Folder state pull failed", it) }
         }
 
+        val pendingDeletes = pendingDeleteDao.messageIdsIn(chatId).toSet()
         val folderCache = mutableMapOf<String, String?>()
         SafeLog.d(TAG, "Sync start chat=$chatId incremental=$incremental")
         var inserted = 0
@@ -132,6 +135,8 @@ class SyncRepositoryImpl @Inject constructor(
             database.withTransaction {
                 for (document in page.documents) {
                     seenMessageIds.add(document.messageId)
+                    // Still in the chat, but a delete is owed for it.
+                    if (document.messageId in pendingDeletes) continue
                     if (isInternalDocument(document)) continue
                     if (manifestCodec.isLocked(document.caption)) {
                         locked++
@@ -175,7 +180,9 @@ class SyncRepositoryImpl @Inject constructor(
         partial: Boolean
     ): AppResult<SyncRepository.SyncStats> {
         var detached = 0
-        if (!partial && locked == 0) {
+        /* Locked files still register as seen, so they cannot be mistaken for
+           missing ones and a restored key backup is not required to prune. */
+        if (!partial) {
             val stale = fileDao.filesWithRemote().filter { entity ->
                 val messageId = entity.messageId
                 messageId != null && entity.chatId == chatId && messageId !in seenMessageIds

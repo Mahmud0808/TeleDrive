@@ -24,6 +24,8 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 import com.drdisagree.teledrive.core.publish.PublishScheduler
+import com.drdisagree.teledrive.data.local.dao.PendingDeleteDao
+import com.drdisagree.teledrive.data.local.entity.PendingDeleteEntity
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @Singleton
@@ -36,6 +38,7 @@ class TrashRepositoryImpl @Inject constructor(
     private val telegramClient: TelegramClient,
     private val secureFileDeleter: SecureFileDeleter,
     private val publishScheduler: PublishScheduler,
+    private val pendingDeleteDao: PendingDeleteDao,
     private val activeChannel: ActiveChannel,
     private val transferRepository: TransferRepository
 ) : TrashRepository {
@@ -154,6 +157,18 @@ class TrashRepositoryImpl @Inject constructor(
         val remoteByChat = entities
             .filter { it.chatId != null && it.messageId != null }
             .groupBy { it.chatId!! }
+
+        /* The tombstone is written first: if the process dies between the
+           Telegram call and the local delete, the replay finishes the job
+           rather than leaving a row pointing at a deleted message. */
+        pendingDeleteDao.upsertAll(
+            remoteByChat.flatMap { (chatId, chatEntities) ->
+                chatEntities.map { entity ->
+                    PendingDeleteEntity(chatId, entity.messageId!!, entity.id)
+                }
+            }
+        )
+
         for ((chatId, chatEntities) in remoteByChat) {
             val messageIds = chatEntities.map { it.messageId!! }
             try {
@@ -161,6 +176,7 @@ class TrashRepositoryImpl @Inject constructor(
                 SafeLog.d(TAG, "Deleted ${messageIds.size} messages from storage chat")
             } catch (e: TelegramException) {
                 SafeLog.w(TAG, "Deleting ${messageIds.size} messages failed", e)
+                publishScheduler.kick()
                 return AppResult.Failure(
                     if (e.isRateLimit) AppError.RateLimited(e.retryAfterSeconds ?: 0)
                     else AppError.TelegramError(e.code, e.message)
@@ -181,6 +197,9 @@ class TrashRepositoryImpl @Inject constructor(
         ids.chunked(SQL_BATCH).forEach { chunk ->
             backupDao.deleteRecordsForFiles(chunk)
             fileDao.deleteByIds(chunk)
+        }
+        for ((chatId, chatEntities) in remoteByChat) {
+            pendingDeleteDao.clear(chatId, chatEntities.map { it.messageId!! })
         }
         return AppResult.Success(Unit)
     }

@@ -3,6 +3,19 @@ package com.drdisagree.teledrive.data.local.database
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
+/** Adds delete tombstones so an interrupted permanent delete can be replayed. */
+val MIGRATION_5_6 = object : Migration(5, 6) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS pending_deletes (" +
+                    "chatId INTEGER NOT NULL, " +
+                    "messageId INTEGER NOT NULL, " +
+                    "fileId TEXT NOT NULL, " +
+                    "PRIMARY KEY(chatId, messageId))"
+        )
+    }
+}
+
 /**
  * Adds the publish outbox. Rows start clean: whatever is already in Telegram
  * is what the captions and the folder state document describe.

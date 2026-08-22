@@ -31,4 +31,13 @@
         <item quantity="other">%1$d items</item>
     </plurals>
 
+    <plurals name="rebuild_indexed_files">
+        <item quantity="one">Indexed %d file</item>
+        <item quantity="other">Indexed %d files</item>
+    </plurals>
+
+    <plurals name="rebuild_locked_files">
+        <item quantity="one">%d encrypted file skipped. Restore your key backup to index it.</item>
+        <item quantity="other">%d encrypted files skipped. Restore your key backup to index them.</item>
+    </plurals>
 </resources>

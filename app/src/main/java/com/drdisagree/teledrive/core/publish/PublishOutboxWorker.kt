@@ -13,6 +13,9 @@ import com.drdisagree.teledrive.data.repository.FileManifestPublisher
 import com.drdisagree.teledrive.data.repository.FolderStateSynchronizer
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import com.drdisagree.teledrive.core.telegram.TelegramClient
+import com.drdisagree.teledrive.core.telegram.TelegramException
+import com.drdisagree.teledrive.data.local.dao.PendingDeleteDao
 
 /**
  * Drains the publish outbox: organizational state is written to the database
@@ -26,11 +29,15 @@ class PublishOutboxWorker @AssistedInject constructor(
     @Assisted params: WorkerParameters,
     private val fileDao: FileDao,
     private val folderDao: FolderDao,
+    private val pendingDeleteDao: PendingDeleteDao,
+    private val telegramClient: TelegramClient,
     private val manifestPublisher: FileManifestPublisher,
     private val folderStateSynchronizer: FolderStateSynchronizer
 ) : CoroutineWorker(appContext, params) {
 
     override suspend fun doWork(): Result {
+        if (!replayDeletes()) return Result.retry()
+
         while (true) {
             if (isStopped) return Result.retry()
             val batch = fileDao.pendingPublish(BATCH_SIZE)
@@ -59,6 +66,35 @@ class PublishOutboxWorker @AssistedInject constructor(
         return Result.success()
     }
 
+    /**
+     * Finishes permanent deletes that were interrupted or rejected. Removing a
+     * message that is already gone is accepted by Telegram, so replaying after
+     * a crash costs nothing.
+     */
+    private suspend fun replayDeletes(): Boolean {
+        while (true) {
+            if (isStopped) return false
+            val batch = pendingDeleteDao.oldest(BATCH_SIZE)
+            if (batch.isEmpty()) return true
+
+            for ((chatId, pending) in batch.groupBy { it.chatId }) {
+                val messageIds = pending.map { it.messageId }
+                try {
+                    telegramClient.deleteMessages(chatId, messageIds)
+                } catch (e: TelegramException) {
+                    if (e.code !in PERMANENT_CODES) {
+                        SafeLog.w(TAG, "Replaying ${messageIds.size} deletes failed", e)
+                        return false
+                    }
+                    SafeLog.w(TAG, "Dropping unrepeatable delete: ${e.message}")
+                }
+                fileDao.deleteByIds(pending.map { it.fileId })
+                pendingDeleteDao.clear(chatId, messageIds)
+            }
+        }
+    }
+
+    /** A rejected edit never succeeds on retry, unlike a rate limit or an outage. */
     private fun isPermanent(error: AppError): Boolean =
         error is AppError.TelegramError && error.code in PERMANENT_CODES
 

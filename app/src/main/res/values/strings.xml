@@ -443,6 +443,7 @@
     <string name="message_created_drive">Created %1$s</string>
     <string name="message_download_queued">Download queued</string>
     <string name="message_key_backup_saved">Key backup saved to Telegram</string>
+    <string name="message_rebuild_done">Rebuilt: %1$d added, %2$d updated, %3$d removed</string>
     <string name="message_key_restored">Encryption key restored, reindexing</string>
     <string name="message_moved_count">Moved %1$d</string>
     <string name="message_moved_to_trash">Moved to trash</string>

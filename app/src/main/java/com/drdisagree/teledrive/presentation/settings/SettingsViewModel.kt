@@ -298,11 +298,18 @@ class SettingsViewModel @Inject constructor(
             when (val result = syncRepository.fullResync()) {
                 is AppResult.Success -> _messages.tryEmit(
                     if (result.value.lockedFiles > 0) {
-                        "${result.value.lockedFiles} encrypted files skipped. " +
-                                "Restore your key backup to index them."
+                        context.resources.getQuantityString(
+                            R.plurals.rebuild_locked_files,
+                            result.value.lockedFiles,
+                            result.value.lockedFiles
+                        )
                     } else {
-                        "Synced: ${result.value.inserted} new, " +
-                                "${result.value.updated} updated"
+                        context.getString(
+                            R.string.message_rebuild_done,
+                            result.value.inserted,
+                            result.value.updated,
+                            result.value.detachedFromRemote
+                        )
                     }
                 )
 

@@ -42,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringArrayResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
@@ -219,7 +220,11 @@ private fun AccountSection(
             SettingsClickRow(
                 title = stringResource(R.string.settings_rebuild_index_telegram),
                 subtitle = when {
-                    state.syncing && indexedSoFar > 0 -> "Indexed $indexedSoFar files"
+                    state.syncing && indexedSoFar > 0 -> pluralStringResource(
+                        R.plurals.rebuild_indexed_files,
+                        indexedSoFar,
+                        indexedSoFar
+                    )
                     state.syncing -> stringResource(R.string.settings_reading_channel)
                     else -> stringResource(R.string.settings_restores_file_list)
                 },
