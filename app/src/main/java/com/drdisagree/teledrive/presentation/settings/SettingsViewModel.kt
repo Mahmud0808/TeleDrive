@@ -43,6 +43,14 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import com.drdisagree.teledrive.core.update.AppRelease
+import com.drdisagree.teledrive.core.update.UpdateChecker
+
+sealed interface UpdateState {
+    data object Idle : UpdateState
+    data object Checking : UpdateState
+    data class Available(val release: AppRelease) : UpdateState
+}
 
 data class SettingsUiState(
     val preferences: UserPreferences = UserPreferences(),
@@ -69,10 +77,14 @@ class SettingsViewModel @Inject constructor(
     private val backupRepository: BackupRepository,
     private val appLockManager: AppLockManager,
     private val maintenanceScheduler: MaintenanceScheduler,
-    val permissionChecker: PermissionChecker
+    val permissionChecker: PermissionChecker,
+    private val updateChecker: UpdateChecker
 ) : ViewModel() {
 
     private val user = MutableStateFlow<TelegramUser?>(null)
+
+    private val _updateState = MutableStateFlow<UpdateState>(UpdateState.Idle)
+    val updateState: StateFlow<UpdateState> = _updateState.asStateFlow()
 
     private val _messages = MutableSharedFlow<String>(extraBufferCapacity = 8)
     val messages = _messages.asSharedFlow()
@@ -291,6 +303,25 @@ class SettingsViewModel @Inject constructor(
             cacheRepository.clearThumbnails()
             _messages.tryEmit(context.getString(R.string.message_thumbnails_cleared))
         }
+    }
+
+    fun checkForUpdates() {
+        if (_updateState.value is UpdateState.Checking) return
+        viewModelScope.launch {
+            _updateState.value = UpdateState.Checking
+            val release = updateChecker.newerRelease()
+            settingsRepository.update { it.copy(lastUpdateCheckAt = System.currentTimeMillis()) }
+            _updateState.value = if (release == null) {
+                _messages.tryEmit(context.getString(R.string.about_no_update))
+                UpdateState.Idle
+            } else {
+                UpdateState.Available(release)
+            }
+        }
+    }
+
+    fun dismissUpdate() {
+        _updateState.value = UpdateState.Idle
     }
 
     fun resync() {

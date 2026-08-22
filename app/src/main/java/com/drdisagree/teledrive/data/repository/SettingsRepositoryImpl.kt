@@ -116,6 +116,10 @@ class SettingsRepositoryImpl @Inject constructor(
                 ?: defaults.showArchivedFiles,
             showRecentFiles = this[PreferenceKeys.SHOW_RECENT_FILES] ?: defaults.showRecentFiles,
             linkPreviews = this[PreferenceKeys.LINK_PREVIEWS] ?: defaults.linkPreviews,
+            updateCheckEnabled = this[PreferenceKeys.UPDATE_CHECK_ENABLED]
+                ?: defaults.updateCheckEnabled,
+            lastUpdateCheckAt = this[PreferenceKeys.LAST_UPDATE_CHECK_AT]
+                ?: defaults.lastUpdateCheckAt,
             textPreviewScale = this[PreferenceKeys.TEXT_PREVIEW_SCALE]
                 ?: defaults.textPreviewScale,
             sortField = enumOrDefault(this[PreferenceKeys.SORT_FIELD], defaults.sortField),
@@ -170,6 +174,8 @@ class SettingsRepositoryImpl @Inject constructor(
         this[PreferenceKeys.SHOW_ARCHIVED_FILES] = prefs.showArchivedFiles
         this[PreferenceKeys.SHOW_RECENT_FILES] = prefs.showRecentFiles
         this[PreferenceKeys.LINK_PREVIEWS] = prefs.linkPreviews
+        this[PreferenceKeys.UPDATE_CHECK_ENABLED] = prefs.updateCheckEnabled
+        this[PreferenceKeys.LAST_UPDATE_CHECK_AT] = prefs.lastUpdateCheckAt
         this[PreferenceKeys.TEXT_PREVIEW_SCALE] = prefs.textPreviewScale
         this[PreferenceKeys.SORT_FIELD] = prefs.sortField.name
         this[PreferenceKeys.SORT_DIRECTION] = prefs.sortDirection.name

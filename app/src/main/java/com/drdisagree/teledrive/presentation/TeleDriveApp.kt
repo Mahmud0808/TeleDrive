@@ -89,6 +89,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.time.Duration.Companion.milliseconds
+import com.drdisagree.teledrive.presentation.common.openLink
+import com.drdisagree.teledrive.presentation.components.UpdateDialog
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun TeleDriveApp(
@@ -118,6 +121,9 @@ fun TeleDriveApp(
         AppTheme.SYSTEM -> isSystemInDarkTheme()
     }
 
+    val pendingUpdate by viewModel.pendingUpdate.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+
     TeleDriveTheme(darkTheme = darkTheme, dynamicColor = state.dynamicColor) {
         CompositionLocalProvider(LocalCompactLayout provides state.compactLayout) {
             when {
@@ -129,6 +135,16 @@ fun TeleDriveApp(
                     notificationDestination = notificationDestination,
                     onDestinationHandled = onDestinationHandled,
                     driveMissing = viewModel.driveMissing
+                )
+            }
+            pendingUpdate?.takeIf { !state.loading && !state.locked }?.let { release ->
+                UpdateDialog(
+                    release = release,
+                    onDownload = {
+                        viewModel.dismissUpdate()
+                        openLink(context, release.pageUrl)
+                    },
+                    onDismiss = viewModel::dismissUpdate
                 )
             }
         }

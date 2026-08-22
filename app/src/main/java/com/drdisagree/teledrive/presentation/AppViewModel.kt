@@ -27,6 +27,10 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.drdisagree.teledrive.core.update.AppRelease
+import com.drdisagree.teledrive.core.update.UpdateChecker
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 data class AppUiState(
     val loading: Boolean = true,
@@ -44,11 +48,15 @@ class AppViewModel @Inject constructor(
     private val syncRepository: SyncRepository,
     private val backupRepository: BackupRepository,
     private val channelRepository: ChannelRepository,
-    private val appLockManager: AppLockManager
+    private val appLockManager: AppLockManager,
+    private val updateChecker: UpdateChecker
 ) : ViewModel() {
 
     private val _driveMissing = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     val driveMissing = _driveMissing.asSharedFlow()
+
+    private val _pendingUpdate = MutableStateFlow<AppRelease?>(null)
+    val pendingUpdate: StateFlow<AppRelease?> = _pendingUpdate.asStateFlow()
 
     val uiState: StateFlow<AppUiState> = combine(
         settingsRepository.preferences,
@@ -70,6 +78,7 @@ class AppViewModel @Inject constructor(
             backupRepository.refreshActiveSession()
             telegramAuthRepository.startFromStoredCredentials()
         }
+        checkForUpdate()
         combine(
             telegramAuthRepository.authState.map { it == TelegramAuthState.Ready },
             uiState.map { it.onboardingComplete }
@@ -101,5 +110,26 @@ class AppViewModel @Inject constructor(
         viewModelScope.launch { appLockManager.onAppStarted() }
     }
 
+    /** Looks for a release at most once a day, and never before setup is done. */
+    private fun checkForUpdate() {
+        viewModelScope.launch {
+            val prefs = settingsRepository.preferences.first()
+            if (!prefs.onboardingComplete || !prefs.updateCheckEnabled) return@launch
+            val elapsed = System.currentTimeMillis() - prefs.lastUpdateCheckAt
+            if (elapsed < UPDATE_CHECK_INTERVAL_MS) return@launch
+
+            settingsRepository.update { it.copy(lastUpdateCheckAt = System.currentTimeMillis()) }
+            _pendingUpdate.value = updateChecker.newerRelease()
+        }
+    }
+
+    fun dismissUpdate() {
+        _pendingUpdate.value = null
+    }
+
     fun unlock() = appLockManager.unlock()
+
+    private companion object {
+        const val UPDATE_CHECK_INTERVAL_MS = 24L * 60 * 60 * 1000
+    }
 }

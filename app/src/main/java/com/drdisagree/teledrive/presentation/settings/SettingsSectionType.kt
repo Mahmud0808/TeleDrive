@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.CloudUpload
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Palette
@@ -63,5 +64,10 @@ enum class SettingsSectionType(
         R.string.settings_section_advanced_title,
         R.string.settings_section_advanced_subtitle,
         Icons.Filled.Tune
+    ),
+    ABOUT(
+        R.string.settings_section_about_title,
+        R.string.settings_section_about_subtitle,
+        Icons.Filled.Info
     )
 }

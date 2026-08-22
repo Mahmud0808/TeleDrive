@@ -151,6 +151,7 @@ fun SettingsSectionScreen(
                 SettingsSectionType.PLAYBACK -> PlaybackSection(state, viewModel)
                 SettingsSectionType.NOTIFICATIONS -> NotificationsSection(state, viewModel)
                 SettingsSectionType.ADVANCED -> AdvancedSection(state, viewModel)
+                SettingsSectionType.ABOUT -> AboutSection(state, viewModel)
             }
             Spacer(Modifier.height(24.dp + padding.calculateBottomPadding()))
         }

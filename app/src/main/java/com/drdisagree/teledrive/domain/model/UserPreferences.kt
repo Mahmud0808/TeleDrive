@@ -46,5 +46,8 @@ data class UserPreferences(
     val transferConcurrency: Int = 2,
     val transferRetryCount: Int = 3,
     val allowMeteredTransfers: Boolean = true,
-    val debugLogging: Boolean = false
+    val debugLogging: Boolean = false,
+
+    val updateCheckEnabled: Boolean = true,
+    val lastUpdateCheckAt: Long = 0L
 )

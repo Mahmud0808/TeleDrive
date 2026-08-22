@@ -135,7 +135,7 @@ private fun Color.takeOrElse(fallback: () -> Color): Color =
     if (this == Color.Unspecified) fallback() else this
 
 private val INLINE_PATTERN = Regex(
-    """\[([^\]]+)\]\(([^)]+)\)|\*\*(.+?)\*\*|~~(.+?)~~|`([^`]+)`|_(.+?)_"""
+    """\[([^\]]+)\]\(([^)]+)\)|\*\*(.+?)\*\*|~~(.+?)~~|`([^`]+)`|_(.+?)_|\*([^*]+)\*"""
 )
 
 private fun inlineMarkdown(line: String, linkColor: Color): AnnotatedString =
@@ -144,6 +144,7 @@ private fun inlineMarkdown(line: String, linkColor: Color): AnnotatedString =
         INLINE_PATTERN.findAll(line).forEach { match ->
             appendPlain(line.substring(cursor, match.range.first), linkColor)
             val (label, url, bold, strike, code, italic) = match.destructured
+            val starred = match.groupValues[7]
             when {
                 url.isNotEmpty() -> {
                     pushStringAnnotation(URL_TAG, Urls.normalize(url))
@@ -164,6 +165,9 @@ private fun inlineMarkdown(line: String, linkColor: Color): AnnotatedString =
 
                 italic.isNotEmpty() ->
                     withStyle(SpanStyle(fontStyle = FontStyle.Italic)) { append(italic) }
+
+                starred.isNotEmpty() ->
+                    withStyle(SpanStyle(fontStyle = FontStyle.Italic)) { append(starred) }
             }
             cursor = match.range.last + 1
         }

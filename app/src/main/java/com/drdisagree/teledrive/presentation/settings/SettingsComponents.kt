@@ -6,7 +6,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
@@ -15,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.drdisagree.teledrive.presentation.components.GroupedList
 import com.drdisagree.teledrive.presentation.components.GroupedListScope
@@ -40,7 +43,8 @@ fun SettingsSwitchRow(
     checked: Boolean,
     onChange: (Boolean) -> Unit,
     subtitle: String? = null,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    icon: ImageVector? = null
 ) {
     Row(
         modifier = Modifier
@@ -49,6 +53,7 @@ fun SettingsSwitchRow(
             .padding(horizontal = 16.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        RowIcon(icon)
         Column(modifier = Modifier.weight(1f)) {
             Text(title, style = MaterialTheme.typography.bodyLarge)
             subtitle?.let {
@@ -70,7 +75,8 @@ fun SettingsClickRow(
     onClick: () -> Unit,
     subtitle: String? = null,
     titleColor: Color? = null,
-    trailing: (@Composable () -> Unit)? = null
+    trailing: (@Composable () -> Unit)? = null,
+    icon: ImageVector? = null
 ) {
     Row(
         modifier = Modifier
@@ -79,6 +85,7 @@ fun SettingsClickRow(
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        RowIcon(icon)
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 title,
@@ -98,6 +105,18 @@ fun SettingsClickRow(
             it()
         }
     }
+}
+
+@Composable
+private fun RowIcon(icon: ImageVector?) {
+    icon ?: return
+    Icon(
+        imageVector = icon,
+        contentDescription = null,
+        tint = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.size(ROW_ICON_SIZE)
+    )
+    Spacer(Modifier.width(16.dp))
 }
 
 @Composable
@@ -133,3 +152,5 @@ fun SettingsSliderRow(
         )
     }
 }
+
+private val ROW_ICON_SIZE = 24.dp

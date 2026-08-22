@@ -41,6 +41,8 @@ object PreferenceKeys {
     val SHOW_ARCHIVED_FILES = booleanPreferencesKey("show_archived_files")
     val SHOW_RECENT_FILES = booleanPreferencesKey("show_recent_files")
     val LINK_PREVIEWS = booleanPreferencesKey("link_previews")
+    val UPDATE_CHECK_ENABLED = booleanPreferencesKey("update_check_enabled")
+    val LAST_UPDATE_CHECK_AT = longPreferencesKey("last_update_check_at")
     val TEXT_PREVIEW_SCALE = floatPreferencesKey("text_preview_scale")
 
     val SORT_FIELD = stringPreferencesKey("sort_field")
