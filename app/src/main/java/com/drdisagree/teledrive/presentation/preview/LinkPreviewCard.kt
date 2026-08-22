@@ -129,6 +129,7 @@ private fun BareLink(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun ArticleCard(
     url: String,
@@ -183,6 +184,16 @@ private fun ArticleCard(
                     maxLines = 4,
                     overflow = TextOverflow.Ellipsis
                 )
+            }
+            Spacer(Modifier.height(16.dp))
+            Button(onClick = onOpen, shapes = ButtonDefaults.shapes()) {
+                Icon(
+                    Icons.AutoMirrored.Filled.OpenInNew,
+                    contentDescription = null,
+                    modifier = Modifier.size(BUTTON_ICON_SIZE)
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(R.string.preview_open_link))
             }
         }
     }
