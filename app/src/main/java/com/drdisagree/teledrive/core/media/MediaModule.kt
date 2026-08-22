@@ -3,8 +3,8 @@ package com.drdisagree.teledrive.core.media
 import android.content.Context
 import coil3.ImageLoader
 import coil3.key.Keyer
-import coil3.request.crossfade
 import coil3.request.Options
+import coil3.request.crossfade
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

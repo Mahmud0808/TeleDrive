@@ -46,9 +46,9 @@ fun rememberDragSelect(
     indexAt = { offset ->
         gridState.layoutInfo.visibleItemsInfo.fastFirstOrNull { item ->
             offset.x >= item.offset.x &&
-                offset.x <= item.offset.x + item.size.width &&
-                offset.y >= item.offset.y &&
-                offset.y <= item.offset.y + item.size.height
+                    offset.x <= item.offset.x + item.size.width &&
+                    offset.y >= item.offset.y &&
+                    offset.y <= item.offset.y + item.size.height
         }?.index
     },
     onStart = onStart,
@@ -146,7 +146,7 @@ private suspend fun AwaitPointerEventScope.awaitLongPress(down: PointerInputChan
                 val event = awaitPointerEvent(PointerEventPass.Initial)
                 val change = event.changes.fastFirstOrNull { it.id == down.id }
                 held = change != null && change.pressed &&
-                    (change.position - down.position).getDistance() <= viewConfiguration.touchSlop
+                        (change.position - down.position).getDistance() <= viewConfiguration.touchSlop
             }
             false
         }

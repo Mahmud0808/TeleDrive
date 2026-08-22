@@ -15,6 +15,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Backs up whatever is new after MediaStore reports a change. The trigger and
@@ -35,7 +36,7 @@ class MediaWatchWorker @AssistedInject constructor(
         SafeLog.d(
             TAG,
             "Media change seen: auto=${prefs.autoBackupEnabled} " +
-                "instant=${prefs.instantBackupEnabled} wifiOnly=${prefs.backupWifiOnly}"
+                    "instant=${prefs.instantBackupEnabled} wifiOnly=${prefs.backupWifiOnly}"
         )
         if (!prefs.autoBackupEnabled || !prefs.instantBackupEnabled) {
             return Result.success()
@@ -44,7 +45,7 @@ class MediaWatchWorker @AssistedInject constructor(
         val started = telegramAuthRepository.startFromStoredCredentials()
         if (started is AppResult.Failure || started.getOrNull() != true) return Result.success()
 
-        val ready = withTimeoutOrNull(AUTH_TIMEOUT_MS) {
+        val ready = withTimeoutOrNull(AUTH_TIMEOUT_MS.milliseconds) {
             telegramAuthRepository.authState.first { it == TelegramAuthState.Ready }
         } != null
         if (!ready) {

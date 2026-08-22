@@ -1,17 +1,16 @@
 package com.drdisagree.teledrive.presentation.channels
 
-import androidx.compose.foundation.background
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.VisibilityThreshold
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.VisibilityThreshold
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,8 +21,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -56,7 +53,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -64,11 +60,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.drdisagree.teledrive.R
 import com.drdisagree.teledrive.domain.model.DriveChannel
+import com.drdisagree.teledrive.presentation.common.CollectSnackbarMessages
 import com.drdisagree.teledrive.presentation.common.Formatters
 import com.drdisagree.teledrive.presentation.common.add
 import com.drdisagree.teledrive.presentation.components.BlockingProgressDialog
@@ -76,9 +76,6 @@ import com.drdisagree.teledrive.presentation.components.ChannelAvatar
 import com.drdisagree.teledrive.presentation.components.EmptyState
 import com.drdisagree.teledrive.presentation.components.liftedTopAppBarColors
 import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
-import androidx.compose.ui.res.stringResource
-import com.drdisagree.teledrive.R
-import com.drdisagree.teledrive.presentation.common.CollectSnackbarMessages
 
 /**
  * Drives this account owns. Every channel keeps its own index, folders and
@@ -151,12 +148,18 @@ fun ChannelsScreen(
                 title = { Text(stringResource(R.string.common_storage_channels)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back))
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.common_back)
+                        )
                     }
                 },
                 actions = {
                     IconButton(onClick = viewModel::refresh) {
-                        Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.channels_look_drives))
+                        Icon(
+                            Icons.Filled.Refresh,
+                            contentDescription = stringResource(R.string.channels_look_drives)
+                        )
                     }
                 }
             )
@@ -270,7 +273,10 @@ private fun ChannelRow(
         }
         Box {
             IconButton(onClick = { showMenu = true }) {
-                Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.channels_drive_actions))
+                Icon(
+                    Icons.Filled.MoreVert,
+                    contentDescription = stringResource(R.string.channels_drive_actions)
+                )
             }
             DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
                 DropdownMenuItem(
@@ -351,7 +357,12 @@ private fun DeleteChannelDialog(
                     value = typed,
                     onValueChange = { typed = it },
                     label = {
-                        Text(stringResource(R.string.channels_delete_confirm_hint, channel.displayName))
+                        Text(
+                            stringResource(
+                                R.string.channels_delete_confirm_hint,
+                                channel.displayName
+                            )
+                        )
                     },
                     singleLine = true,
                     isError = typed.isNotEmpty() && !matches,

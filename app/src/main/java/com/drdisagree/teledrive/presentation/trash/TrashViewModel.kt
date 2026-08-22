@@ -1,29 +1,29 @@
 package com.drdisagree.teledrive.presentation.trash
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.drdisagree.teledrive.R
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.domain.model.TrashItem
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.repository.TrashRepository
 import com.drdisagree.teledrive.presentation.common.toUserMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
-import android.content.Context
-import com.drdisagree.teledrive.R
-import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 
 data class TrashUiState(
     val items: List<TrashItem> = emptyList(),
@@ -185,14 +185,14 @@ class TrashViewModel @Inject constructor(
             working.value = "Restoring $total item${if (total == 1) "" else "s"}…"
             var failed = 0
             withContext(NonCancellable) {
-            if (fileIds.isNotEmpty() &&
-                trashRepository.restoreFiles(fileIds) is AppResult.Failure
-            ) {
-                failed += fileIds.size
-            }
-            folderIds.forEach { folderId ->
-                if (trashRepository.restoreFolder(folderId) is AppResult.Failure) failed++
-            }
+                if (fileIds.isNotEmpty() &&
+                    trashRepository.restoreFiles(fileIds) is AppResult.Failure
+                ) {
+                    failed += fileIds.size
+                }
+                folderIds.forEach { folderId ->
+                    if (trashRepository.restoreFolder(folderId) is AppResult.Failure) failed++
+                }
             }
             working.value = null
             _messages.tryEmit(
@@ -210,20 +210,20 @@ class TrashViewModel @Inject constructor(
             var failed = 0
             var lastError: String? = null
             withContext(NonCancellable) {
-            if (fileIds.isNotEmpty()) {
-                val result = trashRepository.deleteFilesPermanently(fileIds)
-                if (result is AppResult.Failure) {
-                    failed += fileIds.size
-                    lastError = result.error.toUserMessage(context)
+                if (fileIds.isNotEmpty()) {
+                    val result = trashRepository.deleteFilesPermanently(fileIds)
+                    if (result is AppResult.Failure) {
+                        failed += fileIds.size
+                        lastError = result.error.toUserMessage(context)
+                    }
                 }
-            }
-            folderIds.forEach { folderId ->
-                val result = trashRepository.deleteFolderPermanently(folderId)
-                if (result is AppResult.Failure) {
-                    failed++
-                    lastError = result.error.toUserMessage(context)
+                folderIds.forEach { folderId ->
+                    val result = trashRepository.deleteFolderPermanently(folderId)
+                    if (result is AppResult.Failure) {
+                        failed++
+                        lastError = result.error.toUserMessage(context)
+                    }
                 }
-            }
             }
             working.value = null
             _messages.tryEmit(

@@ -17,11 +17,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import com.drdisagree.teledrive.R
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.drdisagree.teledrive.R
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -104,7 +104,10 @@ fun ErrorState(
         )
         onRetry?.let {
             Spacer(Modifier.height(16.dp))
-            Button(onClick = it, shapes = ButtonDefaults.shapes()) { Text(stringResource(R.string.common_retry)) }
+            Button(
+                onClick = it,
+                shapes = ButtonDefaults.shapes()
+            ) { Text(stringResource(R.string.common_retry)) }
         }
     }
 }

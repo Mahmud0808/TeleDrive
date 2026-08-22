@@ -59,8 +59,10 @@ class ConnectivityNetworkMonitor @Inject constructor(
     private fun statusOf(capabilities: NetworkCapabilities): NetworkStatus = when {
         !capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED) ->
             NetworkStatus.UNAVAILABLE
+
         capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED) ->
             NetworkStatus.UNMETERED
+
         else -> NetworkStatus.METERED
     }
 }

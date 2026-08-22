@@ -24,11 +24,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.drdisagree.teledrive.core.files.MimeTypes
 import com.drdisagree.teledrive.core.media.ThumbnailModel
 import com.drdisagree.teledrive.domain.model.DriveFile
 import com.drdisagree.teledrive.domain.model.FileCategory
 import com.drdisagree.teledrive.presentation.common.Formatters
-import com.drdisagree.teledrive.core.files.MimeTypes
 
 /**
  * Thumbnail with an icon fallback. Image, video and text files attempt
@@ -44,8 +44,8 @@ fun FileThumbnail(
 ) {
     // Text can carry one too: a note holding a link previews as that link.
     val supportsThumbnail = file.category == FileCategory.IMAGE ||
-        file.category == FileCategory.VIDEO ||
-        MimeTypes.isText(file.mimeType)
+            file.category == FileCategory.VIDEO ||
+            MimeTypes.isText(file.mimeType)
     var failed by remember(file.id) { mutableStateOf(false) }
 
     BoxWithConstraints(

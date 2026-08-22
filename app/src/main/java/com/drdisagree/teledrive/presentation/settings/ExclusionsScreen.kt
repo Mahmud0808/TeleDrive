@@ -2,17 +2,20 @@ package com.drdisagree.teledrive.presentation.settings
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
@@ -36,7 +39,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -46,24 +48,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.rememberScrollState
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.drdisagree.teledrive.R
 import com.drdisagree.teledrive.core.files.DocumentTreePaths
 import com.drdisagree.teledrive.domain.model.Exclusion
 import com.drdisagree.teledrive.domain.model.ExclusionType
 import com.drdisagree.teledrive.presentation.common.add
 import com.drdisagree.teledrive.presentation.components.ConfirmDialog
 import com.drdisagree.teledrive.presentation.components.EmptyState
-import androidx.compose.foundation.lazy.rememberLazyListState
 import com.drdisagree.teledrive.presentation.components.liftedTopAppBarColors
 import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
-import androidx.compose.ui.res.stringResource
-import com.drdisagree.teledrive.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -95,18 +93,24 @@ fun ExclusionsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                    colors = liftedTopAppBarColors(lifted),
+                colors = liftedTopAppBarColors(lifted),
                 title = { Text(stringResource(R.string.settings_exclusions)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back))
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.common_back)
+                        )
                     }
                 }
             )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { showAddDialog = true }) {
-                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.settings_add_exclusion))
+                Icon(
+                    Icons.Filled.Add,
+                    contentDescription = stringResource(R.string.settings_add_exclusion)
+                )
             }
         }
     ) { padding ->
@@ -150,7 +154,10 @@ fun ExclusionsScreen(
                         onCheckedChange = { viewModel.setEnabled(exclusion.id, it) }
                     )
                     IconButton(onClick = { exclusionToRemove = exclusion }) {
-                        Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.settings_remove))
+                        Icon(
+                            Icons.Filled.Delete,
+                            contentDescription = stringResource(R.string.settings_remove)
+                        )
                     }
                 }
             }

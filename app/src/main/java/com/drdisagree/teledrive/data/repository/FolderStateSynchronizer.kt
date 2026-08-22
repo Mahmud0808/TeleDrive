@@ -2,6 +2,9 @@ package com.drdisagree.teledrive.data.repository
 
 import android.content.Context
 import com.drdisagree.teledrive.core.common.SafeLog
+import com.drdisagree.teledrive.core.crypto.CryptoKeys
+import com.drdisagree.teledrive.core.crypto.StreamCrypto
+import com.drdisagree.teledrive.core.crypto.WrappedKeyRepository
 import com.drdisagree.teledrive.core.telegram.RemoteDocument
 import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.core.telegram.TelegramDownloadEvent
@@ -12,9 +15,6 @@ import com.drdisagree.teledrive.data.local.entity.FolderEntity
 import com.drdisagree.teledrive.data.remote.telegram.RemoteFolderState
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
-import java.io.File
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -25,9 +25,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
-import com.drdisagree.teledrive.core.crypto.CryptoKeys
-import com.drdisagree.teledrive.core.crypto.StreamCrypto
-import com.drdisagree.teledrive.core.crypto.WrappedKeyRepository
+import java.io.File
+import javax.inject.Inject
+import javax.inject.Singleton
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Mirrors the folder tree into a single document in the storage chat. File
@@ -56,7 +57,7 @@ class FolderStateSynchronizer @Inject constructor(
     fun schedulePush() {
         pendingPush?.cancel()
         pendingPush = scope.launch {
-            delay(PUSH_DEBOUNCE_MS)
+            delay(PUSH_DEBOUNCE_MS.milliseconds)
             runCatching { push() }
                 .onFailure { SafeLog.w(TAG, "Folder state push failed", it) }
         }
@@ -192,7 +193,7 @@ class FolderStateSynchronizer @Inject constructor(
             }
             page.documents.firstOrNull {
                 it.fileName == RemoteFolderState.FILE_NAME ||
-                    it.caption.startsWith(RemoteFolderState.MARKER)
+                        it.caption.startsWith(RemoteFolderState.MARKER)
             }?.let { return it }
             if (page.nextFromMessageId == 0L) return null
             fromMessageId = page.nextFromMessageId

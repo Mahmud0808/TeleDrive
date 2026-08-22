@@ -1,22 +1,22 @@
 package com.drdisagree.teledrive.core.common
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.content.Context
-import com.drdisagree.teledrive.presentation.MainActivity
-import android.content.Intent
-import android.app.PendingIntent
-import androidx.core.app.NotificationManagerCompat
-import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
-import javax.inject.Singleton
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.presentation.MainActivity
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class AppNotifications @Inject constructor(
@@ -70,10 +70,10 @@ class AppNotifications @Inject constructor(
 
     private fun hasPermission(): Boolean =
         Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) == PackageManager.PERMISSION_GRANTED
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED
 
     fun createChannels() {
         val manager = NotificationManagerCompat.from(context)
@@ -82,7 +82,9 @@ class AppNotifications @Inject constructor(
                 CHANNEL_TRANSFERS,
                 context.getString(R.string.notification_channel_transfers),
                 NotificationManager.IMPORTANCE_LOW
-            ).apply { description = context.getString(R.string.notification_channel_transfers_desc) }
+            ).apply {
+                description = context.getString(R.string.notification_channel_transfers_desc)
+            }
         )
         manager.createNotificationChannel(
             NotificationChannel(

@@ -5,9 +5,9 @@ import com.drdisagree.teledrive.core.telegram.TelegramAuthState
 import com.drdisagree.teledrive.core.telegram.TelegramConnectionState
 import com.drdisagree.teledrive.core.telegram.TelegramCredentials
 import com.drdisagree.teledrive.core.telegram.TelegramUser
+import com.drdisagree.teledrive.domain.model.CountryList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
-import com.drdisagree.teledrive.domain.model.CountryList
 
 interface TelegramAuthRepository {
 

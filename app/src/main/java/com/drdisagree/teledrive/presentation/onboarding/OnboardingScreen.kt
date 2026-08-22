@@ -1,42 +1,43 @@
 package com.drdisagree.teledrive.presentation.onboarding
 
 import android.Manifest
-import android.content.Intent
-import androidx.core.content.ContextCompat
-import android.content.pm.PackageManager
 import android.content.Context
-import android.net.Uri
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Environment
-import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import com.drdisagree.teledrive.domain.model.DriveChannel
-import com.drdisagree.teledrive.presentation.components.ChannelAvatar
-import androidx.compose.material3.RadioButton
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.semantics.Role
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -44,28 +45,34 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.CloudDone
+import androidx.compose.material.icons.filled.CloudQueue
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.PhoneAndroid
-import androidx.compose.material.icons.filled.CloudQueue
 import androidx.compose.material.icons.filled.Photo
+import androidx.compose.material.icons.filled.QrCode2
 import androidx.compose.material.icons.filled.Sms
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.LoadingIndicator
-import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearWavyProgressIndicator
+import androidx.compose.material3.LoadingIndicator
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -73,55 +80,44 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.drdisagree.teledrive.core.telegram.CodeDeliveryChannel
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.res.painterResource
-import com.drdisagree.teledrive.R
-import androidx.compose.ui.draw.clip
-import androidx.compose.animation.SizeTransform
-import androidx.compose.animation.core.CubicBezierEasing
-import androidx.compose.animation.core.tween
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.animation.core.snap
-import androidx.compose.runtime.DisposableEffect
-import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import androidx.compose.runtime.remember
-import androidx.compose.ui.res.stringResource
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.runtime.LaunchedEffect
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.core.permissions.openAllFilesAccess
+import com.drdisagree.teledrive.core.telegram.CodeDeliveryChannel
 import com.drdisagree.teledrive.domain.model.Country
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.QrCode2
-import androidx.compose.ui.graphics.Color
+import com.drdisagree.teledrive.domain.model.DriveChannel
+import com.drdisagree.teledrive.presentation.components.ChannelAvatar
 import com.drdisagree.teledrive.presentation.components.QrCode
-import androidx.core.net.toUri
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -156,108 +152,115 @@ fun OnboardingScreen(
                         .heightIn(min = availableHeight),
                     verticalArrangement = Arrangement.Center
                 ) {
-            AnimatedContent(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center,
-                targetState = state.step,
-                transitionSpec = {
-                    val forward = targetState.ordinal >= initialState.ordinal
-                    val spec = tween<IntOffset>(
-                        durationMillis = STEP_SLIDE_MS,
-                        easing = EmphasizedEasing
-                    )
-                    slideInHorizontally(spec) { width ->
-                        if (forward) width else -width
-                    }.togetherWith(
-                        slideOutHorizontally(spec) { width ->
-                            if (forward) -width else width
+                    AnimatedContent(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center,
+                        targetState = state.step,
+                        transitionSpec = {
+                            val forward = targetState.ordinal >= initialState.ordinal
+                            val spec = tween<IntOffset>(
+                                durationMillis = STEP_SLIDE_MS,
+                                easing = EmphasizedEasing
+                            )
+                            slideInHorizontally(spec) { width ->
+                                if (forward) width else -width
+                            }.togetherWith(
+                                slideOutHorizontally(spec) { width ->
+                                    if (forward) -width else width
+                                }
+                            ).using(SizeTransform(clip = true) { _, _ -> snap() })
+                        },
+                        label = stringResource(R.string.onboarding_step)
+                    ) { step ->
+                        when (step) {
+                            OnboardingStep.WELCOME -> WelcomeStep(onContinue = viewModel::start)
+                            OnboardingStep.API_CREDENTIALS -> CredentialsStep(
+                                working = state.working,
+                                error = state.error,
+                                onSubmit = viewModel::submitCredentials
+                            )
+
+                            OnboardingStep.EMAIL_ADDRESS -> EmailAddressStep(
+                                working = state.working,
+                                error = state.error,
+                                onSubmit = viewModel::submitEmailAddress
+                            )
+
+                            OnboardingStep.EMAIL_CODE -> EmailCodeStep(
+                                working = state.working,
+                                error = state.error,
+                                emailPattern = state.codePhoneNumber,
+                                codeLength = state.codeLength,
+                                onSubmit = viewModel::submitEmailCode
+                            )
+
+                            OnboardingStep.PHONE -> if (state.qrMode) {
+                                QrStep(
+                                    working = state.working,
+                                    error = state.error,
+                                    link = state.qrLink,
+                                    onCancel = viewModel::cancelQrLogin
+                                )
+                            } else PhoneStep(
+                                countries = state.countries,
+                                selectedCountry = state.selectedCountry,
+                                countryLoadState = state.countryLoadState,
+                                onLoadCountries = viewModel::loadCountries,
+                                onSelectCountry = viewModel::selectCountry,
+                                onUseQrCode = viewModel::startQrLogin,
+                                working = state.working,
+                                error = state.error,
+                                registrationRequired = state.registrationRequired,
+                                onSubmit = viewModel::submitPhone
+                            )
+
+                            OnboardingStep.CODE -> CodeStep(
+                                working = state.working,
+                                error = state.error,
+                                phoneNumber = state.codePhoneNumber,
+                                channel = state.codeChannel,
+                                codeLength = state.codeLength,
+                                onSubmit = viewModel::submitCode,
+                                onResend = viewModel::resendCode
+                            )
+
+                            OnboardingStep.PASSWORD -> PasswordStep(
+                                working = state.working,
+                                error = state.error,
+                                hint = state.passwordHint,
+                                onSubmit = viewModel::submitPassword
+                            )
+
+                            OnboardingStep.PERMISSIONS -> PermissionsStep(
+                                working = state.working,
+                                onResolved = viewModel::onPermissionsResolved
+                            )
+
+                            OnboardingStep.CHANNEL_SELECT -> ChannelSelectStep(
+                                channels = state.channels,
+                                selectedChatId = state.selectedChatId,
+                                justCreated = state.channelCreated,
+                                working = state.working,
+                                error = state.error,
+                                onSelect = viewModel::selectChannel,
+                                onRetry = viewModel::retryDriveSetup,
+                                onContinue = viewModel::confirmChannel
+                            )
+
+                            OnboardingStep.BACKUP_SETUP -> BackupSetupStep(
+                                state = state,
+                                onDcim = viewModel::setBackupDcim,
+                                onPictures = viewModel::setBackupPictures,
+                                onMovies = viewModel::setBackupMovies,
+                                onAutoBackup = viewModel::setAutoBackup,
+                                onWifiOnly = viewModel::setWifiOnly,
+                                onFinish = viewModel::finishSetup,
+                                finishing = state.finishing
+                            )
+
+                            OnboardingStep.DONE -> Unit
                         }
-                    ).using(SizeTransform(clip = true) { _, _ -> snap() })
-                },
-                label = stringResource(R.string.onboarding_step)
-            ) { step ->
-                when (step) {
-                    OnboardingStep.WELCOME -> WelcomeStep(onContinue = viewModel::start)
-                    OnboardingStep.API_CREDENTIALS -> CredentialsStep(
-                        working = state.working,
-                        error = state.error,
-                        onSubmit = viewModel::submitCredentials
-                    )
-                    OnboardingStep.EMAIL_ADDRESS -> EmailAddressStep(
-                        working = state.working,
-                        error = state.error,
-                        onSubmit = viewModel::submitEmailAddress
-                    )
-
-                    OnboardingStep.EMAIL_CODE -> EmailCodeStep(
-                        working = state.working,
-                        error = state.error,
-                        emailPattern = state.codePhoneNumber,
-                        codeLength = state.codeLength,
-                        onSubmit = viewModel::submitEmailCode
-                    )
-
-                    OnboardingStep.PHONE -> if (state.qrMode) {
-                        QrStep(
-                            working = state.working,
-                            error = state.error,
-                            link = state.qrLink,
-                            onCancel = viewModel::cancelQrLogin
-                        )
-                    } else PhoneStep(
-                        countries = state.countries,
-                        selectedCountry = state.selectedCountry,
-                        countryLoadState = state.countryLoadState,
-                        onLoadCountries = viewModel::loadCountries,
-                        onSelectCountry = viewModel::selectCountry,
-                        onUseQrCode = viewModel::startQrLogin,
-                        working = state.working,
-                        error = state.error,
-                        registrationRequired = state.registrationRequired,
-                        onSubmit = viewModel::submitPhone
-                    )
-                    OnboardingStep.CODE -> CodeStep(
-                        working = state.working,
-                        error = state.error,
-                        phoneNumber = state.codePhoneNumber,
-                        channel = state.codeChannel,
-                        codeLength = state.codeLength,
-                        onSubmit = viewModel::submitCode,
-                        onResend = viewModel::resendCode
-                    )
-                    OnboardingStep.PASSWORD -> PasswordStep(
-                        working = state.working,
-                        error = state.error,
-                        hint = state.passwordHint,
-                        onSubmit = viewModel::submitPassword
-                    )
-                    OnboardingStep.PERMISSIONS -> PermissionsStep(
-                        working = state.working,
-                        onResolved = viewModel::onPermissionsResolved
-                    )
-                    OnboardingStep.CHANNEL_SELECT -> ChannelSelectStep(
-                        channels = state.channels,
-                        selectedChatId = state.selectedChatId,
-                        justCreated = state.channelCreated,
-                        working = state.working,
-                        error = state.error,
-                        onSelect = viewModel::selectChannel,
-                        onRetry = viewModel::retryDriveSetup,
-                        onContinue = viewModel::confirmChannel
-                    )
-                    OnboardingStep.BACKUP_SETUP -> BackupSetupStep(
-                        state = state,
-                        onDcim = viewModel::setBackupDcim,
-                        onPictures = viewModel::setBackupPictures,
-                        onMovies = viewModel::setBackupMovies,
-                        onAutoBackup = viewModel::setAutoBackup,
-                        onWifiOnly = viewModel::setWifiOnly,
-                        onFinish = viewModel::finishSetup,
-                        finishing = state.finishing
-                    )
-                    OnboardingStep.DONE -> Unit
-                }
-            }
+                    }
                     Spacer(Modifier.height(32.dp + padding.calculateBottomPadding()))
                 }
             }
@@ -700,7 +703,7 @@ private fun QrStep(
                 enabled = !working && telegramIntent != null,
                 onClick = {
                     openFailed = telegramIntent == null ||
-                        runCatching { context.startActivity(telegramIntent) }.isFailure
+                            runCatching { context.startActivity(telegramIntent) }.isFailure
                 }
             )
             if (openFailed) {
@@ -927,8 +930,8 @@ private fun CountryPickerSheet(
         } else {
             countries.filter { country ->
                 country.name.contains(trimmed, ignoreCase = true) ||
-                    country.callingCode.contains(trimmed) ||
-                    country.isoCode.equals(trimmed, ignoreCase = true)
+                        country.callingCode.contains(trimmed) ||
+                        country.isoCode.equals(trimmed, ignoreCase = true)
             }
         }
     }
@@ -989,25 +992,34 @@ private fun CountryPickerSheet(
 
 /** Explains where the code actually went, as Telegram reported it. */
 @Composable
-private fun codeDeliveryText(channel: CodeDeliveryChannel, target: String): String = when (channel) {
-    CodeDeliveryChannel.TELEGRAM_APP -> stringResource(R.string.onboarding_code_via_telegram)
-    CodeDeliveryChannel.SMS -> stringResource(R.string.onboarding_code_via_sms, target)
-    CodeDeliveryChannel.SMS_WORD -> stringResource(R.string.onboarding_code_via_sms_word, target)
-    CodeDeliveryChannel.SMS_PHRASE ->
-        stringResource(R.string.onboarding_code_via_sms_phrase, target)
+private fun codeDeliveryText(channel: CodeDeliveryChannel, target: String): String =
+    when (channel) {
+        CodeDeliveryChannel.TELEGRAM_APP -> stringResource(R.string.onboarding_code_via_telegram)
+        CodeDeliveryChannel.SMS -> stringResource(R.string.onboarding_code_via_sms, target)
+        CodeDeliveryChannel.SMS_WORD -> stringResource(
+            R.string.onboarding_code_via_sms_word,
+            target
+        )
 
-    CodeDeliveryChannel.CALL -> stringResource(R.string.onboarding_code_via_call, target)
-    CodeDeliveryChannel.FLASH_CALL ->
-        stringResource(R.string.onboarding_code_via_flash_call, target)
+        CodeDeliveryChannel.SMS_PHRASE ->
+            stringResource(R.string.onboarding_code_via_sms_phrase, target)
 
-    CodeDeliveryChannel.MISSED_CALL ->
-        stringResource(R.string.onboarding_code_via_missed_call, target)
+        CodeDeliveryChannel.CALL -> stringResource(R.string.onboarding_code_via_call, target)
+        CodeDeliveryChannel.FLASH_CALL ->
+            stringResource(R.string.onboarding_code_via_flash_call, target)
 
-    CodeDeliveryChannel.FRAGMENT -> stringResource(R.string.onboarding_code_via_fragment, target)
-    CodeDeliveryChannel.FIREBASE -> stringResource(R.string.onboarding_code_via_sms, target)
-    CodeDeliveryChannel.EMAIL -> stringResource(R.string.onboarding_code_via_email, target)
-    CodeDeliveryChannel.OTHER -> stringResource(R.string.onboarding_code_sent)
-}
+        CodeDeliveryChannel.MISSED_CALL ->
+            stringResource(R.string.onboarding_code_via_missed_call, target)
+
+        CodeDeliveryChannel.FRAGMENT -> stringResource(
+            R.string.onboarding_code_via_fragment,
+            target
+        )
+
+        CodeDeliveryChannel.FIREBASE -> stringResource(R.string.onboarding_code_via_sms, target)
+        CodeDeliveryChannel.EMAIL -> stringResource(R.string.onboarding_code_via_email, target)
+        CodeDeliveryChannel.OTHER -> stringResource(R.string.onboarding_code_sent)
+    }
 
 @Composable
 private fun EmailAddressStep(
@@ -1197,14 +1209,7 @@ private fun PermissionsStep(working: Boolean, onResolved: () -> Unit) {
             onClick = {
                 when {
                     askForMedia -> launcher.launch(permissions.toTypedArray())
-                    !allFilesGranted -> runCatching {
-                        context.startActivity(
-                            Intent(
-                                Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
-                                Uri.parse("package:${context.packageName}")
-                            )
-                        )
-                    }
+                    !allFilesGranted -> openAllFilesAccess(context)
                     else -> onResolved()
                 }
             }
@@ -1246,11 +1251,19 @@ private fun BackupSetupStep(
     ) {
         SectionLabel(stringResource(R.string.onboarding_section_folders))
         ToggleCard(stringResource(R.string.onboarding_toggle_camera), state.backupDcim, onDcim)
-        ToggleCard(stringResource(R.string.onboarding_toggle_pictures), state.backupPictures, onPictures)
+        ToggleCard(
+            stringResource(R.string.onboarding_toggle_pictures),
+            state.backupPictures,
+            onPictures
+        )
         ToggleCard(stringResource(R.string.onboarding_toggle_movies), state.backupMovies, onMovies)
         Spacer(Modifier.height(16.dp))
         SectionLabel(stringResource(R.string.onboarding_section_behavior))
-        ToggleCard(stringResource(R.string.onboarding_toggle_auto_backup), state.autoBackupEnabled, onAutoBackup)
+        ToggleCard(
+            stringResource(R.string.onboarding_toggle_auto_backup),
+            state.autoBackupEnabled,
+            onAutoBackup
+        )
         ToggleCard(stringResource(R.string.onboarding_toggle_wifi_only), state.wifiOnly, onWifiOnly)
         Spacer(Modifier.height(32.dp))
         BigButton(

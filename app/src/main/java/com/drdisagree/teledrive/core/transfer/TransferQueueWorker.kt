@@ -3,6 +3,7 @@ package com.drdisagree.teledrive.core.transfer
 import android.app.Notification
 import android.content.Context
 import android.content.pm.ServiceInfo
+import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
@@ -12,7 +13,9 @@ import com.drdisagree.teledrive.R
 import com.drdisagree.teledrive.core.common.AppNotifications
 import com.drdisagree.teledrive.core.network.NetworkMonitor
 import com.drdisagree.teledrive.core.network.NetworkStatus
+import com.drdisagree.teledrive.data.local.dao.FileDao
 import com.drdisagree.teledrive.data.local.dao.TransferDao
+import com.drdisagree.teledrive.domain.model.BackupState
 import com.drdisagree.teledrive.domain.model.TransferState
 import com.drdisagree.teledrive.domain.model.TransferType
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
@@ -22,13 +25,12 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.withContext
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
-import com.drdisagree.teledrive.data.local.dao.FileDao
-import com.drdisagree.teledrive.domain.model.BackupState
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Drains the transfer queue. Runs as expedited work with a dataSync foreground
@@ -69,7 +71,7 @@ class TransferQueueWorker @AssistedInject constructor(
                         }
                         val status = networkMonitor.currentStatus()
                         val blocked = status == NetworkStatus.UNAVAILABLE ||
-                            (status == NetworkStatus.METERED && !prefs.allowMeteredTransfers)
+                                (status == NetworkStatus.METERED && !prefs.allowMeteredTransfers)
                         if (blocked) {
                             interrupted = true
                             return@launch
@@ -105,15 +107,18 @@ class TransferQueueWorker @AssistedInject constructor(
                     refreshSession(current.backupSessionId)
                     return
                 }
+
                 is TransferExecutor.Outcome.Paused -> {
                     markState(transferId, TransferState.PAUSED)
                     return
                 }
+
                 is TransferExecutor.Outcome.Cancelled -> {
                     markState(transferId, TransferState.CANCELLED)
                     refreshSession(current.backupSessionId)
                     return
                 }
+
                 is TransferExecutor.Outcome.Failed -> {
                     attempt++
                     if (attempt > maxRetries) {
@@ -149,7 +154,7 @@ class TransferQueueWorker @AssistedInject constructor(
                     }
                     val backoffSeconds = outcome.retryAfterSeconds
                         ?: (BASE_BACKOFF_SECONDS shl (attempt - 1)).coerceAtMost(MAX_BACKOFF_SECONDS)
-                    delay(backoffSeconds * 1000L)
+                    delay((backoffSeconds * 1000L).milliseconds)
                 }
             }
         }
@@ -167,11 +172,12 @@ class TransferQueueWorker @AssistedInject constructor(
 
     override suspend fun getForegroundInfo(): ForegroundInfo {
         val notification = buildNotification()
-        return ForegroundInfo(
-            AppNotifications.NOTIFICATION_ID_TRANSFER_QUEUE,
-            notification,
-            ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
-        )
+        val id = AppNotifications.NOTIFICATION_ID_TRANSFER_QUEUE
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ForegroundInfo(id, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        } else {
+            ForegroundInfo(id, notification)
+        }
     }
 
     private fun buildNotification(): Notification =

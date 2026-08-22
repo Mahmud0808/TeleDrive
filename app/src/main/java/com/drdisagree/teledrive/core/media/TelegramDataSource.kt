@@ -7,10 +7,11 @@ import androidx.media3.datasource.BaseDataSource
 import androidx.media3.datasource.DataSpec
 import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.core.telegram.TelegramFileInfo
-import java.io.IOException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
+import java.io.IOException
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Media3 DataSource that streams a Telegram file through TDLib's ranged
@@ -86,7 +87,7 @@ class TelegramDataSource(
         ) {
             telegramClient.requestFileRange(fileId, readPosition, 0)
         }
-        withTimeout(BUFFER_TIMEOUT_MS) {
+        withTimeout(BUFFER_TIMEOUT_MS.milliseconds) {
             telegramClient.fileUpdates(fileId).first { covers(it, readPosition, count) }
         }
     }

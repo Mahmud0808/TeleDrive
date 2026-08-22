@@ -2,7 +2,6 @@ package com.drdisagree.teledrive.presentation.common
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import androidx.core.content.FileProvider
 import com.drdisagree.teledrive.R
 import java.io.File
@@ -30,7 +29,7 @@ fun shareLocalFiles(context: Context, paths: List<String>, mimeType: String) {
     } else {
         Intent(Intent.ACTION_SEND_MULTIPLE).apply {
             type = mimeType
-            putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris as ArrayList<Uri>)
+            putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)
         }
     }
     intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)

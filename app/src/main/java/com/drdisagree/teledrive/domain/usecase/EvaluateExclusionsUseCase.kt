@@ -30,13 +30,17 @@ class EvaluateExclusionsUseCase @Inject constructor() {
                     val folder = value.replace('\\', '/').trimEnd('/')
                     path.startsWith("$folder/")
                 }
+
                 ExclusionType.EXTENSION ->
                     fileName.substringAfterLast('.', "") == value.removePrefix(".")
+
                 ExclusionType.MIME_TYPE ->
                     candidate.mimeType.lowercase(Locale.ROOT).startsWith(value)
+
                 ExclusionType.PATH_PATTERN -> globMatches(value, path)
                 ExclusionType.MAX_SIZE ->
                     value.toLongOrNull()?.let { candidate.sizeBytes > it } == true
+
                 ExclusionType.HIDDEN -> candidate.isHidden
             }
             if (matched) return true
@@ -58,6 +62,7 @@ class EvaluateExclusionsUseCase @Inject constructor() {
                             append("[^/]*")
                         }
                     }
+
                     '?' -> append("[^/]")
                     else -> append(Regex.escape(c.toString()))
                 }

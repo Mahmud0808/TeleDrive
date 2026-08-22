@@ -1,48 +1,79 @@
 package com.drdisagree.teledrive.presentation
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import com.drdisagree.teledrive.core.common.AppNotifications
-import kotlinx.coroutines.withTimeoutOrNull
-import kotlinx.coroutines.delay
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.compose.foundation.layout.Row
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
+import com.drdisagree.teledrive.core.common.AppNotifications
+import com.drdisagree.teledrive.core.files.PendingShare
 import com.drdisagree.teledrive.domain.model.AppTheme
 import com.drdisagree.teledrive.presentation.applock.LockScreen
 import com.drdisagree.teledrive.presentation.components.LoadingState
@@ -50,47 +81,14 @@ import com.drdisagree.teledrive.presentation.components.LocalCompactLayout
 import com.drdisagree.teledrive.presentation.navigation.AppNavHost
 import com.drdisagree.teledrive.presentation.navigation.BottomBarHeight
 import com.drdisagree.teledrive.presentation.navigation.LocalBottomBarHeight
-import com.drdisagree.teledrive.presentation.navigation.LocalBottomBarInset
 import com.drdisagree.teledrive.presentation.navigation.Route
-import com.drdisagree.teledrive.presentation.navigation.navigateOnce
 import com.drdisagree.teledrive.presentation.navigation.TopLevelDestination
+import com.drdisagree.teledrive.presentation.navigation.navigateOnce
 import com.drdisagree.teledrive.presentation.theme.TeleDriveTheme
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Surface
-import androidx.compose.ui.graphics.Color
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.expandHorizontally
-import androidx.compose.animation.shrinkHorizontally
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInParent
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Dp
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.animation.core.tween
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.ui.res.stringResource
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import com.drdisagree.teledrive.core.files.PendingShare
+import kotlinx.coroutines.withTimeoutOrNull
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun TeleDriveApp(
@@ -161,8 +159,8 @@ private fun MainScaffold(
 
     LaunchedEffect(Unit) {
         driveMissing.collect {
-            val graphReady = withTimeoutOrNull(NAV_READY_TIMEOUT_MS) {
-                while (navController.currentBackStackEntry == null) delay(NAV_READY_POLL_MS)
+            val graphReady = withTimeoutOrNull(NAV_READY_TIMEOUT_MS.milliseconds) {
+                while (navController.currentBackStackEntry == null) delay(NAV_READY_POLL_MS.milliseconds)
                 true
             } == true
             if (graphReady) navController.navigate(Route.Channels)
@@ -173,8 +171,8 @@ private fun MainScaffold(
         val target = notificationDestination ?: return@LaunchedEffect
         if (!onboardingComplete) return@LaunchedEffect
 
-        val graphReady = withTimeoutOrNull(NAV_READY_TIMEOUT_MS) {
-            while (navController.currentBackStackEntry == null) delay(NAV_READY_POLL_MS)
+        val graphReady = withTimeoutOrNull(NAV_READY_TIMEOUT_MS.milliseconds) {
+            while (navController.currentBackStackEntry == null) delay(NAV_READY_POLL_MS.milliseconds)
             true
         } == true
         if (!graphReady) return@LaunchedEffect
@@ -185,6 +183,7 @@ private fun MainScaffold(
             AppNotifications.DESTINATION_NOTE -> navController.navigate(
                 Route.NoteEditor(sharedText = pendingShare.text.value)
             )
+
             else -> Unit
         }
         onDestinationHandled()
@@ -248,9 +247,9 @@ private fun MainScaffold(
             AnimatedVisibility(
                 visible = isTopLevel,
                 enter = slideInVertically(barSlideSpec()) { height -> height } +
-                    fadeIn(tween(BAR_SLIDE_MS)),
+                        fadeIn(tween(BAR_SLIDE_MS)),
                 exit = slideOutVertically(barSlideSpec()) { height -> height } +
-                    fadeOut(tween(BAR_SLIDE_MS)),
+                        fadeOut(tween(BAR_SLIDE_MS)),
                 modifier = Modifier.align(Alignment.BottomCenter)
             ) {
                 FloatingNavigationBar(
@@ -271,6 +270,7 @@ private fun MainScaffold(
  * one also reveals its icon, and a single pill slides between them instead of
  * each item drawing its own indicator.
  */
+@SuppressLint("UseOfNonLambdaOffsetOverload")
 @Composable
 private fun FloatingNavigationBar(
     selectedIndex: Int,
@@ -370,7 +370,7 @@ private fun NavigationPillItem(
         AnimatedVisibility(
             visible = selected,
             enter = expandHorizontally(spring(stiffness = Spring.StiffnessMediumLow)) +
-                fadeIn(spring(stiffness = Spring.StiffnessMediumLow)),
+                    fadeIn(spring(stiffness = Spring.StiffnessMediumLow)),
             exit = shrinkHorizontally(spring(stiffness = Spring.StiffnessMediumLow)) + fadeOut()
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {

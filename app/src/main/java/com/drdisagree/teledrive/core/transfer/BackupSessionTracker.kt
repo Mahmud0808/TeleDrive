@@ -1,23 +1,23 @@
 package com.drdisagree.teledrive.core.transfer
 
+import android.content.Context
+import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.core.common.AppNotifications
 import com.drdisagree.teledrive.data.local.dao.BackupDao
 import com.drdisagree.teledrive.data.local.dao.TransferDao
 import com.drdisagree.teledrive.data.local.entity.TransferEntity
 import com.drdisagree.teledrive.domain.model.BackupSessionStatus
 import com.drdisagree.teledrive.domain.model.TransferState
-import javax.inject.Inject
-import javax.inject.Singleton
-import android.content.Context
-import com.drdisagree.teledrive.R
-import com.drdisagree.teledrive.core.common.AppNotifications
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Recomputes a backup session from the transfers that belong to it. Counting
  * live rows instead of incrementing counters keeps the session honest when
- * transfers are cancelled, for example after a folder is unselected mid-run.
+ * transfers are canceled, for example after a folder is unselected mid-run.
  */
 @Singleton
 class BackupSessionTracker @Inject constructor(
@@ -97,6 +97,6 @@ fun countSession(transfers: List<TransferEntity>): BackupSessionCounts {
         transferredBytes = completed.sumOf { it.sizeBytes },
         settled = remaining.none { !it.state.isTerminal },
         allPaused = remaining.any { it.state == TransferState.PAUSED } &&
-            remaining.none { it.state == TransferState.QUEUED || it.state == TransferState.RUNNING }
+                remaining.none { it.state == TransferState.QUEUED || it.state == TransferState.RUNNING }
     )
 }

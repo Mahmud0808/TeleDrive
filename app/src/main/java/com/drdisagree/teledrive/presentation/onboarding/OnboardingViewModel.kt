@@ -1,20 +1,24 @@
 package com.drdisagree.teledrive.presentation.onboarding
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.drdisagree.teledrive.R
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.core.files.StandardBackupFolder
+import com.drdisagree.teledrive.core.telegram.CodeDeliveryChannel
 import com.drdisagree.teledrive.core.telegram.TelegramAuthState
 import com.drdisagree.teledrive.core.telegram.TelegramCredentials
 import com.drdisagree.teledrive.core.transfer.MaintenanceScheduler
-import com.drdisagree.teledrive.domain.repository.SettingsRepository
+import com.drdisagree.teledrive.domain.model.Country
 import com.drdisagree.teledrive.domain.model.DriveChannel
 import com.drdisagree.teledrive.domain.repository.ChannelRepository
+import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.repository.SyncRepository
 import com.drdisagree.teledrive.domain.repository.TelegramAuthRepository
 import com.drdisagree.teledrive.presentation.common.toUserMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,11 +27,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import android.content.Context
-import com.drdisagree.teledrive.R
-import dagger.hilt.android.qualifiers.ApplicationContext
-import com.drdisagree.teledrive.domain.model.Country
-import com.drdisagree.teledrive.core.telegram.CodeDeliveryChannel
+import javax.inject.Inject
 
 @HiltViewModel
 class OnboardingViewModel @Inject constructor(
@@ -60,6 +60,7 @@ class OnboardingViewModel @Inject constructor(
                     current.qrLink != null -> current.copy(working = false, qrLink = null)
                     else -> current
                 }
+
                 is TelegramAuthState.WaitingForCode -> current.copy(
                     step = OnboardingStep.CODE,
                     working = false,
@@ -74,11 +75,13 @@ class OnboardingViewModel @Inject constructor(
                     working = false,
                     qrLink = state.link
                 )
+
                 is TelegramAuthState.WaitingForEmailAddress -> current.copy(
                     step = OnboardingStep.EMAIL_ADDRESS,
                     working = false,
                     error = null
                 )
+
                 is TelegramAuthState.WaitingForEmailCode -> current.copy(
                     step = OnboardingStep.EMAIL_CODE,
                     working = false,
@@ -87,21 +90,25 @@ class OnboardingViewModel @Inject constructor(
                     codeChannel = CodeDeliveryChannel.EMAIL,
                     codeLength = state.codeLength
                 )
+
                 is TelegramAuthState.WaitingForPassword -> current.copy(
                     step = OnboardingStep.PASSWORD,
                     working = false,
                     error = null,
                     passwordHint = state.passwordHint
                 )
+
                 is TelegramAuthState.RegistrationRequired -> current.copy(
                     working = false,
                     registrationRequired = true,
                     error = context.getString(R.string.onboarding_no_account)
                 )
+
                 is TelegramAuthState.Failed -> current.copy(
                     working = false,
                     error = state.message
                 )
+
                 is TelegramAuthState.Ready ->
                     // A signed-in user reopening the app resumes past sign-in.
                     if (current.step in listOf(
@@ -112,8 +119,13 @@ class OnboardingViewModel @Inject constructor(
                             OnboardingStep.API_CREDENTIALS
                         )
                     ) {
-                        current.copy(step = OnboardingStep.PERMISSIONS, working = false, error = null)
+                        current.copy(
+                            step = OnboardingStep.PERMISSIONS,
+                            working = false,
+                            error = null
+                        )
                     } else current
+
                 else -> current
             }
         }
@@ -134,7 +146,8 @@ class OnboardingViewModel @Inject constructor(
             return
         }
         runAction {
-            val result = telegramAuthRepository.configure(TelegramCredentials(apiId, apiHash.trim()))
+            val result =
+                telegramAuthRepository.configure(TelegramCredentials(apiId, apiHash.trim()))
             if (result is AppResult.Success) {
                 onAuthStateChanged(telegramAuthRepository.authState.value)
             }

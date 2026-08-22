@@ -2,12 +2,12 @@ package com.drdisagree.teledrive.core.security
 
 import android.os.SystemClock
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Session lock state. The app locks on launch and after the configured

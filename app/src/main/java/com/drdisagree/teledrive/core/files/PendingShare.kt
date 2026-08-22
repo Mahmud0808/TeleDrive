@@ -1,12 +1,12 @@
 package com.drdisagree.teledrive.core.files
 
 import android.net.Uri
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Files handed to the app from another app's share sheet, waiting for the user

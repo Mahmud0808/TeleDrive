@@ -1,11 +1,11 @@
 package com.drdisagree.teledrive.presentation.components
 
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import com.drdisagree.teledrive.domain.model.ViewMode
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.calculateZoom
 
 const val MIN_GRID_COLUMNS = 2
 const val MAX_GRID_COLUMNS = 6

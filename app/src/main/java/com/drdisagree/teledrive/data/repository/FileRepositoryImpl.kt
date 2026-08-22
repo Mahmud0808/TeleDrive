@@ -6,13 +6,18 @@ import androidx.paging.PagingData
 import androidx.paging.map
 import com.drdisagree.teledrive.core.common.AppError
 import com.drdisagree.teledrive.core.common.AppResult
+import com.drdisagree.teledrive.core.crypto.CryptoKeys
+import com.drdisagree.teledrive.core.crypto.StreamCrypto
+import com.drdisagree.teledrive.core.crypto.WrappedKeyRepository
+import com.drdisagree.teledrive.core.files.FileNameUtils
+import com.drdisagree.teledrive.core.files.Hashing
 import com.drdisagree.teledrive.core.files.LocalCleanup
 import com.drdisagree.teledrive.core.files.LocalCopyDeleter
-import com.drdisagree.teledrive.core.files.FileNameUtils
 import com.drdisagree.teledrive.core.files.MimeTypes
+import com.drdisagree.teledrive.core.files.NoteStore
 import com.drdisagree.teledrive.core.telegram.TelegramClient
+import com.drdisagree.teledrive.core.telegram.TelegramDownloadEvent
 import com.drdisagree.teledrive.core.telegram.TelegramException
-import com.drdisagree.teledrive.core.files.Hashing
 import com.drdisagree.teledrive.data.local.FileQueryBuilder
 import com.drdisagree.teledrive.data.local.dao.FileDao
 import com.drdisagree.teledrive.data.local.dao.FolderDao
@@ -25,29 +30,24 @@ import com.drdisagree.teledrive.domain.model.BackupState
 import com.drdisagree.teledrive.domain.model.DriveFile
 import com.drdisagree.teledrive.domain.model.DriveFolder
 import com.drdisagree.teledrive.domain.model.FileCategory
+import com.drdisagree.teledrive.domain.model.FileSortField
+import com.drdisagree.teledrive.domain.model.LinkMetadata
 import com.drdisagree.teledrive.domain.model.MediaAlbum
+import com.drdisagree.teledrive.domain.model.SortDirection
+import com.drdisagree.teledrive.domain.model.StorageSlice
 import com.drdisagree.teledrive.domain.repository.FileRepository
+import com.drdisagree.teledrive.domain.repository.SettingsRepository
+import com.drdisagree.teledrive.domain.usecase.FolderCycleCheck
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import java.io.File
+import java.net.URI
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import com.drdisagree.teledrive.domain.usecase.FolderCycleCheck
-import com.drdisagree.teledrive.domain.model.StorageSlice
-import com.drdisagree.teledrive.domain.model.FileSortField
-import com.drdisagree.teledrive.domain.model.SortDirection
-import com.drdisagree.teledrive.core.files.NoteStore
-import java.net.URI
-import com.drdisagree.teledrive.domain.model.LinkMetadata
-import com.drdisagree.teledrive.domain.repository.SettingsRepository
-import kotlinx.coroutines.flow.first
-import com.drdisagree.teledrive.core.crypto.CryptoKeys
-import com.drdisagree.teledrive.core.crypto.StreamCrypto
-import com.drdisagree.teledrive.core.crypto.WrappedKeyRepository
-import com.drdisagree.teledrive.core.telegram.TelegramDownloadEvent
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @Singleton
@@ -213,7 +213,7 @@ class FileRepositoryImpl @Inject constructor(
         val siblingNames = fileDao.namesInFolder(file.folderId)
         val unique = FileNameUtils.uniqueName(sanitized) { candidate ->
             candidate != file.name &&
-                siblingNames.any { it.equals(candidate, ignoreCase = true) }
+                    siblingNames.any { it.equals(candidate, ignoreCase = true) }
         }
         val now = System.currentTimeMillis()
         fileDao.rename(id, unique, now)
@@ -286,6 +286,7 @@ class FileRepositoryImpl @Inject constructor(
                         existingNames.add(name)
                         copied++
                     }
+
                     is AppResult.Failure -> lastError = result.error
                 }
             } else {
@@ -593,8 +594,8 @@ class FileRepositoryImpl @Inject constructor(
     override suspend fun deleteLocalCopy(ids: List<String>): AppResult<LocalCleanup> {
         val candidates = fileDao.byIds(ids).filter { entity ->
             entity.localPath != null &&
-                entity.messageId != null &&
-                entity.backupState == BackupState.BACKED_UP
+                    entity.messageId != null &&
+                    entity.backupState == BackupState.BACKED_UP
         }
         if (candidates.isEmpty()) return AppResult.Success(LocalCleanup(0))
 

@@ -122,7 +122,11 @@ class StreamCrypto @Inject constructor() {
     fun encryptBytes(key: ByteArray, plaintext: ByteArray): ByteArray {
         val nonce = ByteArray(NONCE_LENGTH).also(secureRandom::nextBytes)
         val cipher = Cipher.getInstance(TRANSFORMATION)
-        cipher.init(Cipher.ENCRYPT_MODE, SecretKeySpec(key, "AES"), GCMParameterSpec(TAG_BITS, nonce))
+        cipher.init(
+            Cipher.ENCRYPT_MODE,
+            SecretKeySpec(key, "AES"),
+            GCMParameterSpec(TAG_BITS, nonce)
+        )
         return nonce + cipher.doFinal(plaintext)
     }
 

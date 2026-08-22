@@ -1,8 +1,10 @@
 package com.drdisagree.teledrive.presentation.components
 
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,14 +22,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
+import com.drdisagree.teledrive.R
 import com.drdisagree.teledrive.domain.model.DriveFile
 import com.drdisagree.teledrive.presentation.common.Formatters
-import androidx.compose.ui.res.stringResource
-import com.drdisagree.teledrive.R
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

@@ -13,14 +13,14 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import com.drdisagree.teledrive.R
 import com.drdisagree.teledrive.domain.model.BackupState
 import com.drdisagree.teledrive.domain.model.DriveFile
 import com.drdisagree.teledrive.presentation.common.Formatters
 import java.util.Locale
-import androidx.compose.ui.res.stringResource
-import com.drdisagree.teledrive.R
 
 /** Detailed metadata sheet available from the browser, gallery, and preview. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,7 +49,12 @@ fun FileInfoSheet(
             if (file.width != null && file.height != null) {
                 InfoRow(stringResource(R.string.info_resolution), "${file.width} × ${file.height}")
             }
-            file.durationMs?.let { InfoRow(stringResource(R.string.info_duration), Formatters.duration(it)) }
+            file.durationMs?.let {
+                InfoRow(
+                    stringResource(R.string.info_duration),
+                    Formatters.duration(it)
+                )
+            }
 
             HorizontalDivider(Modifier.padding(vertical = 12.dp))
 
@@ -77,8 +82,20 @@ fun FileInfoSheet(
                 stringResource(R.string.info_encrypted),
                 stringResource(if (file.isEncrypted) R.string.info_yes else R.string.info_no)
             )
-            file.localPath?.let { InfoRow(stringResource(R.string.info_path), it, monospace = true) }
-            file.contentHash?.let { InfoRow(stringResource(R.string.info_sha256), it, monospace = true) }
+            file.localPath?.let {
+                InfoRow(
+                    stringResource(R.string.info_path),
+                    it,
+                    monospace = true
+                )
+            }
+            file.contentHash?.let {
+                InfoRow(
+                    stringResource(R.string.info_sha256),
+                    it,
+                    monospace = true
+                )
+            }
 
             Spacer(Modifier.height(24.dp))
         }
@@ -96,7 +113,9 @@ private fun InfoRow(label: String, value: String, monospace: Boolean = false) {
             text = label,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(end = 16.dp).weight(0.35f)
+            modifier = Modifier
+                .padding(end = 16.dp)
+                .weight(0.35f)
         )
         Text(
             text = value,

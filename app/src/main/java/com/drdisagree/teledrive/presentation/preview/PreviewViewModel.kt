@@ -1,15 +1,18 @@
 package com.drdisagree.teledrive.presentation.preview
 
+import android.content.Context
 import android.content.IntentSender
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.drdisagree.teledrive.R
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.data.local.FileQueryBuilder
 import com.drdisagree.teledrive.domain.model.DriveFile
 import com.drdisagree.teledrive.domain.model.FileCategory
 import com.drdisagree.teledrive.domain.model.FileSortField
+import com.drdisagree.teledrive.domain.model.LinkMetadata
 import com.drdisagree.teledrive.domain.model.SortDirection
 import com.drdisagree.teledrive.domain.repository.FileRepository
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
@@ -18,7 +21,7 @@ import com.drdisagree.teledrive.domain.repository.TrashRepository
 import com.drdisagree.teledrive.presentation.common.toUserMessage
 import com.drdisagree.teledrive.presentation.navigation.Route
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -27,19 +30,16 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import android.content.Context
-import com.drdisagree.teledrive.R
-import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flowOf
-import com.drdisagree.teledrive.domain.model.LinkMetadata
+import javax.inject.Inject
 
 data class PreviewUiState(
     val files: List<DriveFile> = emptyList(),
@@ -236,6 +236,7 @@ class PreviewViewModel @Inject constructor(
                     }
                     refreshFile(fileId)
                 }
+
                 is AppResult.Failure -> _messages.tryEmit(result.error.toUserMessage(context))
             }
         }
@@ -245,7 +246,11 @@ class PreviewViewModel @Inject constructor(
         viewModelScope.launch {
             fileRepository.setFilesFavorite(listOf(file.id), favorite)
             refreshFile(file.id)
-            _messages.tryEmit(if (favorite) context.getString(R.string.preview_added_favorites) else context.getString(R.string.preview_removed_favorites))
+            _messages.tryEmit(
+                if (favorite) context.getString(R.string.preview_added_favorites) else context.getString(
+                    R.string.preview_removed_favorites
+                )
+            )
         }
     }
 
@@ -253,7 +258,11 @@ class PreviewViewModel @Inject constructor(
         viewModelScope.launch {
             fileRepository.setFilesHidden(listOf(file.id), hidden)
             refreshFile(file.id)
-            _messages.tryEmit(if (hidden) context.getString(R.string.preview_hidden) else context.getString(R.string.preview_unhidden))
+            _messages.tryEmit(
+                if (hidden) context.getString(R.string.preview_hidden) else context.getString(
+                    R.string.preview_unhidden
+                )
+            )
         }
     }
 
@@ -261,7 +270,11 @@ class PreviewViewModel @Inject constructor(
         viewModelScope.launch {
             fileRepository.setFilesArchived(listOf(file.id), archived)
             refreshFile(file.id)
-            _messages.tryEmit(if (archived) context.getString(R.string.preview_archived) else context.getString(R.string.preview_unarchived))
+            _messages.tryEmit(
+                if (archived) context.getString(R.string.preview_archived) else context.getString(
+                    R.string.preview_unarchived
+                )
+            )
         }
     }
 
@@ -272,6 +285,7 @@ class PreviewViewModel @Inject constructor(
                     refreshFile(file.id)
                     _messages.tryEmit(context.getString(R.string.message_renamed))
                 }
+
                 is AppResult.Failure -> _messages.tryEmit(result.error.toUserMessage(context))
             }
         }

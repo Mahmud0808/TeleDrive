@@ -32,7 +32,7 @@ class DecideBackupActionUseCase @Inject constructor(
 
         if (existingRecord != null) {
             val sameSizeAndTime = existingRecord.sizeBytes == candidate.sizeBytes &&
-                existingRecord.modifiedAt == modifiedAt
+                    existingRecord.modifiedAt == modifiedAt
             if (sameSizeAndTime) return BackupDecision.SKIP_UNCHANGED
 
             if (existingRecord.sizeBytes == candidate.sizeBytes &&

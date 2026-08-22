@@ -7,7 +7,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Rows written before multi-channel support, and rows created while no drive
+ * Rows written before multichannel support, and rows created while no drive
  * was selected, carry no owner. The first channel to open adopts them, which
  * keeps a drive built by an older build visible instead of silently empty.
  */

@@ -10,13 +10,11 @@ import com.drdisagree.teledrive.domain.model.FileSortField
 import com.drdisagree.teledrive.domain.model.SortDirection
 import com.drdisagree.teledrive.domain.repository.FileRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -25,6 +23,8 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 
 data class SearchFilters(
     val category: FileCategory? = null,
@@ -59,7 +59,7 @@ class SearchViewModel @Inject constructor(
     private val searching = MutableStateFlow(false)
 
     private val results = combine(
-        query.debounce(250).distinctUntilChanged(),
+        query.debounce(250.milliseconds).distinctUntilChanged(),
         filters
     ) { text, filterValues -> text to filterValues }
         .flatMapLatest { (text, filterValues) ->
@@ -88,14 +88,14 @@ class SearchViewModel @Inject constructor(
         }
 
     private val folderResults = combine(
-        query.debounce(250).distinctUntilChanged(),
+        query.debounce(250.milliseconds).distinctUntilChanged(),
         filters
     ) { text, filterValues -> text to filterValues }
         .flatMapLatest { (text, filterValues) ->
             val fileOnlyFilterActive = filterValues.category != null ||
-                filterValues.backedUpOnly ||
-                filterValues.notBackedUpOnly ||
-                filterValues.minSizeMb != null
+                    filterValues.backedUpOnly ||
+                    filterValues.notBackedUpOnly ||
+                    filterValues.minSizeMb != null
             if (text.isBlank() || fileOnlyFilterActive) {
                 flowOf(emptyList())
             } else {

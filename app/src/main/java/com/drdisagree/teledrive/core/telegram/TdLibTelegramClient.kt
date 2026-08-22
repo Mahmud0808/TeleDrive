@@ -4,17 +4,15 @@ import android.content.Context
 import android.os.Build
 import com.drdisagree.teledrive.BuildConfig
 import com.drdisagree.teledrive.core.common.SafeLog
+import com.drdisagree.teledrive.domain.model.Country
+import com.drdisagree.teledrive.domain.model.LinkMetadata
 import dagger.hilt.android.qualifiers.ApplicationContext
-import java.io.File
-import java.util.Locale
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,17 +24,20 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import javax.inject.Inject
-import javax.inject.Singleton
+import kotlinx.coroutines.withTimeoutOrNull
 import org.drinkless.tdlib.Client
 import org.drinkless.tdlib.TdApi
-import com.drdisagree.teledrive.domain.model.Country
-import com.drdisagree.teledrive.domain.model.LinkMetadata
+import java.io.File
+import java.util.Locale
+import javax.inject.Inject
+import javax.inject.Singleton
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.time.Duration.Companion.milliseconds
 
 @Singleton
 class TdLibTelegramClient @Inject constructor(
@@ -58,7 +59,8 @@ class TdLibTelegramClient @Inject constructor(
     override val authState: StateFlow<TelegramAuthState> = _authState.asStateFlow()
 
     private val _connectionState = MutableStateFlow(TelegramConnectionState.CONNECTING)
-    override val connectionState: StateFlow<TelegramConnectionState> = _connectionState.asStateFlow()
+    override val connectionState: StateFlow<TelegramConnectionState> =
+        _connectionState.asStateFlow()
 
     private val updates = MutableSharedFlow<TdApi.Object>(
         extraBufferCapacity = 4096,
@@ -90,10 +92,12 @@ class TdLibTelegramClient @Inject constructor(
         when (update) {
             is TdApi.UpdateAuthorizationState ->
                 handleAuthorizationState(generation, update.authorizationState)
+
             is TdApi.UpdateConnectionState -> _connectionState.value = when (update.state) {
                 is TdApi.ConnectionStateWaitingForNetwork -> TelegramConnectionState.WAITING_FOR_NETWORK
                 is TdApi.ConnectionStateConnecting,
                 is TdApi.ConnectionStateConnectingToProxy -> TelegramConnectionState.CONNECTING
+
                 is TdApi.ConnectionStateUpdating -> TelegramConnectionState.UPDATING
                 else -> TelegramConnectionState.READY
             }
@@ -105,8 +109,10 @@ class TdLibTelegramClient @Inject constructor(
         when (state) {
             is TdApi.AuthorizationStateWaitTdlibParameters ->
                 scope.launch { sendTdlibParameters() }
+
             is TdApi.AuthorizationStateWaitPhoneNumber ->
                 _authState.value = TelegramAuthState.WaitingForPhoneNumber
+
             is TdApi.AuthorizationStateWaitCode -> {
                 val info = state.codeInfo
                 _authState.value = TelegramAuthState.WaitingForCode(
@@ -116,12 +122,15 @@ class TdLibTelegramClient @Inject constructor(
                     resendTimeoutSeconds = info.timeout
                 )
             }
+
             is TdApi.AuthorizationStateWaitOtherDeviceConfirmation -> {
                 SafeLog.d(TAG, "QR login token refreshed")
                 _authState.value = TelegramAuthState.WaitingForQrScan(state.link)
             }
+
             is TdApi.AuthorizationStateWaitEmailAddress ->
                 _authState.value = TelegramAuthState.WaitingForEmailAddress
+
             is TdApi.AuthorizationStateWaitEmailCode -> {
                 val info = state.codeInfo
                 _authState.value = TelegramAuthState.WaitingForEmailCode(
@@ -129,24 +138,31 @@ class TdLibTelegramClient @Inject constructor(
                     codeLength = info.length.takeIf { it > 0 }
                 )
             }
+
             is TdApi.AuthorizationStateWaitPassword ->
                 _authState.value = TelegramAuthState.WaitingForPassword(
                     state.passwordHint?.takeIf { it.isNotEmpty() }
                 )
+
             is TdApi.AuthorizationStateWaitRegistration ->
                 _authState.value = TelegramAuthState.RegistrationRequired
+
             is TdApi.AuthorizationStateReady ->
                 _authState.value = TelegramAuthState.Ready
+
             is TdApi.AuthorizationStateLoggingOut ->
                 _authState.value = TelegramAuthState.LoggingOut
+
             is TdApi.AuthorizationStateClosing ->
                 _authState.value = TelegramAuthState.Initializing
+
             is TdApi.AuthorizationStateClosed -> {
                 if (generation == clientGeneration) {
                     client = null
                     _authState.value = TelegramAuthState.Closed
                 }
             }
+
             else -> SafeLog.w(TAG, "Unhandled authorization state: ${state::class.simpleName}")
         }
     }
@@ -156,7 +172,7 @@ class TdLibTelegramClient @Inject constructor(
         var activeClient = client
         var waitedMs = 0
         while (activeClient == null && waitedMs < CLIENT_WAIT_LIMIT_MS) {
-            delay(CLIENT_WAIT_STEP_MS)
+            delay(CLIENT_WAIT_STEP_MS.milliseconds)
             waitedMs += CLIENT_WAIT_STEP_MS.toInt()
             activeClient = client
         }
@@ -239,7 +255,7 @@ class TdLibTelegramClient @Inject constructor(
     override suspend fun restartAuthentication() {
         val current = credentials ?: return
         runCatching { send(TdApi.Close()) }
-        withTimeoutOrNull(CLOSE_WAIT_LIMIT_MS) {
+        withTimeoutOrNull(CLOSE_WAIT_LIMIT_MS.milliseconds) {
             _authState.first { it == TelegramAuthState.Closed }
         }
         clientMutex.withLock { client = null }
@@ -303,7 +319,7 @@ class TdLibTelegramClient @Inject constructor(
             }
             repeat(DISCOVERY_ATTEMPTS) { attempt ->
                 findStorageChat()?.let { return@withLock it }
-                if (attempt < DISCOVERY_ATTEMPTS - 1) delay(DISCOVERY_RETRY_MS)
+                if (attempt < DISCOVERY_ATTEMPTS - 1) delay(DISCOVERY_RETRY_MS.milliseconds)
             }
             val chat = send(
                 TdApi.CreateNewSupergroupChat(
@@ -426,7 +442,6 @@ class TdLibTelegramClient @Inject constructor(
     }
 
 
-
     private fun driveTitle(label: String): String {
         val trimmed = label.trim()
             .removePrefix(STORAGE_CHAT_TITLE)
@@ -441,7 +456,7 @@ class TdLibTelegramClient @Inject constructor(
     /** Requests answer with an error until the client finishes signing in. */
     private suspend fun awaitAuthorized() {
         if (_authState.value == TelegramAuthState.Ready) return
-        withTimeoutOrNull(AUTH_WAIT_MS) {
+        withTimeoutOrNull(AUTH_WAIT_MS.milliseconds) {
             authState.first { it == TelegramAuthState.Ready }
         }
     }
@@ -534,7 +549,7 @@ class TdLibTelegramClient @Inject constructor(
     private suspend fun isOwnPrivateChannel(supergroupId: Long): Boolean = runCatching {
         val supergroup = send(TdApi.GetSupergroup(supergroupId))
         supergroup.status is TdApi.ChatMemberStatusCreator &&
-            supergroup.usernames?.activeUsernames.isNullOrEmpty()
+                supergroup.usernames?.activeUsernames.isNullOrEmpty()
     }.getOrDefault(false)
 
     private suspend fun writeMarker(chatId: Long, description: String) {
@@ -629,7 +644,7 @@ class TdLibTelegramClient @Inject constructor(
                 SafeLog.d(TAG, "Chat list page $page ended: ${loaded.exceptionOrNull()?.message}")
                 return
             }
-            delay(CHAT_LIST_SETTLE_MS)
+            delay(CHAT_LIST_SETTLE_MS.milliseconds)
         }
     }
 
@@ -695,6 +710,7 @@ class TdLibTelegramClient @Inject constructor(
                             )
                         }
                     }
+
                     is TdApi.UpdateMessageSendSucceeded -> {
                         if (update.oldMessageId == pending.id) {
                             sentMessageId = update.message.id
@@ -711,6 +727,7 @@ class TdLibTelegramClient @Inject constructor(
                             }
                         }
                     }
+
                     is TdApi.UpdateMessageSendFailed -> {
                         if (update.oldMessageId == pending.id) {
                             finished = true
@@ -749,20 +766,22 @@ class TdLibTelegramClient @Inject constructor(
         val pending: TdApi.Message =
             send(TdApi.SendMessage(chatId, null, null, null, null, content))
 
-        val sent = withTimeoutOrNull(COPY_TIMEOUT_MS) {
-            updates.filter { update ->
+        val sent = withTimeoutOrNull(COPY_TIMEOUT_MS.milliseconds) {
+            updates.first { update ->
                 (update is TdApi.UpdateMessageSendSucceeded &&
-                    update.oldMessageId == pending.id) ||
-                    (update is TdApi.UpdateMessageSendFailed &&
-                        update.oldMessageId == pending.id)
-            }.first()
+                        update.oldMessageId == pending.id) ||
+                        (update is TdApi.UpdateMessageSendFailed &&
+                                update.oldMessageId == pending.id)
+            }
         }
         return when (sent) {
             is TdApi.UpdateMessageSendSucceeded ->
                 sent.message.toRemoteDocument()
                     ?: throw TelegramException(500, "Copied message is not a document")
+
             is TdApi.UpdateMessageSendFailed ->
                 throw TelegramException.from(sent.error.code, sent.error.message)
+
             else -> pending.toRemoteDocument()
                 ?: throw TelegramException(500, "Copy did not complete")
         }
@@ -877,7 +896,7 @@ class TdLibTelegramClient @Inject constructor(
         var found = searchMessages(chatId, fromMessageId, limit)
         var attempts = 0
         while (fromMessageId == 0L && found.messages.isEmpty() && attempts++ < HISTORY_RETRIES) {
-            delay(HISTORY_RETRY_MS)
+            delay(HISTORY_RETRY_MS.milliseconds)
             found = searchMessages(chatId, fromMessageId, limit)
         }
 
@@ -886,7 +905,7 @@ class TdLibTelegramClient @Inject constructor(
         SafeLog.d(
             TAG,
             "Page from=$fromMessageId messages=${found.messages.size} " +
-                "mapped=${documents.size} next=$oldest"
+                    "mapped=${documents.size} next=$oldest"
         )
         return RemoteDocumentPage(
             documents = documents,
@@ -943,7 +962,10 @@ class TdLibTelegramClient @Inject constructor(
                 return block()
             } catch (e: TelegramException) {
                 if (!e.isRateLimit || attempt++ >= RATE_LIMIT_RETRIES) throw e
-                delay(((e.retryAfterSeconds ?: RATE_LIMIT_FALLBACK_SECONDS) + 1) * 1000L)
+                delay(
+                    (((e.retryAfterSeconds
+                        ?: RATE_LIMIT_FALLBACK_SECONDS) + 1) * 1000L).milliseconds
+                )
             }
         }
     }
@@ -1017,9 +1039,6 @@ class TdLibTelegramClient @Inject constructor(
             miniThumbnail = miniThumbnail
         )
     }
-
-
-
 
     private fun TdApi.AuthenticationCodeType.toChannel(): CodeDeliveryChannel = when (this) {
         is TdApi.AuthenticationCodeTypeTelegramMessage -> CodeDeliveryChannel.TELEGRAM_APP

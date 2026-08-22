@@ -1,14 +1,20 @@
 package com.drdisagree.teledrive.presentation.common
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -20,12 +26,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.drdisagree.teledrive.core.files.Urls
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.width
-import androidx.compose.ui.draw.clip
 
 /**
  * Renders the markdown subset the note editor writes: headings, bold, italic,
@@ -118,6 +118,7 @@ private fun MarkdownLine(
 ) {
     val annotated = inlineMarkdown(line, linkColor)
     val onSurface = MaterialTheme.colorScheme.onSurface
+    @Suppress("DEPRECATION")
     ClickableText(
         text = annotated,
         style = style.copy(color = style.color.takeOrElse { onSurface }),
@@ -170,7 +171,7 @@ private fun inlineMarkdown(line: String, linkColor: Color): AnnotatedString =
     }
 
 /** Bare links still become tappable, without any markup around them. */
-private fun androidx.compose.ui.text.AnnotatedString.Builder.appendPlain(
+private fun AnnotatedString.Builder.appendPlain(
     segment: String,
     linkColor: Color
 ) {
@@ -186,14 +187,14 @@ private fun androidx.compose.ui.text.AnnotatedString.Builder.appendPlain(
     append(segment.substring(cursor))
 }
 
-private inline fun androidx.compose.ui.text.AnnotatedString.Builder.withLinkStyle(
+private inline fun AnnotatedString.Builder.withLinkStyle(
     linkColor: Color,
     block: () -> Unit
 ) {
     withStyle(SpanStyle(color = linkColor, textDecoration = TextDecoration.Underline)) { block() }
 }
 
-private inline fun androidx.compose.ui.text.AnnotatedString.Builder.withStyle(
+private inline fun AnnotatedString.Builder.withStyle(
     style: SpanStyle,
     block: () -> Unit
 ) {

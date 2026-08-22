@@ -685,7 +685,6 @@
     <string name="note_not_editable">Only text files can be edited here</string>
     <string name="note_edit_action">Edit text</string>
     <string name="preview_open_link">Open link</string>
-    <string name="preview_link_note">Saved link</string>
     <string name="settings_link_previews">Link previews</string>
     <string name="settings_link_previews_subtitle">Telegram fetches the title and image for saved links</string>
 </resources>

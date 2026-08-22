@@ -22,13 +22,16 @@ class ValidateUploadUseCase @Inject constructor() {
     ): AppError? = when {
         fileSizeBytes <= 0 ->
             AppError.NotFound
+
         fileSizeBytes > limits.maxFileBytes ->
             AppError.FileTooLarge(fileSizeBytes, limits.maxFileBytes)
+
         requiredScratchBytes > 0 && availableLocalBytes < requiredScratchBytes + STORAGE_MARGIN_BYTES ->
             AppError.InsufficientStorage(
                 requiredScratchBytes + STORAGE_MARGIN_BYTES,
                 availableLocalBytes
             )
+
         else -> null
     }
 

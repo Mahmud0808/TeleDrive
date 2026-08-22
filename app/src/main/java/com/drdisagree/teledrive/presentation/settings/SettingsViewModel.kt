@@ -1,20 +1,23 @@
 package com.drdisagree.teledrive.presentation.settings
 
+import android.content.Context
 import android.content.IntentSender
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.drdisagree.teledrive.R
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.core.permissions.PermissionChecker
 import com.drdisagree.teledrive.core.security.AppLockManager
-import com.drdisagree.teledrive.core.telegram.StorageChannel
 import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.core.telegram.TelegramConnectionState
 import com.drdisagree.teledrive.core.telegram.TelegramUser
 import com.drdisagree.teledrive.core.transfer.MaintenanceScheduler
+import com.drdisagree.teledrive.data.repository.LocalDataWiper
+import com.drdisagree.teledrive.domain.model.BackupTrigger
 import com.drdisagree.teledrive.domain.model.UserPreferences
 import com.drdisagree.teledrive.domain.repository.BackupRepository
-import com.drdisagree.teledrive.domain.repository.ChannelRepository
 import com.drdisagree.teledrive.domain.repository.CacheRepository
+import com.drdisagree.teledrive.domain.repository.ChannelRepository
 import com.drdisagree.teledrive.domain.repository.FileRepository
 import com.drdisagree.teledrive.domain.repository.KeyBackupRepository
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
@@ -22,28 +25,24 @@ import com.drdisagree.teledrive.domain.repository.SyncRepository
 import com.drdisagree.teledrive.domain.repository.TelegramAuthRepository
 import com.drdisagree.teledrive.presentation.common.toUserMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
-import kotlinx.coroutines.flow.MutableSharedFlow
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.NonCancellable
-import com.drdisagree.teledrive.data.repository.LocalDataWiper
-import com.drdisagree.teledrive.domain.model.BackupTrigger
-import android.content.Context
-import com.drdisagree.teledrive.R
-import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 
 data class SettingsUiState(
     val preferences: UserPreferences = UserPreferences(),
@@ -126,6 +125,7 @@ class SettingsViewModel @Inject constructor(
             is AppResult.Success -> result.value?.let {
                 _messages.tryEmit(context.getString(R.string.message_backing_up_new_folder))
             }
+
             is AppResult.Failure -> Unit
         }
     }
@@ -199,6 +199,7 @@ class SettingsViewModel @Inject constructor(
                     }
                     _messages.tryEmit(context.getString(R.string.message_key_backup_saved))
                 }
+
                 is AppResult.Failure -> _messages.tryEmit(result.error.toUserMessage(context))
             }
         }
@@ -242,6 +243,7 @@ class SettingsViewModel @Inject constructor(
                         _messages.tryEmit(context.getString(R.string.message_wrong_passphrase))
                     }
                 }
+
                 is AppResult.Failure -> _messages.tryEmit(result.error.toUserMessage(context))
             }
         }
@@ -271,6 +273,7 @@ class SettingsViewModel @Inject constructor(
                         )
                     }
                 }
+
                 is AppResult.Failure -> _messages.tryEmit(result.error.toUserMessage(context))
             }
         }
@@ -296,12 +299,13 @@ class SettingsViewModel @Inject constructor(
                 is AppResult.Success -> _messages.tryEmit(
                     if (result.value.lockedFiles > 0) {
                         "${result.value.lockedFiles} encrypted files skipped. " +
-                            "Restore your key backup to index them."
+                                "Restore your key backup to index them."
                     } else {
                         "Synced: ${result.value.inserted} new, " +
-                            "${result.value.updated} updated"
+                                "${result.value.updated} updated"
                     }
                 )
+
                 is AppResult.Failure -> _messages.tryEmit(result.error.toUserMessage(context))
             }
         }
@@ -325,6 +329,7 @@ class SettingsViewModel @Inject constructor(
                     }
                     onLoggedOut()
                 }
+
                 is AppResult.Failure -> _messages.tryEmit(result.error.toUserMessage(context))
             }
         }

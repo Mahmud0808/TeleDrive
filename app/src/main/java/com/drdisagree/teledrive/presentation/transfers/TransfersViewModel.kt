@@ -6,12 +6,12 @@ import com.drdisagree.teledrive.domain.model.TransferState
 import com.drdisagree.teledrive.domain.model.TransferTask
 import com.drdisagree.teledrive.domain.repository.TransferRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class TransfersUiState(
     val active: List<TransferTask> = emptyList(),
@@ -33,7 +33,8 @@ class TransfersViewModel @Inject constructor(
                 active = ordered.filter { it.state.isActive },
                 paused = ordered.filter { it.state == TransferState.PAUSED },
                 failed = ordered.filter { it.state == TransferState.FAILED },
-                completed = ordered.filter { it.state == TransferState.COMPLETED }.sortedWith(FINISHED_ORDER),
+                completed = ordered.filter { it.state == TransferState.COMPLETED }
+                    .sortedWith(FINISHED_ORDER),
                 loading = false
             )
         }

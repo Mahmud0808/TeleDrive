@@ -1,17 +1,22 @@
 package com.drdisagree.teledrive.presentation.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
-import com.drdisagree.teledrive.presentation.navigation.NavigationTransitions.isPeerSwitch
-import com.drdisagree.teledrive.presentation.navigation.NavigationTransitions.movesForward
+import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.presentation.channels.ChannelsScreen
 import com.drdisagree.teledrive.presentation.collection.CollectionScreen
 import com.drdisagree.teledrive.presentation.files.FilesScreen
 import com.drdisagree.teledrive.presentation.gallery.GalleryScreen
 import com.drdisagree.teledrive.presentation.home.HomeScreen
+import com.drdisagree.teledrive.presentation.navigation.NavigationTransitions.isPeerSwitch
+import com.drdisagree.teledrive.presentation.navigation.NavigationTransitions.movesForward
+import com.drdisagree.teledrive.presentation.note.NoteEditorScreen
 import com.drdisagree.teledrive.presentation.onboarding.OnboardingScreen
 import com.drdisagree.teledrive.presentation.preview.PreviewScreen
 import com.drdisagree.teledrive.presentation.search.SearchScreen
@@ -19,13 +24,8 @@ import com.drdisagree.teledrive.presentation.settings.ExclusionsScreen
 import com.drdisagree.teledrive.presentation.settings.SettingsScreen
 import com.drdisagree.teledrive.presentation.settings.SettingsSectionScreen
 import com.drdisagree.teledrive.presentation.settings.SettingsSectionType
-import com.drdisagree.teledrive.presentation.channels.ChannelsScreen
 import com.drdisagree.teledrive.presentation.transfers.TransfersScreen
 import com.drdisagree.teledrive.presentation.trash.TrashScreen
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.res.stringResource
-import com.drdisagree.teledrive.R
-import com.drdisagree.teledrive.presentation.note.NoteEditorScreen
 
 @Composable
 fun AppNavHost(
@@ -98,14 +98,14 @@ fun AppNavHost(
                         navController.navigateOnce(sequence.routeFor(id))
                     },
                     onOpenSearch = { navController.navigateOnce(Route.Search) },
-                onNewNote = { folderId ->
-                    navController.navigateOnce(Route.NoteEditor(folderId = folderId))
-                },
-                onEditNote = { fileId, title ->
-                    navController.navigateOnce(
-                        Route.NoteEditor(fileId = fileId, title = title)
-                    )
-                },
+                    onNewNote = { folderId ->
+                        navController.navigateOnce(Route.NoteEditor(folderId = folderId))
+                    },
+                    onEditNote = { fileId, title ->
+                        navController.navigateOnce(
+                            Route.NoteEditor(fileId = fileId, title = title)
+                        )
+                    },
                     onBack = if (isRoot) null else ({ navController.popBackStackOnce() })
                 )
             }
@@ -113,7 +113,7 @@ fun AppNavHost(
         composable<Route.Gallery> {
             UnderBottomBar {
                 val unfiledAlbumName = stringResource(R.string.album_not_in_folder)
-            GalleryScreen(
+                GalleryScreen(
                     onOpenFile = { id, sequence ->
                         navController.navigateOnce(sequence.routeFor(id))
                     },

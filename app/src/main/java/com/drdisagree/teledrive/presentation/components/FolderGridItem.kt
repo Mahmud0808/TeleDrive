@@ -22,11 +22,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.drdisagree.teledrive.domain.model.DriveFolder
-import androidx.compose.ui.res.stringResource
 import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.domain.model.DriveFolder
 
 /** Folder tile matching [FileGridItem] so grid view stays visually uniform. */
 @OptIn(ExperimentalFoundationApi::class)

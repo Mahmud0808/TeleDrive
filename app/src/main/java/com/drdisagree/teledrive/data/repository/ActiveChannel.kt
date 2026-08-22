@@ -1,12 +1,12 @@
 package com.drdisagree.teledrive.data.repository
 
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /** The storage channel every query and every new row belongs to right now. */
 @Singleton

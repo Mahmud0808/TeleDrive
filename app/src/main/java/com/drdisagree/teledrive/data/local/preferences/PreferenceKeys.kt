@@ -1,11 +1,11 @@
 package com.drdisagree.teledrive.data.local.preferences
 
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
-import androidx.datastore.preferences.core.floatPreferencesKey
 
 object PreferenceKeys {
     val ONBOARDING_COMPLETE = booleanPreferencesKey("onboarding_complete")

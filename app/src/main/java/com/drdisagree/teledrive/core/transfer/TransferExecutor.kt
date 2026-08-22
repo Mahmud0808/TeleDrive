@@ -7,10 +7,11 @@ import com.drdisagree.teledrive.core.crypto.StreamCrypto
 import com.drdisagree.teledrive.core.crypto.WrappedKeyRepository
 import com.drdisagree.teledrive.core.files.DownloadWriter
 import com.drdisagree.teledrive.core.files.Hashing
+import com.drdisagree.teledrive.core.media.ThumbnailStore
 import com.drdisagree.teledrive.core.telegram.TelegramClient
+import com.drdisagree.teledrive.core.telegram.TelegramDownloadEvent
 import com.drdisagree.teledrive.core.telegram.TelegramException
 import com.drdisagree.teledrive.core.telegram.TelegramUploadEvent
-import com.drdisagree.teledrive.core.telegram.TelegramDownloadEvent
 import com.drdisagree.teledrive.data.local.dao.BackupDao
 import com.drdisagree.teledrive.data.local.dao.FileDao
 import com.drdisagree.teledrive.data.local.dao.TransferDao
@@ -24,14 +25,13 @@ import com.drdisagree.teledrive.domain.model.TransferState
 import com.drdisagree.teledrive.domain.model.TransferType
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.first
 import java.io.File
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.flow.first
-import com.drdisagree.teledrive.core.media.ThumbnailStore
 
 /**
  * Executes one transfer end to end: staging (optional encryption), the
@@ -133,7 +133,8 @@ class TransferExecutor @Inject constructor(
         var lastTick = startedAt
 
         return try {
-            var outcome: Outcome = Outcome.Failed(context.getString(R.string.transfer_error_upload_ended))
+            var outcome: Outcome =
+                Outcome.Failed(context.getString(R.string.transfer_error_upload_ended))
             val previewPath = if (encrypt) {
                 null
             } else {
@@ -163,6 +164,7 @@ class TransferExecutor @Inject constructor(
                         }
                         checkControl(transfer.id)
                     }
+
                     is TelegramUploadEvent.Completed -> {
                         val document = event.document
                         fileDao.setRemoteMapping(
@@ -219,7 +221,8 @@ class TransferExecutor @Inject constructor(
         var lastTick = startedAt
 
         return try {
-            var outcome: Outcome = Outcome.Failed(context.getString(R.string.transfer_error_download_ended))
+            var outcome: Outcome =
+                Outcome.Failed(context.getString(R.string.transfer_error_download_ended))
             telegramClient.downloadDocument(remoteFileId).collect { event ->
                 currentCoroutineContext().ensureActive()
                 when (event) {
@@ -236,6 +239,7 @@ class TransferExecutor @Inject constructor(
                         }
                         checkControl(transfer.id)
                     }
+
                     is TelegramDownloadEvent.Completed -> {
                         outcome = finalizeDownload(transfer, entity.id, event.localPath)
                     }
@@ -254,7 +258,8 @@ class TransferExecutor @Inject constructor(
         fileId: String,
         tdlibPath: String
     ): Outcome {
-        val entity = fileDao.byId(fileId) ?: return Outcome.Failed(context.getString(R.string.transfer_error_file_record_missing))
+        val entity = fileDao.byId(fileId)
+            ?: return Outcome.Failed(context.getString(R.string.transfer_error_file_record_missing))
         val source = File(tdlibPath)
         if (!source.exists()) return Outcome.Failed(context.getString(R.string.transfer_error_downloaded_missing))
 

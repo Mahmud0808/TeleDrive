@@ -4,27 +4,27 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
-import android.os.Build
 import android.media.ThumbnailUtils
+import android.os.Build
 import android.util.Size
 import com.drdisagree.teledrive.core.crypto.CryptoKeys
 import com.drdisagree.teledrive.core.crypto.StreamCrypto
 import com.drdisagree.teledrive.core.crypto.WrappedKeyRepository
 import com.drdisagree.teledrive.core.files.MimeTypes
+import com.drdisagree.teledrive.core.files.Urls
 import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.data.local.dao.FileDao
 import com.drdisagree.teledrive.data.local.dao.ThumbnailDao
 import com.drdisagree.teledrive.data.local.entity.ThumbnailEntity
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import java.io.ByteArrayOutputStream
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.sync.Semaphore
-import kotlinx.coroutines.sync.withPermit
-import com.drdisagree.teledrive.core.files.Urls
 
 /**
  * Generates and caches thumbnails. Cache files are AES-GCM sealed when

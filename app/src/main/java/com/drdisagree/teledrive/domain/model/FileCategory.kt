@@ -14,15 +14,17 @@ enum class FileCategory {
             mimeType.startsWith("video/") -> VIDEO
             mimeType.startsWith("audio/") -> AUDIO
             mimeType == "application/pdf" ||
-                mimeType.startsWith("text/") ||
-                mimeType.contains("document") ||
-                mimeType.contains("spreadsheet") ||
-                mimeType.contains("presentation") -> DOCUMENT
+                    mimeType.startsWith("text/") ||
+                    mimeType.contains("document") ||
+                    mimeType.contains("spreadsheet") ||
+                    mimeType.contains("presentation") -> DOCUMENT
+
             mimeType == "application/zip" ||
-                mimeType == "application/x-7z-compressed" ||
-                mimeType == "application/vnd.rar" ||
-                mimeType == "application/x-tar" ||
-                mimeType == "application/gzip" -> ARCHIVE
+                    mimeType == "application/x-7z-compressed" ||
+                    mimeType == "application/vnd.rar" ||
+                    mimeType == "application/x-tar" ||
+                    mimeType == "application/gzip" -> ARCHIVE
+
             else -> OTHER
         }
     }

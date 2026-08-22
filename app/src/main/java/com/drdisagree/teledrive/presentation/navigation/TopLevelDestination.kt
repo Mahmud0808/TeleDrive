@@ -1,8 +1,9 @@
 package com.drdisagree.teledrive.presentation.navigation
 
+import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.InsertDriveFile
 import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
+import androidx.compose.material.icons.automirrored.outlined.InsertDriveFile
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Photo
 import androidx.compose.material.icons.filled.Settings
@@ -10,7 +11,6 @@ import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Photo
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.annotation.StringRes
 import com.drdisagree.teledrive.R
 
 enum class TopLevelDestination(

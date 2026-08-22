@@ -17,7 +17,7 @@ class StorageInspector @Inject constructor(
     }.getOrDefault(0L)
 
     fun cacheSizeBytes(): Long = directorySize(context.cacheDir) +
-        (context.externalCacheDir?.let(::directorySize) ?: 0L)
+            (context.externalCacheDir?.let(::directorySize) ?: 0L)
 
     fun directorySize(directory: File): Long {
         if (!directory.exists()) return 0L

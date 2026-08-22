@@ -1,8 +1,8 @@
 package com.drdisagree.teledrive.presentation.onboarding
 
 import com.drdisagree.teledrive.core.telegram.CodeDeliveryChannel
-import com.drdisagree.teledrive.domain.model.DriveChannel
 import com.drdisagree.teledrive.domain.model.Country
+import com.drdisagree.teledrive.domain.model.DriveChannel
 
 data class OnboardingUiState(
     val step: OnboardingStep = OnboardingStep.WELCOME,

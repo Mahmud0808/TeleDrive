@@ -8,8 +8,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import com.drdisagree.teledrive.R
 import androidx.compose.ui.res.stringResource
+import com.drdisagree.teledrive.R
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable

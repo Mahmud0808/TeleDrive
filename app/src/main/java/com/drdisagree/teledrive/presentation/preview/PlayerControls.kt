@@ -54,7 +54,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.LocalContentColor
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.RadioButton
@@ -66,27 +65,29 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.C
 import androidx.media3.common.Player
 import androidx.media3.common.TrackSelectionOverride
 import androidx.media3.common.Tracks
-import com.drdisagree.teledrive.presentation.common.Formatters
-import kotlin.math.abs
-import kotlinx.coroutines.delay
-import androidx.compose.ui.res.stringResource
 import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.presentation.common.Formatters
+import kotlinx.coroutines.delay
+import kotlin.math.abs
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Playback controls drawn in Compose over the video surface. The Media3
@@ -124,13 +125,14 @@ fun PlayerControls(
     var showSpeeds by remember { mutableStateOf(false) }
 
     val activity = LocalActivity.current
+
     /**
      * Streaming from Telegram means a seek, or the first frames of a file, can
      * take a moment. Showing play there reads as "nothing happened", so the
      * button reports that the player is waiting on data instead.
      */
     val waitingForData = playbackState == Player.STATE_BUFFERING ||
-        (playWhenReady && !playing && !ended && playbackState != Player.STATE_IDLE)
+            (playWhenReady && !playing && !ended && playbackState != Player.STATE_IDLE)
 
     val textGroups = tracks.groups.filter { it.type == C.TRACK_TYPE_TEXT }
     val audioGroups = tracks.groups.filter { it.type == C.TRACK_TYPE_AUDIO }
@@ -186,7 +188,7 @@ fun PlayerControls(
                 position = current
             }
             duration = player.duration.coerceAtLeast(0)
-            delay(PROGRESS_INTERVAL_MS)
+            delay(PROGRESS_INTERVAL_MS.milliseconds)
         }
     }
 
@@ -219,123 +221,132 @@ fun PlayerControls(
                         CompositionLocalProvider(
                             LocalLayoutDirection provides LayoutDirection.Ltr
                         ) {
-                        ControlButton(
-                            icon = if (muted) {
-                                Icons.AutoMirrored.Filled.VolumeOff
-                            } else {
-                                Icons.AutoMirrored.Filled.VolumeUp
-                            },
-                            description = if (muted) stringResource(R.string.player_unmute) else stringResource(R.string.player_mute),
-                            active = muted,
-                            onClick = {
-                                onInteraction()
-                                muted = !muted
-                                player.volume = if (muted) 0f else 1f
-                            }
-                        )
-                        ControlButton(
-                            icon = rotation.icon,
-                            description = rotation.description,
-                            active = rotation != PlayerRotation.AUTO,
-                            onClick = {
-                                onInteraction()
-                                rotation = rotation.next()
-                                activity?.requestedOrientation = rotation.orientation
-                            }
-                        )
-                        if (!audioOnly) {
                             ControlButton(
-                                icon = resizeMode.icon,
-                                description = resizeMode.description,
-                                onClick = {
-                                    onInteraction()
-                                    onCycleResizeMode()
-                                }
-                            )
-                        }
-                        ExtraControl(expanded) {
-                            ControlButton(
-                                icon = Icons.Filled.SlowMotionVideo,
-                                description = stringResource(R.string.preview_playback_speed),
-                                active = speed != 1f,
-                                onClick = {
-                                    onInteraction()
-                                    showSpeeds = true
-                                }
-                            )
-                        }
-                        ExtraControl(expanded) {
-                            ControlButton(
-                                icon = if (repeatOne) {
-                                    Icons.Filled.RepeatOne
+                                icon = if (muted) {
+                                    Icons.AutoMirrored.Filled.VolumeOff
                                 } else {
-                                    Icons.Filled.Repeat
+                                    Icons.AutoMirrored.Filled.VolumeUp
                                 },
-                                description = if (repeatOne) stringResource(R.string.player_repeat_off) else stringResource(R.string.player_repeat_one),
-                                active = repeatOne,
+                                description = if (muted) stringResource(R.string.player_unmute) else stringResource(
+                                    R.string.player_mute
+                                ),
+                                active = muted,
                                 onClick = {
                                     onInteraction()
-                                    repeatOne = !repeatOne
-                                    player.repeatMode = if (repeatOne) {
-                                        Player.REPEAT_MODE_ONE
-                                    } else {
-                                        Player.REPEAT_MODE_OFF
-                                    }
+                                    muted = !muted
+                                    player.volume = if (muted) 0f else 1f
                                 }
                             )
-                        }
-                        if (!audioOnly) {
-                            ExtraControl(expanded) {
+                            ControlButton(
+                                icon = rotation.icon,
+                                description = rotation.description,
+                                active = rotation != PlayerRotation.AUTO,
+                                onClick = {
+                                    onInteraction()
+                                    rotation = rotation.next()
+                                    activity?.requestedOrientation = rotation.orientation
+                                }
+                            )
+                            if (!audioOnly) {
                                 ControlButton(
-                                    icon = if (subtitlesOn) {
-                                        Icons.Filled.Subtitles
-                                    } else {
-                                        Icons.Filled.SubtitlesOff
-                                    },
-                                    description = if (subtitlesOn) {
-                                        stringResource(R.string.player_hide_subtitles)
-                                    } else {
-                                        stringResource(R.string.player_show_subtitles)
-                                    },
-                                    active = subtitlesOn,
-                                    enabled = textGroups.isNotEmpty(),
+                                    icon = resizeMode.icon,
+                                    description = resizeMode.description,
                                     onClick = {
                                         onInteraction()
-                                        subtitlesOn = !subtitlesOn
+                                        onCycleResizeMode()
+                                    }
+                                )
+                            }
+                            ExtraControl(expanded) {
+                                ControlButton(
+                                    icon = Icons.Filled.SlowMotionVideo,
+                                    description = stringResource(R.string.preview_playback_speed),
+                                    active = speed != 1f,
+                                    onClick = {
+                                        onInteraction()
+                                        showSpeeds = true
+                                    }
+                                )
+                            }
+                            ExtraControl(expanded) {
+                                ControlButton(
+                                    icon = if (repeatOne) {
+                                        Icons.Filled.RepeatOne
+                                    } else {
+                                        Icons.Filled.Repeat
+                                    },
+                                    description = if (repeatOne) stringResource(R.string.player_repeat_off) else stringResource(
+                                        R.string.player_repeat_one
+                                    ),
+                                    active = repeatOne,
+                                    onClick = {
+                                        onInteraction()
+                                        repeatOne = !repeatOne
+                                        player.repeatMode = if (repeatOne) {
+                                            Player.REPEAT_MODE_ONE
+                                        } else {
+                                            Player.REPEAT_MODE_OFF
+                                        }
+                                    }
+                                )
+                            }
+                            if (!audioOnly) {
+                                ExtraControl(expanded) {
+                                    ControlButton(
+                                        icon = if (subtitlesOn) {
+                                            Icons.Filled.Subtitles
+                                        } else {
+                                            Icons.Filled.SubtitlesOff
+                                        },
+                                        description = if (subtitlesOn) {
+                                            stringResource(R.string.player_hide_subtitles)
+                                        } else {
+                                            stringResource(R.string.player_show_subtitles)
+                                        },
+                                        active = subtitlesOn,
+                                        enabled = textGroups.isNotEmpty(),
+                                        onClick = {
+                                            onInteraction()
+                                            subtitlesOn = !subtitlesOn
+                                            player.trackSelectionParameters =
+                                                player.trackSelectionParameters
+                                                    .buildUpon()
+                                                    .setTrackTypeDisabled(
+                                                        C.TRACK_TYPE_TEXT,
+                                                        !subtitlesOn
+                                                    )
+                                                    .build()
+                                        }
+                                    )
+                                }
+                            }
+                            ExtraControl(expanded) {
+                                ControlButton(
+                                    icon = Icons.Filled.Audiotrack,
+                                    description = stringResource(R.string.preview_next_audio_track),
+                                    enabled = audioGroups.size > 1,
+                                    onClick = {
+                                        onInteraction()
+                                        val selected = audioGroups.indexOfFirst { it.isSelected }
+                                        val next = audioGroups[(selected + 1) % audioGroups.size]
                                         player.trackSelectionParameters =
                                             player.trackSelectionParameters
                                                 .buildUpon()
-                                                .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, !subtitlesOn)
+                                                .setOverrideForType(
+                                                    TrackSelectionOverride(next.mediaTrackGroup, 0)
+                                                )
                                                 .build()
                                     }
                                 )
                             }
                         }
-                        ExtraControl(expanded) {
-                            ControlButton(
-                                icon = Icons.Filled.Audiotrack,
-                                description = stringResource(R.string.preview_next_audio_track),
-                                enabled = audioGroups.size > 1,
-                                onClick = {
-                                    onInteraction()
-                                    val selected = audioGroups.indexOfFirst { it.isSelected }
-                                    val next = audioGroups[(selected + 1) % audioGroups.size]
-                                    player.trackSelectionParameters =
-                                        player.trackSelectionParameters
-                                            .buildUpon()
-                                            .setOverrideForType(
-                                                TrackSelectionOverride(next.mediaTrackGroup, 0)
-                                            )
-                                            .build()
-                                }
-                            )
-                        }
-                        }
                     }
                 }
                 ControlButton(
                     icon = if (expanded) Icons.Filled.ChevronRight else Icons.Filled.ChevronLeft,
-                    description = if (expanded) stringResource(R.string.player_fewer_controls) else stringResource(R.string.player_more_controls),
+                    description = if (expanded) stringResource(R.string.player_fewer_controls) else stringResource(
+                        R.string.player_more_controls
+                    ),
                     onClick = {
                         onInteraction()
                         expanded = !expanded
@@ -489,74 +500,80 @@ private fun TransportRow(
         horizontalArrangement = Arrangement.spacedBy(24.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-            IconButton(
-                onClick = {
-                    onInteraction()
-                    player.seekTo((player.currentPosition - SEEK_STEP_MS).coerceAtLeast(0))
-                },
-                colors = IconButtonDefaults.filledTonalIconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                        .copy(alpha = TRANSPORT_ALPHA),
-                    contentColor = MaterialTheme.colorScheme.onSurface
-                )
-            ) {
-                Icon(Icons.Filled.Replay10, contentDescription = stringResource(R.string.preview_back_10_seconds))
-            }
-            FilledIconButton(
-                onClick = {
-                    onInteraction()
-                    when {
-                        ended -> {
-                            player.seekTo(0)
-                            player.play()
-                        }
-
-                        player.isPlaying -> player.pause()
-                        else -> player.play()
+        IconButton(
+            onClick = {
+                onInteraction()
+                player.seekTo((player.currentPosition - SEEK_STEP_MS).coerceAtLeast(0))
+            },
+            colors = IconButtonDefaults.filledTonalIconButtonColors(
+                containerColor = MaterialTheme.colorScheme.surface
+                    .copy(alpha = TRANSPORT_ALPHA),
+                contentColor = MaterialTheme.colorScheme.onSurface
+            )
+        ) {
+            Icon(
+                Icons.Filled.Replay10,
+                contentDescription = stringResource(R.string.preview_back_10_seconds)
+            )
+        }
+        FilledIconButton(
+            onClick = {
+                onInteraction()
+                when {
+                    ended -> {
+                        player.seekTo(0)
+                        player.play()
                     }
-                },
-                colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                        .copy(alpha = TRANSPORT_ALPHA),
-                    contentColor = MaterialTheme.colorScheme.onSurface
-                ),
-                modifier = Modifier.size(PLAY_BUTTON_SIZE)
-            ) {
-                if (waiting) {
-                    LoadingIndicator(
-                        color = LocalContentColor.current,
-                        modifier = Modifier.size(PLAY_ICON_SIZE)
-                    )
-                } else {
-                    Icon(
-                        imageVector = when {
-                            ended -> Icons.Filled.Replay
-                            playing -> Icons.Filled.Pause
-                            else -> Icons.Filled.PlayArrow
-                        },
-                        contentDescription = when {
-                            ended -> stringResource(R.string.player_replay)
-                            playing -> stringResource(R.string.player_pause)
-                            else -> stringResource(R.string.player_play)
-                        },
-                        modifier = Modifier.size(PLAY_ICON_SIZE)
-                    )
+
+                    player.isPlaying -> player.pause()
+                    else -> player.play()
                 }
-            }
-            IconButton(
-                onClick = {
-                    onInteraction()
-                    val limit = player.duration.coerceAtLeast(0)
-                    player.seekTo((player.currentPosition + SEEK_STEP_MS).coerceAtMost(limit))
-                },
-                colors = IconButtonDefaults.filledTonalIconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                        .copy(alpha = TRANSPORT_ALPHA),
-                    contentColor = MaterialTheme.colorScheme.onSurface
+            },
+            colors = IconButtonDefaults.filledIconButtonColors(
+                containerColor = MaterialTheme.colorScheme.surface
+                    .copy(alpha = TRANSPORT_ALPHA),
+                contentColor = MaterialTheme.colorScheme.onSurface
+            ),
+            modifier = Modifier.size(PLAY_BUTTON_SIZE)
+        ) {
+            if (waiting) {
+                LoadingIndicator(
+                    color = LocalContentColor.current,
+                    modifier = Modifier.size(PLAY_ICON_SIZE)
                 )
-            ) {
-                Icon(Icons.Filled.Forward10, contentDescription = stringResource(R.string.preview_forward_10_seconds))
+            } else {
+                Icon(
+                    imageVector = when {
+                        ended -> Icons.Filled.Replay
+                        playing -> Icons.Filled.Pause
+                        else -> Icons.Filled.PlayArrow
+                    },
+                    contentDescription = when {
+                        ended -> stringResource(R.string.player_replay)
+                        playing -> stringResource(R.string.player_pause)
+                        else -> stringResource(R.string.player_play)
+                    },
+                    modifier = Modifier.size(PLAY_ICON_SIZE)
+                )
             }
+        }
+        IconButton(
+            onClick = {
+                onInteraction()
+                val limit = player.duration.coerceAtLeast(0)
+                player.seekTo((player.currentPosition + SEEK_STEP_MS).coerceAtMost(limit))
+            },
+            colors = IconButtonDefaults.filledTonalIconButtonColors(
+                containerColor = MaterialTheme.colorScheme.surface
+                    .copy(alpha = TRANSPORT_ALPHA),
+                contentColor = MaterialTheme.colorScheme.onSurface
+            )
+        ) {
+            Icon(
+                Icons.Filled.Forward10,
+                contentDescription = stringResource(R.string.preview_forward_10_seconds)
+            )
+        }
     }
 }
 

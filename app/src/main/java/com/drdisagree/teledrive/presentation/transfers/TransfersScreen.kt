@@ -1,9 +1,7 @@
 package com.drdisagree.teledrive.presentation.transfers
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,17 +12,19 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Cancel
-import androidx.compose.material.icons.filled.ClearAll
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.outlined.SwapVert
 import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearWavyProgressIndicator
@@ -40,10 +40,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.drdisagree.teledrive.R
 import com.drdisagree.teledrive.domain.model.TransferState
 import com.drdisagree.teledrive.domain.model.TransferTask
 import com.drdisagree.teledrive.domain.model.TransferType
@@ -51,14 +53,8 @@ import com.drdisagree.teledrive.presentation.common.Formatters
 import com.drdisagree.teledrive.presentation.common.add
 import com.drdisagree.teledrive.presentation.components.ConfirmDialog
 import com.drdisagree.teledrive.presentation.components.EmptyState
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.foundation.lazy.rememberLazyListState
 import com.drdisagree.teledrive.presentation.components.liftedTopAppBarColors
 import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
-import androidx.compose.ui.res.stringResource
-import com.drdisagree.teledrive.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -104,25 +100,37 @@ fun TransfersScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                    colors = liftedTopAppBarColors(lifted),
+                colors = liftedTopAppBarColors(lifted),
                 title = { Text(stringResource(R.string.transfers)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back))
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.common_back)
+                        )
                     }
                 },
                 actions = {
                     if (state.active.isNotEmpty()) {
                         IconButton(onClick = viewModel::pauseAll) {
-                            Icon(Icons.Filled.Pause, contentDescription = stringResource(R.string.transfers_pause))
+                            Icon(
+                                Icons.Filled.Pause,
+                                contentDescription = stringResource(R.string.transfers_pause)
+                            )
                         }
                     } else if (state.paused.isNotEmpty()) {
                         IconButton(onClick = viewModel::resumeAll) {
-                            Icon(Icons.Filled.PlayArrow, contentDescription = stringResource(R.string.transfers_resume))
+                            Icon(
+                                Icons.Filled.PlayArrow,
+                                contentDescription = stringResource(R.string.transfers_resume)
+                            )
                         }
                     }
                     IconButton(onClick = { showMenu = true }) {
-                        Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.common_actions))
+                        Icon(
+                            Icons.Filled.MoreVert,
+                            contentDescription = stringResource(R.string.common_actions)
+                        )
                     }
                     DropdownMenu(
                         expanded = showMenu,
@@ -131,8 +139,8 @@ fun TransfersScreen(
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.transfers_cancel)) },
                             enabled = state.active.isNotEmpty() ||
-                                state.paused.isNotEmpty() ||
-                                state.failed.isNotEmpty(),
+                                    state.paused.isNotEmpty() ||
+                                    state.failed.isNotEmpty(),
                             onClick = {
                                 showMenu = false
                                 confirmCancelAll = true
@@ -152,7 +160,7 @@ fun TransfersScreen(
         }
     ) { padding ->
         val isEmpty = state.active.isEmpty() && state.paused.isEmpty() &&
-            state.failed.isEmpty() && state.completed.isEmpty()
+                state.failed.isEmpty() && state.completed.isEmpty()
         if (isEmpty && !state.loading) {
             EmptyState(
                 icon = Icons.Outlined.SwapVert,

@@ -61,7 +61,11 @@ interface TransferDao {
         """UPDATE transfers SET state = :completed, transferredBytes = sizeBytes,
            completedAt = :completedAt, updatedAt = :completedAt WHERE id = :id"""
     )
-    suspend fun setCompleted(id: String, completedAt: Long, completed: TransferState = TransferState.COMPLETED)
+    suspend fun setCompleted(
+        id: String,
+        completedAt: Long,
+        completed: TransferState = TransferState.COMPLETED
+    )
 
     /** Recovers transfers that were RUNNING when the process died. */
     @Query("UPDATE transfers SET state = 'QUEUED', telegramFileId = NULL WHERE state = 'RUNNING'")

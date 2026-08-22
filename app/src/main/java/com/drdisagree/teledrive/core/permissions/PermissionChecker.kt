@@ -23,7 +23,7 @@ class PermissionChecker @Inject constructor(
 
     fun hasAllFilesAccess(): Boolean =
         Build.VERSION.SDK_INT < Build.VERSION_CODES.R ||
-            Environment.isExternalStorageManager()
+                Environment.isExternalStorageManager()
 
     fun statuses(): Map<AppPermission, Boolean> =
         AppPermission.entries.associateWith(::isGranted)

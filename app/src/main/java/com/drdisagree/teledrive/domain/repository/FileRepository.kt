@@ -6,12 +6,12 @@ import com.drdisagree.teledrive.core.files.LocalCleanup
 import com.drdisagree.teledrive.data.local.FileQueryBuilder
 import com.drdisagree.teledrive.domain.model.DriveFile
 import com.drdisagree.teledrive.domain.model.DriveFolder
-import com.drdisagree.teledrive.domain.model.StorageSlice
-import com.drdisagree.teledrive.domain.model.MediaAlbum
-import kotlinx.coroutines.flow.Flow
 import com.drdisagree.teledrive.domain.model.FileSortField
-import com.drdisagree.teledrive.domain.model.SortDirection
 import com.drdisagree.teledrive.domain.model.LinkMetadata
+import com.drdisagree.teledrive.domain.model.MediaAlbum
+import com.drdisagree.teledrive.domain.model.SortDirection
+import com.drdisagree.teledrive.domain.model.StorageSlice
+import kotlinx.coroutines.flow.Flow
 
 interface FileRepository {
 

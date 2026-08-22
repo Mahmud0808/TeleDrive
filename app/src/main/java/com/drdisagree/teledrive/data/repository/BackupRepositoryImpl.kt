@@ -1,42 +1,42 @@
 package com.drdisagree.teledrive.data.repository
 
+import android.os.Environment
 import com.drdisagree.teledrive.core.common.AppError
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.core.common.SafeLog
 import com.drdisagree.teledrive.core.files.Hashing
 import com.drdisagree.teledrive.core.files.MimeTypes
 import com.drdisagree.teledrive.core.media.MediaMetadataExtractor
+import com.drdisagree.teledrive.core.transfer.BackupSessionTracker
 import com.drdisagree.teledrive.data.local.dao.BackupDao
 import com.drdisagree.teledrive.data.local.dao.FileDao
 import com.drdisagree.teledrive.data.local.dao.TransferDao
+import com.drdisagree.teledrive.data.local.entity.BackupRecordEntity
 import com.drdisagree.teledrive.data.local.entity.BackupSessionEntity
 import com.drdisagree.teledrive.data.local.entity.FileEntity
+import com.drdisagree.teledrive.data.local.entity.TransferEntity
 import com.drdisagree.teledrive.data.mapper.toDomain
 import com.drdisagree.teledrive.domain.model.BackupDecision
 import com.drdisagree.teledrive.domain.model.BackupSession
 import com.drdisagree.teledrive.domain.model.BackupSessionStatus
 import com.drdisagree.teledrive.domain.model.BackupState
 import com.drdisagree.teledrive.domain.model.BackupTrigger
-import com.drdisagree.teledrive.core.transfer.BackupSessionTracker
-import com.drdisagree.teledrive.data.local.entity.TransferEntity
 import com.drdisagree.teledrive.domain.model.FileCategory
 import com.drdisagree.teledrive.domain.model.TransferState
 import com.drdisagree.teledrive.domain.repository.BackupRepository
 import com.drdisagree.teledrive.domain.repository.ChannelRepository
-import com.drdisagree.teledrive.domain.repository.FileRepository
 import com.drdisagree.teledrive.domain.repository.ExclusionRepository
+import com.drdisagree.teledrive.domain.repository.FileRepository
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.usecase.DecideBackupActionUseCase
 import com.drdisagree.teledrive.domain.usecase.EvaluateExclusionsUseCase
-import android.os.Environment
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import java.io.File
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
-import com.drdisagree.teledrive.data.local.entity.BackupRecordEntity
 
 @Singleton
 class BackupRepositoryImpl @Inject constructor(
@@ -75,7 +75,7 @@ class BackupRepositoryImpl @Inject constructor(
             return AppResult.Failure(
                 AppError.UnsupportedOperation(
                     "No backup folders selected. Pick folders in Settings, " +
-                        "or upload files from Files."
+                            "or upload files from Files."
                 )
             )
         }
@@ -100,8 +100,8 @@ class BackupRepositoryImpl @Inject constructor(
         for (candidate in candidates) {
             if (backupDao.recordByPath(candidate.absolutePath) == null &&
                 (adoptLinkedUpload(candidate) ||
-                    reviveTrashedUpload(candidate) ||
-                    adoptUploadedCopy(candidate))
+                        reviveTrashedUpload(candidate) ||
+                        adoptUploadedCopy(candidate))
             ) {
                 skipped++
                 continue
@@ -138,7 +138,7 @@ class BackupRepositoryImpl @Inject constructor(
             SafeLog.d(
                 TAG,
                 "Backup scan: nothing to do, $skipped of ${candidates.size} skipped, " +
-                    "reasons=$reasons"
+                        "reasons=$reasons"
             )
             return AppResult.Success(null)
         }

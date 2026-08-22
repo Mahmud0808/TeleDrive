@@ -5,10 +5,10 @@ import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.drdisagree.teledrive.core.common.AppResult
+import com.drdisagree.teledrive.core.telegram.TelegramAuthState
 import com.drdisagree.teledrive.domain.model.BackupTrigger
 import com.drdisagree.teledrive.domain.repository.BackupRepository
 import com.drdisagree.teledrive.domain.repository.TelegramAuthRepository
-import com.drdisagree.teledrive.core.telegram.TelegramAuthState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.first

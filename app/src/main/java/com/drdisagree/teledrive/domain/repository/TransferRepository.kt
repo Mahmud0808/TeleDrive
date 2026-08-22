@@ -1,7 +1,6 @@
 package com.drdisagree.teledrive.domain.repository
 
 import com.drdisagree.teledrive.core.common.AppResult
-import com.drdisagree.teledrive.domain.model.TransferState
 import com.drdisagree.teledrive.domain.model.TransferTask
 import kotlinx.coroutines.flow.Flow
 

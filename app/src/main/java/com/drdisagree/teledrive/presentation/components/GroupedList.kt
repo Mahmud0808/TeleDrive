@@ -72,9 +72,9 @@ fun GroupedList(
             AnimatedVisibility(
                 visible = item.visible,
                 enter = expandVertically(spring(stiffness = Spring.StiffnessMediumLow)) +
-                    fadeIn(spring(stiffness = Spring.StiffnessMediumLow)),
+                        fadeIn(spring(stiffness = Spring.StiffnessMediumLow)),
                 exit = shrinkVertically(spring(stiffness = Spring.StiffnessMediumLow)) +
-                    fadeOut()
+                        fadeOut()
             ) {
                 Column {
                     Surface(

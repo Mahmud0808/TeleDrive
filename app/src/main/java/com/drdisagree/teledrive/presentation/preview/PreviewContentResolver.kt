@@ -1,6 +1,7 @@
 package com.drdisagree.teledrive.presentation.preview
 
 import android.content.Context
+import com.drdisagree.teledrive.R
 import com.drdisagree.teledrive.core.crypto.CryptoKeys
 import com.drdisagree.teledrive.core.crypto.StreamCrypto
 import com.drdisagree.teledrive.core.crypto.WrappedKeyRepository
@@ -13,17 +14,16 @@ import com.drdisagree.teledrive.data.local.entity.CacheEntryEntity
 import com.drdisagree.teledrive.data.local.entity.CacheEntryType
 import com.drdisagree.teledrive.domain.model.DriveFile
 import com.drdisagree.teledrive.domain.model.FileCategory
+import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
-import java.io.File
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import net.lingala.zip4j.ZipFile
-import com.drdisagree.teledrive.domain.repository.SettingsRepository
-import kotlinx.coroutines.flow.first
-import com.drdisagree.teledrive.R
+import java.io.File
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Turns a [DriveFile] into displayable preview content, fetching remote files
@@ -72,7 +72,7 @@ class PreviewContentResolver @Inject constructor(
            open, so browsing stays instant while a large transfer never starts
            without the user asking. */
         val autoFetchable = file.sizeBytes <= AUTO_PREVIEW_LIMIT &&
-            (MimeTypes.isImage(file.mimeType) || MimeTypes.isText(file.mimeType))
+                (MimeTypes.isImage(file.mimeType) || MimeTypes.isText(file.mimeType))
         if (!autoFetchable) {
             emit(PreviewContent.RequiresDownload(file.sizeBytes))
             return@flow
@@ -148,6 +148,7 @@ class PreviewContentResolver @Inject constructor(
                 when (event) {
                     is TelegramDownloadEvent.Progress ->
                         onProgress(event.transferredBytes, event.totalBytes)
+
                     is TelegramDownloadEvent.Completed -> tdlibPath = event.localPath
                 }
             }

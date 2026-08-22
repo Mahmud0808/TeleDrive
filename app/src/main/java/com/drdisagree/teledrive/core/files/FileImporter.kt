@@ -1,5 +1,6 @@
 package com.drdisagree.teledrive.core.files
 
+import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
@@ -8,7 +9,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
-import android.content.ContentResolver
 
 /**
  * Turns a SAF-picked document into a real path the transfer engine can upload
@@ -27,8 +27,6 @@ class FileImporter @Inject constructor(
     data class Imported(val path: String, val name: String, val sizeBytes: Long)
 
     fun import(uri: Uri): Imported? {
-        /* Most senders hand over content://, but a file:// URI is still legal
-           and points straight at something readable. */
         if (uri.scheme == ContentResolver.SCHEME_FILE) {
             val direct = uri.path?.let(::File)?.takeIf { it.isFile }
             if (direct != null) {

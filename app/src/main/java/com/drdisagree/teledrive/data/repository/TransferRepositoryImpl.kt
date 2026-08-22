@@ -6,6 +6,7 @@ import com.drdisagree.teledrive.core.files.StorageInspector
 import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.core.telegram.TelegramException
 import com.drdisagree.teledrive.core.telegram.TelegramLimits
+import com.drdisagree.teledrive.core.transfer.BackupSessionTracker
 import com.drdisagree.teledrive.core.transfer.TransferScheduler
 import com.drdisagree.teledrive.data.local.dao.FileDao
 import com.drdisagree.teledrive.data.local.dao.TransferDao
@@ -18,13 +19,12 @@ import com.drdisagree.teledrive.domain.model.TransferType
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.repository.TransferRepository
 import com.drdisagree.teledrive.domain.usecase.ValidateUploadUseCase
-import java.util.UUID
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import com.drdisagree.teledrive.core.transfer.BackupSessionTracker
+import java.util.UUID
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class TransferRepositoryImpl @Inject constructor(
@@ -62,7 +62,14 @@ class TransferRepositoryImpl @Inject constructor(
                 AppError.InsufficientStorage(entity.sizeBytes + STORAGE_MARGIN, available)
             )
         }
-        return insertTransfer(entity.id, entity.name, entity.sizeBytes, TransferType.DOWNLOAD, priority, null)
+        return insertTransfer(
+            entity.id,
+            entity.name,
+            entity.sizeBytes,
+            TransferType.DOWNLOAD,
+            priority,
+            null
+        )
     }
 
     suspend fun enqueueBackup(

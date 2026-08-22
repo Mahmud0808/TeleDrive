@@ -43,7 +43,8 @@ class MediaTriggerScheduler @Inject constructor(
             .setTriggerContentMaxDelay(MAX_DELAY_MS)
             .build()
 
-        val result = runCatching { scheduler.schedule(job) }.getOrDefault(JobScheduler.RESULT_FAILURE)
+        val result =
+            runCatching { scheduler.schedule(job) }.getOrDefault(JobScheduler.RESULT_FAILURE)
         if (result != JobScheduler.RESULT_SUCCESS) {
             SafeLog.w(TAG, "Could not arm the media trigger")
         }

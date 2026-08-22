@@ -4,26 +4,26 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.RectF
 import android.graphics.pdf.PdfRenderer
-import android.os.ParcelFileDescriptor
 import android.os.Build
-import androidx.compose.foundation.Image
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.VectorConverter
+import android.os.ParcelFileDescriptor
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.VectorConverter
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
@@ -35,25 +35,26 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import com.drdisagree.teledrive.presentation.components.ErrorState
+import androidx.core.graphics.createBitmap
+import com.drdisagree.teledrive.R
 import com.drdisagree.teledrive.presentation.common.add
+import com.drdisagree.teledrive.presentation.components.ErrorState
 import com.drdisagree.teledrive.presentation.components.LoadingState
-import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import androidx.compose.ui.res.stringResource
-import com.drdisagree.teledrive.R
+import java.io.File
 
 /**
  * PDF viewer backed by the platform PdfRenderer. Pages render lazily and are
@@ -80,7 +81,7 @@ fun PdfPreview(path: String, modifier: Modifier = Modifier) {
                 ParcelFileDescriptor.MODE_READ_ONLY
             )
             rendererState.value = PdfRenderer(descriptor)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             error.value = openFailedMessage
         }
         onDispose {
@@ -184,10 +185,9 @@ private fun PdfPage(
                 runCatching {
                     renderer.openPage(pageIndex).use { page ->
                         val scale = TARGET_WIDTH.toFloat() / page.width
-                        val bitmap = Bitmap.createBitmap(
+                        val bitmap = createBitmap(
                             TARGET_WIDTH,
-                            (page.height * scale).toInt().coerceAtLeast(1),
-                            Bitmap.Config.ARGB_8888
+                            (page.height * scale).toInt().coerceAtLeast(1)
                         )
                         bitmap.eraseColor(Color.WHITE)
                         page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
@@ -287,6 +287,7 @@ private data class PdfLink(
 
 private const val TARGET_WIDTH = 1080
 private const val PLACEHOLDER_RATIO = 0.7f
+
 /** Keeps the zoomed page covering the viewport, so no empty edge shows. */
 private fun clampPdfOffset(target: Offset, scale: Float, viewport: IntSize): Offset {
     val maxX = viewport.width * (scale - 1f) / 2f

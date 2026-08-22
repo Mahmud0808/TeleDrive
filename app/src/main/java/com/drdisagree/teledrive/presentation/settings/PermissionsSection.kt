@@ -28,14 +28,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.drdisagree.teledrive.R
 import com.drdisagree.teledrive.core.permissions.AppPermission
 import com.drdisagree.teledrive.core.permissions.PermissionChecker
-import androidx.compose.ui.res.stringResource
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.core.permissions.openAllFilesAccess
 
 /**
  * Lists every permission with its current state. Tapping a denied entry asks
@@ -103,7 +104,10 @@ private fun PermissionRow(
                 text = if (granted) {
                     stringResource(R.string.permissions_allowed)
                 } else if (permission.critical) {
-                    stringResource(R.string.permission_not_allowed, stringResource(permission.rationaleRes))
+                    stringResource(
+                        R.string.permission_not_allowed,
+                        stringResource(permission.rationaleRes)
+                    )
                 } else {
                     "Not allowed · optional"
                 },
@@ -118,7 +122,9 @@ private fun PermissionRow(
         Spacer(Modifier.width(16.dp))
         Icon(
             imageVector = if (granted) Icons.Filled.CheckCircle else Icons.Outlined.Cancel,
-            contentDescription = if (granted) stringResource(R.string.permissions_allowed) else stringResource(R.string.permissions_not_allowed),
+            contentDescription = if (granted) stringResource(R.string.permissions_allowed) else stringResource(
+                R.string.permissions_not_allowed
+            ),
             modifier = Modifier.size(22.dp),
             tint = when {
                 granted -> MaterialTheme.colorScheme.primary
@@ -134,17 +140,6 @@ private fun openAppSettings(context: android.content.Context) {
         context.startActivity(
             Intent(
                 Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                Uri.fromParts("package", context.packageName, null)
-            )
-        )
-    }
-}
-
-private fun openAllFilesAccess(context: android.content.Context) {
-    runCatching {
-        context.startActivity(
-            Intent(
-                Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
                 Uri.fromParts("package", context.packageName, null)
             )
         )

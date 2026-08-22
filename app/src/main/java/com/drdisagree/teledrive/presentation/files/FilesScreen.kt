@@ -1,73 +1,81 @@
 package com.drdisagree.teledrive.presentation.files
 
+import android.app.Activity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.DriveFileMove
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.CreateNewFolder
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.CloudDownload
-import androidx.compose.material.icons.filled.CloudUpload
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.CreateNewFolder
 import androidx.compose.material.icons.filled.Deselect
-import androidx.compose.material.icons.automirrored.filled.DriveFileMove
-import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material.icons.outlined.FolderOff
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonMenu
+import androidx.compose.material3.FloatingActionButtonMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.ToggleFloatingActionButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -75,66 +83,37 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
+import com.drdisagree.teledrive.R
 import com.drdisagree.teledrive.domain.model.DriveFile
 import com.drdisagree.teledrive.domain.model.DriveFolder
 import com.drdisagree.teledrive.domain.model.FileSortField
 import com.drdisagree.teledrive.domain.model.SortDirection
 import com.drdisagree.teledrive.domain.model.ViewMode
-import com.drdisagree.teledrive.presentation.components.pinchZoom
+import com.drdisagree.teledrive.presentation.common.CollectSnackbarMessages
 import com.drdisagree.teledrive.presentation.common.add
+import com.drdisagree.teledrive.presentation.common.isInitialLoad
+import com.drdisagree.teledrive.presentation.common.shareLocalFiles
+import com.drdisagree.teledrive.presentation.components.BlockingProgressDialog
+import com.drdisagree.teledrive.presentation.components.BottomBarSnackbarHost
 import com.drdisagree.teledrive.presentation.components.ConfirmDialog
 import com.drdisagree.teledrive.presentation.components.EmptyState
 import com.drdisagree.teledrive.presentation.components.FileGridItem
 import com.drdisagree.teledrive.presentation.components.FileInfoSheet
-import com.drdisagree.teledrive.presentation.components.FolderInfoSheet
 import com.drdisagree.teledrive.presentation.components.FileListItem
 import com.drdisagree.teledrive.presentation.components.FolderGridItem
-import com.drdisagree.teledrive.presentation.components.FolderRow
+import com.drdisagree.teledrive.presentation.components.FolderInfoSheet
 import com.drdisagree.teledrive.presentation.components.FolderPickerDialog
+import com.drdisagree.teledrive.presentation.components.FolderRow
+import com.drdisagree.teledrive.presentation.components.LoadingState
 import com.drdisagree.teledrive.presentation.components.RenameDialog
+import com.drdisagree.teledrive.presentation.components.liftedTopAppBarColors
+import com.drdisagree.teledrive.presentation.components.pinchZoom
+import com.drdisagree.teledrive.presentation.components.rememberDragSelect
+import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
 import com.drdisagree.teledrive.presentation.navigation.FabBottomBarInset
 import com.drdisagree.teledrive.presentation.navigation.LocalBottomBarInset
-import com.drdisagree.teledrive.presentation.components.BottomBarSnackbarHost
 import com.drdisagree.teledrive.presentation.preview.PreviewSequence
-import com.drdisagree.teledrive.presentation.components.rememberDragSelect
-import com.drdisagree.teledrive.presentation.components.contentsLabel
-import com.drdisagree.teledrive.presentation.components.LoadingState
-import com.drdisagree.teledrive.presentation.common.isInitialLoad
-import android.app.Activity
-import androidx.activity.result.IntentSenderRequest
-import androidx.compose.foundation.background
-import androidx.compose.ui.graphics.Color
-import androidx.compose.foundation.clickable
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import com.drdisagree.teledrive.presentation.components.liftedTopAppBarColors
-import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
-import androidx.compose.foundation.lazy.grid.LazyGridState
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.runtime.derivedStateOf
-import com.drdisagree.teledrive.presentation.components.BlockingProgressDialog
-import androidx.compose.ui.res.stringResource
-import com.drdisagree.teledrive.R
-import androidx.compose.material.icons.filled.ArrowUpward
-import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
-import androidx.compose.ui.platform.LocalContext
-import com.drdisagree.teledrive.presentation.common.shareLocalFiles
-import com.drdisagree.teledrive.presentation.common.CollectSnackbarMessages
-import androidx.compose.material.icons.filled.EditNote
-import androidx.compose.material3.FloatingActionButtonMenu
-import androidx.compose.material3.FloatingActionButtonMenuItem
-import androidx.compose.material3.ToggleFloatingActionButton
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -219,14 +198,20 @@ fun FilesScreen(
                     colors = liftedTopAppBarColors(lifted),
                     title = {
                         Text(
-                            text = stringResource(R.string.common_selection_count, state.selectionCount),
+                            text = stringResource(
+                                R.string.common_selection_count,
+                                state.selectionCount
+                            ),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
                     },
                     navigationIcon = {
                         IconButton(onClick = viewModel::clearSelection) {
-                            Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.common_clear_selection))
+                            Icon(
+                                Icons.Filled.Close,
+                                contentDescription = stringResource(R.string.common_clear_selection)
+                            )
                         }
                     },
                     actions = {
@@ -249,11 +234,17 @@ fun FilesScreen(
                             )
                         }
                         IconButton(onClick = { showMovePicker = true }) {
-                            Icon(Icons.AutoMirrored.Filled.DriveFileMove, contentDescription = stringResource(R.string.files_move))
+                            Icon(
+                                Icons.AutoMirrored.Filled.DriveFileMove,
+                                contentDescription = stringResource(R.string.files_move)
+                            )
                         }
                         Box {
                             IconButton(onClick = { showSelectionOverflow = true }) {
-                                Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.common_actions))
+                                Icon(
+                                    Icons.Filled.MoreVert,
+                                    contentDescription = stringResource(R.string.common_actions)
+                                )
                             }
                             DropdownMenu(
                                 expanded = showSelectionOverflow,
@@ -262,7 +253,7 @@ fun FilesScreen(
                                 DropdownMenuItem(
                                     text = { Text(stringResource(R.string.common_download)) },
                                     enabled = state.folderInSelection ||
-                                        state.capabilities.canDownload,
+                                            state.capabilities.canDownload,
                                     onClick = {
                                         showSelectionOverflow = false
                                         viewModel.downloadSelected()
@@ -271,7 +262,7 @@ fun FilesScreen(
                                 DropdownMenuItem(
                                     text = { Text(stringResource(R.string.common_upload)) },
                                     enabled = !state.folderInSelection &&
-                                        state.capabilities.canUpload,
+                                            state.capabilities.canUpload,
                                     onClick = {
                                         showSelectionOverflow = false
                                         viewModel.uploadSelected()
@@ -280,7 +271,7 @@ fun FilesScreen(
                                 DropdownMenuItem(
                                     text = { Text(stringResource(R.string.note_edit_action)) },
                                     enabled = state.selectionCount == 1 &&
-                                        state.folderSelection.isEmpty(),
+                                            state.folderSelection.isEmpty(),
                                     onClick = {
                                         showSelectionOverflow = false
                                         viewModel.editSelectedNote()
@@ -292,7 +283,7 @@ fun FilesScreen(
                                        to another app, so any folder in the
                                        selection rules sharing out. */
                                     enabled = state.selectionCount > 0 &&
-                                        state.folderSelection.isEmpty(),
+                                            state.folderSelection.isEmpty(),
                                     onClick = {
                                         showSelectionOverflow = false
                                         viewModel.shareSelected()
@@ -301,7 +292,7 @@ fun FilesScreen(
                                 DropdownMenuItem(
                                     text = { Text(stringResource(R.string.info_details)) },
                                     enabled = state.selectionCount +
-                                        state.folderSelection.size == 1,
+                                            state.folderSelection.size == 1,
                                     onClick = {
                                         showSelectionOverflow = false
                                         viewModel.showInfoForSelection()
@@ -333,7 +324,7 @@ fun FilesScreen(
                                 DropdownMenuItem(
                                     text = { Text(stringResource(R.string.common_free_space)) },
                                     enabled = !state.folderInSelection &&
-                                        state.capabilities.canFreeUpSpace,
+                                            state.capabilities.canFreeUpSpace,
                                     onClick = {
                                         showSelectionOverflow = false
                                         confirmDeleteLocal = true
@@ -382,7 +373,10 @@ fun FilesScreen(
                     },
                     actions = {
                         IconButton(onClick = onOpenSearch) {
-                            Icon(Icons.Filled.Search, contentDescription = stringResource(R.string.files_search))
+                            Icon(
+                                Icons.Filled.Search,
+                                contentDescription = stringResource(R.string.files_search)
+                            )
                         }
                         IconButton(onClick = { showCreateFolder = true }) {
                             Icon(
@@ -391,7 +385,10 @@ fun FilesScreen(
                             )
                         }
                         IconButton(onClick = { showSortMenu = true }) {
-                            Icon(Icons.AutoMirrored.Filled.Sort, contentDescription = stringResource(R.string.files_sort))
+                            Icon(
+                                Icons.AutoMirrored.Filled.Sort,
+                                contentDescription = stringResource(R.string.files_sort)
+                            )
                         }
                         SortMenu(
                             expanded = showSortMenu,
@@ -489,28 +486,28 @@ fun FilesScreen(
                 onRefresh = viewModel::refresh,
                 modifier = Modifier.fillMaxSize()
             ) {
-            if (isLoading) {
-                LoadingState()
-            } else if (isEmpty) {
-                EmptyState(
-                    icon = Icons.Outlined.FolderOff,
-                    title = stringResource(R.string.files_nothing_here_yet),
-                    description = stringResource(R.string.files_back_import_appear)
-                )
-            } else {
-                FilesContent(
-                    gridState = gridState,
-                    state = state,
-                    files = files,
-                    padding = PaddingValues(
-                        bottom = padding.calculateBottomPadding() +
-                            LocalBottomBarInset.current
-                    ),
-                    onOpenFolder = onOpenFolder,
-                    onOpenFile = onOpenFile,
-                    viewModel = viewModel
-                )
-            }
+                if (isLoading) {
+                    LoadingState()
+                } else if (isEmpty) {
+                    EmptyState(
+                        icon = Icons.Outlined.FolderOff,
+                        title = stringResource(R.string.files_nothing_here_yet),
+                        description = stringResource(R.string.files_back_import_appear)
+                    )
+                } else {
+                    FilesContent(
+                        gridState = gridState,
+                        state = state,
+                        files = files,
+                        padding = PaddingValues(
+                            bottom = padding.calculateBottomPadding() +
+                                    LocalBottomBarInset.current
+                        ),
+                        onOpenFolder = onOpenFolder,
+                        onOpenFile = onOpenFile,
+                        viewModel = viewModel
+                    )
+                }
             }
         }
     }
@@ -551,7 +548,9 @@ fun FilesScreen(
     }
     renameTarget?.let { target ->
         RenameDialog(
-            title = if (target.isFolder) stringResource(R.string.files_rename_folder) else stringResource(R.string.files_rename_file),
+            title = if (target.isFolder) stringResource(R.string.files_rename_folder) else stringResource(
+                R.string.files_rename_file
+            ),
             initialValue = target.name,
             confirmLabel = stringResource(R.string.common_rename),
             onConfirm = viewModel::confirmRename,

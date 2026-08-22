@@ -1,13 +1,15 @@
 package com.drdisagree.teledrive.presentation.channels
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.drdisagree.teledrive.R
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.domain.model.DriveChannel
 import com.drdisagree.teledrive.domain.repository.ChannelRepository
 import com.drdisagree.teledrive.presentation.common.toUserMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -16,9 +18,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import android.content.Context
-import com.drdisagree.teledrive.R
-import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 
 @HiltViewModel
 class ChannelsViewModel @Inject constructor(
@@ -61,7 +61,12 @@ class ChannelsViewModel @Inject constructor(
     fun create(label: String) = run(context.getString(R.string.channels_creating_drive)) {
         when (val result = channelRepository.create(label)) {
             is AppResult.Success -> {
-                _messages.tryEmit(context.getString(R.string.message_created_drive, result.value.displayName))
+                _messages.tryEmit(
+                    context.getString(
+                        R.string.message_created_drive,
+                        result.value.displayName
+                    )
+                )
                 channelRepository.switchTo(result.value.chatId)
             }
 
@@ -69,7 +74,8 @@ class ChannelsViewModel @Inject constructor(
         }
     }
 
-    fun switchTo(chatId: Long) = run(context.getString(R.string.channels_opening_drive)) { channelRepository.switchTo(chatId) }
+    fun switchTo(chatId: Long) =
+        run(context.getString(R.string.channels_opening_drive)) { channelRepository.switchTo(chatId) }
 
     fun rename(chatId: Long, label: String) = run(context.getString(R.string.channels_renaming)) {
         channelRepository.rename(chatId, label)

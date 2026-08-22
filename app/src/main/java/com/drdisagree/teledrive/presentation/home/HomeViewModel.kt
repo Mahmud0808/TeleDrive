@@ -1,22 +1,26 @@
 package com.drdisagree.teledrive.presentation.home
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.core.network.NetworkMonitor
+import com.drdisagree.teledrive.core.network.NetworkStatus
 import com.drdisagree.teledrive.core.permissions.AppPermission
 import com.drdisagree.teledrive.core.permissions.PermissionChecker
-import com.drdisagree.teledrive.core.network.NetworkStatus
+import com.drdisagree.teledrive.core.security.AppLockManager
 import com.drdisagree.teledrive.core.telegram.TelegramConnectionState
+import com.drdisagree.teledrive.data.local.dao.FileDao
+import com.drdisagree.teledrive.data.repository.ActiveChannel
 import com.drdisagree.teledrive.domain.model.BackupSession
 import com.drdisagree.teledrive.domain.model.BackupState
 import com.drdisagree.teledrive.domain.model.BackupTrigger
 import com.drdisagree.teledrive.domain.model.DriveChannel
 import com.drdisagree.teledrive.domain.model.DriveFile
-import com.drdisagree.teledrive.domain.model.StorageSlice
 import com.drdisagree.teledrive.domain.model.DriveFolder
+import com.drdisagree.teledrive.domain.model.StorageSlice
 import com.drdisagree.teledrive.domain.model.TransferTask
-import com.drdisagree.teledrive.data.local.dao.FileDao
-import com.drdisagree.teledrive.data.repository.ActiveChannel
 import com.drdisagree.teledrive.domain.repository.BackupRepository
 import com.drdisagree.teledrive.domain.repository.ChannelRepository
 import com.drdisagree.teledrive.domain.repository.FileRepository
@@ -24,14 +28,15 @@ import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.repository.SyncRepository
 import com.drdisagree.teledrive.domain.repository.TelegramAuthRepository
 import com.drdisagree.teledrive.domain.repository.TransferRepository
+import com.drdisagree.teledrive.presentation.common.toUserMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -40,12 +45,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import com.drdisagree.teledrive.core.common.AppResult
-import com.drdisagree.teledrive.core.security.AppLockManager
-import com.drdisagree.teledrive.presentation.common.toUserMessage
-import android.content.Context
-import com.drdisagree.teledrive.R
-import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 
 data class HomeUiState(
     val loading: Boolean = true,

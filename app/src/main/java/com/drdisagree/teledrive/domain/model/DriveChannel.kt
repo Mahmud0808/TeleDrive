@@ -5,7 +5,6 @@ data class DriveChannel(
     val chatId: Long,
     val title: String,
     val fileCount: Int,
-    /** What Telegram holds, which is known even before this device indexes. */
     val remoteFileCount: Int,
     val storedBytes: Long,
     val backupFolders: Set<String>,

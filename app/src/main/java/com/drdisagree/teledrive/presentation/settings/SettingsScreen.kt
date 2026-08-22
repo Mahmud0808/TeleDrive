@@ -26,15 +26,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.drdisagree.teledrive.presentation.navigation.LocalBottomBarInset
-import androidx.compose.runtime.getValue
+import com.drdisagree.teledrive.R
 import com.drdisagree.teledrive.presentation.components.liftedTopAppBarColors
 import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
-import androidx.compose.ui.res.stringResource
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.presentation.navigation.LocalBottomBarInset
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -1,29 +1,44 @@
 package com.drdisagree.teledrive.presentation.preview
 
-import android.graphics.Color
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import androidx.annotation.OptIn
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
@@ -33,25 +48,11 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
+import coil3.compose.AsyncImage
 import com.drdisagree.teledrive.core.media.TelegramDataSourceFactory
 import com.drdisagree.teledrive.core.media.ThumbnailModel
-import coil3.compose.AsyncImage
 import kotlinx.coroutines.delay
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MusicNote
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Media3 player for local and Telegram-streamed playback. PlayerView renders
@@ -86,12 +87,14 @@ fun MediaPlayer(
                 is PreviewContent.LocalMedia -> {
                     setMediaItem(MediaItem.fromUri("file://${content.path}"))
                 }
+
                 is PreviewContent.StreamedMedia -> {
                     val factory = dataSourceFactory.create(content.remoteFileId)
                     val source = ProgressiveMediaSource.Factory(factory)
                         .createMediaSource(MediaItem.fromUri("telegram://stream"))
                     setMediaSource(source)
                 }
+
                 else -> Unit
             }
             prepare()
@@ -149,7 +152,7 @@ fun MediaPlayer(
 
     LaunchedEffect(controlsVisible, playing, interactionTick, activePage, audioOnly) {
         if (!controlsVisible || !playing || !activePage || audioOnly) return@LaunchedEffect
-        delay(CONTROLLER_TIMEOUT_MS)
+        delay(CONTROLLER_TIMEOUT_MS.milliseconds)
         notifyControls(false)
     }
 

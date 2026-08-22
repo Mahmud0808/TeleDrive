@@ -2,13 +2,21 @@ package com.drdisagree.teledrive.presentation.home
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,14 +26,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.CloudSync
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.SwapVert
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material3.Button
@@ -45,34 +54,41 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import com.drdisagree.teledrive.R
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.drdisagree.teledrive.R
 import com.drdisagree.teledrive.core.telegram.TelegramConnectionState
 import com.drdisagree.teledrive.domain.model.BackupSessionStatus
-import com.drdisagree.teledrive.domain.model.SortDirection
 import com.drdisagree.teledrive.domain.model.FileSortField
-import com.drdisagree.teledrive.domain.model.TransferState
+import com.drdisagree.teledrive.domain.model.SortDirection
+import com.drdisagree.teledrive.domain.model.StorageSlice
 import com.drdisagree.teledrive.presentation.collection.CollectionType
+import com.drdisagree.teledrive.presentation.common.AgeBucket
+import com.drdisagree.teledrive.presentation.common.CollectSnackbarMessages
 import com.drdisagree.teledrive.presentation.common.Formatters
 import com.drdisagree.teledrive.presentation.common.add
+import com.drdisagree.teledrive.presentation.components.BottomBarSnackbarHost
+import com.drdisagree.teledrive.presentation.components.ChannelAvatar
 import com.drdisagree.teledrive.presentation.components.ConfirmDialog
 import com.drdisagree.teledrive.presentation.components.ConnectionDot
 import com.drdisagree.teledrive.presentation.components.ConnectionIndicator
@@ -80,31 +96,13 @@ import com.drdisagree.teledrive.presentation.components.FileThumbnail
 import com.drdisagree.teledrive.presentation.components.GroupedList
 import com.drdisagree.teledrive.presentation.components.LoadingState
 import com.drdisagree.teledrive.presentation.components.PermissionWarningCard
-import com.drdisagree.teledrive.presentation.navigation.LocalBottomBarInset
-import com.drdisagree.teledrive.presentation.preview.PreviewSequence
-import com.drdisagree.teledrive.presentation.components.BottomBarSnackbarHost
-import com.drdisagree.teledrive.presentation.components.ChannelAvatar
-import androidx.annotation.StringRes
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
-import androidx.compose.runtime.saveable.rememberSaveable
-import kotlinx.coroutines.delay
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.ui.res.pluralStringResource
-import com.drdisagree.teledrive.domain.model.StorageSlice
 import com.drdisagree.teledrive.presentation.components.chartColor
 import com.drdisagree.teledrive.presentation.components.label
+import com.drdisagree.teledrive.presentation.navigation.LocalBottomBarInset
+import com.drdisagree.teledrive.presentation.preview.PreviewSequence
+import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.TextStyle
-import com.drdisagree.teledrive.presentation.common.AgeBucket
-import com.drdisagree.teledrive.presentation.common.CollectSnackbarMessages
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -286,13 +284,15 @@ fun HomeScreen(
                                     .width(112.dp)
                                     .clip(MaterialTheme.shapes.large)
                                     .background(MaterialTheme.colorScheme.surfaceContainerLow)
-                                    .clickable { onOpenFile(
-                                        file.id,
-                                        PreviewSequence(
-                                            sortField = FileSortField.DATE_ADDED,
-                                            sortDirection = SortDirection.DESCENDING
+                                    .clickable {
+                                        onOpenFile(
+                                            file.id,
+                                            PreviewSequence(
+                                                sortField = FileSortField.DATE_ADDED,
+                                                sortDirection = SortDirection.DESCENDING
+                                            )
                                         )
-                                    ) }
+                                    }
                                     .padding(6.dp)
                             ) {
                                 FileThumbnail(
@@ -583,41 +583,6 @@ private fun BackupCard(
     }
 }
 
-@Composable
-private fun TransferCard(state: HomeUiState, onOpenTransfers: () -> Unit) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onOpenTransfers),
-        shape = MaterialTheme.shapes.extraLarge
-    ) {
-        Column(modifier = Modifier.padding(20.dp)) {
-            Text(
-                text = stringResource(
-                    R.string.home_active_transfers,
-                    state.activeTransfers.size
-                ),
-                style = MaterialTheme.typography.titleMedium
-            )
-            state.activeTransfers.take(2).forEach { transfer ->
-                Spacer(Modifier.height(10.dp))
-                Text(
-                    transfer.displayName,
-                    style = MaterialTheme.typography.bodySmall,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(Modifier.height(4.dp))
-                LinearWavyProgressIndicator(
-                    progress = { transfer.progress },
-                    amplitude = { if (transfer.state == TransferState.RUNNING) 1f else 0f },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        }
-    }
-}
-
 /** Connection state worth showing, or null while everything is normal. */
 private data class ConnectionStatus(
     val indicator: ConnectionIndicator,
@@ -640,7 +605,7 @@ private fun rememberConnectionStatus(
     LaunchedEffect(settled) {
         if (settled && !wasSettled) {
             showRecovered = true
-            delay(RECOVERED_VISIBLE_MS)
+            delay(RECOVERED_VISIBLE_MS.milliseconds)
             showRecovered = false
         }
         wasSettled = settled

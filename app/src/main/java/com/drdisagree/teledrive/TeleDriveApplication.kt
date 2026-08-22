@@ -7,24 +7,24 @@ import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.SingletonImageLoader
 import com.drdisagree.teledrive.core.common.AppNotifications
+import com.drdisagree.teledrive.core.common.SafeLog
 import com.drdisagree.teledrive.core.transfer.MaintenanceScheduler
 import com.drdisagree.teledrive.core.transfer.MediaStoreWatcher
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.repository.TransferRepository
 import com.drdisagree.teledrive.domain.repository.TrashRepository
 import dagger.hilt.android.HiltAndroidApp
-import javax.inject.Inject
-import javax.inject.Provider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
-import com.drdisagree.teledrive.core.common.SafeLog
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+import javax.inject.Provider
 
 @HiltAndroidApp
 class TeleDriveApplication : Application(), Configuration.Provider, SingletonImageLoader.Factory {

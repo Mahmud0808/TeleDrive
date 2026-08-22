@@ -59,7 +59,7 @@ class LocalCopyDeleter @Inject constructor(
     }
 
     private fun mediaUriFor(path: String): Uri? = runCatching {
-        val collection = MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL)
+        val collection = MediaStore.Files.getContentUri(externalVolume())
         context.contentResolver.query(
             collection,
             arrayOf(MediaStore.MediaColumns._ID),
@@ -75,10 +75,18 @@ class LocalCopyDeleter @Inject constructor(
         }
     }.getOrNull()
 
+    private fun externalVolume(): String =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            MediaStore.VOLUME_EXTERNAL
+        } else {
+            LEGACY_EXTERNAL_VOLUME
+        }
+
     private fun needsUserConsent(): Boolean =
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !Environment.isExternalStorageManager()
 
     private companion object {
         const val TAG = "LocalCopyDeleter"
+        const val LEGACY_EXTERNAL_VOLUME = "external"
     }
 }

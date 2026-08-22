@@ -8,14 +8,14 @@ import com.drdisagree.teledrive.core.telegram.TelegramConnectionState
 import com.drdisagree.teledrive.core.telegram.TelegramCredentials
 import com.drdisagree.teledrive.core.telegram.TelegramException
 import com.drdisagree.teledrive.core.telegram.TelegramUser
+import com.drdisagree.teledrive.domain.model.CountryList
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.repository.TelegramAuthRepository
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
-import com.drdisagree.teledrive.domain.model.CountryList
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class TelegramAuthRepositoryImpl @Inject constructor(
@@ -111,12 +111,16 @@ class TelegramAuthRepositoryImpl @Inject constructor(
         code == 401 -> AppError.AuthenticationRequired
         message.contains("PHONE_NUMBER_INVALID") ->
             AppError.InvalidPhoneNumber
+
         message.contains("PHONE_CODE_INVALID") ->
             AppError.IncorrectCode
+
         message.contains("PASSWORD_HASH_INVALID") ->
             AppError.IncorrectPassword
+
         message.contains("API_ID_INVALID") ->
             AppError.InvalidApiCredentials
+
         else -> AppError.TelegramError(code, message)
     }
 }

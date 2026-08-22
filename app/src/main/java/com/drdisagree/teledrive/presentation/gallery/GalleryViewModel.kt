@@ -1,11 +1,15 @@
 package com.drdisagree.teledrive.presentation.gallery
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import androidx.paging.insertSeparators
+import androidx.paging.map
+import com.drdisagree.teledrive.R
 import com.drdisagree.teledrive.data.local.FileQueryBuilder
 import com.drdisagree.teledrive.domain.model.DriveFile
 import com.drdisagree.teledrive.domain.model.FileCategory
@@ -13,19 +17,22 @@ import com.drdisagree.teledrive.domain.model.FileSortField
 import com.drdisagree.teledrive.domain.model.MediaAlbum
 import com.drdisagree.teledrive.domain.model.SortDirection
 import com.drdisagree.teledrive.domain.model.ViewMode
-import com.drdisagree.teledrive.presentation.components.GridZoomLevel
-import com.drdisagree.teledrive.presentation.components.zoomedIn
-import com.drdisagree.teledrive.presentation.components.zoomedOut
 import com.drdisagree.teledrive.domain.repository.FileRepository
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.repository.SyncRepository
 import com.drdisagree.teledrive.domain.repository.TransferRepository
 import com.drdisagree.teledrive.domain.repository.TrashRepository
+import com.drdisagree.teledrive.presentation.common.Formatters
+import com.drdisagree.teledrive.presentation.components.GridZoomLevel
+import com.drdisagree.teledrive.presentation.components.MIN_GRID_COLUMNS
+import com.drdisagree.teledrive.presentation.components.SelectionCapabilities
+import com.drdisagree.teledrive.presentation.components.zoomedIn
+import com.drdisagree.teledrive.presentation.components.zoomedOut
 import com.drdisagree.teledrive.presentation.navigation.Route
-import dagger.hilt.android.lifecycle.HiltViewModel
 import com.drdisagree.teledrive.presentation.preview.PreviewSequence
-import javax.inject.Inject
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -40,15 +47,8 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import com.drdisagree.teledrive.presentation.common.Formatters
-import androidx.paging.map
-import androidx.paging.insertSeparators
-import com.drdisagree.teledrive.presentation.components.MIN_GRID_COLUMNS
-import com.drdisagree.teledrive.presentation.components.SelectionCapabilities
-import androidx.annotation.StringRes
-import com.drdisagree.teledrive.R
+import javax.inject.Inject
 
 enum class GalleryTab(@param:StringRes val labelRes: Int) {
     ALL(R.string.gallery_tab_all),
@@ -103,7 +103,7 @@ class GalleryViewModel @Inject constructor(
         tab,
         sort,
         settingsRepository.preferences
-    ) { currentTab, (field, direction), prefs ->
+    ) { currentTab, (field, direction), _ ->
         FileQueryBuilder.Spec(
             folderId = albumFolderId,
             filterByFolder = isAlbumView,

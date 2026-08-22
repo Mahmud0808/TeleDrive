@@ -21,7 +21,7 @@ fun requireDeviceOwner(
         return
     }
     val authenticators = BiometricManager.Authenticators.BIOMETRIC_STRONG or
-        BiometricManager.Authenticators.DEVICE_CREDENTIAL
+            BiometricManager.Authenticators.DEVICE_CREDENTIAL
     if (BiometricManager.from(host).canAuthenticate(authenticators) !=
         BiometricManager.BIOMETRIC_SUCCESS
     ) {
@@ -39,8 +39,8 @@ fun requireDeviceOwner(
 
             override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
                 val silent = errorCode == BiometricPrompt.ERROR_USER_CANCELED ||
-                    errorCode == BiometricPrompt.ERROR_NEGATIVE_BUTTON ||
-                    errorCode == BiometricPrompt.ERROR_CANCELED
+                        errorCode == BiometricPrompt.ERROR_NEGATIVE_BUTTON ||
+                        errorCode == BiometricPrompt.ERROR_CANCELED
                 onDenied(if (silent) null else errString.toString())
             }
         }

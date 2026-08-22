@@ -1,64 +1,65 @@
 package com.drdisagree.teledrive.presentation.preview
 
+import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import androidx.core.content.FileProvider
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.activity.compose.LocalActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.VisibilityThreshold
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material.icons.outlined.FolderOpen
-import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Card
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -69,66 +70,59 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
+import androidx.core.net.toUri
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.media3.common.util.UnstableApi
+import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.core.files.MimeTypes
 import com.drdisagree.teledrive.core.media.TelegramDataSourceFactory
 import com.drdisagree.teledrive.domain.model.DriveFile
 import com.drdisagree.teledrive.domain.model.FileCategory
+import com.drdisagree.teledrive.domain.model.LinkMetadata
+import com.drdisagree.teledrive.presentation.common.CollectSnackbarMessages
 import com.drdisagree.teledrive.presentation.common.Formatters
-import com.drdisagree.teledrive.core.files.MimeTypes
-import com.drdisagree.teledrive.presentation.components.iconFor
+import com.drdisagree.teledrive.presentation.common.LinkedText
+import com.drdisagree.teledrive.presentation.common.MarkdownText
 import com.drdisagree.teledrive.presentation.common.add
+import com.drdisagree.teledrive.presentation.common.normalizeUrl
+import com.drdisagree.teledrive.presentation.common.scaledBy
+import com.drdisagree.teledrive.presentation.common.soleUrlOf
 import com.drdisagree.teledrive.presentation.components.ConfirmDialog
 import com.drdisagree.teledrive.presentation.components.EmptyState
 import com.drdisagree.teledrive.presentation.components.ErrorState
 import com.drdisagree.teledrive.presentation.components.FileInfoSheet
 import com.drdisagree.teledrive.presentation.components.LoadingState
 import com.drdisagree.teledrive.presentation.components.RenameDialog
-import dagger.hilt.android.EntryPointAccessors
-import dagger.hilt.InstallIn
+import com.drdisagree.teledrive.presentation.components.iconFor
 import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
-import java.io.File
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import android.app.Activity
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.IntentSenderRequest
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.media3.common.util.UnstableApi
-import android.annotation.SuppressLint
-import androidx.compose.ui.res.stringResource
-import com.drdisagree.teledrive.R
-import androidx.compose.ui.res.pluralStringResource
-import com.drdisagree.teledrive.presentation.common.CollectSnackbarMessages
-import com.drdisagree.teledrive.presentation.common.LinkedText
-import androidx.core.net.toUri
-import androidx.compose.material.icons.filled.Edit
-import com.drdisagree.teledrive.presentation.common.soleUrlOf
-import com.drdisagree.teledrive.presentation.common.normalizeUrl
-import androidx.compose.material.icons.filled.Link
-import com.drdisagree.teledrive.domain.model.LinkMetadata
-import com.drdisagree.teledrive.presentation.common.MarkdownText
-import androidx.compose.foundation.gestures.detectTransformGestures
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.text.TextStyle
-import com.drdisagree.teledrive.presentation.common.scaledBy
 import kotlinx.coroutines.delay
+import java.io.File
+import kotlin.time.Duration.Companion.milliseconds
 
 @EntryPoint
 @InstallIn(SingletonComponent::class)
@@ -200,7 +194,7 @@ fun PreviewScreen(
     val currentFile = liveFile ?: pagedFile
 
     val immersive = currentFile.category == FileCategory.IMAGE ||
-        currentFile.category == FileCategory.VIDEO
+            currentFile.category == FileCategory.VIDEO
     var chromeVisible by remember { mutableStateOf(true) }
     val chromeShown = chromeVisible || !immersive
 
@@ -272,7 +266,10 @@ fun PreviewScreen(
                     },
                     navigationIcon = {
                         IconButton(onClick = onBack) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back))
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(R.string.common_back)
+                            )
                         }
                     },
                     actions = {
@@ -293,7 +290,10 @@ fun PreviewScreen(
                             }
                         }
                         IconButton(onClick = { viewModel.showInfo(currentFile) }) {
-                            Icon(Icons.Filled.Info, contentDescription = stringResource(R.string.preview_file_info))
+                            Icon(
+                                Icons.Filled.Info,
+                                contentDescription = stringResource(R.string.preview_file_info)
+                            )
                         }
                         Box {
                             IconButton(onClick = { showOverflow = true }) {
@@ -467,7 +467,7 @@ private fun PreviewPage(
     // Written once the pinch settles, not on every frame of the gesture.
     LaunchedEffect(textScale) {
         if (textScale != storedTextScale) {
-            delay(TEXT_SCALE_SAVE_DELAY_MS)
+            delay(TEXT_SCALE_SAVE_DELAY_MS.milliseconds)
             onTextScaleChange(textScale)
         }
     }
@@ -511,11 +511,13 @@ private fun PreviewPage(
                 modifier = Modifier.padding(top = 12.dp)
             )
         }
+
         is PreviewContent.Image -> ZoomableImage(
             model = content.model,
             contentDescription = file.name,
             onTap = onToggleChrome
         )
+
         is PreviewContent.LocalMedia,
         is PreviewContent.StreamedMedia ->
             MediaPlayer(
@@ -528,6 +530,7 @@ private fun PreviewPage(
                 allowBackgroundPlayback = allowBackgroundPlayback,
                 onControlsVisibilityChanged = onChromeRequested
             )
+
         is PreviewContent.Pdf -> PdfPreview(path = content.path)
         is PreviewContent.PlainText -> if (soleUrlOf(content.text) != null) {
             val url = normalizeUrl(soleUrlOf(content.text).orEmpty())
@@ -579,6 +582,7 @@ private fun PreviewPage(
                 )
             }
         }
+
         is PreviewContent.Archive -> ArchiveList(content)
         is PreviewContent.RequiresDownload -> EmptyState(
             icon = Icons.Filled.Download,
@@ -590,6 +594,7 @@ private fun PreviewPage(
             actionLabel = stringResource(R.string.common_download),
             onAction = onDownload
         )
+
         is PreviewContent.Unsupported -> EmptyState(
             icon = Icons.Outlined.Description,
             title = stringResource(R.string.preview_no_preview),
@@ -597,6 +602,7 @@ private fun PreviewPage(
             actionLabel = if (file.hasLocalCopy) null else stringResource(R.string.common_download),
             onAction = if (file.hasLocalCopy) null else onDownload
         )
+
         is PreviewContent.Failed -> ErrorState(message = stringResource(content.messageRes))
     }
 }
@@ -640,13 +646,22 @@ private fun ArchiveList(archive: PreviewContent.Archive) {
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
                     Text(
-                        text = stringResource(R.string.preview_archive_format_title, archive.format),
+                        text = stringResource(
+                            R.string.preview_archive_format_title,
+                            archive.format
+                        ),
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.primary
                     )
                     Text(
                         text = buildString {
-                            append(pluralStringResource(R.plurals.file_count, files.size, files.size))
+                            append(
+                                pluralStringResource(
+                                    R.plurals.file_count,
+                                    files.size,
+                                    files.size
+                                )
+                            )
                             if (folderCount > 0) {
                                 append(", ")
                                 append(
@@ -795,7 +810,9 @@ private fun ArchiveRow(
         if (node.isDirectory) {
             Icon(
                 imageVector = Icons.Filled.ExpandMore,
-                contentDescription = if (row.expanded) stringResource(R.string.common_collapse) else stringResource(R.string.common_expand),
+                contentDescription = if (row.expanded) stringResource(R.string.common_collapse) else stringResource(
+                    R.string.common_expand
+                ),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.rotate(chevronRotation)
             )

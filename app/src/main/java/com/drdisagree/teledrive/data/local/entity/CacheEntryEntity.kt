@@ -3,7 +3,6 @@ package com.drdisagree.teledrive.data.local.entity
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.drdisagree.teledrive.data.local.entity.CacheEntryType
 
 @Entity(
     tableName = "cache_entries",

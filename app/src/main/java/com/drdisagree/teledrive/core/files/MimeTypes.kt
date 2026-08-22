@@ -37,9 +37,9 @@ object MimeTypes {
 
     fun isText(mimeType: String): Boolean =
         mimeType.startsWith("text/") ||
-            mimeType == "application/json" ||
-            mimeType == "application/xml" ||
-            mimeType == "application/yaml"
+                mimeType == "application/json" ||
+                mimeType == "application/xml" ||
+                mimeType == "application/yaml"
 
     fun isArchive(mimeType: String): Boolean = mimeType in setOf(
         "application/zip",

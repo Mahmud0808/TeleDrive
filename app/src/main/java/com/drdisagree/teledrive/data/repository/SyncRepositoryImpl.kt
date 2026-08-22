@@ -1,34 +1,35 @@
 package com.drdisagree.teledrive.data.repository
 
+import androidx.room.withTransaction
 import com.drdisagree.teledrive.core.common.AppError
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.core.common.SafeLog
+import com.drdisagree.teledrive.core.crypto.KeyBackupCodec
 import com.drdisagree.teledrive.core.files.MimeTypes
 import com.drdisagree.teledrive.core.telegram.RemoteDocument
 import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.core.telegram.TelegramException
 import com.drdisagree.teledrive.data.local.dao.FileDao
 import com.drdisagree.teledrive.data.local.dao.FolderDao
+import com.drdisagree.teledrive.data.local.database.TeleDriveDatabase
 import com.drdisagree.teledrive.data.local.entity.FileEntity
-import com.drdisagree.teledrive.core.crypto.KeyBackupCodec
 import com.drdisagree.teledrive.data.remote.telegram.ManifestCodec
+import com.drdisagree.teledrive.data.remote.telegram.RemoteFileManifest
 import com.drdisagree.teledrive.data.remote.telegram.RemoteFolderState
 import com.drdisagree.teledrive.domain.model.BackupState
 import com.drdisagree.teledrive.domain.model.FileCategory
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.repository.SyncRepository
-import java.util.UUID
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import com.drdisagree.teledrive.data.remote.telegram.RemoteFileManifest
-import androidx.room.withTransaction
-import com.drdisagree.teledrive.data.local.database.TeleDriveDatabase
+import java.util.UUID
+import javax.inject.Inject
+import javax.inject.Singleton
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Reconciles local metadata with the storage chat. The chat is the source of
@@ -118,7 +119,7 @@ class SyncRepositoryImpl @Inject constructor(
                 telegramClient.fetchDocuments(chatId, fromMessageId, PAGE_SIZE)
             } catch (e: TelegramException) {
                 if (e.isRateLimit) {
-                    delay(((e.retryAfterSeconds ?: 5) + 1) * 1000L)
+                    delay((((e.retryAfterSeconds ?: 5) + 1) * 1000L).milliseconds)
                     continue
                 }
                 throw e
@@ -199,9 +200,9 @@ class SyncRepositoryImpl @Inject constructor(
     /** App-managed bookkeeping documents must never surface as user files. */
     private fun isInternalDocument(document: RemoteDocument): Boolean =
         document.fileName == RemoteFolderState.FILE_NAME ||
-            document.fileName == KeyBackupCodec.BACKUP_FILE_NAME ||
-            document.caption.startsWith(RemoteFolderState.MARKER) ||
-            document.caption.startsWith(KEY_BACKUP_MARKER)
+                document.fileName == KeyBackupCodec.BACKUP_FILE_NAME ||
+                document.caption.startsWith(RemoteFolderState.MARKER) ||
+                document.caption.startsWith(KEY_BACKUP_MARKER)
 
     private fun isNewToLocal(document: RemoteDocument, known: KnownRows): Boolean {
         val existing = known.byUniqueId[document.uniqueFileId] ?: return true
@@ -312,9 +313,9 @@ class SyncRepositoryImpl @Inject constructor(
                 existing?.preTrashFolderId
             },
             createdAt = manifest?.createdAt ?: existing?.createdAt
-                ?: document.dateSeconds * 1000L,
+            ?: (document.dateSeconds * 1000L),
             modifiedAt = manifest?.modifiedAt ?: existing?.modifiedAt
-                ?: document.dateSeconds * 1000L,
+            ?: (document.dateSeconds * 1000L),
             addedAt = existing?.addedAt ?: now
         )
 
@@ -323,15 +324,18 @@ class SyncRepositoryImpl @Inject constructor(
                 fileDao.upsert(entity)
                 ReconcileResult.INSERTED
             }
+
             existing.id != entity.id -> {
                 fileDao.deleteByIds(listOf(existing.id))
                 fileDao.upsert(entity)
                 ReconcileResult.UPDATED
             }
+
             existing != entity -> {
                 fileDao.upsert(entity)
                 ReconcileResult.UPDATED
             }
+
             else -> ReconcileResult.UNCHANGED
         }
     }

@@ -1,5 +1,6 @@
 package com.drdisagree.teledrive.presentation.files
 
+import android.content.Context
 import android.content.IntentSender
 import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
@@ -8,8 +9,11 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import com.drdisagree.teledrive.R
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.core.files.FileImporter
+import com.drdisagree.teledrive.core.files.MimeTypes
+import com.drdisagree.teledrive.core.files.PendingShare
 import com.drdisagree.teledrive.data.local.FileQueryBuilder
 import com.drdisagree.teledrive.domain.model.DriveFile
 import com.drdisagree.teledrive.domain.model.DriveFolder
@@ -17,19 +21,22 @@ import com.drdisagree.teledrive.domain.model.FileSortField
 import com.drdisagree.teledrive.domain.model.SortDirection
 import com.drdisagree.teledrive.domain.model.UserPreferences
 import com.drdisagree.teledrive.domain.model.ViewMode
-import com.drdisagree.teledrive.presentation.components.GridZoomLevel
-import com.drdisagree.teledrive.presentation.components.zoomedIn
-import com.drdisagree.teledrive.presentation.components.zoomedOut
 import com.drdisagree.teledrive.domain.repository.FileRepository
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.repository.SyncRepository
 import com.drdisagree.teledrive.domain.repository.TransferRepository
 import com.drdisagree.teledrive.domain.repository.TrashRepository
 import com.drdisagree.teledrive.presentation.common.toUserMessage
+import com.drdisagree.teledrive.presentation.components.GridZoomLevel
+import com.drdisagree.teledrive.presentation.components.SelectionCapabilities
+import com.drdisagree.teledrive.presentation.components.zoomedIn
+import com.drdisagree.teledrive.presentation.components.zoomedOut
 import com.drdisagree.teledrive.presentation.navigation.Route
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,24 +46,18 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
-import com.drdisagree.teledrive.presentation.components.SelectionCapabilities
-import kotlinx.coroutines.flow.flow
-import android.content.Context
-import com.drdisagree.teledrive.R
-import dagger.hilt.android.qualifiers.ApplicationContext
-import com.drdisagree.teledrive.core.files.PendingShare
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.emitAll
-import com.drdisagree.teledrive.core.files.MimeTypes
+import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 
 data class RenameTarget(
     val id: String,
@@ -146,10 +147,11 @@ class FilesViewModel @Inject constructor(
                         )
                     }
                 }
+
                 is AppResult.Failure -> _messages.tryEmit(result.error.toUserMessage(context))
             }
             val elapsed = System.currentTimeMillis() - startedAt
-            if (elapsed < MIN_REFRESH_VISIBLE_MS) delay(MIN_REFRESH_VISIBLE_MS - elapsed)
+            if (elapsed < MIN_REFRESH_VISIBLE_MS) delay((MIN_REFRESH_VISIBLE_MS - elapsed).milliseconds)
             _refreshing.update { false }
         }
     }
@@ -198,11 +200,11 @@ class FilesViewModel @Inject constructor(
         folderFlow(),
         settingsRepository.preferences.flatMapLatest { prefs ->
             fileRepository.observeFolders(
-                folderId,
-                false,
-                false,
-                prefs.sortField,
-                prefs.sortDirection
+                parentId = folderId,
+                showHidden = false,
+                showArchived = false,
+                sortField = prefs.sortField,
+                sortDirection = prefs.sortDirection
             )
         }
     ) { prefs: UserPreferences, selectionState, selectedFolders, folder, folders ->
@@ -404,8 +406,8 @@ class FilesViewModel @Inject constructor(
         clearSelection()
         viewModelScope.launch {
             val ids = (
-                fileIds + folderIds.flatMap { fileRepository.fileIdsInTree(it) }
-                ).distinct()
+                    fileIds + folderIds.flatMap { fileRepository.fileIdsInTree(it) }
+                    ).distinct()
             if (ids.isEmpty()) {
                 _messages.tryEmit(context.getString(R.string.message_nothing_to_download))
                 return@launch
@@ -463,7 +465,12 @@ class FilesViewModel @Inject constructor(
                     _messages.tryEmit(result.error.toUserMessage(context))
                 }
             }
-            if (failures == 0) _messages.tryEmit(context.getString(R.string.message_moved_count, ids.size + folderIds.size))
+            if (failures == 0) _messages.tryEmit(
+                context.getString(
+                    R.string.message_moved_count,
+                    ids.size + folderIds.size
+                )
+            )
         }
     }
 
@@ -477,6 +484,7 @@ class FilesViewModel @Inject constructor(
                     if (result.value == ids.size) "Copied ${result.value}"
                     else "Copied ${result.value} of ${ids.size}"
                 )
+
                 is AppResult.Failure -> _messages.tryEmit(result.error.toUserMessage(context))
             }
             _copying.update { false }
@@ -522,6 +530,7 @@ class FilesViewModel @Inject constructor(
                         )
                     }
                 }
+
                 is AppResult.Failure -> _messages.tryEmit(result.error.toUserMessage(context))
             }
         }
@@ -560,7 +569,7 @@ class FilesViewModel @Inject constructor(
                     if (existing.folderId == target) {
                         duplicates++
                     } else if (fileRepository.copyFiles(listOf(existing.id), target)
-                            is AppResult.Success
+                                is AppResult.Success
                     ) {
                         copied++
                     } else {
@@ -579,6 +588,7 @@ class FilesViewModel @Inject constructor(
                             imported++
                         }
                     }
+
                     is AppResult.Failure -> failed++
                 }
             }

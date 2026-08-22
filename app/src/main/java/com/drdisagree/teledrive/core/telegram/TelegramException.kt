@@ -13,10 +13,14 @@ class TelegramException(
 
     val isChannelLimit: Boolean
         get() = message.contains("CHANNELS_TOO_MUCH", ignoreCase = true) ||
-            message.contains("too many chats", ignoreCase = true) ||
-            message.contains("Too much chats", ignoreCase = true)
+                message.contains("too many chats", ignoreCase = true) ||
+                message.contains("Too much chats", ignoreCase = true)
 
-    val isNetworkFailure: Boolean get() = code == 500 && message.contains("network", ignoreCase = true)
+    val isNetworkFailure: Boolean
+        get() = code == 500 && message.contains(
+            "network",
+            ignoreCase = true
+        )
 
     companion object {
         private val floodWaitRegex = Regex("retry after (\\d+)", RegexOption.IGNORE_CASE)

@@ -44,18 +44,21 @@ enum class AppPermission(
                 } else {
                     Manifest.permission.READ_EXTERNAL_STORAGE
                 }
+
             MEDIA_VIDEO ->
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     Manifest.permission.READ_MEDIA_VIDEO
                 } else {
                     Manifest.permission.READ_EXTERNAL_STORAGE
                 }
+
             NOTIFICATIONS ->
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     Manifest.permission.POST_NOTIFICATIONS
                 } else {
                     null
                 }
+
             ALL_FILES -> null
         }
 

@@ -8,8 +8,8 @@ import androidx.compose.ui.graphics.toArgb
 import com.google.android.material.color.MaterialColors
 
 /**
- * Pulls an authored colour toward the active primary so it belongs to the
- * current palette while staying recognisably itself. Under dynamic colour the
+ * Pulls an authored color toward the active primary so it belongs to the
+ * current palette while staying recognisably itself. Under dynamic color the
  * primary follows the wallpaper, so the whole chart re-tints with the system.
  */
 @Composable

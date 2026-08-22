@@ -1,35 +1,34 @@
 package com.drdisagree.teledrive.presentation
 
-import android.graphics.Color
-import android.os.Bundle
-import kotlinx.coroutines.flow.MutableStateFlow
-import com.drdisagree.teledrive.core.common.AppNotifications
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.compose.runtime.getValue
 import android.content.Intent
+import android.content.res.Configuration
+import android.graphics.Color
+import android.net.Uri
+import android.os.Build
+import android.os.Bundle
+import android.view.WindowManager
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.fragment.app.FragmentActivity
-import dagger.hilt.android.AndroidEntryPoint
-import android.content.res.Configuration
-import android.os.Build
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.ui.graphics.toArgb
+import androidx.core.content.IntentCompat
 import androidx.core.graphics.drawable.toDrawable
-import android.view.WindowManager
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.drdisagree.teledrive.core.common.AppNotifications
+import com.drdisagree.teledrive.core.files.PendingShare
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
-import javax.inject.Inject
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import android.net.Uri
-import androidx.core.content.IntentCompat
-import com.drdisagree.teledrive.core.files.PendingShare
+import javax.inject.Inject
 
 /**
  * Extends FragmentActivity because androidx BiometricPrompt requires it for
@@ -43,8 +42,8 @@ class MainActivity : FragmentActivity() {
 
 
     /**
-     * The launch theme can only name a static colour, so the splash lands on
-     * the closest system tone. Repainting the window with the very colour the
+     * The launch theme can only name a static color, so the splash lands on
+     * the closest system tone. Repainting the window with the very color the
      * Compose theme uses removes the seam between splash and first frame.
      */
     private fun applyWindowBackground() {
@@ -103,7 +102,13 @@ class MainActivity : FragmentActivity() {
     /** Files another app handed over through the system share sheet. */
     private fun sharedUris(intent: Intent?): List<Uri> = when (intent?.action) {
         Intent.ACTION_SEND ->
-            listOfNotNull(IntentCompat.getParcelableExtra(intent, Intent.EXTRA_STREAM, Uri::class.java))
+            listOfNotNull(
+                IntentCompat.getParcelableExtra(
+                    intent,
+                    Intent.EXTRA_STREAM,
+                    Uri::class.java
+                )
+            )
 
         Intent.ACTION_SEND_MULTIPLE ->
             IntentCompat.getParcelableArrayListExtra(

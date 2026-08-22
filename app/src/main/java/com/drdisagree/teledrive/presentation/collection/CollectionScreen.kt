@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
@@ -24,24 +25,23 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
+import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.presentation.common.isInitialLoad
 import com.drdisagree.teledrive.presentation.components.ConfirmDialog
 import com.drdisagree.teledrive.presentation.components.EmptyState
-import com.drdisagree.teledrive.presentation.preview.PreviewSequence
-import com.drdisagree.teledrive.presentation.components.rememberDragSelect
 import com.drdisagree.teledrive.presentation.components.FileListItem
 import com.drdisagree.teledrive.presentation.components.LoadingState
-import com.drdisagree.teledrive.presentation.common.isInitialLoad
-import androidx.compose.foundation.lazy.rememberLazyListState
 import com.drdisagree.teledrive.presentation.components.liftedTopAppBarColors
+import com.drdisagree.teledrive.presentation.components.rememberDragSelect
 import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
-import androidx.compose.ui.res.stringResource
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.presentation.preview.PreviewSequence
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,7 +78,7 @@ fun CollectionScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                    colors = liftedTopAppBarColors(lifted),
+                colors = liftedTopAppBarColors(lifted),
                 title = {
                     Text(
                         text = if (selectionMode) {
@@ -100,7 +100,9 @@ fun CollectionScreen(
                             } else {
                                 Icons.AutoMirrored.Filled.ArrowBack
                             },
-                            contentDescription = if (selectionMode) stringResource(R.string.common_clear_selection) else stringResource(R.string.common_back)
+                            contentDescription = if (selectionMode) stringResource(R.string.common_clear_selection) else stringResource(
+                                R.string.common_back
+                            )
                         )
                     }
                 },
@@ -134,7 +136,10 @@ fun CollectionScreen(
                             )
                         }
                         IconButton(onClick = { confirmTrash = true }) {
-                            Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.common_move_trash))
+                            Icon(
+                                Icons.Filled.Delete,
+                                contentDescription = stringResource(R.string.common_move_trash)
+                            )
                         }
                     }
                 }

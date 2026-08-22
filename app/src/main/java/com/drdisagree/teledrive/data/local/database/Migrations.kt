@@ -4,7 +4,7 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
 /**
- * Adds multi-channel support. Existing rows all belong to the single drive the
+ * Adds multichannel support. Existing rows all belong to the single drive the
  * app used before, so they are left with a null owner and adopted by the first
  * channel that opens, which keeps a wiped local index in step with the cloud.
  */
@@ -12,7 +12,7 @@ val MIGRATION_3_4 = object : Migration(3, 4) {
     override fun migrate(db: SupportSQLiteDatabase) {
         db.execSQL(
             "ALTER TABLE storage_channels " +
-                "ADD COLUMN defaultsSeeded INTEGER NOT NULL DEFAULT 0"
+                    "ADD COLUMN defaultsSeeded INTEGER NOT NULL DEFAULT 0"
         )
     }
 }
@@ -21,7 +21,7 @@ val MIGRATION_2_3 = object : Migration(2, 3) {
     override fun migrate(db: SupportSQLiteDatabase) {
         db.execSQL(
             "ALTER TABLE storage_channels " +
-                "ADD COLUMN remoteFileCount INTEGER NOT NULL DEFAULT 0"
+                    "ADD COLUMN remoteFileCount INTEGER NOT NULL DEFAULT 0"
         )
     }
 }
@@ -35,7 +35,7 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
         db.execSQL("DROP INDEX IF EXISTS index_exclusions_type_value")
         db.execSQL(
             "CREATE UNIQUE INDEX IF NOT EXISTS index_exclusions_chatId_type_value " +
-                "ON exclusions(chatId, type, value)"
+                    "ON exclusions(chatId, type, value)"
         )
 
         db.execSQL(

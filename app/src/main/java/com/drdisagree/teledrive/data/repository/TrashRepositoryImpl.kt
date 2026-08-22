@@ -1,9 +1,9 @@
 package com.drdisagree.teledrive.data.repository
 
 import android.content.Context
-import dagger.hilt.android.qualifiers.ApplicationContext
 import com.drdisagree.teledrive.core.common.AppError
 import com.drdisagree.teledrive.core.common.AppResult
+import com.drdisagree.teledrive.core.common.SafeLog
 import com.drdisagree.teledrive.core.crypto.SecureFileDeleter
 import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.core.telegram.TelegramException
@@ -13,16 +13,16 @@ import com.drdisagree.teledrive.data.local.dao.FolderDao
 import com.drdisagree.teledrive.data.local.dao.ThumbnailDao
 import com.drdisagree.teledrive.data.mapper.toDomain
 import com.drdisagree.teledrive.domain.model.TrashItem
+import com.drdisagree.teledrive.domain.repository.TransferRepository
 import com.drdisagree.teledrive.domain.repository.TrashRepository
-import java.io.File
-import javax.inject.Inject
-import javax.inject.Singleton
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import com.drdisagree.teledrive.core.common.SafeLog
-import com.drdisagree.teledrive.domain.repository.TransferRepository
+import java.io.File
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @Singleton
@@ -47,7 +47,7 @@ class TrashRepositoryImpl @Inject constructor(
                 folderDao.observeTrashRoots(chatId)
             ) { files, folders ->
                 (files.map { TrashItem.File(it.toDomain()) } +
-                    folders.map { TrashItem.Folder(it.toDomain()) })
+                        folders.map { TrashItem.Folder(it.toDomain()) })
                     .sortedByDescending { it.trashedAt }
             }
         }
@@ -90,7 +90,7 @@ class TrashRepositoryImpl @Inject constructor(
     }
 
     override suspend fun repairTrashTree() {
-        var repaired = 0
+        var repaired: Int
         var guard = 0
         do {
             val orphans = folderDao.untrashedChildrenOfTrashed()

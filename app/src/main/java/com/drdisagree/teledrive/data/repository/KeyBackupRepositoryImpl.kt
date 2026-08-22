@@ -14,10 +14,10 @@ import com.drdisagree.teledrive.core.telegram.TelegramUploadEvent
 import com.drdisagree.teledrive.domain.repository.KeyBackupRepository
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.first
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlinx.coroutines.flow.first
 
 @Singleton
 class KeyBackupRepositoryImpl @Inject constructor(
@@ -38,8 +38,8 @@ class KeyBackupRepositoryImpl @Inject constructor(
             return@runTelegram AppResult.Failure(
                 AppError.UnsupportedOperation(
                     "This channel already holds a key backup, and this device has no " +
-                        "key yet. Restore the existing backup with its passphrase first, " +
-                        "or files encrypted with the old key can never be decrypted."
+                            "key yet. Restore the existing backup with its passphrase first, " +
+                            "or files encrypted with the old key can never be decrypted."
                 )
             )
         }
@@ -100,7 +100,7 @@ class KeyBackupRepositoryImpl @Inject constructor(
             val page = telegramClient.fetchDocuments(chatId, fromMessageId, PAGE_SIZE)
             page.documents.firstOrNull {
                 it.fileName == KeyBackupCodec.BACKUP_FILE_NAME ||
-                    it.caption.startsWith(BACKUP_MARKER)
+                        it.caption.startsWith(BACKUP_MARKER)
             }?.let { return it }
             if (page.nextFromMessageId == 0L) return null
             fromMessageId = page.nextFromMessageId

@@ -63,8 +63,8 @@ fun SavedLink(
         value = when {
             metadata == null -> LinkState.Bare
             metadata.title == null &&
-                metadata.description == null &&
-                metadata.imagePath == null -> LinkState.Bare
+                    metadata.description == null &&
+                    metadata.imagePath == null -> LinkState.Bare
 
             else -> LinkState.Article(metadata)
         }

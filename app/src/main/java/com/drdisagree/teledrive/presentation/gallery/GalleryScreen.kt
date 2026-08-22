@@ -1,6 +1,11 @@
 package com.drdisagree.teledrive.presentation.gallery
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,18 +16,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.CloudDownload
-import androidx.compose.material.icons.filled.CloudUpload
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Deselect
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.SelectAll
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Photo
 import androidx.compose.material.icons.outlined.PhotoLibrary
 import androidx.compose.material3.ButtonGroupDefaults
@@ -39,11 +43,18 @@ import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -51,40 +62,24 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
+import com.drdisagree.teledrive.R
 import com.drdisagree.teledrive.domain.model.MediaAlbum
 import com.drdisagree.teledrive.domain.model.ViewMode
+import com.drdisagree.teledrive.presentation.common.DayBucket
+import com.drdisagree.teledrive.presentation.common.Formatters
+import com.drdisagree.teledrive.presentation.common.isInitialLoad
 import com.drdisagree.teledrive.presentation.components.ConfirmDialog
 import com.drdisagree.teledrive.presentation.components.EmptyState
-import com.drdisagree.teledrive.presentation.components.rememberDragSelect
 import com.drdisagree.teledrive.presentation.components.FileGridItem
 import com.drdisagree.teledrive.presentation.components.FileListItem
+import com.drdisagree.teledrive.presentation.components.LoadingState
+import com.drdisagree.teledrive.presentation.components.RenameDialog
+import com.drdisagree.teledrive.presentation.components.liftedTopAppBarColors
 import com.drdisagree.teledrive.presentation.components.pinchZoom
+import com.drdisagree.teledrive.presentation.components.rememberDragSelect
+import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
 import com.drdisagree.teledrive.presentation.navigation.LocalBottomBarInset
 import com.drdisagree.teledrive.presentation.preview.PreviewSequence
-import com.drdisagree.teledrive.presentation.common.Formatters
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import com.drdisagree.teledrive.presentation.components.LoadingState
-import com.drdisagree.teledrive.presentation.common.isInitialLoad
-import com.drdisagree.teledrive.presentation.components.RenameDialog
-import com.drdisagree.teledrive.domain.model.DriveFile
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import com.drdisagree.teledrive.presentation.components.liftedTopAppBarColors
-import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.ui.res.stringResource
-import com.drdisagree.teledrive.R
-import com.drdisagree.teledrive.presentation.common.DayBucket
 
 @Composable
 private fun DayHeaderRow(dayStartMillis: Long, modifier: Modifier = Modifier) {
@@ -249,7 +244,10 @@ fun GalleryScreen(
                     },
                     navigationIcon = {
                         IconButton(onClick = viewModel::clearSelection) {
-                            Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.common_clear_selection))
+                            Icon(
+                                Icons.Filled.Close,
+                                contentDescription = stringResource(R.string.common_clear_selection)
+                            )
                         }
                     },
                     actions = {
@@ -273,7 +271,10 @@ fun GalleryScreen(
                         }
                         Box {
                             IconButton(onClick = { showSelectionOverflow = true }) {
-                                Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.common_actions))
+                                Icon(
+                                    Icons.Filled.MoreVert,
+                                    contentDescription = stringResource(R.string.common_actions)
+                                )
                             }
                             DropdownMenu(
                                 expanded = showSelectionOverflow,

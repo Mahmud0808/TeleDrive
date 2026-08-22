@@ -1,5 +1,6 @@
 package com.drdisagree.teledrive.presentation.search
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -9,8 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
@@ -19,6 +20,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -26,22 +28,20 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.drdisagree.teledrive.R
 import com.drdisagree.teledrive.domain.model.FileCategory
 import com.drdisagree.teledrive.presentation.components.EmptyState
-import com.drdisagree.teledrive.presentation.preview.PreviewSequence
 import com.drdisagree.teledrive.presentation.components.FileListItem
 import com.drdisagree.teledrive.presentation.components.FolderRow
 import com.drdisagree.teledrive.presentation.components.LoadingState
+import com.drdisagree.teledrive.presentation.components.label
 import com.drdisagree.teledrive.presentation.components.liftedTopAppBarColors
 import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.ui.res.stringResource
-import com.drdisagree.teledrive.R
-import androidx.compose.material3.MaterialTheme
-import com.drdisagree.teledrive.presentation.components.label
+import com.drdisagree.teledrive.presentation.preview.PreviewSequence
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,7 +70,10 @@ fun SearchScreen(
                         trailingIcon = {
                             if (state.query.isNotEmpty()) {
                                 IconButton(onClick = { viewModel.setQuery("") }) {
-                                    Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.common_clear))
+                                    Icon(
+                                        Icons.Filled.Close,
+                                        contentDescription = stringResource(R.string.common_clear)
+                                    )
                                 }
                             }
                         }
@@ -78,7 +81,10 @@ fun SearchScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back))
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.common_back)
+                        )
                     }
                 }
             )
@@ -126,11 +132,13 @@ fun SearchScreen(
                     title = stringResource(R.string.app_search_drive),
                     description = stringResource(R.string.app_search_name_filter_type)
                 )
+
                 state.results.isEmpty() && state.folders.isEmpty() -> EmptyState(
                     icon = Icons.Outlined.Search,
                     title = stringResource(R.string.app_no_results),
                     description = stringResource(R.string.app_nothing_matches_search)
                 )
+
                 else -> LazyColumn(
                     state = listState,
                     modifier = Modifier.fillMaxSize(),

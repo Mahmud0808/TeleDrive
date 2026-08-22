@@ -29,10 +29,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
-import androidx.compose.ui.res.stringResource
 import com.drdisagree.teledrive.R
 
 /**
@@ -54,7 +54,7 @@ fun LockScreen(onUnlocked: () -> Unit) {
     LaunchedEffect(promptTrigger) {
         val host = activity ?: return@LaunchedEffect
         val authenticators = BiometricManager.Authenticators.BIOMETRIC_STRONG or
-            BiometricManager.Authenticators.DEVICE_CREDENTIAL
+                BiometricManager.Authenticators.DEVICE_CREDENTIAL
         val availability = BiometricManager.from(host).canAuthenticate(authenticators)
         if (availability != BiometricManager.BIOMETRIC_SUCCESS) {
             statusText = noScreenLockMessage
@@ -77,9 +77,11 @@ fun LockScreen(onUnlocked: () -> Unit) {
                         BiometricPrompt.ERROR_LOCKOUT,
                         BiometricPrompt.ERROR_LOCKOUT_PERMANENT ->
                             tooManyAttemptsMessage
+
                         BiometricPrompt.ERROR_USER_CANCELED,
                         BiometricPrompt.ERROR_NEGATIVE_BUTTON,
                         BiometricPrompt.ERROR_CANCELED -> null
+
                         else -> errString.toString()
                     }
                 }

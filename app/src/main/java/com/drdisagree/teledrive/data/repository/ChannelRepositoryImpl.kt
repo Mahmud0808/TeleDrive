@@ -3,9 +3,8 @@ package com.drdisagree.teledrive.data.repository
 import com.drdisagree.teledrive.core.common.AppError
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.core.common.SafeLog
-import com.drdisagree.teledrive.core.telegram.TelegramClient
-import kotlinx.coroutines.delay
 import com.drdisagree.teledrive.core.telegram.StorageChannel
+import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.core.telegram.TelegramException
 import com.drdisagree.teledrive.data.local.dao.StorageChannelDao
 import com.drdisagree.teledrive.data.local.entity.StorageChannelEntity
@@ -14,13 +13,15 @@ import com.drdisagree.teledrive.domain.repository.ChannelRepository
 import com.drdisagree.teledrive.domain.repository.ExclusionRepository
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.repository.SyncRepository
-import javax.inject.Inject
-import java.io.File
-import javax.inject.Singleton
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import java.io.File
+import javax.inject.Inject
+import javax.inject.Singleton
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Keeps the list of drives this account owns. Rows in files and folders carry
@@ -87,7 +88,7 @@ class ChannelRepositoryImpl @Inject constructor(
         repeat(DISCOVERY_ATTEMPTS) { attempt ->
             val found = telegramClient.listStorageChannels(channelDao.all().size)
             if (found.isNotEmpty()) return found
-            if (attempt < DISCOVERY_ATTEMPTS - 1) delay(DISCOVERY_RETRY_MS)
+            if (attempt < DISCOVERY_ATTEMPTS - 1) delay(DISCOVERY_RETRY_MS.milliseconds)
         }
         SafeLog.d(TAG, "No drive channels found on this account")
         return emptyList()

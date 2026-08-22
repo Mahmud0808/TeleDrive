@@ -21,10 +21,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.res.stringResource
 import com.drdisagree.teledrive.R
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -58,7 +58,14 @@ fun KeyBackupDialog(
                     singleLine = true,
                     isError = tooShort,
                     supportingText = if (tooShort) {
-                        { Text(stringResource(R.string.settings_passphrase_min_length, MIN_LENGTH)) }
+                        {
+                            Text(
+                                stringResource(
+                                    R.string.settings_passphrase_min_length,
+                                    MIN_LENGTH
+                                )
+                            )
+                        }
                     } else null,
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),

@@ -2,6 +2,7 @@ package com.drdisagree.teledrive.data.local
 
 import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteQuery
+import com.drdisagree.teledrive.data.local.FileQueryBuilder.build
 import com.drdisagree.teledrive.domain.model.FileCategory
 import com.drdisagree.teledrive.domain.model.FileSortField
 import com.drdisagree.teledrive.domain.model.SortDirection
@@ -107,7 +108,7 @@ object FileQueryBuilder {
         }
 
         val sql = "SELECT $projection FROM files WHERE $where " +
-            "ORDER BY $orderColumn $direction, id ASC"
+                "ORDER BY $orderColumn $direction, id ASC"
         return SimpleSQLiteQuery(sql, args.toTypedArray())
     }
 

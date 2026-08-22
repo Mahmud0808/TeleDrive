@@ -19,13 +19,49 @@ enum class SettingsSectionType(
     @param:StringRes val subtitleRes: Int,
     val icon: ImageVector
 ) {
-    ACCOUNT(R.string.settings_section_account_title, R.string.settings_section_account_subtitle, Icons.Filled.AccountCircle),
-    BACKUP(R.string.settings_section_backup_title, R.string.settings_section_backup_subtitle, Icons.Filled.CloudUpload),
-    STORAGE(R.string.settings_section_storage_title, R.string.settings_section_storage_subtitle, Icons.Filled.Storage),
-    PERMISSIONS(R.string.settings_section_permissions_title, R.string.settings_section_permissions_subtitle, Icons.Filled.Shield),
-    SECURITY(R.string.settings_section_security_title, R.string.settings_section_security_subtitle, Icons.Filled.Lock),
-    APPEARANCE(R.string.settings_section_appearance_title, R.string.settings_section_appearance_subtitle, Icons.Filled.Palette),
-    PLAYBACK(R.string.settings_section_playback_title, R.string.settings_section_playback_subtitle, Icons.Filled.PlayCircle),
-    NOTIFICATIONS(R.string.settings_section_notifications_title, R.string.settings_section_notifications_subtitle, Icons.Filled.Notifications),
-    ADVANCED(R.string.settings_section_advanced_title, R.string.settings_section_advanced_subtitle, Icons.Filled.Tune)
+    ACCOUNT(
+        R.string.settings_section_account_title,
+        R.string.settings_section_account_subtitle,
+        Icons.Filled.AccountCircle
+    ),
+    BACKUP(
+        R.string.settings_section_backup_title,
+        R.string.settings_section_backup_subtitle,
+        Icons.Filled.CloudUpload
+    ),
+    STORAGE(
+        R.string.settings_section_storage_title,
+        R.string.settings_section_storage_subtitle,
+        Icons.Filled.Storage
+    ),
+    PERMISSIONS(
+        R.string.settings_section_permissions_title,
+        R.string.settings_section_permissions_subtitle,
+        Icons.Filled.Shield
+    ),
+    SECURITY(
+        R.string.settings_section_security_title,
+        R.string.settings_section_security_subtitle,
+        Icons.Filled.Lock
+    ),
+    APPEARANCE(
+        R.string.settings_section_appearance_title,
+        R.string.settings_section_appearance_subtitle,
+        Icons.Filled.Palette
+    ),
+    PLAYBACK(
+        R.string.settings_section_playback_title,
+        R.string.settings_section_playback_subtitle,
+        Icons.Filled.PlayCircle
+    ),
+    NOTIFICATIONS(
+        R.string.settings_section_notifications_title,
+        R.string.settings_section_notifications_subtitle,
+        Icons.Filled.Notifications
+    ),
+    ADVANCED(
+        R.string.settings_section_advanced_title,
+        R.string.settings_section_advanced_subtitle,
+        Icons.Filled.Tune
+    )
 }

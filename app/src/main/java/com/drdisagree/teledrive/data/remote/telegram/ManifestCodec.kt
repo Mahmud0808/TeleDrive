@@ -46,6 +46,7 @@ class ManifestCodec @Inject constructor(
                     RemoteFileManifest.serializer(),
                     caption.removePrefix(PREFIX_PLAIN)
                 )
+
             caption.startsWith(PREFIX_ENCRYPTED) -> {
                 val key = wrappedKeyRepository.get(CryptoKeys.CONTENT) ?: return null
                 val plaintext = streamCrypto.decryptBytes(
@@ -57,6 +58,7 @@ class ManifestCodec @Inject constructor(
                     String(plaintext, Charsets.UTF_8)
                 )
             }
+
             else -> null
         }
     }.getOrNull()

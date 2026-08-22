@@ -1,9 +1,10 @@
 package com.drdisagree.teledrive.presentation.trash
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,13 +14,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteForever
-import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Deselect
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.RestoreFromTrash
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.outlined.Delete
@@ -33,7 +36,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,28 +44,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.layout.Column
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.drdisagree.teledrive.R
 import com.drdisagree.teledrive.domain.model.TrashItem
+import com.drdisagree.teledrive.presentation.common.CollectSnackbarMessages
 import com.drdisagree.teledrive.presentation.common.Formatters
 import com.drdisagree.teledrive.presentation.common.add
+import com.drdisagree.teledrive.presentation.components.BlockingProgressDialog
 import com.drdisagree.teledrive.presentation.components.ConfirmDialog
 import com.drdisagree.teledrive.presentation.components.EmptyState
 import com.drdisagree.teledrive.presentation.components.FileThumbnail
-import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.ExpandMore
-import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.lazy.rememberLazyListState
 import com.drdisagree.teledrive.presentation.components.liftedTopAppBarColors
 import com.drdisagree.teledrive.presentation.components.rememberDragSelect
 import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
-import com.drdisagree.teledrive.presentation.components.BlockingProgressDialog
-import androidx.compose.ui.res.stringResource
-import com.drdisagree.teledrive.R
-import com.drdisagree.teledrive.presentation.common.CollectSnackbarMessages
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -87,7 +84,7 @@ fun TrashScreen(
     val listState = rememberLazyListState()
     val lifted by rememberToolbarLift(listState)
     val allSelected = state.rows.any { it.selectable } &&
-        state.selection.size == state.rows.count { it.selectable }
+            state.selection.size == state.rows.count { it.selectable }
     val dragSelect = rememberDragSelect(
         listState = listState,
         onStart = viewModel::startRangeSelection,
@@ -112,7 +109,10 @@ fun TrashScreen(
                     },
                     navigationIcon = {
                         IconButton(onClick = viewModel::clearSelection) {
-                            Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.common_clear_selection))
+                            Icon(
+                                Icons.Filled.Close,
+                                contentDescription = stringResource(R.string.common_clear_selection)
+                            )
                         }
                     },
                     actions = {
@@ -135,7 +135,10 @@ fun TrashScreen(
                             )
                         }
                         IconButton(onClick = viewModel::restoreSelected) {
-                            Icon(Icons.Filled.RestoreFromTrash, contentDescription = stringResource(R.string.common_restore))
+                            Icon(
+                                Icons.Filled.RestoreFromTrash,
+                                contentDescription = stringResource(R.string.common_restore)
+                            )
                         }
                         IconButton(onClick = { confirmDeleteSelected = true }) {
                             Icon(
@@ -151,7 +154,10 @@ fun TrashScreen(
                     title = { Text(stringResource(R.string.trash)) },
                     navigationIcon = {
                         IconButton(onClick = onBack) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back))
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(R.string.common_back)
+                            )
                         }
                     },
                     actions = {
@@ -244,7 +250,10 @@ fun TrashScreen(
                         )
                         Text(
                             text = if (row.depth == 0) {
-                                stringResource(R.string.trash_trashed_at, Formatters.dateTime(item.trashedAt))
+                                stringResource(
+                                    R.string.trash_trashed_at,
+                                    Formatters.dateTime(item.trashedAt)
+                                )
                             } else {
                                 stringResource(R.string.trash_restores_with_folder)
                             },

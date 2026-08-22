@@ -7,12 +7,7 @@ import androidx.datastore.preferences.core.edit
 import com.drdisagree.teledrive.core.crypto.KeystoreManager
 import com.drdisagree.teledrive.core.telegram.TelegramCredentials
 import com.drdisagree.teledrive.data.local.preferences.PreferenceKeys
-import com.drdisagree.teledrive.domain.model.AppTheme
-import com.drdisagree.teledrive.domain.model.FileSortField
-import com.drdisagree.teledrive.domain.model.LayoutDensity
-import com.drdisagree.teledrive.domain.model.SortDirection
 import com.drdisagree.teledrive.domain.model.UserPreferences
-import com.drdisagree.teledrive.domain.model.ViewMode
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -41,7 +36,14 @@ class SettingsRepositoryImpl @Inject constructor(
         val apiHashEnc = data[PreferenceKeys.API_HASH_ENCRYPTED] ?: return null
         return runCatching {
             TelegramCredentials(
-                apiId = String(keystoreManager.decrypt(Base64.decode(apiIdEnc, Base64.NO_WRAP))).toInt(),
+                apiId = String(
+                    keystoreManager.decrypt(
+                        Base64.decode(
+                            apiIdEnc,
+                            Base64.NO_WRAP
+                        )
+                    )
+                ).toInt(),
                 apiHash = String(keystoreManager.decrypt(Base64.decode(apiHashEnc, Base64.NO_WRAP)))
             )
         }.getOrNull()

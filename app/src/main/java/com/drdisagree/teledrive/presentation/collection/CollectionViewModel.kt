@@ -13,15 +13,15 @@ import com.drdisagree.teledrive.domain.model.SortDirection
 import com.drdisagree.teledrive.domain.repository.FileRepository
 import com.drdisagree.teledrive.domain.repository.TrashRepository
 import com.drdisagree.teledrive.presentation.navigation.Route
-import dagger.hilt.android.lifecycle.HiltViewModel
 import com.drdisagree.teledrive.presentation.preview.PreviewSequence
-import javax.inject.Inject
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class CollectionViewModel @Inject constructor(
