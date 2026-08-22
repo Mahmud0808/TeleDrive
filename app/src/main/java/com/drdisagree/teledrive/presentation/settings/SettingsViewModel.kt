@@ -12,6 +12,7 @@ import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.core.telegram.TelegramConnectionState
 import com.drdisagree.teledrive.core.telegram.TelegramUser
 import com.drdisagree.teledrive.core.transfer.MaintenanceScheduler
+import com.drdisagree.teledrive.core.transfer.TransferScheduler
 import com.drdisagree.teledrive.data.repository.LocalDataWiper
 import com.drdisagree.teledrive.domain.model.BackupTrigger
 import com.drdisagree.teledrive.domain.model.UserPreferences
@@ -77,6 +78,7 @@ class SettingsViewModel @Inject constructor(
     private val backupRepository: BackupRepository,
     private val appLockManager: AppLockManager,
     private val maintenanceScheduler: MaintenanceScheduler,
+    private val transferScheduler: TransferScheduler,
     val permissionChecker: PermissionChecker,
     private val updateChecker: UpdateChecker
 ) : ViewModel() {
@@ -126,6 +128,9 @@ class SettingsViewModel @Inject constructor(
             val current = settingsRepository.preferences.first()
             if (current.linkPreviews != previous.linkPreviews) {
                 cacheRepository.clearLinkThumbnails()
+            }
+            if (current.allowMeteredTransfers != previous.allowMeteredTransfers) {
+                transferScheduler.rekick(current.allowMeteredTransfers)
             }
             backupRepository.syncActiveSessionWithSelection()
             rescheduleWork()
