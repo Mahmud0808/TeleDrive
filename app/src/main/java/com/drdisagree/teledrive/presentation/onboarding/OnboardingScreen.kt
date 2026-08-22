@@ -240,7 +240,9 @@ fun OnboardingScreen(
                         selectedChatId = state.selectedChatId,
                         justCreated = state.channelCreated,
                         working = state.working,
+                        error = state.error,
                         onSelect = viewModel::selectChannel,
+                        onRetry = viewModel::retryDriveSetup,
                         onContinue = viewModel::confirmChannel
                     )
                     OnboardingStep.BACKUP_SETUP -> BackupSetupStep(
@@ -274,13 +276,23 @@ private fun ChannelSelectStep(
     selectedChatId: Long?,
     justCreated: Boolean,
     working: Boolean,
+    error: String?,
     onSelect: (Long) -> Unit,
+    onRetry: () -> Unit,
     onContinue: () -> Unit
 ) {
     OnboardingPage(
         icon = Icons.Filled.CloudQueue,
-        title = if (justCreated) stringResource(R.string.onboarding_drive_ready) else stringResource(R.string.onboarding_choose_drive),
+        title = when {
+            channels.isEmpty() && error != null ->
+                stringResource(R.string.onboarding_no_drive_yet)
+
+            justCreated -> stringResource(R.string.onboarding_drive_ready)
+            else -> stringResource(R.string.onboarding_choose_drive)
+        },
         description = when {
+            channels.isEmpty() && error != null -> error
+
             justCreated -> stringResource(R.string.onboarding_drive_created_desc)
 
             channels.size > 1 -> stringResource(R.string.onboarding_pick_drive_desc)
@@ -337,6 +349,17 @@ private fun ChannelSelectStep(
             }
         }
         Spacer(Modifier.height(16.dp))
+        if (channels.isEmpty()) {
+            BigButton(
+                label = stringResource(
+                    if (working) R.string.onboarding_looking_for_drives
+                    else R.string.common_try_again
+                ),
+                onClick = onRetry,
+                enabled = !working
+            )
+            return@OnboardingPage
+        }
         BigButton(
             label = stringResource(
                 if (working) R.string.onboarding_opening else R.string.onboarding_continue

@@ -103,7 +103,9 @@ class OnboardingViewModel @Inject constructor(
                     error = state.message
                 )
                 is TelegramAuthState.Ready ->
+                    // A signed-in user reopening the app resumes past sign-in.
                     if (current.step in listOf(
+                            OnboardingStep.WELCOME,
                             OnboardingStep.PHONE,
                             OnboardingStep.CODE,
                             OnboardingStep.PASSWORD,
@@ -232,24 +234,38 @@ class OnboardingViewModel @Inject constructor(
      * channel their files will live in. An account with none gets one created.
      */
     fun onPermissionsResolved() {
-        _uiState.update { it.copy(working = true) }
-        viewModelScope.launch {
-            var channels = refreshChannels()
-            var created = false
-            if (channels.isEmpty()) {
-                created = channelRepository.create(DEFAULT_DRIVE_LABEL) is AppResult.Success
-                channels = refreshChannels()
+        _uiState.update { it.copy(working = true, error = null) }
+        viewModelScope.launch { loadOrCreateDrive() }
+    }
+
+    /** Retried from the drive step once the account has room again. */
+    fun retryDriveSetup() {
+        if (_uiState.value.working) return
+        _uiState.update { it.copy(working = true, error = null) }
+        viewModelScope.launch { loadOrCreateDrive() }
+    }
+
+    private suspend fun loadOrCreateDrive() {
+        var channels = refreshChannels()
+        var created = false
+        var failure: String? = null
+        if (channels.isEmpty()) {
+            when (val result = channelRepository.create(DEFAULT_DRIVE_LABEL)) {
+                is AppResult.Success -> created = true
+                is AppResult.Failure -> failure = result.error.toUserMessage(context)
             }
-            _uiState.update {
-                it.copy(
-                    step = OnboardingStep.CHANNEL_SELECT,
-                    channels = channels,
-                    channelCreated = created,
-                    selectedChatId = channels.firstOrNull { channel -> channel.isActive }?.chatId
-                        ?: channels.firstOrNull()?.chatId,
-                    working = false
-                )
-            }
+            channels = refreshChannels()
+        }
+        _uiState.update {
+            it.copy(
+                step = OnboardingStep.CHANNEL_SELECT,
+                channels = channels,
+                channelCreated = created,
+                selectedChatId = channels.firstOrNull { channel -> channel.isActive }?.chatId
+                    ?: channels.firstOrNull()?.chatId,
+                error = failure.takeIf { channels.isEmpty() },
+                working = false
+            )
         }
     }
 

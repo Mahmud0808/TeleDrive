@@ -34,6 +34,7 @@ fun AppError.toUserMessage(context: Context): String = when (this) {
     is AppError.NoRemoteCopy -> context.getString(R.string.error_no_remote_copy)
     is AppError.NoLocalCopy -> context.getString(R.string.error_no_local_copy)
     is AppError.LastDriveRemaining -> context.getString(R.string.error_last_drive)
+    is AppError.ChannelLimitReached -> context.getString(R.string.error_channel_limit)
     is AppError.InvalidApiCredentials -> context.getString(R.string.error_invalid_api)
     is AppError.InvalidPhoneNumber -> context.getString(R.string.error_invalid_phone)
     is AppError.IncorrectCode -> context.getString(R.string.error_incorrect_code)

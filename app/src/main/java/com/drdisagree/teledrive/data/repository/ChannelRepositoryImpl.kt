@@ -251,7 +251,9 @@ class ChannelRepositoryImpl @Inject constructor(
         block()
     } catch (e: TelegramException) {
         AppResult.Failure(
-            if (e.isRateLimit) {
+            if (e.isChannelLimit) {
+                AppError.ChannelLimitReached
+            } else if (e.isRateLimit) {
                 AppError.RateLimited(e.retryAfterSeconds ?: 0)
             } else {
                 AppError.TelegramError(e.code, e.message)

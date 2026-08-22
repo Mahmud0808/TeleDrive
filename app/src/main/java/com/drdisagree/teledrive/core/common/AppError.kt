@@ -38,6 +38,8 @@ sealed interface AppError {
 
     data object LastDriveRemaining : AppError
 
+    data object ChannelLimitReached : AppError
+
     data object InvalidApiCredentials : AppError
 
     data object InvalidPhoneNumber : AppError
