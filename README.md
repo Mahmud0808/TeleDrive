@@ -102,11 +102,7 @@ thumbnail cache.
 ## Screenshots
 
 <div align="center">
-
-| Home | Files | Gallery | Settings |
-| :---: | :---: | :---: | :---: |
-| <img src=".github/screenshots/home.png" width="200" alt="Home screen with backup status and storage breakdown"> | <img src=".github/screenshots/files.png" width="200" alt="File browser"> | <img src=".github/screenshots/gallery.png" width="200" alt="Media gallery"> | <img src=".github/screenshots/settings.png" width="200" alt="Settings"> |
-
+<img src=".github/screenshots/1.png" width="24%" alt="Home"> <img src=".github/screenshots/2.png" width="24%" alt="Files"> <img src=".github/screenshots/3.png" width="24%" alt="Gallery"> <img src=".github/screenshots/4.png" width="24%" alt="Settings">
 </div>
 
 ## Install
