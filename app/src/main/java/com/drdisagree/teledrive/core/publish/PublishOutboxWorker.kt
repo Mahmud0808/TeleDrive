@@ -16,6 +16,8 @@ import dagger.assisted.AssistedInject
 import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.core.telegram.TelegramException
 import com.drdisagree.teledrive.data.local.dao.PendingDeleteDao
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Drains the publish outbox: organizational state is written to the database
@@ -43,13 +45,22 @@ class PublishOutboxWorker @AssistedInject constructor(
             val batch = fileDao.pendingPublish(BATCH_SIZE)
             if (batch.isEmpty()) break
 
-            for (entity in batch) {
+            var index = 0
+            while (index < batch.size) {
+                val entity = batch[index++]
                 if (isStopped) return Result.retry()
                 when (val result = manifestPublisher.publish(entity)) {
                     is AppResult.Success -> fileDao.clearPendingPublish(entity.id)
                     is AppResult.Failure -> {
-                        if (!isPermanent(result.error)) return Result.retry()
-                        SafeLog.w(TAG, "Dropping unpublishable manifest: ${result.error}")
+                        val error = result.error
+                        if (error is AppError.RateLimited) {
+                            if (error.retryAfterSeconds > INLINE_WAIT_LIMIT) return Result.retry()
+                            delay(((error.retryAfterSeconds + 1) * 1000L).milliseconds)
+                            index--
+                            continue
+                        }
+                        if (!isPermanent(error)) return Result.retry()
+                        SafeLog.w(TAG, "Dropping unpublishable manifest: $error")
                         fileDao.clearPendingPublish(entity.id)
                     }
                 }
@@ -102,6 +113,7 @@ class PublishOutboxWorker @AssistedInject constructor(
         const val UNIQUE_NAME = "publish-outbox"
         private const val TAG = "PublishOutbox"
         private const val BATCH_SIZE = 100
+        private const val INLINE_WAIT_LIMIT = 60
         private val PERMANENT_CODES = 400..499
     }
 }

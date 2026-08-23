@@ -47,7 +47,8 @@ import kotlinx.coroutines.flow.onSubscription
 @Singleton
 class TdLibTelegramClient @Inject constructor(
     @param:ApplicationContext private val context: Context,
-    private val databaseKeyProvider: TdlibDatabaseKeyProvider
+    private val databaseKeyProvider: TdlibDatabaseKeyProvider,
+    private val pacer: TelegramPacer
 ) : TelegramClient {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -366,19 +367,21 @@ class TdLibTelegramClient @Inject constructor(
         caption: String
     ): RemoteDocument {
         awaitAuthorized()
-        val edited = send<TdApi.Message>(
-            TdApi.EditMessageMedia(
-                chatId,
-                messageId,
-                null,
-                TdApi.InputMessageDocument(
-                    TdApi.InputFileLocal(localPath),
+        val edited = paced {
+            send<TdApi.Message>(
+                TdApi.EditMessageMedia(
+                    chatId,
+                    messageId,
                     null,
-                    true,
-                    TdApi.FormattedText(caption, emptyArray())
+                    TdApi.InputMessageDocument(
+                        TdApi.InputFileLocal(localPath),
+                        null,
+                        true,
+                        TdApi.FormattedText(caption, emptyArray())
+                    )
                 )
             )
-        )
+        }
         return edited.toRemoteDocument()
             ?: throw TelegramException(500, "Edited message is not a document")
     }
@@ -693,7 +696,7 @@ class TdLibTelegramClient @Inject constructor(
             TdApi.FormattedText(caption, emptyArray())
         )
         var finished = false
-        var sentMessageId = 0L
+        var sentMessageId: Long
         val subscribed = CompletableDeferred<Unit>()
         val pendingMessageId = CompletableDeferred<Long>()
         val pendingFile = CompletableDeferred<Int?>()
@@ -747,7 +750,7 @@ class TdLibTelegramClient @Inject constructor(
 
         subscribed.await()
         val pending: TdApi.Message =
-            send(TdApi.SendMessage(chatId, null, null, null, null, content))
+            paced { send(TdApi.SendMessage(chatId, null, null, null, null, content)) }
         sentMessageId = pending.id
         pendingFile.complete((pending.content as? TdApi.MessageDocument)?.document?.document?.id)
         pendingMessageId.complete(pending.id)
@@ -793,7 +796,7 @@ class TdLibTelegramClient @Inject constructor(
             }
             subscribed.await()
             val pending: TdApi.Message =
-                send(TdApi.SendMessage(chatId, null, null, null, null, content))
+                paced { send(TdApi.SendMessage(chatId, null, null, null, null, content)) }
             pendingMessageId.complete(pending.id)
             outcome.await() ?: pending
         }
@@ -967,25 +970,32 @@ class TdLibTelegramClient @Inject constructor(
             .getOrNull()
 
     override suspend fun editCaption(chatId: Long, messageId: Long, caption: String) {
-        send(
-            TdApi.EditMessageCaption(
-                chatId,
-                messageId,
-                null,
-                TdApi.FormattedText(caption, emptyArray()),
-                false
+        paced {
+            send(
+                TdApi.EditMessageCaption(
+                    chatId,
+                    messageId,
+                    null,
+                    TdApi.FormattedText(caption, emptyArray()),
+                    false
+                )
             )
-        )
+        }
     }
 
     override suspend fun deleteMessages(chatId: Long, messageIds: List<Long>) {
         if (messageIds.isEmpty()) return
         messageIds.chunked(DELETE_BATCH).forEach { batch ->
-            withRateLimitRetry {
-                send(TdApi.DeleteMessages(chatId, batch.toLongArray(), true))
-            }
+            paced { send(TdApi.DeleteMessages(chatId, batch.toLongArray(), true)) }
         }
     }
+
+    /**
+     * Message creation is what Telegram rate limits, so those calls queue behind
+     * one pacer and a flood wait stops all of them, not just the caller that hit it.
+     */
+    private suspend fun <T> paced(block: suspend () -> T): T =
+        pacer.paced { withRateLimitRetry(block) }
 
     private suspend fun <T> withRateLimitRetry(block: suspend () -> T): T {
         var attempt = 0
