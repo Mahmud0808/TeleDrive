@@ -86,7 +86,8 @@ class TeleDriveApplication : Application(), Configuration.Provider, SingletonIma
                 backupIntervalHours = prefs.backupIntervalHours,
                 wifiOnly = prefs.backupWifiOnly,
                 chargingOnly = prefs.backupChargingOnly,
-                instantBackup = prefs.instantBackupEnabled
+                instantBackup = prefs.instantBackupEnabled,
+                updateChecks = prefs.updateCheckEnabled
             )
         }
     }

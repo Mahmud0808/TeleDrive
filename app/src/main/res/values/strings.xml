@@ -456,6 +456,11 @@
     <string name="notification_channel_backup_desc">Backup progress and results</string>
     <string name="notification_channel_failures">Failures</string>
     <string name="notification_channel_failures_desc">Failed transfers and backups</string>
+    <string name="notification_channel_updates">App updates</string>
+    <string name="notification_channel_updates_desc">Tells you when a new release is out</string>
+    <string name="notification_update_skip">Skip this version</string>
+    <string name="notification_update_title">Update available</string>
+    <string name="notification_update_message">%1$s %2$s is ready to download</string>
     <string name="notification_channel_transfers">Transfers</string>
     <string name="notification_channel_transfers_desc">Upload and download progress</string>
     <string name="notification_download_failed">Download failed</string>

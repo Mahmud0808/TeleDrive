@@ -49,5 +49,7 @@ data class UserPreferences(
     val debugLogging: Boolean = false,
 
     val updateCheckEnabled: Boolean = true,
-    val lastUpdateCheckAt: Long = 0L
+    val lastUpdateCheckAt: Long = 0L,
+    val notifiedUpdateVersion: String = "",
+    val skippedUpdateVersion: String = ""
 )

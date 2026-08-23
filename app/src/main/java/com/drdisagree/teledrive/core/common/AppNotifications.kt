@@ -17,6 +17,7 @@ import com.drdisagree.teledrive.presentation.MainActivity
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
+import com.drdisagree.teledrive.core.update.UpdateSkipReceiver
 
 @Singleton
 class AppNotifications @Inject constructor(
@@ -51,6 +52,37 @@ class AppNotifications @Inject constructor(
         runCatching {
             NotificationManagerCompat.from(context).notify(NOTIFICATION_ID_BACKUP, notification)
         }
+    }
+
+    @SuppressLint("MissingPermission")
+    fun notifyUpdate(title: String, message: String, version: String) {
+        if (!hasPermission()) return
+        val notification = NotificationCompat.Builder(context, CHANNEL_UPDATES)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(title)
+            .setContentText(message)
+            .setContentIntent(screenIntent(DESTINATION_UPDATE, REQUEST_UPDATE))
+            .addAction(
+                0,
+                context.getString(R.string.notification_update_skip),
+                skipIntent(version)
+            )
+            .setAutoCancel(true)
+            .build()
+        runCatching {
+            NotificationManagerCompat.from(context).notify(NOTIFICATION_ID_UPDATE, notification)
+        }
+    }
+
+    private fun skipIntent(version: String): PendingIntent {
+        val intent = Intent(context, UpdateSkipReceiver::class.java)
+            .putExtra(EXTRA_VERSION, version)
+        return PendingIntent.getBroadcast(
+            context,
+            REQUEST_SKIP,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
     }
 
     /** Opens the app on [destination], reusing the running task when there is one. */
@@ -95,6 +127,13 @@ class AppNotifications @Inject constructor(
         )
         manager.createNotificationChannel(
             NotificationChannel(
+                CHANNEL_UPDATES,
+                context.getString(R.string.notification_channel_updates),
+                NotificationManager.IMPORTANCE_LOW
+            ).apply { description = context.getString(R.string.notification_channel_updates_desc) }
+        )
+        manager.createNotificationChannel(
+            NotificationChannel(
                 CHANNEL_FAILURES,
                 context.getString(R.string.notification_channel_failures),
                 NotificationManager.IMPORTANCE_DEFAULT
@@ -105,17 +144,23 @@ class AppNotifications @Inject constructor(
     companion object {
         const val ACTION_OPEN_DESTINATION = "com.drdisagree.teledrive.OPEN"
         const val EXTRA_DESTINATION = "destination"
+        const val EXTRA_VERSION = "version"
         const val DESTINATION_TRANSFERS = "transfers"
         const val DESTINATION_FILES = "files"
         const val DESTINATION_NOTE = "note"
+        const val DESTINATION_UPDATE = "update"
         private const val REQUEST_FAILURE = 1
         private const val REQUEST_BACKUP = 2
         private const val REQUEST_QUEUE = 3
+        private const val REQUEST_UPDATE = 4
+        private const val REQUEST_SKIP = 5
         const val CHANNEL_TRANSFERS = "transfers"
         const val CHANNEL_BACKUP = "backup"
         const val CHANNEL_FAILURES = "failures"
+        const val CHANNEL_UPDATES = "updates"
         const val NOTIFICATION_ID_TRANSFER_QUEUE = 1001
         const val NOTIFICATION_ID_BACKUP = 1002
         const val NOTIFICATION_ID_FAILURE = 1003
+        const val NOTIFICATION_ID_UPDATE = 1004
     }
 }

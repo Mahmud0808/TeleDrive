@@ -10,6 +10,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
+import com.drdisagree.teledrive.core.update.UpdateCheckWorker
 
 @Singleton
 class MaintenanceScheduler @Inject constructor(
@@ -17,12 +18,32 @@ class MaintenanceScheduler @Inject constructor(
     private val mediaTriggerScheduler: MediaTriggerScheduler
 ) {
 
+    fun scheduleUpdateCheck(enabled: Boolean) {
+        val workManager = WorkManager.getInstance(context)
+        if (!enabled) {
+            workManager.cancelUniqueWork(UpdateCheckWorker.UNIQUE_NAME)
+            return
+        }
+        workManager.enqueueUniquePeriodicWork(
+            UpdateCheckWorker.UNIQUE_NAME,
+            ExistingPeriodicWorkPolicy.KEEP,
+            PeriodicWorkRequestBuilder<UpdateCheckWorker>(1, TimeUnit.DAYS)
+                .setConstraints(
+                    Constraints.Builder()
+                        .setRequiredNetworkType(NetworkType.CONNECTED)
+                        .build()
+                )
+                .build()
+        )
+    }
+
     fun scheduleAll(
         backupEnabled: Boolean,
         backupIntervalHours: Int,
         wifiOnly: Boolean,
         chargingOnly: Boolean,
-        instantBackup: Boolean = false
+        instantBackup: Boolean = false,
+        updateChecks: Boolean = true
     ) {
         val workManager = WorkManager.getInstance(context)
 
@@ -64,6 +85,8 @@ class MaintenanceScheduler @Inject constructor(
         } else {
             workManager.cancelUniqueWork(ScheduledBackupWorker.UNIQUE_NAME)
         }
+
+        scheduleUpdateCheck(updateChecks)
 
         workManager.enqueueUniquePeriodicWork(
             TrashCleanupWorker.UNIQUE_NAME,

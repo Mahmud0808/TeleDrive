@@ -110,16 +110,21 @@ class AppViewModel @Inject constructor(
         viewModelScope.launch { appLockManager.onAppStarted() }
     }
 
-    /** Looks for a release at most once a day, and never before setup is done. */
-    private fun checkForUpdate() {
+    /**
+     * Runs at most once a day whatever the notification setting says;
+     * [force] is for the notification tap, which asks for the answer now.
+     */
+    fun checkForUpdate(force: Boolean = false) {
         viewModelScope.launch {
             val prefs = settingsRepository.preferences.first()
-            if (!prefs.onboardingComplete || !prefs.updateCheckEnabled) return@launch
+            if (!prefs.onboardingComplete) return@launch
             val elapsed = System.currentTimeMillis() - prefs.lastUpdateCheckAt
-            if (elapsed < UPDATE_CHECK_INTERVAL_MS) return@launch
+            if (!force && elapsed < UPDATE_CHECK_INTERVAL_MS) return@launch
 
             settingsRepository.update { it.copy(lastUpdateCheckAt = System.currentTimeMillis()) }
-            _pendingUpdate.value = updateChecker.newerRelease()
+            val release = updateChecker.newerRelease()
+            if (!force && release?.version == prefs.skippedUpdateVersion) return@launch
+            _pendingUpdate.value = release
         }
     }
 

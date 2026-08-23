@@ -134,6 +134,7 @@ fun TeleDriveApp(
                     onboardingComplete = state.onboardingComplete,
                     notificationDestination = notificationDestination,
                     onDestinationHandled = onDestinationHandled,
+                    onUpdateRequested = { viewModel.checkForUpdate(force = true) },
                     driveMissing = viewModel.driveMissing
                 )
             }
@@ -157,6 +158,7 @@ private fun MainScaffold(
     onboardingComplete: Boolean,
     notificationDestination: String?,
     onDestinationHandled: () -> Unit,
+    onUpdateRequested: () -> Unit,
     driveMissing: Flow<Unit>
 ) {
     val navController = rememberNavController()
@@ -199,6 +201,8 @@ private fun MainScaffold(
             AppNotifications.DESTINATION_NOTE -> navController.navigate(
                 Route.NoteEditor(sharedText = pendingShare.text.value)
             )
+
+            AppNotifications.DESTINATION_UPDATE -> onUpdateRequested()
 
             else -> Unit
         }

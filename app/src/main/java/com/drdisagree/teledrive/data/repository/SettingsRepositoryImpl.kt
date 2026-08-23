@@ -120,6 +120,10 @@ class SettingsRepositoryImpl @Inject constructor(
                 ?: defaults.updateCheckEnabled,
             lastUpdateCheckAt = this[PreferenceKeys.LAST_UPDATE_CHECK_AT]
                 ?: defaults.lastUpdateCheckAt,
+            notifiedUpdateVersion = this[PreferenceKeys.NOTIFIED_UPDATE_VERSION]
+                ?: defaults.notifiedUpdateVersion,
+            skippedUpdateVersion = this[PreferenceKeys.SKIPPED_UPDATE_VERSION]
+                ?: defaults.skippedUpdateVersion,
             textPreviewScale = this[PreferenceKeys.TEXT_PREVIEW_SCALE]
                 ?: defaults.textPreviewScale,
             sortField = enumOrDefault(this[PreferenceKeys.SORT_FIELD], defaults.sortField),
@@ -176,6 +180,8 @@ class SettingsRepositoryImpl @Inject constructor(
         this[PreferenceKeys.LINK_PREVIEWS] = prefs.linkPreviews
         this[PreferenceKeys.UPDATE_CHECK_ENABLED] = prefs.updateCheckEnabled
         this[PreferenceKeys.LAST_UPDATE_CHECK_AT] = prefs.lastUpdateCheckAt
+        this[PreferenceKeys.NOTIFIED_UPDATE_VERSION] = prefs.notifiedUpdateVersion
+        this[PreferenceKeys.SKIPPED_UPDATE_VERSION] = prefs.skippedUpdateVersion
         this[PreferenceKeys.TEXT_PREVIEW_SCALE] = prefs.textPreviewScale
         this[PreferenceKeys.SORT_FIELD] = prefs.sortField.name
         this[PreferenceKeys.SORT_DIRECTION] = prefs.sortDirection.name

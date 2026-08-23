@@ -102,5 +102,9 @@
             android:exported="false"
             android:permission="android.permission.BIND_JOB_SERVICE" />
 
+        <receiver
+            android:name=".core.update.UpdateSkipReceiver"
+            android:exported="false" />
+
     </application>
 </manifest>

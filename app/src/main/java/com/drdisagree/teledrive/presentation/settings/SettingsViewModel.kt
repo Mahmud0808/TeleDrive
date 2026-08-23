@@ -132,6 +132,9 @@ class SettingsViewModel @Inject constructor(
             if (current.allowMeteredTransfers != previous.allowMeteredTransfers) {
                 transferScheduler.rekick(current.allowMeteredTransfers)
             }
+            if (current.updateCheckEnabled != previous.updateCheckEnabled) {
+                maintenanceScheduler.scheduleUpdateCheck(current.updateCheckEnabled)
+            }
             backupRepository.syncActiveSessionWithSelection()
             rescheduleWork()
         }
@@ -154,7 +157,8 @@ class SettingsViewModel @Inject constructor(
             backupIntervalHours = prefs.backupIntervalHours,
             wifiOnly = prefs.backupWifiOnly,
             chargingOnly = prefs.backupChargingOnly,
-            instantBackup = prefs.instantBackupEnabled
+            instantBackup = prefs.instantBackupEnabled,
+            updateChecks = prefs.updateCheckEnabled
         )
     }
 
@@ -315,6 +319,7 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             _updateState.value = UpdateState.Checking
             val release = updateChecker.newerRelease()
+            settingsRepository.update { it.copy(notifiedUpdateVersion = release?.version ?: "") }
             settingsRepository.update { it.copy(lastUpdateCheckAt = System.currentTimeMillis()) }
             _updateState.value = if (release == null) {
                 _messages.tryEmit(context.getString(R.string.about_no_update))
