@@ -13,6 +13,7 @@ import com.drdisagree.teledrive.core.files.FileNameUtils
 import com.drdisagree.teledrive.core.files.Hashing
 import com.drdisagree.teledrive.core.files.LocalCleanup
 import com.drdisagree.teledrive.core.files.LocalCopyDeleter
+import com.drdisagree.teledrive.core.files.Markdown
 import com.drdisagree.teledrive.core.files.MimeTypes
 import com.drdisagree.teledrive.core.files.NoteStore
 import com.drdisagree.teledrive.core.telegram.TelegramClient
@@ -569,7 +570,7 @@ class FileRepositoryImpl @Inject constructor(
                 ?.takeIf { it.isNotEmpty() }
                 ?.let { return it }
         }
-        return firstLine.take(NOTE_TITLE_LIMIT)
+        return Markdown.plain(firstLine).take(NOTE_TITLE_LIMIT)
     }
 
     override suspend fun findDuplicate(localPath: String): DriveFile? {
