@@ -161,6 +161,30 @@ TDLib native libraries come from the prebuilt
 [`tdlibx/td`](https://github.com/tdlibx/td) AAR via JitPack, so no NDK
 build is needed.
 
+## Bringing existing files in
+
+Already have files sitting in a channel, a group, or Saved Messages? Forward
+them into the drive TeleDrive created and they appear in the app after the next
+sync. Forwarding happens on Telegram's servers, so nothing is downloaded or
+uploaded again, and files of any size come across in seconds.
+
+Select the messages in the Telegram app, forward them to your TeleDrive
+channel, then pull to refresh in TeleDrive.
+
+What to expect for forwarded files:
+
+- Only messages sent **as documents** are picked up. A photo or video sent the
+  normal way was compressed by Telegram into a media message, and those are
+  skipped. Forward the original file version instead.
+- **Captions are replaced.** TeleDrive stores each file's name, folder and
+  flags in the caption, so the first rename, move or trash overwrites whatever
+  text the message carried.
+- **No checksum is recorded**, since the file is never read locally. Duplicate
+  detection cannot match forwarded files, so uploading the same file later
+  creates a second copy.
+- Files land at the drive root and stay unencrypted, because they were already
+  stored that way. Move them into folders in the app afterwards.
+
 ## Architecture
 
 Clean Architecture with MVVM and one package per screen. The dependency rule is
