@@ -97,6 +97,12 @@ interface FolderDao {
     @Query("SELECT name FROM folders WHERE parentId IS :parentId AND trashedAt IS NULL")
     suspend fun namesIn(parentId: String?): List<String>
 
+    @Query(
+        """SELECT name FROM folders
+           WHERE parentId IS :parentId AND trashedAt IS NULL AND id != :excludeId"""
+    )
+    suspend fun namesInExcluding(parentId: String?, excludeId: String): List<String>
+
     @Query("UPDATE folders SET name = :name, modifiedAt = :modifiedAt WHERE id = :id")
     suspend fun rename(id: String, name: String, modifiedAt: Long)
 

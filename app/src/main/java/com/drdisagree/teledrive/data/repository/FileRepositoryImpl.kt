@@ -211,10 +211,9 @@ class FileRepositoryImpl @Inject constructor(
     override suspend fun renameFile(id: String, newName: String): AppResult<Unit> {
         val file = fileDao.byId(id) ?: return AppResult.Failure(AppError.NotFound)
         val sanitized = FileNameUtils.sanitize(newName)
-        val siblingNames = fileDao.namesInFolder(file.folderId)
+        val siblingNames = fileDao.namesInFolderExcluding(file.folderId, id)
         val unique = FileNameUtils.uniqueName(sanitized) { candidate ->
-            candidate != file.name &&
-                    siblingNames.any { it.equals(candidate, ignoreCase = true) }
+            siblingNames.any { it.equals(candidate, ignoreCase = true) }
         }
         val now = System.currentTimeMillis()
         fileDao.rename(id, unique, now)
@@ -233,8 +232,13 @@ class FileRepositoryImpl @Inject constructor(
     }
 
     override suspend fun renameFolder(id: String, newName: String): AppResult<Unit> {
-        folderDao.byId(id) ?: return AppResult.Failure(AppError.NotFound)
-        folderDao.rename(id, FileNameUtils.sanitize(newName), System.currentTimeMillis())
+        val folder = folderDao.byId(id) ?: return AppResult.Failure(AppError.NotFound)
+        val sanitized = FileNameUtils.sanitize(newName)
+        val siblings = folderDao.namesInExcluding(folder.parentId, id)
+        if (siblings.any { it.equals(sanitized, ignoreCase = true) }) {
+            return AppResult.Failure(AppError.FolderNameTaken)
+        }
+        folderDao.rename(id, sanitized, System.currentTimeMillis())
         markFolderStateDirty()
         markFolderContentsDirty(id)
         return AppResult.Success(Unit)
