@@ -22,6 +22,7 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * Keeps the list of drives this account owns. Rows in files and folders carry
@@ -47,6 +48,9 @@ class ChannelRepositoryImpl @Inject constructor(
 
     override suspend fun refresh(): AppResult<List<DriveChannel>> = runTelegram {
         val remote = discoverChannels()
+            ?: return@runTelegram AppResult.Failure(
+                AppError.TelegramError(DISCOVERY_TIMEOUT_CODE, "Telegram did not respond")
+            )
         val now = System.currentTimeMillis()
         for (channel in remote) {
             val known = channelDao.byId(channel.chatId)
@@ -84,14 +88,21 @@ class ChannelRepositoryImpl @Inject constructor(
      * on that answer would strand the user's files in the channel they already
      * had, so discovery is retried before it is believed.
      */
-    private suspend fun discoverChannels(): List<StorageChannel> {
-        repeat(DISCOVERY_ATTEMPTS) { attempt ->
-            val found = telegramClient.listStorageChannels(channelDao.all().size)
-            if (found.isNotEmpty()) return found
-            if (attempt < DISCOVERY_ATTEMPTS - 1) delay(DISCOVERY_RETRY_MS.milliseconds)
+    private suspend fun discoverChannels(): List<StorageChannel>? {
+        val found = withTimeoutOrNull(DISCOVERY_BUDGET_MS.milliseconds) {
+            repeat(DISCOVERY_ATTEMPTS) { attempt ->
+                val pass = telegramClient.listStorageChannels(channelDao.all().map { it.chatId })
+                if (pass.isNotEmpty()) return@withTimeoutOrNull pass
+                if (attempt < DISCOVERY_ATTEMPTS - 1) delay(DISCOVERY_RETRY_MS.milliseconds)
+            }
+            emptyList()
         }
-        SafeLog.d(TAG, "No drive channels found on this account")
-        return emptyList()
+        if (found == null) {
+            SafeLog.w(TAG, "Drive discovery ran out of time")
+            return null
+        }
+        if (found.isEmpty()) SafeLog.d(TAG, "No drive channels found on this account")
+        return found
     }
 
     override suspend fun refreshKnown(): AppResult<Unit> = runTelegram {
@@ -264,6 +275,8 @@ class ChannelRepositoryImpl @Inject constructor(
 
     private companion object {
         const val TAG = "ChannelRepository"
+        const val DISCOVERY_BUDGET_MS = 60_000L
+        const val DISCOVERY_TIMEOUT_CODE = 408
         const val DISCOVERY_ATTEMPTS = 4
         const val DISCOVERY_RETRY_MS = 1_500L
         const val FOLDER_SEPARATOR = "\n"

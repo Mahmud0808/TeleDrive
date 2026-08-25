@@ -21,7 +21,7 @@ interface TelegramClient {
      * Channels on this account that can serve as the drive. Scanning every chat
      * is skipped when searching by name already finds [knownCount] of them.
      */
-    suspend fun listStorageChannels(knownCount: Int = 0): List<StorageChannel>
+    suspend fun listStorageChannels(knownChatIds: List<Long> = emptyList()): List<StorageChannel>
 
     /**
      * Creates another drive channel. [label] is appended to the drive name so

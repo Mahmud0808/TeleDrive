@@ -212,20 +212,30 @@ class TdLibTelegramClient @Inject constructor(
     }
 
 
+    /**
+     * TDLib answers a queued request whenever it reconnects, which on a dead
+     * connection can be never. Every request therefore carries a deadline, so a
+     * caller fails with an error it can show instead of waiting forever.
+     */
     private suspend fun <T : TdApi.Object> send(function: TdApi.Function<T>): T {
         val activeClient = client ?: throw TelegramException(500, "Telegram client not started")
-        return suspendCancellableCoroutine { continuation ->
-            activeClient.send(function) { result ->
-                if (result is TdApi.Error) {
-                    continuation.resumeWithException(
-                        TelegramException.from(result.code, result.message)
-                    )
-                } else {
-                    @Suppress("UNCHECKED_CAST")
-                    continuation.resume(result as T)
+        return withTimeoutOrNull(REQUEST_TIMEOUT_MS.milliseconds) {
+            suspendCancellableCoroutine { continuation ->
+                activeClient.send(function) { result ->
+                    if (result is TdApi.Error) {
+                        continuation.resumeWithException(
+                            TelegramException.from(result.code, result.message)
+                        )
+                    } else {
+                        @Suppress("UNCHECKED_CAST")
+                        continuation.resume(result as T)
+                    }
                 }
             }
-        }
+        } ?: throw TelegramException(
+            REQUEST_TIMEOUT_CODE,
+            "Telegram did not answer ${function::class.java.simpleName}"
+        ).also { SafeLog.w(TAG, "Request timed out: ${function::class.java.simpleName}") }
     }
 
     override suspend fun countries(): List<Country> =
@@ -474,14 +484,21 @@ class TdLibTelegramClient @Inject constructor(
      * an own private channel with the drive title whose description never took.
      * The marker is written back so the next check is unambiguous.
      */
-    override suspend fun listStorageChannels(knownCount: Int): List<StorageChannel> {
+    override suspend fun listStorageChannels(knownChatIds: List<Long>): List<StorageChannel> {
         awaitAuthorized()
+
+        val known = validateCandidates(knownChatIds.toSet())
+        if (known.size == knownChatIds.size && known.isNotEmpty()) {
+            SafeLog.d(TAG, "Confirmed ${known.size} known drives")
+            return known.sortedByDescending { it.documentCount }
+        }
+
         val candidates = LinkedHashSet<Long>()
         runCatching { send(TdApi.SearchChatsOnServer(STORAGE_CHAT_TITLE, CHAT_SEARCH_LIMIT)) }
             .getOrNull()?.chatIds?.forEach { candidates.add(it) }
 
         val fromSearch = validateCandidates(candidates)
-        if (fromSearch.size >= knownCount && fromSearch.isNotEmpty()) {
+        if (fromSearch.size >= knownChatIds.size && fromSearch.isNotEmpty()) {
             SafeLog.d(TAG, "Discovered ${fromSearch.size} drives by name")
             return fromSearch.sortedByDescending { it.documentCount }
         }
@@ -1108,6 +1125,8 @@ class TdLibTelegramClient @Inject constructor(
     companion object {
         private const val TAG = "TdLibTelegramClient"
         private const val CLIENT_WAIT_LIMIT_MS = 5_000
+        private const val REQUEST_TIMEOUT_MS = 45_000L
+        private const val REQUEST_TIMEOUT_CODE = 408
         private const val COPY_TIMEOUT_MS = 30_000L
         private const val CLIENT_WAIT_STEP_MS = 10L
         private const val DOWNLOAD_PRIORITY = 16
