@@ -33,6 +33,7 @@ fun LinkedText(
     modifier: Modifier = Modifier
 ) {
     val annotated = remember(text, linkColor) { annotateLinks(text, linkColor) }
+    @Suppress("DEPRECATION")
     ClickableText(
         text = annotated,
         style = style,
