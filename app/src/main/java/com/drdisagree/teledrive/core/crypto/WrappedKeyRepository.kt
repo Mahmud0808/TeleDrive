@@ -1,6 +1,7 @@
 package com.drdisagree.teledrive.core.crypto
 
 import android.content.Context
+import com.drdisagree.teledrive.core.common.SafeLog
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import java.security.SecureRandom
@@ -18,23 +19,40 @@ class WrappedKeyRepository @Inject constructor(
 ) {
 
     private val cache = mutableMapOf<String, ByteArray>()
+    private val recreated = mutableSetOf<String>()
     private val secureRandom = SecureRandom()
 
+    /**
+     * The Keystore refuses to unwrap a key it did not create, which is what a
+     * file-level restore onto another device produces. Keys guarding disposable
+     * data are minted again; the content key never is, because a fresh one
+     * would quietly make every encrypted upload unreadable.
+     */
     @Synchronized
     fun getOrCreate(name: String, sizeBytes: Int = 32): ByteArray {
         cache[name]?.let { return it }
         val file = keyFile(name)
-        val key = if (file.exists()) {
-            keystoreManager.decrypt(file.readBytes())
-        } else {
-            val fresh = ByteArray(sizeBytes).also(secureRandom::nextBytes)
-            file.parentFile?.mkdirs()
-            file.writeBytes(keystoreManager.encrypt(fresh))
-            fresh
+        if (file.exists()) {
+            val stored = runCatching { keystoreManager.decrypt(file.readBytes()) }.getOrNull()
+            if (stored != null) {
+                cache[name] = stored
+                return stored
+            }
+            SafeLog.w(TAG, "Wrapped key $name cannot be unwrapped on this device")
+            if (name !in RECREATABLE) throw KeyUnavailableException(name)
+            file.delete()
+            recreated += name
         }
-        cache[name] = key
-        return key
+        val fresh = ByteArray(sizeBytes).also(secureRandom::nextBytes)
+        file.parentFile?.mkdirs()
+        file.writeBytes(keystoreManager.encrypt(fresh))
+        cache[name] = fresh
+        return fresh
     }
+
+    /** True when [name] had to be replaced, so whatever it guarded is now junk. */
+    @Synchronized
+    fun wasRecreated(name: String): Boolean = name in recreated
 
     /**
      * Reads a key without ever creating one. Decryption paths must use this:
@@ -45,7 +63,10 @@ class WrappedKeyRepository @Inject constructor(
         cache[name]?.let { return it }
         val file = keyFile(name)
         if (!file.exists()) return null
-        return keystoreManager.decrypt(file.readBytes()).also { cache[name] = it }
+        return runCatching { keystoreManager.decrypt(file.readBytes()) }
+            .onFailure { SafeLog.w(TAG, "Wrapped key $name cannot be unwrapped") }
+            .getOrNull()
+            ?.also { cache[name] = it }
     }
 
     fun exists(name: String): Boolean = cache.containsKey(name) || keyFile(name).exists()
@@ -60,4 +81,17 @@ class WrappedKeyRepository @Inject constructor(
 
     private fun keyFile(name: String): File =
         File(File(context.filesDir, "keys"), "$name.bin")
+
+    private companion object {
+        const val TAG = "WrappedKeyRepository"
+        val RECREATABLE = setOf(
+            CryptoKeys.TDLIB_DATABASE,
+            CryptoKeys.THUMBNAIL,
+            CryptoKeys.CACHE
+        )
+    }
 }
+
+/** Raised for a key that guards data a new key would destroy. */
+class KeyUnavailableException(name: String) :
+    Exception("Encryption key $name cannot be read on this device")

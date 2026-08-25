@@ -3,6 +3,7 @@ package com.drdisagree.teledrive.core.transfer
 import android.content.Context
 import com.drdisagree.teledrive.R
 import com.drdisagree.teledrive.core.crypto.CryptoKeys
+import com.drdisagree.teledrive.core.crypto.KeyUnavailableException
 import com.drdisagree.teledrive.core.crypto.StreamCrypto
 import com.drdisagree.teledrive.core.crypto.WrappedKeyRepository
 import com.drdisagree.teledrive.core.files.DownloadWriter
@@ -93,9 +94,13 @@ class TransferExecutor @Inject constructor(
         data class Failed(val message: String, val retryAfterSeconds: Int? = null) : Outcome
     }
 
-    suspend fun execute(transfer: TransferEntity): Outcome = when (transfer.type) {
-        TransferType.UPLOAD, TransferType.BACKUP -> executeUpload(transfer)
-        TransferType.DOWNLOAD, TransferType.RESTORE -> executeDownload(transfer)
+    suspend fun execute(transfer: TransferEntity): Outcome = try {
+        when (transfer.type) {
+            TransferType.UPLOAD, TransferType.BACKUP -> executeUpload(transfer)
+            TransferType.DOWNLOAD, TransferType.RESTORE -> executeDownload(transfer)
+        }
+    } catch (_: KeyUnavailableException) {
+        Outcome.Failed(context.getString(R.string.transfer_error_key_missing))
     }
 
     private suspend fun executeUpload(transfer: TransferEntity): Outcome {
