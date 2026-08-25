@@ -80,6 +80,7 @@ import com.drdisagree.teledrive.presentation.components.rememberDragSelect
 import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
 import com.drdisagree.teledrive.presentation.navigation.LocalBottomBarInset
 import com.drdisagree.teledrive.presentation.preview.PreviewSequence
+import com.drdisagree.teledrive.presentation.common.rememberPosition
 
 @Composable
 private fun DayHeaderRow(dayStartMillis: Long, modifier: Modifier = Modifier) {
@@ -225,6 +226,11 @@ fun GalleryScreen(
     val previewSequence by viewModel.previewSequence.collectAsStateWithLifecycle()
     val mediaGridState = rememberLazyGridState()
     val scrolled = if (state.viewMode == ViewMode.LIST) mediaListState else mediaGridState
+    if (state.viewMode == ViewMode.LIST) {
+        mediaListState.rememberPosition(viewModel.listPosition, media.itemCount)
+    } else {
+        mediaGridState.rememberPosition(viewModel.listPosition, media.itemCount)
+    }
     val lifted by rememberToolbarLift(scrolled)
 
     Scaffold(

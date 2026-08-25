@@ -92,6 +92,7 @@ import com.drdisagree.teledrive.domain.model.ViewMode
 import com.drdisagree.teledrive.presentation.common.CollectSnackbarMessages
 import com.drdisagree.teledrive.presentation.common.add
 import com.drdisagree.teledrive.presentation.common.isInitialLoad
+import com.drdisagree.teledrive.presentation.common.rememberPosition
 import com.drdisagree.teledrive.presentation.common.shareLocalFiles
 import com.drdisagree.teledrive.presentation.components.BlockingProgressDialog
 import com.drdisagree.teledrive.presentation.components.BottomBarSnackbarHost
@@ -166,6 +167,7 @@ fun FilesScreen(
     BackHandler(enabled = state.selectionMode) { viewModel.clearSelection() }
 
     val gridState = rememberLazyGridState()
+    gridState.rememberPosition(viewModel.listPosition, state.folders.size + files.itemCount)
     var fabVisible by remember { mutableStateOf(true) }
     val listScrolls by remember {
         derivedStateOf { gridState.canScrollForward || gridState.canScrollBackward }

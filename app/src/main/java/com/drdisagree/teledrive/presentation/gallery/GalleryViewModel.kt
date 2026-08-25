@@ -23,6 +23,7 @@ import com.drdisagree.teledrive.domain.repository.SyncRepository
 import com.drdisagree.teledrive.domain.repository.TransferRepository
 import com.drdisagree.teledrive.domain.repository.TrashRepository
 import com.drdisagree.teledrive.presentation.common.Formatters
+import com.drdisagree.teledrive.presentation.common.ListPosition
 import com.drdisagree.teledrive.presentation.components.GridZoomLevel
 import com.drdisagree.teledrive.presentation.components.MIN_GRID_COLUMNS
 import com.drdisagree.teledrive.presentation.components.SelectionCapabilities
@@ -94,6 +95,9 @@ class GalleryViewModel @Inject constructor(
 
     private val tab = MutableStateFlow(GalleryTab.ALL)
     private val sort = MutableStateFlow(FileSortField.DATE_MODIFIED to SortDirection.DESCENDING)
+
+    val listPosition = ListPosition(savedStateHandle)
+
     private val selection = MutableStateFlow<Set<String>>(emptySet())
     private var rangeBase: Set<String>? = null
     private val _allSelected = MutableStateFlow(false)

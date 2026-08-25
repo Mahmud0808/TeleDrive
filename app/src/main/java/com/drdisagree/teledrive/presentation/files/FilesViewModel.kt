@@ -26,6 +26,7 @@ import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.repository.SyncRepository
 import com.drdisagree.teledrive.domain.repository.TransferRepository
 import com.drdisagree.teledrive.domain.repository.TrashRepository
+import com.drdisagree.teledrive.presentation.common.ListPosition
 import com.drdisagree.teledrive.presentation.common.toUserMessage
 import com.drdisagree.teledrive.presentation.components.GridZoomLevel
 import com.drdisagree.teledrive.presentation.components.SelectionCapabilities
@@ -100,6 +101,8 @@ class FilesViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val folderId: String? = savedStateHandle.toRoute<Route.Files>().folderId
+
+    val listPosition = ListPosition(savedStateHandle)
 
     private val selection = MutableStateFlow<Set<String>>(emptySet())
     private val folderSelection = MutableStateFlow<Set<String>>(emptySet())
