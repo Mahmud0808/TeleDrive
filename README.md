@@ -6,12 +6,12 @@
 
 Back up and browse your files using a private Telegram channel as storage.
 
-[![Platform](https://img.shields.io/badge/platform-Android%208.0%2B-3DDC84?logo=android&logoColor=white)](#requirements)
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.4-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org)
-[![Compose](https://img.shields.io/badge/Jetpack%20Compose-Material%203%20Expressive-4285F4?logo=jetpackcompose&logoColor=white)](https://developer.android.com/compose)
-[![Release](https://img.shields.io/github/v/release/Mahmud0808/TeleDrive?color=brightgreen&logo=github)](https://github.com/Mahmud0808/TeleDrive/releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/Mahmud0808/TeleDrive/total?color=orange&logo=github)](https://github.com/Mahmud0808/TeleDrive/releases)
-[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Android%208.0%2B-3DDC84?style=for-the-badge&logo=android&logoColor=white)](#requirements)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.4-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)](https://kotlinlang.org)
+[![Compose](https://img.shields.io/badge/Compose-Material%203-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white)](https://developer.android.com/compose)
+[![Release](https://img.shields.io/github/v/release/Mahmud0808/TeleDrive?style=for-the-badge&logo=github&logoColor=white&color=1F883D)](https://github.com/Mahmud0808/TeleDrive/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/Mahmud0808/TeleDrive/total?style=for-the-badge&logo=github&logoColor=white&color=D97706)](https://github.com/Mahmud0808/TeleDrive/releases)
+[![License](https://img.shields.io/badge/license-Apache%202.0-6750A4?style=for-the-badge&logo=apache&logoColor=white)](LICENSE)
 <br><br>
 <a href="https://www.buymeacoffee.com/DrDisagree"><img src="https://raw.githubusercontent.com/Mahmud0808/ColorBlendr/master/.github/resources/bmc-button.png" width="30%" alt="Buy me a coffee" /></a>
 </div>
