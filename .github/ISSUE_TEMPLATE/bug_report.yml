@@ -1,0 +1,117 @@
+name: Bug report
+description: Something works incorrectly or crashes
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this. Filling in the details below
+        saves a round of questions and usually gets the fix out sooner.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before reporting
+      options:
+        - label: I searched [existing issues](https://github.com/Mahmud0808/TeleDrive/issues?q=is%3Aissue) and this is not a duplicate
+          required: true
+        - label: I am on the latest [release](https://github.com/Mahmud0808/TeleDrive/releases/latest)
+          required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What went wrong, and what you expected instead.
+      placeholder: |
+        Uploads sit on "waiting" and never start. I expected them to upload.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Numbered steps someone else can follow on a fresh install.
+      placeholder: |
+        1. Sign in and create a drive
+        2. Pick a file with the upload button
+        3. Open Transfers
+        4. The transfer stays queued
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where does it happen
+      options:
+        - Sign in or setup
+        - Uploads or downloads
+        - Automatic backup
+        - Files or folders
+        - Gallery or media player
+        - Notes and links
+        - Encryption or key backup
+        - Drives and channels
+        - Settings
+        - Somewhere else
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      description: Settings, About. Include the ABI you downloaded.
+      placeholder: 1.1, arm64-v8a
+    validations:
+      required: true
+
+  - type: input
+    id: device
+    attributes:
+      label: Device, Android version and ROM
+      description: Say so if you use a custom ROM, it matters more often than you would think.
+      placeholder: Pixel 8, Android 16, stock
+    validations:
+      required: true
+
+  - type: dropdown
+    id: encryption
+    attributes:
+      label: Are uploads encrypted
+      options:
+        - "No"
+        - "Yes"
+        - Not sure
+    validations:
+      required: true
+
+  - type: dropdown
+    id: restored
+    attributes:
+      label: Was this install restored or copied from another device
+      description: Root backup tools such as Swift Backup cannot carry the keys TeleDrive relies on.
+      options:
+        - "No, a normal install"
+        - "Yes, restored with a backup tool"
+        - Not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: |
+        Turn on Debug logging in Settings, Advanced, reproduce the problem, then
+        capture a log with an app such as Logcat Reader or LogFox and paste it here.
+        For a crash, the stack trace alone is enough.
+      render: text
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Screenshots or anything else
+      description: Drag images straight into this box.

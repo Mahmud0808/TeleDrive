@@ -1,0 +1,53 @@
+name: Feature request
+description: Suggest something TeleDrive should do
+labels: ["enhancement"]
+body:
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before requesting
+      options:
+        - label: I searched [existing issues](https://github.com/Mahmud0808/TeleDrive/issues?q=is%3Aissue) and this is not a duplicate
+          required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do
+      description: Describe the situation rather than the solution. It often has more than one answer.
+      placeholder: |
+        I watch long videos across several sittings and lose my place every time.
+    validations:
+      required: true
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like TeleDrive to do
+      placeholder: |
+        Remember where a video was stopped and offer to resume from there.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part of the app
+      options:
+        - Uploads or downloads
+        - Automatic backup
+        - Files or folders
+        - Gallery or media player
+        - Notes and links
+        - Encryption or key backup
+        - Drives and channels
+        - Settings or appearance
+        - Somewhere else
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: How do you work around it today
+      description: Skip this if there is no workaround.
