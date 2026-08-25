@@ -299,8 +299,24 @@ class TdLibTelegramClient @Inject constructor(
         send(TdApi.ResendAuthenticationCode(null))
     }
 
+    /**
+     * Signing out is a local decision. Telling Telegram is attempted first, but
+     * a client that never started, or a server that does not answer, must not
+     * leave the account stuck on this device with no way out.
+     */
     override suspend fun logout() {
-        send(TdApi.LogOut())
+        runCatching { send(TdApi.LogOut()) }
+            .onFailure { SafeLog.w(TAG, "Remote sign out failed, dropping session locally") }
+        runCatching { send(TdApi.Close()) }
+        withTimeoutOrNull(CLOSE_WAIT_LIMIT_MS.milliseconds) {
+            _authState.first { it == TelegramAuthState.Closed }
+        }
+        clientMutex.withLock {
+            client = null
+            credentials = null
+            _authState.value = TelegramAuthState.Closed
+        }
+        File(context.filesDir, "tdlib").deleteRecursively()
     }
 
     override suspend fun getCurrentUser(): TelegramUser {

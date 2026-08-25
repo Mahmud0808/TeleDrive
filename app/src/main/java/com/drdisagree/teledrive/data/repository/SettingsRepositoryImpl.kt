@@ -30,6 +30,12 @@ class SettingsRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun hasStoredTelegramCredentials(): Boolean {
+        val data = dataStore.data.first()
+        return data[PreferenceKeys.API_ID_ENCRYPTED] != null &&
+                data[PreferenceKeys.API_HASH_ENCRYPTED] != null
+    }
+
     override suspend fun getTelegramCredentials(): TelegramCredentials? {
         val data = dataStore.data.first()
         val apiIdEnc = data[PreferenceKeys.API_ID_ENCRYPTED] ?: return null

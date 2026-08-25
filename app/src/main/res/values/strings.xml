@@ -421,6 +421,9 @@
     <string name="about_update_ready">Version %1$s is ready to download</string>
     <string name="about_update_title">Update to %1$s</string>
     <string name="about_version">Version %1$s</string>
+    <string name="session_broken_action">Sign in again</string>
+    <string name="session_broken_message">This device can no longer read its saved Telegram session. It usually happens after restoring a backup onto another device or changing the screen lock. Your files are safe in the channel. Sign in again to reach them.</string>
+    <string name="session_broken_title">Session unreadable</string>
     <string name="settings_section_about_title">About</string>
     <string name="settings_section_about_subtitle">Version, links and updates</string>
 

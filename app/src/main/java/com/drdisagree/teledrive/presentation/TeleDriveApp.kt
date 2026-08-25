@@ -92,6 +92,7 @@ import kotlin.time.Duration.Companion.milliseconds
 import com.drdisagree.teledrive.presentation.common.openLink
 import com.drdisagree.teledrive.presentation.components.UpdateDialog
 import androidx.compose.ui.platform.LocalContext
+import com.drdisagree.teledrive.presentation.components.SessionBrokenDialog
 
 @Composable
 fun TeleDriveApp(
@@ -122,6 +123,7 @@ fun TeleDriveApp(
     }
 
     val pendingUpdate by viewModel.pendingUpdate.collectAsStateWithLifecycle()
+    val sessionBroken by viewModel.sessionBroken.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
     TeleDriveTheme(darkTheme = darkTheme, dynamicColor = state.dynamicColor) {
@@ -137,6 +139,9 @@ fun TeleDriveApp(
                     onUpdateRequested = { viewModel.checkForUpdate(force = true) },
                     driveMissing = viewModel.driveMissing
                 )
+            }
+            if (sessionBroken) {
+                SessionBrokenDialog(onSignInAgain = viewModel::resetSession)
             }
             pendingUpdate?.takeIf { !state.loading && !state.locked }?.let { release ->
                 UpdateDialog(
@@ -183,6 +188,19 @@ private fun MainScaffold(
             } == true
             if (graphReady) navController.navigate(Route.Channels)
         }
+    }
+
+    LaunchedEffect(onboardingComplete) {
+        if (onboardingComplete) return@LaunchedEffect
+        val graphReady = withTimeoutOrNull(NAV_READY_TIMEOUT_MS.milliseconds) {
+            while (navController.currentBackStackEntry == null) delay(NAV_READY_POLL_MS.milliseconds)
+            true
+        } == true
+        if (!graphReady) return@LaunchedEffect
+        if (navController.currentDestination?.hasRoute(Route.Onboarding::class) == true) {
+            return@LaunchedEffect
+        }
+        navController.navigate(Route.Onboarding) { popUpTo(0) { inclusive = true } }
     }
 
     LaunchedEffect(notificationDestination, onboardingComplete) {

@@ -44,7 +44,11 @@ class TelegramAuthRepositoryImpl @Inject constructor(
 
     override suspend fun startFromStoredCredentials(): AppResult<Boolean> {
         val credentials = settingsRepository.getTelegramCredentials()
-            ?: return AppResult.Success(false)
+            ?: return if (settingsRepository.hasStoredTelegramCredentials()) {
+                AppResult.Failure(AppError.InvalidApiCredentials)
+            } else {
+                AppResult.Success(false)
+            }
         return when (val result = runTelegram { telegramClient.start(credentials) }) {
             is AppResult.Success -> AppResult.Success(true)
             is AppResult.Failure -> AppResult.Failure(result.error)

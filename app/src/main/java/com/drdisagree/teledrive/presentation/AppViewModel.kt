@@ -31,6 +31,10 @@ import com.drdisagree.teledrive.core.update.AppRelease
 import com.drdisagree.teledrive.core.update.UpdateChecker
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import com.drdisagree.teledrive.core.common.AppResult
+import com.drdisagree.teledrive.data.repository.LocalDataWiper
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
 
 data class AppUiState(
     val loading: Boolean = true,
@@ -49,8 +53,12 @@ class AppViewModel @Inject constructor(
     private val backupRepository: BackupRepository,
     private val channelRepository: ChannelRepository,
     private val appLockManager: AppLockManager,
+    private val localDataWiper: LocalDataWiper,
     private val updateChecker: UpdateChecker
 ) : ViewModel() {
+
+    private val _sessionBroken = MutableStateFlow(false)
+    val sessionBroken: StateFlow<Boolean> = _sessionBroken.asStateFlow()
 
     private val _driveMissing = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     val driveMissing = _driveMissing.asSharedFlow()
@@ -76,7 +84,8 @@ class AppViewModel @Inject constructor(
         viewModelScope.launch {
             appLockManager.onAppStarted()
             backupRepository.refreshActiveSession()
-            telegramAuthRepository.startFromStoredCredentials()
+            val started = telegramAuthRepository.startFromStoredCredentials()
+            if (started is AppResult.Failure) _sessionBroken.value = true
         }
         checkForUpdate()
         combine(
@@ -125,6 +134,25 @@ class AppViewModel @Inject constructor(
             val release = updateChecker.newerRelease()
             if (!force && release?.version == prefs.skippedUpdateVersion) return@launch
             _pendingUpdate.value = release
+        }
+    }
+
+    /** Drops the unusable session and sends the user back to signing in. */
+    fun resetSession() {
+        viewModelScope.launch {
+            withContext(NonCancellable) {
+                telegramAuthRepository.logout()
+                localDataWiper.wipe()
+                settingsRepository.clearTelegramCredentials()
+                settingsRepository.update {
+                    it.copy(
+                        onboardingComplete = false,
+                        storageChatId = null,
+                        backupFolders = emptySet()
+                    )
+                }
+            }
+            _sessionBroken.value = false
         }
     }
 

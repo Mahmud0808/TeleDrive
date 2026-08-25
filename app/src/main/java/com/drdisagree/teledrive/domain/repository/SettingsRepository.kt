@@ -15,5 +15,8 @@ interface SettingsRepository {
 
     suspend fun setTelegramCredentials(credentials: TelegramCredentials)
 
+    /** True when credentials are stored, regardless of whether they can be decrypted. */
+    suspend fun hasStoredTelegramCredentials(): Boolean
+
     suspend fun clearTelegramCredentials()
 }
