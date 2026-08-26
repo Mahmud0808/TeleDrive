@@ -3,6 +3,39 @@ package com.drdisagree.teledrive.data.local.database
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
+/** Adds the local step a split transfer reports while it is between parts. */
+val MIGRATION_7_8 = object : Migration(7, 8) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE transfers ADD COLUMN stage TEXT")
+    }
+}
+
+/** Adds the parts a file too large for one Telegram message is split into. */
+val MIGRATION_6_7 = object : Migration(6, 7) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS file_parts (" +
+                    "fileId TEXT NOT NULL, " +
+                    "partIndex INTEGER NOT NULL, " +
+                    "chatId INTEGER, " +
+                    "messageId INTEGER, " +
+                    "remoteFileId TEXT, " +
+                    "remoteUniqueId TEXT, " +
+                    "plainOffset INTEGER NOT NULL, " +
+                    "plainSize INTEGER NOT NULL, " +
+                    "storedSize INTEGER NOT NULL, " +
+                    "uploadedAt INTEGER NOT NULL, " +
+                    "PRIMARY KEY(fileId, partIndex))"
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_file_parts_fileId ON file_parts(fileId)")
+        db.execSQL(
+            "CREATE INDEX IF NOT EXISTS index_file_parts_remoteUniqueId " +
+                    "ON file_parts(remoteUniqueId)"
+        )
+        db.execSQL("ALTER TABLE files ADD COLUMN partCount INTEGER NOT NULL DEFAULT 0")
+    }
+}
+
 /** Adds delete tombstones so an interrupted permanent delete can be replayed. */
 val MIGRATION_5_6 = object : Migration(5, 6) {
     override fun migrate(db: SupportSQLiteDatabase) {

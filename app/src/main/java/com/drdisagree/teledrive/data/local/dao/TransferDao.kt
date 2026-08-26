@@ -8,6 +8,7 @@ import androidx.room.Update
 import com.drdisagree.teledrive.data.local.entity.TransferEntity
 import com.drdisagree.teledrive.domain.model.TransferState
 import kotlinx.coroutines.flow.Flow
+import com.drdisagree.teledrive.domain.model.TransferStage
 
 @Dao
 interface TransferDao {
@@ -41,6 +42,9 @@ interface TransferDao {
 
     @Query("SELECT COUNT(*) FROM transfers WHERE state IN ('QUEUED', 'RUNNING')")
     fun observeActiveCount(): Flow<Int>
+
+    @Query("UPDATE transfers SET stage = :stage, updatedAt = :updatedAt WHERE id = :id")
+    suspend fun setStage(id: String, stage: TransferStage?, updatedAt: Long)
 
     @Query(
         """UPDATE transfers SET transferredBytes = :transferred, speedBytesPerSecond = :speed,

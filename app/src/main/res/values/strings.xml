@@ -587,6 +587,8 @@
     <string name="transfers_failed_uploads">Failed uploads</string>
     <string name="transfers_failed_downloads">Failed downloads</string>
     <string name="transfers_failed_transfers">Failed transfers</string>
+    <string name="transfer_stage_joining">Merging parts</string>
+    <string name="transfer_stage_sealing">Encrypting part</string>
     <string name="transfer_type_upload">Upload</string>
     <string name="transfer_type_download">Download</string>
     <string name="transfer_type_backup">Backup</string>

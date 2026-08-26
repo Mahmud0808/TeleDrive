@@ -118,6 +118,67 @@ class StreamCrypto @Inject constructor() {
         output.flush()
     }
 
+    /**
+     * Frames are a fixed plaintext size, so the sealed bytes holding any given
+     * plaintext offset can be located arithmetically. That is what lets a
+     * player seek inside an encrypted file without reading it from the start.
+     */
+    fun headerSize(): Int = MAGIC.size + 1 + SALT_LENGTH
+
+    fun frameIndexOf(plainOffset: Long): Int = (plainOffset / CHUNK_SIZE).toInt()
+
+    fun frameStart(frameIndex: Int): Long =
+        headerSize() + frameIndex.toLong() * (LENGTH_BYTES + CHUNK_SIZE + TAG_BYTES)
+
+    /** Sealed length of a frame holding [plainLength] bytes, header included. */
+    fun frameStoredSize(plainLength: Int): Int = LENGTH_BYTES + plainLength + TAG_BYTES
+
+    fun storedSize(plainSize: Long): Long {
+        if (plainSize <= 0) return headerSize().toLong() + frameStoredSize(0)
+        val whole = plainSize / CHUNK_SIZE
+        val remainder = (plainSize % CHUNK_SIZE).toInt()
+        var total = headerSize().toLong() + whole * frameStoredSize(CHUNK_SIZE)
+        if (remainder > 0) total += frameStoredSize(remainder)
+        return total
+    }
+
+    fun saltOf(header: ByteArray): ByteArray {
+        require(header.size >= headerSize()) { "Header too short" }
+        for (i in MAGIC.indices) {
+            if (header[i] != MAGIC[i]) throw IllegalArgumentException("Not an encrypted file")
+        }
+        if (header[MAGIC.size] != VERSION.toByte()) {
+            throw IllegalArgumentException("Unsupported encryption version")
+        }
+        return header.copyOfRange(MAGIC.size + 1, headerSize())
+    }
+
+    /** Decrypts one frame given its sealed bytes, length prefix included. */
+    fun decryptFrame(
+        key: ByteArray,
+        salt: ByteArray,
+        frameIndex: Int,
+        frame: ByteArray
+    ): ByteArray {
+        require(frame.size > LENGTH_BYTES) { "Frame too short" }
+        val marker = ByteBuffer.wrap(frame, 0, LENGTH_BYTES).int
+        val isFinal = marker and FINAL_FLAG != 0
+        val sealedLength = marker and FINAL_FLAG.inv()
+        if (sealedLength < TAG_BYTES || sealedLength > CHUNK_SIZE + TAG_BYTES) {
+            throw IllegalArgumentException("Invalid frame length")
+        }
+        if (frame.size < LENGTH_BYTES + sealedLength) throw EOFException("Truncated frame")
+
+        val cipher = Cipher.getInstance(TRANSFORMATION)
+        cipher.init(
+            Cipher.DECRYPT_MODE,
+            SecretKeySpec(key, "AES"),
+            GCMParameterSpec(TAG_BITS, nonceFor(salt, frameIndex))
+        )
+        cipher.updateAAD(aadFor(frameIndex, isFinal))
+        return cipher.doFinal(frame, LENGTH_BYTES, sealedLength)
+    }
+
     /** One-shot helper for small payloads such as thumbnails. */
     fun encryptBytes(key: ByteArray, plaintext: ByteArray): ByteArray {
         val nonce = ByteArray(NONCE_LENGTH).also(secureRandom::nextBytes)
@@ -166,6 +227,7 @@ class StreamCrypto @Inject constructor() {
         private const val VERSION = 1
         private const val FINAL_FLAG = 1 shl 31
         const val CHUNK_SIZE = 1024 * 1024
+        private const val LENGTH_BYTES = 4
         private const val SALT_LENGTH = 8
         private const val NONCE_LENGTH = 12
         private const val TAG_BITS = 128

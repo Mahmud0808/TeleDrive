@@ -6,6 +6,7 @@ import com.drdisagree.teledrive.data.local.dao.BackupDao
 import com.drdisagree.teledrive.data.local.dao.CacheDao
 import com.drdisagree.teledrive.data.local.dao.ExclusionDao
 import com.drdisagree.teledrive.data.local.dao.FileDao
+import com.drdisagree.teledrive.data.local.dao.FilePartDao
 import com.drdisagree.teledrive.data.local.dao.FolderDao
 import com.drdisagree.teledrive.data.local.dao.PendingDeleteDao
 import com.drdisagree.teledrive.data.local.dao.StorageChannelDao
@@ -26,7 +27,15 @@ object DatabaseModule {
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): TeleDriveDatabase =
         Room.databaseBuilder(context, TeleDriveDatabase::class.java, TeleDriveDatabase.NAME)
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+            .addMigrations(
+                MIGRATION_1_2,
+                MIGRATION_2_3,
+                MIGRATION_3_4,
+                MIGRATION_4_5,
+                MIGRATION_5_6,
+                MIGRATION_6_7,
+                MIGRATION_7_8
+            )
             .build()
 
     @Provides
@@ -55,4 +64,7 @@ object DatabaseModule {
 
     @Provides
     fun providePendingDeleteDao(db: TeleDriveDatabase): PendingDeleteDao = db.pendingDeleteDao()
+
+    @Provides
+    fun provideFilePartDao(db: TeleDriveDatabase): FilePartDao = db.filePartDao()
 }

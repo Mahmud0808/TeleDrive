@@ -12,32 +12,36 @@ import com.drdisagree.teledrive.core.media.ThumbnailStore
 import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.core.telegram.TelegramDownloadEvent
 import com.drdisagree.teledrive.core.telegram.TelegramException
+import com.drdisagree.teledrive.core.telegram.TelegramLimits
 import com.drdisagree.teledrive.core.telegram.TelegramUploadEvent
 import com.drdisagree.teledrive.data.local.dao.BackupDao
 import com.drdisagree.teledrive.data.local.dao.FileDao
+import com.drdisagree.teledrive.data.local.dao.FilePartDao
 import com.drdisagree.teledrive.data.local.dao.TransferDao
 import com.drdisagree.teledrive.data.local.entity.BackupRecordEntity
+import com.drdisagree.teledrive.data.local.entity.FileEntity
 import com.drdisagree.teledrive.data.local.entity.TransferEntity
 import com.drdisagree.teledrive.data.remote.telegram.ManifestCodec
 import com.drdisagree.teledrive.data.remote.telegram.RemoteFileManifest
 import com.drdisagree.teledrive.data.repository.FolderPathResolver
 import com.drdisagree.teledrive.domain.model.BackupState
+import com.drdisagree.teledrive.domain.model.TransferStage
 import com.drdisagree.teledrive.domain.model.TransferState
 import com.drdisagree.teledrive.domain.model.TransferType
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import java.io.File
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
@@ -60,7 +64,10 @@ class TransferExecutor @Inject constructor(
     private val streamCrypto: StreamCrypto,
     private val wrappedKeyRepository: WrappedKeyRepository,
     private val downloadWriter: DownloadWriter,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val filePartDao: FilePartDao,
+    private val partUploader: PartUploader,
+    private val partDownloader: PartDownloader
 ) {
 
     /**
@@ -79,8 +86,9 @@ class TransferExecutor @Inject constructor(
             }
         }
         while (true) {
-            val received = withTimeoutOrNull(STALL_TIMEOUT_MS.milliseconds) { relay.receiveCatching() }
-                ?: throw TelegramException(STALL_CODE, context.getString(messageRes))
+            val received =
+                withTimeoutOrNull(STALL_TIMEOUT_MS.milliseconds) { relay.receiveCatching() }
+                    ?: throw TelegramException(STALL_CODE, context.getString(messageRes))
             received.exceptionOrNull()?.let { throw it }
             if (received.isClosed) break
             send(received.getOrThrow())
@@ -163,6 +171,20 @@ class TransferExecutor @Inject constructor(
 
         fileDao.setBackupState(entity.id, BackupState.UPLOADING)
 
+        if (splitsIntoParts(entity, sourceFile)) {
+            stagingFile?.delete()
+            return uploadInParts(
+                transfer = transfer,
+                entity = entity,
+                sourceFile = sourceFile,
+                localPath = localPath,
+                chatId = chatId,
+                manifest = manifest,
+                encrypt = encrypt,
+                contentHash = contentHash
+            )
+        }
+
         val startedAt = System.currentTimeMillis()
         var lastBytes = 0L
         var lastTick = startedAt
@@ -243,11 +265,119 @@ class TransferExecutor @Inject constructor(
         }
     }
 
+    /**
+     * Splitting is decided by the account's current limit, but a file that was
+     * already split stays split: the parts on record are what the file is made
+     * of, whatever the limit happens to be today.
+     */
+    private suspend fun splitsIntoParts(entity: FileEntity, source: File): Boolean {
+        if (filePartDao.countOf(entity.id) > 0) return true
+        val limit = runCatching { telegramClient.getLimits() }
+            .getOrDefault(TelegramLimits.REGULAR)
+            .maxFileBytes
+        return FileParts.splits(source.length(), limit)
+    }
+
+    private suspend fun uploadInParts(
+        transfer: TransferEntity,
+        entity: FileEntity,
+        sourceFile: File,
+        localPath: String,
+        chatId: Long,
+        manifest: RemoteFileManifest,
+        encrypt: Boolean,
+        contentHash: String?
+    ): Outcome {
+        var lastBytes = 0L
+        var lastTick = System.currentTimeMillis()
+        var outcome: Outcome =
+            Outcome.Failed(context.getString(R.string.transfer_error_upload_ended))
+
+        return try {
+            partUploader.upload(entity, sourceFile, chatId, manifest, encrypt)
+                .collect { event ->
+                    currentCoroutineContext().ensureActive()
+                    when (event) {
+                        is PartUploader.Event.Progress -> {
+                            val now = System.currentTimeMillis()
+                            val speed = speedOf(event.transferredBytes, lastBytes, lastTick, now)
+                                ?: transfer.speedBytesPerSecond
+                            if (now - lastTick >= PROGRESS_INTERVAL_MS) {
+                                lastBytes = event.transferredBytes
+                                lastTick = now
+                                transferDao.updateProgress(
+                                    transfer.id, event.transferredBytes, speed, now
+                                )
+                            }
+                            checkControl(transfer.id)
+                        }
+
+                        is PartUploader.Event.Sealing -> {
+                            transferDao.setStage(
+                                transfer.id,
+                                TransferStage.SEALING,
+                                System.currentTimeMillis()
+                            )
+                            checkControl(transfer.id)
+                        }
+
+                        is PartUploader.Event.PartDone -> {
+                            transferDao.setStage(transfer.id, null, System.currentTimeMillis())
+                            checkControl(transfer.id)
+                        }
+
+                        is PartUploader.Event.Completed -> {
+                            val first = event.parts.firstOrNull()
+                                ?: error("Upload finished with no parts")
+                            fileDao.setPartCount(entity.id, event.parts.size)
+                            fileDao.setRemoteMapping(
+                                id = entity.id,
+                                chatId = first.chatId,
+                                messageId = first.messageId,
+                                remoteFileId = first.remoteFileId,
+                                remoteUniqueId = first.remoteUniqueId,
+                                state = BackupState.BACKED_UP
+                            )
+                            if (transfer.type == TransferType.BACKUP) {
+                                backupDao.upsertRecord(
+                                    BackupRecordEntity(
+                                        id = UUID.randomUUID().toString(),
+                                        sourcePath = localPath,
+                                        fileId = entity.id,
+                                        sizeBytes = entity.sizeBytes,
+                                        modifiedAt = sourceFile.lastModified(),
+                                        contentHash = contentHash,
+                                        backedUpAt = System.currentTimeMillis()
+                                    )
+                                )
+                            }
+                            transferDao.setCompleted(transfer.id, System.currentTimeMillis())
+                            outcome = Outcome.Completed
+                        }
+                    }
+                }
+            outcome
+        } catch (e: TransferControlException) {
+            fileDao.setBackupStateIfLocalOnly(
+                entity.id,
+                if (e.paused) BackupState.QUEUED else BackupState.NONE
+            )
+            if (!e.paused) partUploader.discardParts(entity.id)
+            if (e.paused) Outcome.Paused else Outcome.Cancelled
+        } catch (e: TelegramException) {
+            fileDao.setBackupStateIfLocalOnly(entity.id, BackupState.FAILED)
+            Outcome.Failed(e.message, e.retryAfterSeconds)
+        }
+    }
+
     private suspend fun executeDownload(transfer: TransferEntity): Outcome {
         val fileId = transfer.fileId
             ?: return Outcome.Failed(context.getString(R.string.transfer_error_no_file_reference))
         val entity = fileDao.byId(fileId)
             ?: return Outcome.Failed(context.getString(R.string.transfer_error_file_record_missing))
+
+        if (filePartDao.countOf(entity.id) > 1) return downloadInParts(transfer, entity)
+
         val remoteFileId = entity.remoteFileId
             ?: return Outcome.Failed(context.getString(R.string.transfer_error_no_remote_copy))
 
@@ -261,29 +391,91 @@ class TransferExecutor @Inject constructor(
             telegramClient.downloadDocument(remoteFileId)
                 .failWhenIdle(R.string.transfer_error_download_stalled)
                 .collect { event ->
-                currentCoroutineContext().ensureActive()
-                when (event) {
-                    is TelegramDownloadEvent.Progress -> {
-                        val now = System.currentTimeMillis()
-                        if (now - lastTick >= PROGRESS_INTERVAL_MS) {
-                            val speed = speedOf(event.transferredBytes, lastBytes, lastTick, now)
-                                ?: transfer.speedBytesPerSecond
-                            lastBytes = event.transferredBytes
-                            lastTick = now
-                            transferDao.updateProgress(
-                                transfer.id, event.transferredBytes, speed, now
-                            )
+                    currentCoroutineContext().ensureActive()
+                    when (event) {
+                        is TelegramDownloadEvent.Progress -> {
+                            val now = System.currentTimeMillis()
+                            if (now - lastTick >= PROGRESS_INTERVAL_MS) {
+                                val speed =
+                                    speedOf(event.transferredBytes, lastBytes, lastTick, now)
+                                        ?: transfer.speedBytesPerSecond
+                                lastBytes = event.transferredBytes
+                                lastTick = now
+                                transferDao.updateProgress(
+                                    transfer.id, event.transferredBytes, speed, now
+                                )
+                            }
+                            checkControl(transfer.id)
                         }
-                        checkControl(transfer.id)
-                    }
 
-                    is TelegramDownloadEvent.Completed -> {
-                        outcome = finalizeDownload(transfer, entity.id, event.localPath)
+                        is TelegramDownloadEvent.Completed -> {
+                            outcome = finalizeDownload(transfer, entity.id, event.localPath)
+                        }
                     }
                 }
-            }
             outcome
         } catch (e: TransferControlException) {
+            if (e.paused) Outcome.Paused else Outcome.Cancelled
+        } catch (e: TelegramException) {
+            Outcome.Failed(e.message, e.retryAfterSeconds)
+        }
+    }
+
+    private suspend fun downloadInParts(
+        transfer: TransferEntity,
+        entity: FileEntity
+    ): Outcome {
+        var lastBytes = 0L
+        var lastTick = System.currentTimeMillis()
+        var outcome: Outcome =
+            Outcome.Failed(context.getString(R.string.transfer_error_download_ended))
+
+        return try {
+            partDownloader.download(entity.id, entity.isEncrypted)
+                .failWhenIdle(R.string.transfer_error_download_stalled)
+                .collect { event ->
+                    currentCoroutineContext().ensureActive()
+                    when (event) {
+                        is PartDownloader.Event.Progress -> {
+                            val now = System.currentTimeMillis()
+                            transferDao.setStage(transfer.id, null, now)
+                            if (now - lastTick >= PROGRESS_INTERVAL_MS) {
+                                val speed =
+                                    speedOf(event.transferredBytes, lastBytes, lastTick, now)
+                                        ?: transfer.speedBytesPerSecond
+                                lastBytes = event.transferredBytes
+                                lastTick = now
+                                transferDao.updateProgress(
+                                    transfer.id, event.transferredBytes, speed, now
+                                )
+                            }
+                            checkControl(transfer.id)
+                        }
+
+                        is PartDownloader.Event.Joining -> {
+                            transferDao.setStage(
+                                transfer.id,
+                                TransferStage.JOINING,
+                                System.currentTimeMillis()
+                            )
+                            checkControl(transfer.id)
+                        }
+
+                        is PartDownloader.Event.Completed -> {
+                            transferDao.setStage(transfer.id, null, System.currentTimeMillis())
+                            outcome = finalizeDownload(
+                                transfer = transfer,
+                                fileId = entity.id,
+                                tdlibPath = event.localPath,
+                                alreadyPlain = true
+                            )
+                            partDownloader.discardAssembly(entity.id)
+                        }
+                    }
+                }
+            outcome
+        } catch (e: TransferControlException) {
+            if (!e.paused) partDownloader.discardAssembly(entity.id)
             if (e.paused) Outcome.Paused else Outcome.Cancelled
         } catch (e: TelegramException) {
             Outcome.Failed(e.message, e.retryAfterSeconds)
@@ -293,14 +485,15 @@ class TransferExecutor @Inject constructor(
     private suspend fun finalizeDownload(
         transfer: TransferEntity,
         fileId: String,
-        tdlibPath: String
+        tdlibPath: String,
+        alreadyPlain: Boolean = false
     ): Outcome {
         val entity = fileDao.byId(fileId)
             ?: return Outcome.Failed(context.getString(R.string.transfer_error_file_record_missing))
         val source = File(tdlibPath)
         if (!source.exists()) return Outcome.Failed(context.getString(R.string.transfer_error_downloaded_missing))
 
-        val key = if (entity.isEncrypted) {
+        val key = if (entity.isEncrypted && !alreadyPlain) {
             wrappedKeyRepository.get(CryptoKeys.CONTENT)
                 ?: return Outcome.Failed(context.getString(R.string.transfer_error_key_missing))
         } else {

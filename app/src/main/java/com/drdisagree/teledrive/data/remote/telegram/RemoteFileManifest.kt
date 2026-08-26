@@ -27,9 +27,16 @@ data class RemoteFileManifest(
     @SerialName("mt") val modifiedAt: Long,
     @SerialName("w") val width: Int? = null,
     @SerialName("ht") val height: Int? = null,
-    @SerialName("d") val durationMs: Long? = null
+    @SerialName("d") val durationMs: Long? = null,
+    @SerialName("pc") val partCount: Int = 0,
+    @SerialName("pi") val partIndex: Int = 0,
+    @SerialName("po") val partOffset: Long = 0,
+    @SerialName("ps") val partSize: Long = 0
 ) {
+    val isPart: Boolean get() = partCount > 1
+
     companion object {
         const val VERSION = 1
+        const val PART_VERSION = 2
     }
 }

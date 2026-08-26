@@ -1,6 +1,7 @@
 package com.drdisagree.teledrive.presentation.preview
 
 import androidx.annotation.StringRes
+import com.drdisagree.teledrive.core.media.MediaPart
 
 /** Resolved, displayable content for one file in the fullscreen viewer. */
 sealed interface PreviewContent {
@@ -16,7 +17,12 @@ sealed interface PreviewContent {
     data class LocalMedia(val path: String, val isAudio: Boolean) : PreviewContent
 
     /** Progressive streaming straight from Telegram. */
-    data class StreamedMedia(val remoteFileId: String, val isAudio: Boolean) : PreviewContent
+    data class StreamedMedia(
+        val remoteFileId: String,
+        val isAudio: Boolean,
+        val parts: List<MediaPart> = emptyList(),
+        val encrypted: Boolean = false
+    ) : PreviewContent
 
     data class Pdf(val path: String) : PreviewContent
 

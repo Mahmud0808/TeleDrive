@@ -55,6 +55,7 @@ import com.drdisagree.teledrive.presentation.components.ConfirmDialog
 import com.drdisagree.teledrive.presentation.components.EmptyState
 import com.drdisagree.teledrive.presentation.components.liftedTopAppBarColors
 import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
+import com.drdisagree.teledrive.domain.model.TransferStage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -278,7 +279,18 @@ private fun TransferRow(
                             )
                             append(" · ")
                             append(Formatters.bytes(transfer.sizeBytes))
-                            if (transfer.state == TransferState.RUNNING &&
+                            val stage = transfer.stage
+                            if (transfer.state == TransferState.RUNNING && stage != null) {
+                                append(" · ")
+                                append(
+                                    stringResource(
+                                        when (stage) {
+                                            TransferStage.SEALING -> R.string.transfer_stage_sealing
+                                            TransferStage.JOINING -> R.string.transfer_stage_joining
+                                        }
+                                    )
+                                )
+                            } else if (transfer.state == TransferState.RUNNING &&
                                 transfer.speedBytesPerSecond > 0
                             ) {
                                 append(" · ")

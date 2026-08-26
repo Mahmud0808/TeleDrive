@@ -45,6 +45,9 @@ interface FileDao {
     @Query("UPDATE files SET pendingPublish = 1 WHERE folderId IN (:folderIds)")
     suspend fun markPendingPublishInFolders(folderIds: List<String>)
 
+    @Query("UPDATE files SET partCount = :partCount WHERE id = :id")
+    suspend fun setPartCount(id: String, partCount: Int)
+
     @Query("UPDATE files SET pendingPublish = 0 WHERE id = :id")
     suspend fun clearPendingPublish(id: String)
 

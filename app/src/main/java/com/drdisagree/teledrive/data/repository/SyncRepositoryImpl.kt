@@ -10,9 +10,12 @@ import com.drdisagree.teledrive.core.telegram.RemoteDocument
 import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.core.telegram.TelegramException
 import com.drdisagree.teledrive.data.local.dao.FileDao
+import com.drdisagree.teledrive.data.local.dao.FilePartDao
 import com.drdisagree.teledrive.data.local.dao.FolderDao
+import com.drdisagree.teledrive.data.local.dao.PendingDeleteDao
 import com.drdisagree.teledrive.data.local.database.TeleDriveDatabase
 import com.drdisagree.teledrive.data.local.entity.FileEntity
+import com.drdisagree.teledrive.data.local.entity.FilePartEntity
 import com.drdisagree.teledrive.data.remote.telegram.ManifestCodec
 import com.drdisagree.teledrive.data.remote.telegram.RemoteFileManifest
 import com.drdisagree.teledrive.data.remote.telegram.RemoteFolderState
@@ -30,7 +33,6 @@ import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.milliseconds
-import com.drdisagree.teledrive.data.local.dao.PendingDeleteDao
 
 /**
  * Reconciles local metadata with the storage chat. The chat is the source of
@@ -44,6 +46,7 @@ class SyncRepositoryImpl @Inject constructor(
     private val fileDao: FileDao,
     private val manifestCodec: ManifestCodec,
     private val pendingDeleteDao: PendingDeleteDao,
+    private val filePartDao: FilePartDao,
     private val folderDao: FolderDao,
     private val folderPathResolver: FolderPathResolver,
     private val activeChannel: ActiveChannel,
@@ -276,8 +279,10 @@ class SyncRepositoryImpl @Inject constructor(
         val existing = manifest?.let { known.byId[it.fileId] }
             ?: known.byUniqueId[document.uniqueFileId]
 
-        /* A row waiting on the outbox holds the newer organisational state, so
-           the caption it has not reached yet must not overwrite it. */
+        if (manifest != null && manifest.isPart) {
+            recordPart(document, manifest)
+        }
+
         val local = existing?.takeIf {
             it.pendingPublish && (manifest == null || it.modifiedAt >= manifest.modifiedAt)
         }
@@ -332,8 +337,25 @@ class SyncRepositoryImpl @Inject constructor(
             ?: (document.dateSeconds * 1000L),
             modifiedAt = local?.modifiedAt ?: manifest?.modifiedAt ?: existing?.modifiedAt
             ?: (document.dateSeconds * 1000L),
-            addedAt = existing?.addedAt ?: now
+            addedAt = existing?.addedAt ?: now,
+            partCount = manifest?.partCount ?: existing?.partCount ?: 0
         )
+
+        if (manifest != null && manifest.isPart && manifest.partIndex != 0) {
+            return if (existing == null) {
+                fileDao.upsert(
+                    entity.copy(
+                        chatId = null,
+                        messageId = null,
+                        remoteFileId = null,
+                        remoteUniqueId = null
+                    )
+                )
+                ReconcileResult.INSERTED
+            } else {
+                ReconcileResult.UNCHANGED
+            }
+        }
 
         return when {
             existing == null -> {
@@ -354,6 +376,23 @@ class SyncRepositoryImpl @Inject constructor(
 
             else -> ReconcileResult.UNCHANGED
         }
+    }
+
+    private suspend fun recordPart(document: RemoteDocument, manifest: RemoteFileManifest) {
+        filePartDao.upsert(
+            FilePartEntity(
+                fileId = manifest.fileId,
+                partIndex = manifest.partIndex,
+                chatId = document.chatId,
+                messageId = document.messageId,
+                remoteFileId = document.remoteFileId,
+                remoteUniqueId = document.uniqueFileId,
+                plainOffset = manifest.partOffset,
+                plainSize = manifest.partSize,
+                storedSize = document.sizeBytes,
+                uploadedAt = document.dateSeconds * 1000L
+            )
+        )
     }
 
     private enum class ReconcileResult { INSERTED, UPDATED, UNCHANGED }

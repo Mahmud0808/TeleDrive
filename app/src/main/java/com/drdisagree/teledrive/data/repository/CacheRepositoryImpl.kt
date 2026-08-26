@@ -34,7 +34,7 @@ class CacheRepositoryImpl @Inject constructor(
             thumbnailBytes = thumbnailDao.totalSizeBytes(),
             previewBytes = cacheDao.sizeByType(CacheEntryType.PREVIEW),
             streamBytes = cacheDao.sizeByType(CacheEntryType.STREAM),
-            tempBytes = cacheDao.sizeByType(CacheEntryType.TEMP) + stagingSize(),
+            tempBytes = cacheDao.sizeByType(CacheEntryType.TEMP) + stagingSize() + partSize(),
             tdlibBytes = storageInspector.directorySize(tdlibFilesDir())
         )
     }
@@ -58,6 +58,7 @@ class CacheRepositoryImpl @Inject constructor(
     override suspend fun clearTemp() {
         clearType(CacheEntryType.TEMP)
         stagingDir().deleteRecursively()
+        assemblyDir().deleteRecursively()
         refreshStats()
     }
 
@@ -111,6 +112,14 @@ class CacheRepositoryImpl @Inject constructor(
     private fun stagingDir(): File = File(context.cacheDir, "staging")
 
     private fun stagingSize(): Long = storageInspector.directorySize(stagingDir())
+
+    private fun partsDir(): File = File(context.cacheDir, "parts")
+
+    private fun assemblyDir(): File = File(context.cacheDir, "assembly")
+
+    private fun partSize(): Long =
+        storageInspector.directorySize(partsDir()) +
+                storageInspector.directorySize(assemblyDir())
 
     private fun tdlibFilesDir(): File = File(File(context.filesDir, "tdlib"), "files")
 }

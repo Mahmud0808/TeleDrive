@@ -14,6 +14,7 @@ fun TransferEntity.toDomain(): TransferTask = TransferTask(
     priority = priority,
     errorMessage = errorMessage,
     speedBytesPerSecond = speedBytesPerSecond,
+    stage = stage,
     createdAt = createdAt,
     updatedAt = updatedAt,
     completedAt = completedAt

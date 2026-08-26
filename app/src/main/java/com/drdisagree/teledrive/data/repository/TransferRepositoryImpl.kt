@@ -7,6 +7,7 @@ import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.core.telegram.TelegramException
 import com.drdisagree.teledrive.core.telegram.TelegramLimits
 import com.drdisagree.teledrive.core.transfer.BackupSessionTracker
+import com.drdisagree.teledrive.core.transfer.FileParts
 import com.drdisagree.teledrive.core.transfer.TransferScheduler
 import com.drdisagree.teledrive.data.local.dao.FileDao
 import com.drdisagree.teledrive.data.local.dao.TransferDao
@@ -94,12 +95,17 @@ class TransferRepositoryImpl @Inject constructor(
 
         val limits = currentLimits()
         val prefs = settingsRepository.preferences.first()
-        val scratch = if (prefs.encryptFiles) entity.sizeBytes else 0
+        val scratch = if (prefs.encryptFiles) {
+            minOf(entity.sizeBytes, FileParts.PART_SIZE)
+        } else {
+            0
+        }
         validateUpload(
             fileSizeBytes = entity.sizeBytes,
             limits = limits,
             availableLocalBytes = storageInspector.availableBytes(),
-            requiredScratchBytes = scratch
+            requiredScratchBytes = scratch,
+            splitsIfTooLarge = true
         )?.let { return AppResult.Failure(it) }
 
         fileDao.setBackupStateIfLocalOnly(entity.id, BackupState.QUEUED)

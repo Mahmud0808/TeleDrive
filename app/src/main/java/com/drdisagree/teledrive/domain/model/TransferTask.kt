@@ -11,6 +11,7 @@ data class TransferTask(
     val priority: Int,
     val errorMessage: String?,
     val speedBytesPerSecond: Long,
+    val stage: TransferStage? = null,
     val createdAt: Long,
     val updatedAt: Long,
     val completedAt: Long?

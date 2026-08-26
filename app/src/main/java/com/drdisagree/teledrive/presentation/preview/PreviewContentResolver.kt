@@ -7,9 +7,11 @@ import com.drdisagree.teledrive.core.crypto.StreamCrypto
 import com.drdisagree.teledrive.core.crypto.WrappedKeyRepository
 import com.drdisagree.teledrive.core.dispatchers.DispatcherProvider
 import com.drdisagree.teledrive.core.files.MimeTypes
+import com.drdisagree.teledrive.core.media.MediaPart
 import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.core.telegram.TelegramDownloadEvent
 import com.drdisagree.teledrive.data.local.dao.CacheDao
+import com.drdisagree.teledrive.data.local.dao.FilePartDao
 import com.drdisagree.teledrive.data.local.entity.CacheEntryEntity
 import com.drdisagree.teledrive.data.local.entity.CacheEntryType
 import com.drdisagree.teledrive.domain.model.DriveFile
@@ -37,6 +39,7 @@ class PreviewContentResolver @Inject constructor(
     private val streamCrypto: StreamCrypto,
     private val wrappedKeyRepository: WrappedKeyRepository,
     private val cacheDao: CacheDao,
+    private val filePartDao: FilePartDao,
     private val settingsRepository: SettingsRepository,
     private val dispatchers: DispatcherProvider
 ) {
@@ -55,17 +58,49 @@ class PreviewContentResolver @Inject constructor(
         }
 
         val prefs = settingsRepository.preferences.first()
-        if (prefs.streamBeforeDownload &&
-            !file.isEncrypted &&
-            (file.category == FileCategory.VIDEO || file.category == FileCategory.AUDIO)
-        ) {
-            emit(
-                PreviewContent.StreamedMedia(
-                    remoteFileId = file.remoteFileId,
-                    isAudio = file.category == FileCategory.AUDIO
+        val isMedia = file.category == FileCategory.VIDEO || file.category == FileCategory.AUDIO
+        val parts = if (isMedia) filePartDao.partsOf(file.id) else emptyList()
+
+        if (prefs.streamBeforeDownload && isMedia && parts.size > 1) {
+            if (!file.isEncrypted || wrappedKeyRepository.exists(CryptoKeys.CONTENT)) {
+                emit(
+                    PreviewContent.StreamedMedia(
+                        remoteFileId = file.remoteFileId,
+                        isAudio = file.category == FileCategory.AUDIO,
+                        parts = parts.mapNotNull { part ->
+                            part.remoteFileId?.let {
+                                MediaPart(it, part.plainOffset, part.plainSize)
+                            }
+                        },
+                        encrypted = file.isEncrypted
+                    )
                 )
-            )
-            return@flow
+                return@flow
+            }
+        }
+
+        if (prefs.streamBeforeDownload && isMedia && parts.isEmpty()) {
+            if (!file.isEncrypted) {
+                emit(
+                    PreviewContent.StreamedMedia(
+                        remoteFileId = file.remoteFileId,
+                        isAudio = file.category == FileCategory.AUDIO
+                    )
+                )
+                return@flow
+            }
+
+            if (wrappedKeyRepository.exists(CryptoKeys.CONTENT)) {
+                emit(
+                    PreviewContent.StreamedMedia(
+                        remoteFileId = file.remoteFileId,
+                        isAudio = file.category == FileCategory.AUDIO,
+                        parts = listOf(MediaPart(file.remoteFileId, 0, file.sizeBytes)),
+                        encrypted = true
+                    )
+                )
+                return@flow
+            }
         }
 
         /* Only small files a viewer cannot show any other way are fetched on

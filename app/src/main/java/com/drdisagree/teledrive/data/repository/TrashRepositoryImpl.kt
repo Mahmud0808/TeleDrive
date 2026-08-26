@@ -5,12 +5,16 @@ import com.drdisagree.teledrive.core.common.AppError
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.core.common.SafeLog
 import com.drdisagree.teledrive.core.crypto.SecureFileDeleter
+import com.drdisagree.teledrive.core.publish.PublishScheduler
 import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.core.telegram.TelegramException
 import com.drdisagree.teledrive.data.local.dao.BackupDao
 import com.drdisagree.teledrive.data.local.dao.FileDao
+import com.drdisagree.teledrive.data.local.dao.FilePartDao
 import com.drdisagree.teledrive.data.local.dao.FolderDao
+import com.drdisagree.teledrive.data.local.dao.PendingDeleteDao
 import com.drdisagree.teledrive.data.local.dao.ThumbnailDao
+import com.drdisagree.teledrive.data.local.entity.PendingDeleteEntity
 import com.drdisagree.teledrive.data.mapper.toDomain
 import com.drdisagree.teledrive.domain.model.TrashItem
 import com.drdisagree.teledrive.domain.repository.TransferRepository
@@ -23,9 +27,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
-import com.drdisagree.teledrive.core.publish.PublishScheduler
-import com.drdisagree.teledrive.data.local.dao.PendingDeleteDao
-import com.drdisagree.teledrive.data.local.entity.PendingDeleteEntity
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @Singleton
@@ -39,6 +40,7 @@ class TrashRepositoryImpl @Inject constructor(
     private val secureFileDeleter: SecureFileDeleter,
     private val publishScheduler: PublishScheduler,
     private val pendingDeleteDao: PendingDeleteDao,
+    private val filePartDao: FilePartDao,
     private val activeChannel: ActiveChannel,
     private val transferRepository: TransferRepository
 ) : TrashRepository {
@@ -149,28 +151,30 @@ class TrashRepositoryImpl @Inject constructor(
 
     override suspend fun deleteFilesPermanently(ids: List<String>): AppResult<Unit> {
         if (ids.isEmpty()) return AppResult.Success(Unit)
-        /* Uploading something that is being deleted wastes the transfer and
-           would leave a message behind with nothing pointing at it. */
         transferRepository.cancelForFiles(ids)
         val entities = ids.chunked(SQL_BATCH).flatMap { fileDao.byIds(it) }
 
-        val remoteByChat = entities
-            .filter { it.chatId != null && it.messageId != null }
-            .groupBy { it.chatId!! }
+        val parts = ids.chunked(SQL_BATCH).flatMap { filePartDao.partsOfAll(it) }
+        val remoteByChat = (
+                entities
+                    .filter { it.chatId != null && it.messageId != null }
+                    .map { it.chatId!! to it.messageId!! } +
+                        parts
+                            .filter { it.chatId != null && it.messageId != null }
+                            .map { it.chatId!! to it.messageId!! }
+                )
+            .distinct()
+            .groupBy({ it.first }, { it.second })
 
-        /* The tombstone is written first: if the process dies between the
-           Telegram call and the local delete, the replay finishes the job
-           rather than leaving a row pointing at a deleted message. */
         pendingDeleteDao.upsertAll(
-            remoteByChat.flatMap { (chatId, chatEntities) ->
-                chatEntities.map { entity ->
-                    PendingDeleteEntity(chatId, entity.messageId!!, entity.id)
+            remoteByChat.flatMap { (chatId, messageIds) ->
+                messageIds.map { messageId ->
+                    PendingDeleteEntity(chatId, messageId, ids.first())
                 }
             }
         )
 
-        for ((chatId, chatEntities) in remoteByChat) {
-            val messageIds = chatEntities.map { it.messageId!! }
+        for ((chatId, messageIds) in remoteByChat) {
             try {
                 telegramClient.deleteMessages(chatId, messageIds)
                 SafeLog.d(TAG, "Deleted ${messageIds.size} messages from storage chat")
@@ -196,10 +200,11 @@ class TrashRepositoryImpl @Inject constructor(
         }
         ids.chunked(SQL_BATCH).forEach { chunk ->
             backupDao.deleteRecordsForFiles(chunk)
+            filePartDao.deleteFor(chunk)
             fileDao.deleteByIds(chunk)
         }
-        for ((chatId, chatEntities) in remoteByChat) {
-            pendingDeleteDao.clear(chatId, chatEntities.map { it.messageId!! })
+        for ((chatId, messageIds) in remoteByChat) {
+            pendingDeleteDao.clear(chatId, messageIds)
         }
         return AppResult.Success(Unit)
     }

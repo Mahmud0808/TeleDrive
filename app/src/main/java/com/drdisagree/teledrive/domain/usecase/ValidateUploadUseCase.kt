@@ -18,12 +18,13 @@ class ValidateUploadUseCase @Inject constructor() {
         fileSizeBytes: Long,
         limits: TelegramLimits,
         availableLocalBytes: Long,
-        requiredScratchBytes: Long = 0
+        requiredScratchBytes: Long = 0,
+        splitsIfTooLarge: Boolean = false
     ): AppError? = when {
         fileSizeBytes <= 0 ->
             AppError.NotFound
 
-        fileSizeBytes > limits.maxFileBytes ->
+        fileSizeBytes > limits.maxFileBytes && !splitsIfTooLarge ->
             AppError.FileTooLarge(fileSizeBytes, limits.maxFileBytes)
 
         requiredScratchBytes > 0 && availableLocalBytes < requiredScratchBytes + STORAGE_MARGIN_BYTES ->

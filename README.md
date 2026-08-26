@@ -61,6 +61,10 @@ and trash state.
 foreground service. Parallel transfers, pause, resume, cancel, retry,
 priorities, live speed and ETA. Survives process death and reboots.
 
+**No file size limit.** Upload a 20 GB video, and it is one file in the app,
+past whatever cap Telegram puts on a single message. A long upload picks up
+where it stopped instead of starting over.
+
 **File management.** Nested folders, rename, move, copy, favorites, hidden and
 archived items, bulk actions, trash with restore, grid and list layouts, pinch
 to resize the grid, long-press-and-drag range selection, and sorting by name,
@@ -79,9 +83,9 @@ total. Only the categories you actually have are listed.
 **Gallery and playback.** Paged media grid with date grouping and a pinch-zoom
 image viewer that swipes between shots in the order the grid shows them. Video
 and audio play in a Compose player with playback speed, repeat, subtitle and
-audio-track selection, aspect controls and rotation. Unencrypted media streams
-directly from Telegram through ranged downloads instead of downloading in full
-first, so playback starts without waiting for the whole file.
+audio-track selection, aspect controls and rotation. Playback starts straight
+away rather than after a download, and seeking anywhere in a file is immediate,
+encrypted or not.
 
 **Previews without leaving the app.** PDFs render page by page with zoom, pan
 and working links. Text files open inline. ZIP archives list their contents with
@@ -234,15 +238,16 @@ set a hint when you create it and keep the passphrase out of the hint.
 
 ## Good to know
 
-- Telegram caps files at 2 GiB, or 4 GiB with Premium. Oversized files fail
-  immediately with the limit shown instead of uploading partially.
-- Encrypted media downloads and decrypts before playing, so there is a wait and
-  no seeking ahead until it finishes. Unencrypted media streams from Telegram
-  immediately.
+- A file past Telegram's per-file cap is stored as several messages, so opening
+  it in the Telegram app shows the parts rather than the whole file. Only
+  TeleDrive puts it back together.
+- Streaming authenticates the frames it plays, not the whole file. Downloading
+  verifies everything, so use it when integrity matters more than starting fast.
 - Telegram cannot rename a document inside a sent message, so a rename updates
   the caption manifest, which is what a rebuild reads.
-- TDLib cannot resume an interrupted upload, so pausing an upload restarts it.
-  Downloads do resume.
+- TDLib cannot resume a single upload, so pausing one that fits in one message
+  restarts it. A split upload resumes at the last completed part, and downloads
+  always resume.
 
 ## Testing
 

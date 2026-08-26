@@ -89,7 +89,14 @@ fun MediaPlayer(
                 }
 
                 is PreviewContent.StreamedMedia -> {
-                    val factory = dataSourceFactory.create(content.remoteFileId)
+                    val factory = if (content.parts.isNotEmpty()) {
+                        dataSourceFactory.createParted(
+                            parts = content.parts,
+                            encrypted = content.encrypted
+                        )
+                    } else {
+                        dataSourceFactory.create(content.remoteFileId)
+                    }
                     val source = ProgressiveMediaSource.Factory(factory)
                         .createMediaSource(MediaItem.fromUri("telegram://stream"))
                     setMediaSource(source)
