@@ -13,6 +13,9 @@ interface TransferRepository {
     /** Queues an upload of [fileId]'s local copy to the storage chat. */
     suspend fun enqueueUpload(fileId: String, priority: Int = 0): AppResult<String>
 
+    /** Queues every file held only on this device. Returns how many were added. */
+    suspend fun enqueuePendingUploads(): AppResult<Int>
+
     /** Queues a download of [fileId]'s remote copy into local storage. */
     suspend fun enqueueDownload(fileId: String, priority: Int = 0): AppResult<String>
 

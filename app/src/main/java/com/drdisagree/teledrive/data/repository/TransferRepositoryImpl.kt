@@ -49,6 +49,16 @@ class TransferRepositoryImpl @Inject constructor(
     override suspend fun enqueueUpload(fileId: String, priority: Int): AppResult<String> =
         enqueue(fileId, TransferType.UPLOAD, priority)
 
+    override suspend fun enqueuePendingUploads(): AppResult<Int> {
+        val chatId = settingsRepository.preferences.first().storageChatId
+        val pending = fileDao.localOnlyFileIds(chatId)
+        var queued = 0
+        for (fileId in pending) {
+            if (enqueue(fileId, TransferType.UPLOAD, priority = 0) is AppResult.Success) queued++
+        }
+        return AppResult.Success(queued)
+    }
+
     override suspend fun enqueueDownload(fileId: String, priority: Int): AppResult<String> {
         val entity = fileDao.byId(fileId) ?: return AppResult.Failure(AppError.NotFound)
         transferDao.unfinishedIdsForFiles(listOf(fileId)).firstOrNull()

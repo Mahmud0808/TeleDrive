@@ -40,4 +40,14 @@
         <item quantity="one">%d encrypted file skipped. Restore your key backup to index it.</item>
         <item quantity="other">%d encrypted files skipped. Restore your key backup to index them.</item>
     </plurals>
+
+    <plurals name="home_back_up_pending">
+        <item quantity="one">Back up %d file</item>
+        <item quantity="other">Back up %d files</item>
+    </plurals>
+
+    <plurals name="home_queued_files">
+        <item quantity="one">%d file queued</item>
+        <item quantity="other">%d files queued</item>
+    </plurals>
 </resources>

@@ -291,6 +291,31 @@ interface FileDao {
     )
     suspend fun reclaimableFileIds(): List<String>
 
+    /**
+     * Held only on this device: never uploaded, or canceled or failed on the
+     * way up. A backup scan walks device folders and never sees these, so they
+     * need queueing by id.
+     */
+    @Query(
+        """SELECT id FROM files
+           WHERE trashedAt IS NULL
+             AND localPath IS NOT NULL
+             AND messageId IS NULL
+             AND backupState IN ('NONE', 'FAILED')
+             AND chatId IS :chatId"""
+    )
+    suspend fun localOnlyFileIds(chatId: Long?): List<String>
+
+    @Query(
+        """SELECT COUNT(*) FROM files
+           WHERE trashedAt IS NULL
+             AND localPath IS NOT NULL
+             AND messageId IS NULL
+             AND backupState IN ('NONE', 'FAILED')
+             AND chatId IS :chatId"""
+    )
+    fun observeLocalOnlyCount(chatId: Long?): Flow<Int>
+
     @Query(
         """SELECT f.folderId AS folderId,
                   fo.name AS name,

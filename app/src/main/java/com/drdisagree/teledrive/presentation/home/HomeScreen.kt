@@ -237,6 +237,7 @@ fun HomeScreen(
                     scanning = scanning,
                     onChooseFolders = onOpenBackupSettings,
                     onScanNow = viewModel::scanNow,
+                    onBackUpPending = viewModel::backUpPending,
                     onPause = viewModel::pauseBackup,
                     onResume = viewModel::resumeBackup,
                     onCancel = { confirmCancelBackup = it }
@@ -430,6 +431,7 @@ private fun BackupCard(
     scanning: Boolean,
     onChooseFolders: () -> Unit,
     onScanNow: () -> Unit,
+    onBackUpPending: () -> Unit,
     onPause: (String) -> Unit,
     onResume: (String) -> Unit,
     onCancel: (String) -> Unit
@@ -561,8 +563,13 @@ private fun BackupCard(
             if (state.activeBackup == null) {
                 Spacer(Modifier.height(16.dp))
                 val foldersSelected = state.backupFoldersSelected
+                val pending = state.localOnlyCount
                 Button(
-                    onClick = if (foldersSelected) onScanNow else onChooseFolders,
+                    onClick = when {
+                        pending > 0 -> onBackUpPending
+                        foldersSelected -> onScanNow
+                        else -> onChooseFolders
+                    },
                     shapes = ButtonDefaults.shapes(),
                     enabled = !scanning,
                     colors = ButtonDefaults.buttonColors(
@@ -573,6 +580,12 @@ private fun BackupCard(
                     Text(
                         when {
                             scanning -> stringResource(R.string.home_scanning)
+                            pending > 0 -> pluralStringResource(
+                                R.plurals.home_back_up_pending,
+                                pending,
+                                pending
+                            )
+
                             foldersSelected -> stringResource(R.string.home_scan_now)
                             else -> stringResource(R.string.home_choose_folders)
                         }

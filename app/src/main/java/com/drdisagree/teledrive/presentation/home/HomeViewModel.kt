@@ -55,6 +55,7 @@ data class HomeUiState(
     val remoteBytes: Long = 0,
     val backedUpCount: Int = 0,
     val pendingCount: Int = 0,
+    val localOnlyCount: Int = 0,
     val failedCount: Int = 0,
     val recentFiles: List<DriveFile> = emptyList(),
     val favoriteFolders: List<DriveFolder> = emptyList(),
@@ -109,13 +110,25 @@ class HomeViewModel @Inject constructor(
 
     private val counts: Flow<HomeCounts> = activeChannel.observe().flatMapLatest { chatId ->
         combine(
+            combine(
+                fileDao.observeCountByBackupState(BackupState.BACKED_UP, chatId),
+                fileDao.observeCountByBackupState(BackupState.QUEUED, chatId),
+                fileDao.observeCountByBackupState(BackupState.FAILED, chatId),
+                fileDao.observeLocalOnlyCount(chatId)
+            ) { backed, pending, failed, localOnly ->
+                listOf(backed, pending, failed, localOnly)
+            },
             fileDao.observeFileCount(chatId),
-            fileDao.observeRemoteBytes(chatId),
-            fileDao.observeCountByBackupState(BackupState.BACKED_UP, chatId),
-            fileDao.observeCountByBackupState(BackupState.QUEUED, chatId),
-            fileDao.observeCountByBackupState(BackupState.FAILED, chatId)
-        ) { total, bytes, backed, pending, failed ->
-            HomeCounts(total, bytes, backed, pending, failed)
+            fileDao.observeRemoteBytes(chatId)
+        ) { states, total, bytes ->
+            HomeCounts(
+                total = total,
+                remoteBytes = bytes,
+                backedUp = states[0],
+                pending = states[1],
+                failed = states[2],
+                localOnly = states[3]
+            )
         }
     }
 
@@ -170,6 +183,7 @@ class HomeViewModel @Inject constructor(
             remoteBytes = counts.remoteBytes,
             backedUpCount = counts.backedUp,
             pendingCount = counts.pending,
+            localOnlyCount = counts.localOnly,
             failedCount = counts.failed,
             recentFiles = recents,
             favoriteFolders = favorites,
@@ -189,6 +203,32 @@ class HomeViewModel @Inject constructor(
             activeTransferCount = transfers.size
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
+
+    /**
+     * Queues the files sitting on this device alone, which a folder scan never
+     * reaches: anything added by hand, or canceled or failed on its way up.
+     */
+    fun backUpPending() {
+        if (_scanning.value) return
+        viewModelScope.launch {
+            _scanning.value = true
+            val message = when (val result = transferRepository.enqueuePendingUploads()) {
+                is AppResult.Success -> if (result.value == 0) {
+                    context.getString(R.string.home_nothing_new_to_back_up)
+                } else {
+                    context.resources.getQuantityString(
+                        R.plurals.home_queued_files,
+                        result.value,
+                        result.value
+                    )
+                }
+
+                is AppResult.Failure -> result.error.toUserMessage(context)
+            }
+            _scanning.value = false
+            _messages.tryEmit(message)
+        }
+    }
 
     fun scanNow() {
         if (_scanning.value) return
@@ -246,6 +286,7 @@ class HomeViewModel @Inject constructor(
         val remoteBytes: Long,
         val backedUp: Int,
         val pending: Int,
-        val failed: Int
+        val failed: Int,
+        val localOnly: Int = 0
     )
 }
