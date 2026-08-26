@@ -69,7 +69,11 @@ class WrappedKeyRepository @Inject constructor(
             ?.also { cache[name] = it }
     }
 
-    fun exists(name: String): Boolean = cache.containsKey(name) || keyFile(name).exists()
+    /**
+     * Whether the key is present and this device can actually unwrap it.
+     */
+    @Synchronized
+    fun exists(name: String): Boolean = get(name) != null
 
     @Synchronized
     fun store(name: String, key: ByteArray) {

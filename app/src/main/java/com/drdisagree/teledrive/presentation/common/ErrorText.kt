@@ -14,6 +14,7 @@ fun AppError.toUserMessage(context: Context): String = when (this) {
 
     is AppError.RateLimited -> context.getString(R.string.error_rate_limited, retryAfterSeconds)
     is AppError.TelegramError -> context.getString(R.string.error_telegram, message)
+    is AppError.KeyUnreadable -> context.getString(R.string.error_key_unreadable)
     is AppError.FileTooLarge -> context.getString(
         R.string.error_file_too_large,
         Formatters.bytes(sizeBytes),

@@ -18,6 +18,8 @@ sealed interface AppError {
 
     data class TelegramError(val code: Int, val message: String) : AppError
 
+    data object KeyUnreadable : AppError
+
     data class FileTooLarge(val sizeBytes: Long, val limitBytes: Long) : AppError
 
     data class InsufficientStorage(val requiredBytes: Long, val availableBytes: Long) : AppError

@@ -5,6 +5,7 @@ import com.drdisagree.teledrive.core.common.AppError
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.core.crypto.CryptoKeys
 import com.drdisagree.teledrive.core.crypto.KeyBackupCodec
+import com.drdisagree.teledrive.core.crypto.KeyUnavailableException
 import com.drdisagree.teledrive.core.crypto.WrappedKeyRepository
 import com.drdisagree.teledrive.core.telegram.RemoteDocument
 import com.drdisagree.teledrive.core.telegram.TelegramClient
@@ -124,6 +125,8 @@ class KeyBackupRepositoryImpl @Inject constructor(
             if (e.isRateLimit) AppError.RateLimited(e.retryAfterSeconds ?: 0)
             else AppError.TelegramError(e.code, e.message)
         )
+    } catch (_: KeyUnavailableException) {
+        AppResult.Failure(AppError.KeyUnreadable)
     }
 
     companion object {

@@ -514,6 +514,7 @@
     <string name="error_permission_denied">Permission denied</string>
     <string name="error_rate_limited">Telegram rate limit. Try again in %1$ds</string>
     <string name="error_sign_in_required">Sign in to Telegram to continue</string>
+    <string name="error_key_unreadable">This device cannot read its encryption key. Restore your key backup with its passphrase first.</string>
     <string name="error_telegram">Telegram error: %1$s</string>
     <string name="error_timed_out">The operation timed out</string>
     <string name="error_transfer_incomplete">Transfer did not finish</string>
