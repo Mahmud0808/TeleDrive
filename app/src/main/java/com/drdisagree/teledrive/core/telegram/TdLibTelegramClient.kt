@@ -7,11 +7,15 @@ import com.drdisagree.teledrive.core.common.SafeLog
 import com.drdisagree.teledrive.domain.model.Country
 import com.drdisagree.teledrive.domain.model.LinkMetadata
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -24,6 +28,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onSubscription
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
@@ -38,11 +43,6 @@ import javax.inject.Singleton
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.time.Duration.Companion.milliseconds
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.onSubscription
 
 @Singleton
 class TdLibTelegramClient @Inject constructor(
@@ -99,13 +99,17 @@ class TdLibTelegramClient @Inject constructor(
             is TdApi.UpdateAuthorizationState ->
                 handleAuthorizationState(generation, update.authorizationState)
 
-            is TdApi.UpdateConnectionState -> _connectionState.value = when (update.state) {
-                is TdApi.ConnectionStateWaitingForNetwork -> TelegramConnectionState.WAITING_FOR_NETWORK
-                is TdApi.ConnectionStateConnecting,
-                is TdApi.ConnectionStateConnectingToProxy -> TelegramConnectionState.CONNECTING
+            is TdApi.UpdateConnectionState -> if (generation == clientGeneration) {
+                _connectionState.value = when (update.state) {
+                    is TdApi.ConnectionStateWaitingForNetwork ->
+                        TelegramConnectionState.WAITING_FOR_NETWORK
 
-                is TdApi.ConnectionStateUpdating -> TelegramConnectionState.UPDATING
-                else -> TelegramConnectionState.READY
+                    is TdApi.ConnectionStateConnecting,
+                    is TdApi.ConnectionStateConnectingToProxy -> TelegramConnectionState.CONNECTING
+
+                    is TdApi.ConnectionStateUpdating -> TelegramConnectionState.UPDATING
+                    else -> TelegramConnectionState.READY
+                }
             }
         }
     }

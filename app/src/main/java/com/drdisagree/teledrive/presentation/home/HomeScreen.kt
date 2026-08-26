@@ -158,7 +158,11 @@ fun HomeScreen(
             LargeFlexibleTopAppBar(
                 title = { Text(stringResource(R.string.app_name)) },
                 subtitle = {
-                    val status = rememberConnectionStatus(state.offline, state.connection)
+                    val status = rememberConnectionStatus(
+                        offline = state.offline,
+                        connection = state.connection,
+                        known = !state.loading
+                    )
                     AnimatedVisibility(
                         visible = status != null,
                         enter = fadeIn() + expandVertically(),
@@ -609,8 +613,10 @@ private data class ConnectionStatus(
 @Composable
 private fun rememberConnectionStatus(
     offline: Boolean,
-    connection: TelegramConnectionState
+    connection: TelegramConnectionState,
+    known: Boolean
 ): ConnectionStatus? {
+    if (!known) return null
     val settled = !offline && connection == TelegramConnectionState.READY
     var wasSettled by rememberSaveable { mutableStateOf(settled) }
     var showRecovered by remember { mutableStateOf(false) }
