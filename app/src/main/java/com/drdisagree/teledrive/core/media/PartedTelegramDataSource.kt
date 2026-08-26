@@ -132,7 +132,7 @@ class PartedTelegramDataSource(
         val index = parts.indexOf(part)
         open?.takeIf { it.index == index }?.let { return it }
 
-        val remoteFileId = part.remoteFileId ?: throw IOException("Part has no remote copy")
+        val remoteFileId = part.remoteFileId
         val info = telegramClient.resolveFile(remoteFileId)
         val salt = if (encrypted) {
             val headerSize = streamCrypto.headerSize().toLong()
@@ -157,7 +157,7 @@ class PartedTelegramDataSource(
         if (preloaded == nextIndex) return
         if (part.plainSize - within > PRELOAD_MARGIN) return
 
-        val remoteFileId = next.remoteFileId ?: return
+        val remoteFileId = next.remoteFileId
         runCatching {
             val info = telegramClient.resolveFile(remoteFileId)
             telegramClient.requestFileRange(info.fileId, 0, 0)
