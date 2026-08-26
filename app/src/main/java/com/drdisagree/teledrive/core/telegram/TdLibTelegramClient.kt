@@ -1,6 +1,8 @@
 package com.drdisagree.teledrive.core.telegram
 
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.util.Base64
 import android.os.Build
 import com.drdisagree.teledrive.BuildConfig
@@ -390,6 +392,31 @@ class TdLibTelegramClient @Inject constructor(
         )
         awaitAuthorizedOrParameters()
         sendVia(active, request)
+    }
+
+    /**
+     * Changing the route leaves TDLib on its existing sockets, which were opened
+     * the old way. Re-declaring the network type forces every connection to be
+     * re-established, this time through the proxy that was just applied.
+     */
+    override suspend fun reconnect() {
+        if (client == null || !parametersReady) return
+        runCatching { send<TdApi.Ok>(TdApi.SetNetworkType(currentNetworkType())) }
+            .onFailure { SafeLog.w(TAG, "Could not force a reconnect", it) }
+    }
+
+    private fun currentNetworkType(): TdApi.NetworkType {
+        val manager = context.getSystemService(ConnectivityManager::class.java)
+            ?: return TdApi.NetworkTypeOther()
+        val capabilities = manager.activeNetwork?.let { manager.getNetworkCapabilities(it) }
+            ?: return TdApi.NetworkTypeNone()
+        return when {
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> TdApi.NetworkTypeWiFi()
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ->
+                TdApi.NetworkTypeMobile()
+
+            else -> TdApi.NetworkTypeOther()
+        }
     }
 
     private fun TelegramProxy.toTdType(): TdApi.ProxyType = when (type) {

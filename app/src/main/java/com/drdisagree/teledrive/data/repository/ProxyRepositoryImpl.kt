@@ -85,6 +85,19 @@ class ProxyRepositoryImpl @Inject constructor(
                 state !is TelegramAuthState.Closed
     }
 
+    override suspend fun rotate(): AppResult<Boolean> {
+        val saved = proxyDao.all()
+        if (saved.size < 2) return AppResult.Success(false)
+        val activeId = settingsRepository.preferences.first().activeProxyId
+        val current = saved.indexOfFirst { it.id == activeId }
+        val next = saved[(current + 1).mod(saved.size)]
+        SafeLog.d(TAG, "Switching to the next saved proxy")
+        return when (val result = select(next.id)) {
+            is AppResult.Success -> AppResult.Success(true)
+            is AppResult.Failure -> result
+        }
+    }
+
     override suspend fun applyActive() {
         runCatching { telegramClient.applyProxy(activeProxy()) }
             .onFailure { SafeLog.w(TAG, "Could not apply the proxy", it) }
@@ -104,6 +117,9 @@ class ProxyRepositoryImpl @Inject constructor(
         )
     }
 
+    @Volatile
+    private var appliedProxy: TelegramProxy? = null
+
     private suspend fun activeProxy(): TelegramProxy? {
         val prefs = settingsRepository.preferences.first()
         if (!prefs.proxyEnabled) return null
@@ -112,7 +128,12 @@ class ProxyRepositoryImpl @Inject constructor(
     }
 
     private suspend fun applyAndReport(): AppResult<Unit> = try {
-        telegramClient.applyProxy(activeProxy())
+        val target = activeProxy()
+        telegramClient.applyProxy(target)
+        if (target != appliedProxy) {
+            appliedProxy = target
+            telegramClient.reconnect()
+        }
         AppResult.Success(Unit)
     } catch (e: TelegramException) {
         AppResult.Failure(

@@ -21,6 +21,12 @@ interface ProxyRepository {
     /** Reapplies the current choice, for a client that has just started. */
     suspend fun applyActive()
 
+    /**
+     * Moves to the next saved proxy and reconnects through it. Returns false
+     * when there is nothing else to try.
+     */
+    suspend fun rotate(): AppResult<Boolean>
+
     /** Succeeds when Telegram answers through [proxy]. */
     suspend fun test(proxy: ProxyServer): AppResult<Unit>
 

@@ -93,6 +93,9 @@ interface TelegramClient {
     /** Throws [TelegramException] when Telegram cannot be reached through [proxy]. */
     suspend fun testProxy(proxy: TelegramProxy)
 
+    /** Drops every open connection so the next one picks up the current route. */
+    suspend fun reconnect()
+
     /**
      * Returns the chat id of the private storage channel, validating
      * [knownChatId] first, then searching existing chats by marker, and

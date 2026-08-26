@@ -480,7 +480,7 @@
     <string name="settings_section_about_title">About</string>
     <string name="settings_section_account_subtitle">Telegram session, sync, log out</string>
     <string name="settings_section_account_title">Account</string>
-    <string name="settings_section_advanced_subtitle">Transfers, retries, logging</string>
+    <string name="settings_section_advanced_subtitle">Transfers, retries, proxy, logging</string>
     <string name="settings_section_advanced_title">Advanced</string>
     <string name="settings_section_appearance_subtitle">Theme, grid, layout</string>
     <string name="settings_section_appearance_title">Appearance</string>

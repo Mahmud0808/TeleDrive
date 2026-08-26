@@ -26,6 +26,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
 import com.drdisagree.teledrive.core.publish.PublishScheduler
+import com.drdisagree.teledrive.core.proxy.ProxyFailover
 
 @HiltAndroidApp
 class TeleDriveApplication : Application(), Configuration.Provider, SingletonImageLoader.Factory {
@@ -57,6 +58,9 @@ class TeleDriveApplication : Application(), Configuration.Provider, SingletonIma
     @Inject
     lateinit var publishScheduler: PublishScheduler
 
+    @Inject
+    lateinit var proxyFailover: ProxyFailover
+
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     override val workManagerConfiguration: Configuration
@@ -71,6 +75,7 @@ class TeleDriveApplication : Application(), Configuration.Provider, SingletonIma
         super.onCreate()
         appNotifications.createChannels()
         mediaStoreWatcher.start()
+        proxyFailover.start(applicationScope)
         applicationScope.launch {
             settingsRepository.preferences
                 .map { it.debugLogging }
