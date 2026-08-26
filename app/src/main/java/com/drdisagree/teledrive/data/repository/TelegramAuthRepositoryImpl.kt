@@ -16,11 +16,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 import javax.inject.Singleton
+import com.drdisagree.teledrive.domain.repository.ProxyRepository
 
 @Singleton
 class TelegramAuthRepositoryImpl @Inject constructor(
     private val telegramClient: TelegramClient,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val proxyRepository: ProxyRepository
 ) : TelegramAuthRepository {
 
     override val authState: StateFlow<TelegramAuthState> = telegramClient.authState
@@ -39,7 +41,10 @@ class TelegramAuthRepositoryImpl @Inject constructor(
             )
         }
         settingsRepository.setTelegramCredentials(credentials)
-        return runTelegram { telegramClient.start(credentials) }
+        return runTelegram {
+            telegramClient.start(credentials)
+            proxyRepository.applyActive()
+        }
     }
 
     override suspend fun startFromStoredCredentials(): AppResult<Boolean> {
@@ -49,7 +54,10 @@ class TelegramAuthRepositoryImpl @Inject constructor(
             } else {
                 AppResult.Success(false)
             }
-        return when (val result = runTelegram { telegramClient.start(credentials) }) {
+        return when (val result = runTelegram {
+            telegramClient.start(credentials)
+            proxyRepository.applyActive()
+        }) {
             is AppResult.Success -> AppResult.Success(true)
             is AppResult.Failure -> AppResult.Failure(result.error)
         }

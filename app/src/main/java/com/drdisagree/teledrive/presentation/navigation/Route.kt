@@ -69,4 +69,7 @@ sealed interface Route {
 
     @Serializable
     data object Exclusions : Route
+
+    @Serializable
+    data object Proxy : Route
 }

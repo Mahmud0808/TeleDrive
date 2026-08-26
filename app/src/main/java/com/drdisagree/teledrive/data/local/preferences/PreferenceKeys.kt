@@ -45,6 +45,8 @@ object PreferenceKeys {
     val LAST_UPDATE_CHECK_AT = longPreferencesKey("last_update_check_at")
     val NOTIFIED_UPDATE_VERSION = stringPreferencesKey("notified_update_version")
     val SKIPPED_UPDATE_VERSION = stringPreferencesKey("skipped_update_version")
+    val PROXY_ENABLED = booleanPreferencesKey("proxy_enabled")
+    val ACTIVE_PROXY_ID = stringPreferencesKey("active_proxy_id")
     val TEXT_PREVIEW_SCALE = floatPreferencesKey("text_preview_scale")
 
     val SORT_FIELD = stringPreferencesKey("sort_field")

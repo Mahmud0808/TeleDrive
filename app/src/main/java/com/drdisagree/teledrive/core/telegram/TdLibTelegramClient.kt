@@ -1,6 +1,7 @@
 package com.drdisagree.teledrive.core.telegram
 
 import android.content.Context
+import android.util.Base64
 import android.os.Build
 import com.drdisagree.teledrive.BuildConfig
 import com.drdisagree.teledrive.core.common.SafeLog
@@ -59,6 +60,9 @@ class TdLibTelegramClient @Inject constructor(
 
     @Volatile
     private var credentials: TelegramCredentials? = null
+
+    @Volatile
+    private var parametersReady = false
     private var clientGeneration = 0
 
     private val _authState = MutableStateFlow<TelegramAuthState>(TelegramAuthState.Uninitialized)
@@ -78,6 +82,7 @@ class TdLibTelegramClient @Inject constructor(
             this.credentials = credentials
             if (client == null || _authState.value == TelegramAuthState.Closed) {
                 _authState.value = TelegramAuthState.Initializing
+                parametersReady = false
                 client = createClient()
             }
         }
@@ -169,6 +174,7 @@ class TdLibTelegramClient @Inject constructor(
             is TdApi.AuthorizationStateClosed -> {
                 if (generation == clientGeneration) {
                     client = null
+                    parametersReady = false
                     _authState.value = TelegramAuthState.Closed
                 }
             }
@@ -211,6 +217,8 @@ class TdLibTelegramClient @Inject constructor(
             if (result is TdApi.Error) {
                 SafeLog.e(TAG, "SetTdlibParameters failed: ${result.code}")
                 _authState.value = TelegramAuthState.Failed(result.message)
+            } else {
+                parametersReady = true
             }
         }
     }
@@ -223,9 +231,16 @@ class TdLibTelegramClient @Inject constructor(
      */
     private suspend fun <T : TdApi.Object> send(function: TdApi.Function<T>): T {
         val activeClient = client ?: throw TelegramException(500, "Telegram client not started")
+        return sendVia(activeClient, function)
+    }
+
+    private suspend fun <T : TdApi.Object> sendVia(
+        target: Client,
+        function: TdApi.Function<T>
+    ): T {
         return withTimeoutOrNull(REQUEST_TIMEOUT_MS.milliseconds) {
             suspendCancellableCoroutine { continuation ->
-                activeClient.send(function) { result ->
+                target.send(function) { result ->
                     if (result is TdApi.Error) {
                         continuation.resumeWithException(
                             TelegramException.from(result.code, result.message)
@@ -278,7 +293,10 @@ class TdLibTelegramClient @Inject constructor(
         withTimeoutOrNull(CLOSE_WAIT_LIMIT_MS.milliseconds) {
             _authState.first { it == TelegramAuthState.Closed }
         }
-        clientMutex.withLock { client = null }
+        clientMutex.withLock {
+            client = null
+            parametersReady = false
+        }
         File(context.filesDir, "tdlib").deleteRecursively()
         start(current)
     }
@@ -337,6 +355,78 @@ class TdLibTelegramClient @Inject constructor(
     }
 
     private val storageChatMutex = Mutex()
+
+    /**
+     * Replaces whatever TDLib had with the one route the app wants, so a proxy
+     * removed here cannot keep being used behind the app's back.
+     */
+    override suspend fun applyProxy(proxy: TelegramProxy?) {
+        if (client == null) return
+        awaitAuthorizedOrParameters()
+        runCatching {
+            val existing = send<TdApi.Proxies>(TdApi.GetProxies())
+            existing.proxies.forEach { send<TdApi.Ok>(TdApi.RemoveProxy(it.id)) }
+        }
+        if (proxy == null) {
+            runCatching { send<TdApi.Ok>(TdApi.DisableProxy()) }
+            return
+        }
+        send<TdApi.Proxy>(
+            TdApi.AddProxy(proxy.host, proxy.port, true, proxy.toTdType())
+        )
+    }
+
+    override suspend fun testProxy(proxy: TelegramProxy) {
+        val request = TdApi.TestProxy(
+            proxy.host,
+            proxy.port,
+            proxy.toTdType(),
+            PROXY_TEST_DC,
+            PROXY_TEST_TIMEOUT_SECONDS
+        )
+        val active = client?.takeIf { parametersReady } ?: throw TelegramException(
+            PROXY_NEEDS_CLIENT_CODE,
+            "Telegram is not initialised yet"
+        )
+        awaitAuthorizedOrParameters()
+        sendVia(active, request)
+    }
+
+    private fun TelegramProxy.toTdType(): TdApi.ProxyType = when (type) {
+        TelegramProxyType.SOCKS5 -> TdApi.ProxyTypeSocks5(username.orEmpty(), password.orEmpty())
+        TelegramProxyType.MTPROTO -> TdApi.ProxyTypeMtproto(mtprotoSecret(secret.orEmpty()))
+        TelegramProxyType.HTTP ->
+            TdApi.ProxyTypeHttp(username.orEmpty(), password.orEmpty(), false)
+    }
+
+    /**
+     * Shared links carry the secret base64url encoded, while TDLib documents it
+     * as hexadecimal. Anything that is not already hex is decoded and re-encoded
+     * so both forms of the same secret reach Telegram.
+     */
+    private fun mtprotoSecret(raw: String): String {
+        val secret = raw.trim()
+        val isHex = secret.isNotEmpty() &&
+                secret.length % 2 == 0 &&
+                secret.all { it.isDigit() || it in 'a'..'f' || it in 'A'..'F' }
+        if (isHex) return secret.lowercase()
+        return runCatching {
+            Base64.decode(secret, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
+                .joinToString("") { "%02x".format(it) }
+        }.getOrDefault(secret)
+    }
+
+    /**
+     * Proxy calls are accepted once TDLib has its parameters, well before a
+     * sign in, which is the point: without a route there is nothing to sign in
+     * through.
+     */
+    private suspend fun awaitAuthorizedOrParameters() {
+        if (_authState.value == TelegramAuthState.Ready) return
+        withTimeoutOrNull(PROXY_READY_WAIT_MS.milliseconds) {
+            authState.first { it != TelegramAuthState.Initializing }
+        }
+    }
 
     override suspend fun getLimits(): TelegramLimits =
         TelegramLimits.forPremium(getCurrentUser().isPremium)
@@ -1146,6 +1236,10 @@ class TdLibTelegramClient @Inject constructor(
         private const val TAG = "TdLibTelegramClient"
         private const val CLIENT_WAIT_LIMIT_MS = 5_000
         private const val REQUEST_TIMEOUT_MS = 45_000L
+        private const val PROXY_TEST_DC = 2
+        private const val PROXY_NEEDS_CLIENT_CODE = 401
+        private const val PROXY_TEST_TIMEOUT_SECONDS = 20.0
+        private const val PROXY_READY_WAIT_MS = 10_000L
         private const val REQUEST_TIMEOUT_CODE = 408
         private const val COPY_TIMEOUT_MS = 30_000L
         private const val CLIENT_WAIT_STEP_MS = 10L

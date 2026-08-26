@@ -20,6 +20,7 @@ import com.drdisagree.teledrive.presentation.note.NoteEditorScreen
 import com.drdisagree.teledrive.presentation.onboarding.OnboardingScreen
 import com.drdisagree.teledrive.presentation.preview.PreviewScreen
 import com.drdisagree.teledrive.presentation.search.SearchScreen
+import com.drdisagree.teledrive.presentation.proxy.ProxyScreen
 import com.drdisagree.teledrive.presentation.settings.ExclusionsScreen
 import com.drdisagree.teledrive.presentation.settings.SettingsScreen
 import com.drdisagree.teledrive.presentation.settings.SettingsSectionScreen
@@ -57,6 +58,7 @@ fun AppNavHost(
     ) {
         composable<Route.Onboarding> {
             OnboardingScreen(
+                onOpenProxy = { navController.navigateOnce(Route.Proxy) },
                 onFinished = {
                     navController.navigateOnce(Route.Home) {
                         popUpTo(Route.Onboarding) { inclusive = true }
@@ -197,6 +199,7 @@ fun AppNavHost(
                 onOpenChannels = { navController.navigateOnce(Route.Channels) },
                 onBack = { navController.popBackStackOnce() },
                 onOpenExclusions = { navController.navigateOnce(Route.Exclusions) },
+                onOpenProxy = { navController.navigateOnce(Route.Proxy) },
                 onLoggedOut = {
                     navController.navigateOnce(Route.Onboarding) {
                         popUpTo(0) { inclusive = true }
@@ -206,6 +209,9 @@ fun AppNavHost(
         }
         composable<Route.Exclusions> {
             ExclusionsScreen(onBack = { navController.popBackStackOnce() })
+        }
+        composable<Route.Proxy> {
+            ProxyScreen(onBack = { navController.popBackStackOnce() })
         }
     }
 }

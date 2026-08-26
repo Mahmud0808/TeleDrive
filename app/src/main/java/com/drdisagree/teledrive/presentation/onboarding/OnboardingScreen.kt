@@ -44,6 +44,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.CloudDone
@@ -55,6 +56,7 @@ import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.Photo
 import androidx.compose.material.icons.filled.QrCode2
 import androidx.compose.material.icons.filled.Sms
+import androidx.compose.material.icons.filled.VpnKey
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -122,6 +124,7 @@ import com.drdisagree.teledrive.presentation.components.QrCode
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun OnboardingScreen(
+    onOpenProxy: () -> Unit,
     onFinished: () -> Unit,
     viewModel: OnboardingViewModel = hiltViewModel()
 ) {
@@ -208,6 +211,7 @@ fun OnboardingScreen(
                                 onLoadCountries = viewModel::loadCountries,
                                 onSelectCountry = viewModel::selectCountry,
                                 onUseQrCode = viewModel::startQrLogin,
+                                onOpenProxy = onOpenProxy,
                                 working = state.working,
                                 error = state.error,
                                 registrationRequired = state.registrationRequired,
@@ -549,6 +553,64 @@ private fun CredentialsStep(
     }
 }
 
+/**
+ * The way out for anyone whose network blocks Telegram outright, offered where
+ * they first stall rather than buried in a screen they cannot reach yet.
+ */
+@Composable
+private fun BlockedNetworkCard(onOpenProxy: () -> Unit) {
+    val shape = MaterialTheme.shapes.extraLarge
+    Surface(
+        shape = shape,
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .clickable(onClick = onOpenProxy)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.tertiaryContainer,
+                        shape = CircleShape
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.VpnKey,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onTertiaryContainer,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            Spacer(Modifier.width(14.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.onboarding_telegram_blocked),
+                    style = MaterialTheme.typography.titleSmall
+                )
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    text = stringResource(R.string.onboarding_set_up_proxy),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Spacer(Modifier.width(8.dp))
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun ApiGuideDialog(onDismiss: () -> Unit) {
@@ -618,7 +680,7 @@ private fun InstructionCard(number: Int, content: @Composable () -> Unit) {
         ) {
             Box(
                 modifier = Modifier
-                    .size(32.dp)
+                    .size(28.dp)
                     .background(
                         color = MaterialTheme.colorScheme.primary,
                         shape = CircleShape
@@ -627,7 +689,7 @@ private fun InstructionCard(number: Int, content: @Composable () -> Unit) {
             ) {
                 Text(
                     text = number.toString(),
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onPrimary
                 )
             }
@@ -636,7 +698,6 @@ private fun InstructionCard(number: Int, content: @Composable () -> Unit) {
         }
     }
 }
-
 
 @Composable
 private fun QrStep(
@@ -807,12 +868,14 @@ private fun PhoneStep(
     onLoadCountries: () -> Unit,
     onSelectCountry: (Country) -> Unit,
     onUseQrCode: () -> Unit,
+    onOpenProxy: () -> Unit,
     onSubmit: (String) -> Unit
 ) {
     var national by rememberSaveable { mutableStateOf("") }
     var picking by rememberSaveable { mutableStateOf(false) }
-    val unavailable = countryLoadState == CountryLoadState.FAILED
-    val callingCode = selectedCountry?.callingCode.orEmpty()
+    var typedBeforeCountries by rememberSaveable { mutableStateOf(false) }
+    val manual = countryLoadState == CountryLoadState.FAILED || typedBeforeCountries
+    val callingCode = if (manual) "" else selectedCountry?.callingCode.orEmpty()
 
     LaunchedEffect(Unit) { onLoadCountries() }
 
@@ -821,7 +884,7 @@ private fun PhoneStep(
         title = stringResource(R.string.onboarding_number),
         description = stringResource(R.string.onboarding_phone_number_telegram_account)
     ) {
-        if (!unavailable) {
+        if (!manual) {
             CountryField(
                 country = selectedCountry,
                 loading = countryLoadState == CountryLoadState.LOADING,
@@ -832,17 +895,18 @@ private fun PhoneStep(
         }
         OnboardingField(
             value = national,
-            onChange = { entry -> national = entry.filter { it.isDigit() } },
+            onChange = { entry ->
+                if (countryLoadState == CountryLoadState.LOADING) typedBeforeCountries = true
+                national = entry.filter { it.isDigit() }
+            },
             label = stringResource(R.string.onboarding_phone_number),
-            supportingText = if (unavailable) {
+            supportingText = if (manual) {
                 stringResource(R.string.onboarding_include_country_code_like)
             } else {
                 null
             },
             keyboardType = KeyboardType.Phone,
-            /* Typing before the dial code lands would leave the number
-               prefixed with whatever country resolves a moment later. */
-            enabled = !working && countryLoadState != CountryLoadState.LOADING,
+            enabled = !working,
             prefix = "+$callingCode"
         )
         ErrorAndAction(
@@ -865,6 +929,8 @@ private fun PhoneStep(
             Spacer(Modifier.width(8.dp))
             Text(stringResource(R.string.onboarding_qr_sign_in))
         }
+        Spacer(Modifier.height(12.dp))
+        BlockedNetworkCard(onOpenProxy = onOpenProxy)
     }
 
     if (picking) {

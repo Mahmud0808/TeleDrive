@@ -3,6 +3,24 @@ package com.drdisagree.teledrive.data.local.database
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
+/** Adds saved proxies, for networks that block Telegram outright. */
+val MIGRATION_8_9 = object : Migration(8, 9) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS proxies (" +
+                    "id TEXT NOT NULL PRIMARY KEY, " +
+                    "label TEXT NOT NULL, " +
+                    "type TEXT NOT NULL, " +
+                    "host TEXT NOT NULL, " +
+                    "port INTEGER NOT NULL, " +
+                    "username TEXT, " +
+                    "password TEXT, " +
+                    "secret TEXT, " +
+                    "addedAt INTEGER NOT NULL)"
+        )
+    }
+}
+
 /** Adds the local step a split transfer reports while it is between parts. */
 val MIGRATION_7_8 = object : Migration(7, 8) {
     override fun migrate(db: SupportSQLiteDatabase) {

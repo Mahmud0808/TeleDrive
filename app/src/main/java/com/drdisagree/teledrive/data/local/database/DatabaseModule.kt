@@ -9,6 +9,7 @@ import com.drdisagree.teledrive.data.local.dao.FileDao
 import com.drdisagree.teledrive.data.local.dao.FilePartDao
 import com.drdisagree.teledrive.data.local.dao.FolderDao
 import com.drdisagree.teledrive.data.local.dao.PendingDeleteDao
+import com.drdisagree.teledrive.data.local.dao.ProxyDao
 import com.drdisagree.teledrive.data.local.dao.StorageChannelDao
 import com.drdisagree.teledrive.data.local.dao.ThumbnailDao
 import com.drdisagree.teledrive.data.local.dao.TransferDao
@@ -34,7 +35,8 @@ object DatabaseModule {
                 MIGRATION_4_5,
                 MIGRATION_5_6,
                 MIGRATION_6_7,
-                MIGRATION_7_8
+                MIGRATION_7_8,
+                MIGRATION_8_9
             )
             .build()
 
@@ -67,4 +69,7 @@ object DatabaseModule {
 
     @Provides
     fun provideFilePartDao(db: TeleDriveDatabase): FilePartDao = db.filePartDao()
+
+    @Provides
+    fun provideProxyDao(db: TeleDriveDatabase): ProxyDao = db.proxyDao()
 }

@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 
 @HiltViewModel
@@ -164,7 +165,14 @@ class OnboardingViewModel @Inject constructor(
         if (_uiState.value.countries.isNotEmpty()) return
         _uiState.update { it.copy(countryLoadState = CountryLoadState.LOADING) }
         viewModelScope.launch {
-            when (val result = telegramAuthRepository.countries()) {
+            val fetched = withTimeoutOrNull(COUNTRY_LOAD_TIMEOUT_MS) {
+                telegramAuthRepository.countries()
+            }
+            if (fetched == null) {
+                _uiState.update { it.copy(countryLoadState = CountryLoadState.FAILED) }
+                return@launch
+            }
+            when (val result = fetched) {
                 is AppResult.Success -> _uiState.update { current ->
                     current.copy(
                         countries = result.value.countries,
@@ -357,6 +365,7 @@ class OnboardingViewModel @Inject constructor(
     }
 
     private companion object {
+        const val COUNTRY_LOAD_TIMEOUT_MS = 8_000L
         const val DEFAULT_DRIVE_LABEL = ""
     }
 }

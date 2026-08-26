@@ -6,6 +6,7 @@ import com.drdisagree.teledrive.domain.repository.ChannelRepository
 import com.drdisagree.teledrive.domain.repository.ExclusionRepository
 import com.drdisagree.teledrive.domain.repository.FileRepository
 import com.drdisagree.teledrive.domain.repository.KeyBackupRepository
+import com.drdisagree.teledrive.domain.repository.ProxyRepository
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.repository.SyncRepository
 import com.drdisagree.teledrive.domain.repository.TelegramAuthRepository
@@ -48,6 +49,10 @@ interface RepositoryModule {
     @Binds
     @Singleton
     fun bindTelegramAuthRepository(impl: TelegramAuthRepositoryImpl): TelegramAuthRepository
+
+    @Binds
+    @Singleton
+    fun bindProxyRepository(impl: ProxyRepositoryImpl): ProxyRepository
 
     @Binds
     @Singleton

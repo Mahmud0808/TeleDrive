@@ -71,6 +71,7 @@ fun SettingsSectionScreen(
     onOpenChannels: () -> Unit,
     onBack: () -> Unit,
     onOpenExclusions: () -> Unit,
+    onOpenProxy: () -> Unit,
     onLoggedOut: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
@@ -150,7 +151,11 @@ fun SettingsSectionScreen(
                 SettingsSectionType.APPEARANCE -> AppearanceSection(state, viewModel)
                 SettingsSectionType.PLAYBACK -> PlaybackSection(state, viewModel)
                 SettingsSectionType.NOTIFICATIONS -> NotificationsSection(state, viewModel)
-                SettingsSectionType.ADVANCED -> AdvancedSection(state, viewModel)
+                SettingsSectionType.ADVANCED -> AdvancedSection(
+                    state = state,
+                    viewModel = viewModel,
+                    onOpenProxy = onOpenProxy
+                )
                 SettingsSectionType.ABOUT -> AboutSection(state, viewModel)
             }
             Spacer(Modifier.height(24.dp + padding.calculateBottomPadding()))
@@ -914,9 +919,20 @@ private fun NotificationsSection(state: SettingsUiState, viewModel: SettingsView
 }
 
 @Composable
-private fun AdvancedSection(state: SettingsUiState, viewModel: SettingsViewModel) {
+private fun AdvancedSection(
+    state: SettingsUiState,
+    viewModel: SettingsViewModel,
+    onOpenProxy: () -> Unit
+) {
     val prefs = state.preferences
     SettingsGroup {
+        add {
+            SettingsClickRow(
+                title = stringResource(R.string.settings_proxy),
+                subtitle = stringResource(R.string.settings_proxy_subtitle),
+                onClick = onOpenProxy
+            )
+        }
         add {
             SettingsSliderRow(
                 title = stringResource(R.string.settings_parallel_transfers),

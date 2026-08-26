@@ -51,5 +51,8 @@ data class UserPreferences(
     val updateCheckEnabled: Boolean = true,
     val lastUpdateCheckAt: Long = 0L,
     val notifiedUpdateVersion: String = "",
-    val skippedUpdateVersion: String = ""
+    val skippedUpdateVersion: String = "",
+
+    val proxyEnabled: Boolean = false,
+    val activeProxyId: String = ""
 )

@@ -130,6 +130,8 @@ class SettingsRepositoryImpl @Inject constructor(
                 ?: defaults.notifiedUpdateVersion,
             skippedUpdateVersion = this[PreferenceKeys.SKIPPED_UPDATE_VERSION]
                 ?: defaults.skippedUpdateVersion,
+            proxyEnabled = this[PreferenceKeys.PROXY_ENABLED] ?: defaults.proxyEnabled,
+            activeProxyId = this[PreferenceKeys.ACTIVE_PROXY_ID] ?: defaults.activeProxyId,
             textPreviewScale = this[PreferenceKeys.TEXT_PREVIEW_SCALE]
                 ?: defaults.textPreviewScale,
             sortField = enumOrDefault(this[PreferenceKeys.SORT_FIELD], defaults.sortField),
@@ -188,6 +190,8 @@ class SettingsRepositoryImpl @Inject constructor(
         this[PreferenceKeys.LAST_UPDATE_CHECK_AT] = prefs.lastUpdateCheckAt
         this[PreferenceKeys.NOTIFIED_UPDATE_VERSION] = prefs.notifiedUpdateVersion
         this[PreferenceKeys.SKIPPED_UPDATE_VERSION] = prefs.skippedUpdateVersion
+        this[PreferenceKeys.PROXY_ENABLED] = prefs.proxyEnabled
+        this[PreferenceKeys.ACTIVE_PROXY_ID] = prefs.activeProxyId
         this[PreferenceKeys.TEXT_PREVIEW_SCALE] = prefs.textPreviewScale
         this[PreferenceKeys.SORT_FIELD] = prefs.sortField.name
         this[PreferenceKeys.SORT_DIRECTION] = prefs.sortDirection.name

@@ -19,7 +19,7 @@ interface TelegramClient {
 
     /**
      * Channels on this account that can serve as the drive. Scanning every chat
-     * is skipped when searching by name already finds [knownCount] of them.
+     * is skipped when searching by name already finds [knownChatIds] of them.
      */
     suspend fun listStorageChannels(knownChatIds: List<Long> = emptyList()): List<StorageChannel>
 
@@ -86,6 +86,12 @@ interface TelegramClient {
     suspend fun getCurrentUser(): TelegramUser
 
     suspend fun getLimits(): TelegramLimits
+
+    /** Routes traffic through [proxy], or connects directly when null. */
+    suspend fun applyProxy(proxy: TelegramProxy?)
+
+    /** Throws [TelegramException] when Telegram cannot be reached through [proxy]. */
+    suspend fun testProxy(proxy: TelegramProxy)
 
     /**
      * Returns the chat id of the private storage channel, validating
