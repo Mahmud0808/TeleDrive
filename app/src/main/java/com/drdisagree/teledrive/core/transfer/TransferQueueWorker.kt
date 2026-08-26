@@ -190,6 +190,7 @@ class TransferQueueWorker @AssistedInject constructor(
             .setContentTitle(applicationContext.getString(R.string.notification_transfers_active))
             .setOngoing(true)
             .setOnlyAlertOnce(true)
+            .setProgress(0, 0, true)
             .setContentIntent(
                 appNotifications.screenIntent(
                     AppNotifications.DESTINATION_TRANSFERS,

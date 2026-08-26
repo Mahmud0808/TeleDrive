@@ -7,6 +7,7 @@ import java.util.Date
 import java.util.Locale
 import kotlin.math.ln
 import kotlin.math.pow
+import kotlin.math.roundToInt
 
 object Formatters {
 
@@ -26,6 +27,9 @@ object Formatters {
         if (count > MAX_BADGE_COUNT) "$MAX_BADGE_COUNT+" else count.toString()
 
     fun speed(bytesPerSecond: Long): String = "${bytes(bytesPerSecond)}/s"
+
+    fun percent(fraction: Float): String =
+        "${(fraction.coerceIn(0f, 1f) * 100).roundToInt()}%"
 
     fun date(epochMillis: Long): String =
         DateFormat.getDateInstance(DateFormat.MEDIUM).format(Date(epochMillis))

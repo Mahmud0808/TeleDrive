@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.domain.model.TransferStage
 import com.drdisagree.teledrive.domain.model.TransferState
 import com.drdisagree.teledrive.domain.model.TransferTask
 import com.drdisagree.teledrive.domain.model.TransferType
@@ -55,7 +56,6 @@ import com.drdisagree.teledrive.presentation.components.ConfirmDialog
 import com.drdisagree.teledrive.presentation.components.EmptyState
 import com.drdisagree.teledrive.presentation.components.liftedTopAppBarColors
 import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
-import com.drdisagree.teledrive.domain.model.TransferStage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -248,6 +248,23 @@ private fun failedSectionTitle(failed: List<TransferTask>): String {
 }
 
 @Composable
+private fun transferRate(transfer: TransferTask): String {
+    val stage = transfer.stage
+    if (stage != null) {
+        return stringResource(
+            when (stage) {
+                TransferStage.SEALING -> R.string.transfer_stage_sealing
+                TransferStage.JOINING -> R.string.transfer_stage_joining
+            }
+        )
+    }
+    if (transfer.state != TransferState.RUNNING || transfer.speedBytesPerSecond <= 0) return ""
+    val speed = Formatters.speed(transfer.speedBytesPerSecond)
+    val eta = transfer.etaSeconds?.let { Formatters.eta(it) } ?: return speed
+    return "$speed · $eta"
+}
+
+@Composable
 private fun TransferRow(
     transfer: TransferTask,
     primaryIcon: ImageVector? = null,
@@ -279,27 +296,6 @@ private fun TransferRow(
                             )
                             append(" · ")
                             append(Formatters.bytes(transfer.sizeBytes))
-                            val stage = transfer.stage
-                            if (transfer.state == TransferState.RUNNING && stage != null) {
-                                append(" · ")
-                                append(
-                                    stringResource(
-                                        when (stage) {
-                                            TransferStage.SEALING -> R.string.transfer_stage_sealing
-                                            TransferStage.JOINING -> R.string.transfer_stage_joining
-                                        }
-                                    )
-                                )
-                            } else if (transfer.state == TransferState.RUNNING &&
-                                transfer.speedBytesPerSecond > 0
-                            ) {
-                                append(" · ")
-                                append(Formatters.speed(transfer.speedBytesPerSecond))
-                                transfer.etaSeconds?.let {
-                                    append(" · ")
-                                    append(Formatters.eta(it))
-                                }
-                            }
                             transfer.errorMessage?.let {
                                 append(" · ")
                                 append(it)
@@ -342,6 +338,27 @@ private fun TransferRow(
                     amplitude = { if (transfer.state == TransferState.RUNNING) 1f else 0f },
                     modifier = Modifier.fillMaxWidth()
                 )
+                Spacer(Modifier.height(6.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = Formatters.percent(transfer.progress),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Text(
+                        text = transferRate(transfer),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1
+                    )
+                }
             }
         }
     }

@@ -186,8 +186,7 @@ class TransferExecutor @Inject constructor(
         }
 
         val startedAt = System.currentTimeMillis()
-        var lastBytes = 0L
-        var lastTick = startedAt
+        val ticker = ProgressTicker().apply { start(0, startedAt) }
 
         return try {
             var outcome: Outcome =
@@ -210,11 +209,7 @@ class TransferExecutor @Inject constructor(
                     is TelegramUploadEvent.Started -> Unit
                     is TelegramUploadEvent.Progress -> {
                         val now = System.currentTimeMillis()
-                        val speed = speedOf(event.transferredBytes, lastBytes, lastTick, now)
-                            ?: transfer.speedBytesPerSecond
-                        if (now - lastTick >= PROGRESS_INTERVAL_MS) {
-                            lastBytes = event.transferredBytes
-                            lastTick = now
+                        ticker.tick(event.transferredBytes, now)?.let { speed ->
                             transferDao.updateProgress(
                                 transfer.id, event.transferredBytes, speed, now
                             )
@@ -288,8 +283,7 @@ class TransferExecutor @Inject constructor(
         encrypt: Boolean,
         contentHash: String?
     ): Outcome {
-        var lastBytes = 0L
-        var lastTick = System.currentTimeMillis()
+        val ticker = ProgressTicker().apply { start(0, System.currentTimeMillis()) }
         var outcome: Outcome =
             Outcome.Failed(context.getString(R.string.transfer_error_upload_ended))
 
@@ -300,11 +294,7 @@ class TransferExecutor @Inject constructor(
                     when (event) {
                         is PartUploader.Event.Progress -> {
                             val now = System.currentTimeMillis()
-                            val speed = speedOf(event.transferredBytes, lastBytes, lastTick, now)
-                                ?: transfer.speedBytesPerSecond
-                            if (now - lastTick >= PROGRESS_INTERVAL_MS) {
-                                lastBytes = event.transferredBytes
-                                lastTick = now
+                            ticker.tick(event.transferredBytes, now)?.let { speed ->
                                 transferDao.updateProgress(
                                     transfer.id, event.transferredBytes, speed, now
                                 )
@@ -382,8 +372,7 @@ class TransferExecutor @Inject constructor(
             ?: return Outcome.Failed(context.getString(R.string.transfer_error_no_remote_copy))
 
         val startedAt = System.currentTimeMillis()
-        var lastBytes = 0L
-        var lastTick = startedAt
+        val ticker = ProgressTicker().apply { start(0, startedAt) }
 
         return try {
             var outcome: Outcome =
@@ -395,12 +384,7 @@ class TransferExecutor @Inject constructor(
                     when (event) {
                         is TelegramDownloadEvent.Progress -> {
                             val now = System.currentTimeMillis()
-                            if (now - lastTick >= PROGRESS_INTERVAL_MS) {
-                                val speed =
-                                    speedOf(event.transferredBytes, lastBytes, lastTick, now)
-                                        ?: transfer.speedBytesPerSecond
-                                lastBytes = event.transferredBytes
-                                lastTick = now
+                            ticker.tick(event.transferredBytes, now)?.let { speed ->
                                 transferDao.updateProgress(
                                     transfer.id, event.transferredBytes, speed, now
                                 )
@@ -425,8 +409,7 @@ class TransferExecutor @Inject constructor(
         transfer: TransferEntity,
         entity: FileEntity
     ): Outcome {
-        var lastBytes = 0L
-        var lastTick = System.currentTimeMillis()
+        val ticker = ProgressTicker().apply { start(0, System.currentTimeMillis()) }
         var outcome: Outcome =
             Outcome.Failed(context.getString(R.string.transfer_error_download_ended))
 
@@ -439,12 +422,7 @@ class TransferExecutor @Inject constructor(
                         is PartDownloader.Event.Progress -> {
                             val now = System.currentTimeMillis()
                             transferDao.setStage(transfer.id, null, now)
-                            if (now - lastTick >= PROGRESS_INTERVAL_MS) {
-                                val speed =
-                                    speedOf(event.transferredBytes, lastBytes, lastTick, now)
-                                        ?: transfer.speedBytesPerSecond
-                                lastBytes = event.transferredBytes
-                                lastTick = now
+                            ticker.tick(event.transferredBytes, now)?.let { speed ->
                                 transferDao.updateProgress(
                                     transfer.id, event.transferredBytes, speed, now
                                 )
@@ -534,19 +512,12 @@ class TransferExecutor @Inject constructor(
         }
     }
 
-    private fun speedOf(current: Long, last: Long, lastTick: Long, now: Long): Long? {
-        val elapsed = now - lastTick
-        if (elapsed < PROGRESS_INTERVAL_MS || current < last) return null
-        return (current - last) * 1000 / elapsed
-    }
-
     private fun stagingDir(): File =
         File(context.cacheDir, "staging").apply { mkdirs() }
 
     private class TransferControlException(val paused: Boolean) : Exception()
 
     companion object {
-        private const val PROGRESS_INTERVAL_MS = 400L
         private const val STALL_TIMEOUT_MS = 180_000L
         private const val STALL_CODE = 408
     }
