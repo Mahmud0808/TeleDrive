@@ -2,13 +2,23 @@ package com.drdisagree.teledrive.domain.repository
 
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.domain.model.TransferTask
+import com.drdisagree.teledrive.domain.model.TransferSection
 import kotlinx.coroutines.flow.Flow
 
 interface TransferRepository {
 
-    fun observeAll(): Flow<List<TransferTask>>
+    /**
+     * The newest rows of one section. A backup can queue tens of thousands of
+     * transfers, far more than a list can show, so every observer is bounded.
+     */
+    fun observeSection(section: TransferSection, limit: Int): Flow<List<TransferTask>>
 
-    fun observeActive(): Flow<List<TransferTask>>
+    fun observeSectionCount(section: TransferSection): Flow<Int>
+
+    fun observeActiveCount(): Flow<Int>
+
+    /** The queued or running transfer that is fetching [fileId], if any. */
+    fun observeActiveForFile(fileId: String): Flow<TransferTask?>
 
     /** Queues an upload of [fileId]'s local copy to the storage chat. */
     suspend fun enqueueUpload(fileId: String, priority: Int = 0): AppResult<String>

@@ -20,7 +20,6 @@ import com.drdisagree.teledrive.domain.model.DriveChannel
 import com.drdisagree.teledrive.domain.model.DriveFile
 import com.drdisagree.teledrive.domain.model.DriveFolder
 import com.drdisagree.teledrive.domain.model.StorageSlice
-import com.drdisagree.teledrive.domain.model.TransferTask
 import com.drdisagree.teledrive.domain.repository.BackupRepository
 import com.drdisagree.teledrive.domain.repository.ChannelRepository
 import com.drdisagree.teledrive.domain.repository.FileRepository
@@ -59,7 +58,6 @@ data class HomeUiState(
     val failedCount: Int = 0,
     val recentFiles: List<DriveFile> = emptyList(),
     val favoriteFolders: List<DriveFolder> = emptyList(),
-    val activeTransfers: List<TransferTask> = emptyList(),
     val activeBackup: BackupSession? = null,
     val missingPermissions: List<AppPermission> = emptyList(),
     val backupFoldersSelected: Boolean = true,
@@ -142,7 +140,7 @@ class HomeViewModel @Inject constructor(
         countsAndStorage,
         fileRepository.observeRecent(12),
         fileRepository.observeFavoriteFolders(),
-        transferRepository.observeActive(),
+        transferRepository.observeActiveCount(),
         combine(
             backupRepository.observeActiveSession(),
             telegramAuthRepository.connectionState,
@@ -169,7 +167,7 @@ class HomeViewModel @Inject constructor(
                 prefs.showRecentFiles
             )
         }
-    ) { countsWithStorage, recents, favorites, transfers, misc ->
+    ) { countsWithStorage, recents, favorites, activeTransfers, misc ->
         val (counts, storage, lastBackupAt) = countsWithStorage
         val (syncing, session, connection, network, missing, drive) = misc
         val appLockEnabled = misc.appLockEnabled
@@ -187,7 +185,6 @@ class HomeViewModel @Inject constructor(
             failedCount = counts.failed,
             recentFiles = recents,
             favoriteFolders = favorites,
-            activeTransfers = transfers,
             activeBackup = session,
             missingPermissions = missing,
             backupFoldersSelected = drive?.backupFolders?.isNotEmpty() == true,
@@ -200,7 +197,7 @@ class HomeViewModel @Inject constructor(
             showArchivedSection = showArchived,
             showHiddenSection = showHidden,
             showRecentSection = misc.showRecentSection,
-            activeTransferCount = transfers.size
+            activeTransferCount = activeTransfers
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
 

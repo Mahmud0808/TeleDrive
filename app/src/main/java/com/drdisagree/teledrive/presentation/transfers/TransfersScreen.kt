@@ -40,7 +40,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -181,7 +183,7 @@ fun TransfersScreen(
             contentPadding = padding.add(horizontal = 16.dp, top = 16.dp, bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            section(activeTitle, state.active) { transfer ->
+            section(activeTitle, state.active, state.activeTotal) { transfer ->
                 TransferRow(
                     transfer = transfer,
                     primaryIcon = Icons.Filled.Pause,
@@ -190,7 +192,7 @@ fun TransfersScreen(
                     onCancel = { viewModel.cancel(transfer.id) }
                 )
             }
-            section(pausedTitle, state.paused) { transfer ->
+            section(pausedTitle, state.paused, state.pausedTotal) { transfer ->
                 TransferRow(
                     transfer = transfer,
                     primaryIcon = Icons.Filled.PlayArrow,
@@ -199,7 +201,7 @@ fun TransfersScreen(
                     onCancel = { viewModel.cancel(transfer.id) }
                 )
             }
-            section(failedTitle, state.failed) { transfer ->
+            section(failedTitle, state.failed, state.failedTotal) { transfer ->
                 TransferRow(
                     transfer = transfer,
                     primaryIcon = Icons.Filled.Refresh,
@@ -208,7 +210,7 @@ fun TransfersScreen(
                     onCancel = { viewModel.cancel(transfer.id) }
                 )
             }
-            section(finishedTitle, state.completed) { transfer ->
+            section(finishedTitle, state.completed, state.completedTotal) { transfer ->
                 TransferRow(transfer = transfer)
             }
         }
@@ -218,6 +220,7 @@ fun TransfersScreen(
 private fun LazyListScope.section(
     title: String,
     transfers: List<TransferTask>,
+    total: Int,
     content: @Composable (TransferTask) -> Unit
 ) {
     if (transfers.isEmpty()) return
@@ -230,6 +233,20 @@ private fun LazyListScope.section(
     }
     items(transfers, key = { it.id }) { transfer ->
         content(transfer)
+    }
+    val hidden = total - transfers.size
+    if (hidden > 0) {
+        item(key = "more-$title") {
+            Text(
+                text = pluralStringResource(R.plurals.transfers_more_queued, hidden, hidden),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 2.dp, bottom = 4.dp)
+            )
+        }
     }
 }
 

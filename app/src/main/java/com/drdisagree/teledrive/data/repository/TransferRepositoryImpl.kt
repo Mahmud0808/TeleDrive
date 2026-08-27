@@ -15,6 +15,7 @@ import com.drdisagree.teledrive.data.local.entity.TransferEntity
 import com.drdisagree.teledrive.data.mapper.toDomain
 import com.drdisagree.teledrive.domain.model.BackupState
 import com.drdisagree.teledrive.domain.model.TransferState
+import com.drdisagree.teledrive.domain.model.TransferSection
 import com.drdisagree.teledrive.domain.model.TransferTask
 import com.drdisagree.teledrive.domain.model.TransferType
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
@@ -39,12 +40,27 @@ class TransferRepositoryImpl @Inject constructor(
     private val backupSessionTracker: BackupSessionTracker
 ) : TransferRepository {
 
-    override fun observeAll(): Flow<List<TransferTask>> =
-        transferDao.observeAll().map { list -> list.map { it.toDomain() } }
+    override fun observeSection(
+        section: TransferSection,
+        limit: Int
+    ): Flow<List<TransferTask>> = when (section) {
+        TransferSection.ACTIVE -> transferDao.observeActive(limit)
+        TransferSection.PAUSED -> transferDao.observePaused(limit)
+        TransferSection.FAILED -> transferDao.observeFailed(limit)
+        TransferSection.COMPLETED -> transferDao.observeCompleted(limit)
+    }.map { list -> list.map { it.toDomain() } }
 
-    override fun observeActive(): Flow<List<TransferTask>> =
-        transferDao.observeByStates(listOf(TransferState.QUEUED, TransferState.RUNNING))
-            .map { list -> list.map { it.toDomain() } }
+    override fun observeSectionCount(section: TransferSection): Flow<Int> = when (section) {
+        TransferSection.ACTIVE -> transferDao.observeActiveCount()
+        TransferSection.PAUSED -> transferDao.observeCountByState(TransferState.PAUSED)
+        TransferSection.FAILED -> transferDao.observeCountByState(TransferState.FAILED)
+        TransferSection.COMPLETED -> transferDao.observeCountByState(TransferState.COMPLETED)
+    }
+
+    override fun observeActiveCount(): Flow<Int> = transferDao.observeActiveCount()
+
+    override fun observeActiveForFile(fileId: String): Flow<TransferTask?> =
+        transferDao.observeActiveForFile(fileId).map { it?.toDomain() }
 
     override suspend fun enqueueUpload(fileId: String, priority: Int): AppResult<String> =
         enqueue(fileId, TransferType.UPLOAD, priority)

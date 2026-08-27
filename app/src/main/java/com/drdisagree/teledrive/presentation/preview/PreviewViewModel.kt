@@ -149,11 +149,9 @@ class PreviewViewModel @Inject constructor(
         contentCache.getOrPut(file.id) {
             combine(
                 fileRepository.observeFile(file.id),
-                transferRepository.observeActive()
-            ) { latest, transfers ->
-                val incoming = transfers.firstOrNull { task ->
-                    task.fileId == file.id && task.type.isIncoming
-                }
+                transferRepository.observeActiveForFile(file.id)
+            ) { latest, transfer ->
+                val incoming = transfer?.takeIf { it.type.isIncoming }
                 (latest ?: file) to incoming
             }
                 .distinctUntilChanged()

@@ -25,17 +25,45 @@ interface TransferDao {
     @Query("SELECT * FROM transfers WHERE id = :id")
     fun observeById(id: String): Flow<TransferEntity?>
 
-    @Query("SELECT * FROM transfers ORDER BY createdAt DESC")
-    fun observeAll(): Flow<List<TransferEntity>>
+    @Query(
+        """SELECT * FROM transfers WHERE state IN ('QUEUED', 'RUNNING')
+           ORDER BY priority DESC, createdAt ASC LIMIT :limit"""
+    )
+    fun observeActive(limit: Int): Flow<List<TransferEntity>>
+
+    @Query(
+        """SELECT * FROM transfers WHERE state = 'PAUSED'
+           ORDER BY createdAt ASC LIMIT :limit"""
+    )
+    fun observePaused(limit: Int): Flow<List<TransferEntity>>
+
+    @Query(
+        """SELECT * FROM transfers WHERE state = 'FAILED'
+           ORDER BY updatedAt DESC LIMIT :limit"""
+    )
+    fun observeFailed(limit: Int): Flow<List<TransferEntity>>
+
+    @Query(
+        """SELECT * FROM transfers WHERE state = 'COMPLETED'
+           ORDER BY COALESCE(completedAt, updatedAt) DESC LIMIT :limit"""
+    )
+    fun observeCompleted(limit: Int): Flow<List<TransferEntity>>
+
+    @Query("SELECT COUNT(*) FROM transfers WHERE state = :state")
+    fun observeCountByState(state: TransferState): Flow<Int>
+
+    @Query(
+        """SELECT * FROM transfers
+           WHERE fileId = :fileId AND state IN ('QUEUED', 'RUNNING')
+           ORDER BY createdAt ASC LIMIT 1"""
+    )
+    fun observeActiveForFile(fileId: String): Flow<TransferEntity?>
 
     @Query(
         """SELECT id FROM transfers
             WHERE fileId IN (:fileIds) AND state IN ('QUEUED', 'RUNNING', 'PAUSED')"""
     )
     suspend fun unfinishedIdsForFiles(fileIds: List<String>): List<String>
-
-    @Query("SELECT * FROM transfers WHERE state IN (:states) ORDER BY priority DESC, createdAt ASC")
-    fun observeByStates(states: List<TransferState>): Flow<List<TransferEntity>>
 
     @Query("SELECT * FROM transfers WHERE state = 'QUEUED' ORDER BY priority DESC, createdAt ASC LIMIT :limit")
     suspend fun nextQueued(limit: Int): List<TransferEntity>

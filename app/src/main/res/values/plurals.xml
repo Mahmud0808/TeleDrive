@@ -50,4 +50,9 @@
         <item quantity="one">%d file queued</item>
         <item quantity="other">%d files queued</item>
     </plurals>
+
+    <plurals name="transfers_more_queued">
+        <item quantity="one">%d more not shown</item>
+        <item quantity="other">%d more not shown</item>
+    </plurals>
 </resources>
