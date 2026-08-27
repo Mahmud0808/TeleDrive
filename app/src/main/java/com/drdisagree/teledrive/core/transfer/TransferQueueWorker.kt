@@ -18,6 +18,7 @@ import com.drdisagree.teledrive.data.local.dao.TransferDao
 import com.drdisagree.teledrive.domain.model.BackupState
 import com.drdisagree.teledrive.domain.model.TransferState
 import com.drdisagree.teledrive.domain.model.TransferType
+import com.drdisagree.teledrive.domain.model.UserPreferences
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -30,6 +31,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
@@ -56,18 +58,21 @@ class TransferQueueWorker @AssistedInject constructor(
         appNotifications.createChannels()
         runCatching { setForeground(getForegroundInfo()) }
 
-        val prefs = settingsRepository.preferences.first()
-        val concurrency = prefs.transferConcurrency.coerceIn(1, MAX_CONCURRENCY)
         val claimLock = Mutex()
         var interrupted = false
 
         coroutineScope {
-            List(concurrency) {
+            List(MAX_CONCURRENCY) { slot ->
                 launch {
                     while (true) {
                         if (isStopped) {
                             interrupted = true
                             return@launch
+                        }
+                        val prefs = settingsRepository.preferences.first()
+                        if (slot >= concurrencyOf(prefs)) {
+                            if (!awaitSlot(slot)) return@launch
+                            continue
                         }
                         val status = networkMonitor.currentStatus()
                         val blocked = status == NetworkStatus.UNAVAILABLE ||
@@ -87,6 +92,22 @@ class TransferQueueWorker @AssistedInject constructor(
             return Result.retry()
         }
         return Result.success()
+    }
+
+    private fun concurrencyOf(prefs: UserPreferences): Int =
+        prefs.transferConcurrency.coerceIn(1, MAX_CONCURRENCY)
+
+    /**
+     * Parks a slot the current setting has no room for. Raising the setting
+     * wakes it immediately, so a change applies to the backup already running
+     * instead of only to the next one. Returns false once the queue has drained,
+     * which is what lets a parked slot finish rather than hold the worker open.
+     */
+    private suspend fun awaitSlot(slot: Int): Boolean {
+        val widened = withTimeoutOrNull(SLOT_WAIT_MS.milliseconds) {
+            settingsRepository.preferences.first { slot < concurrencyOf(it) }
+        }
+        return widened != null || transferDao.nextQueued(1).isNotEmpty()
     }
 
     /**
@@ -203,6 +224,7 @@ class TransferQueueWorker @AssistedInject constructor(
     companion object {
         const val UNIQUE_NAME = "transfer_queue"
         private const val MAX_CONCURRENCY = 6
+        private const val SLOT_WAIT_MS = 5_000L
         private const val QUEUE_REQUEST_CODE = 3
         private const val BASE_BACKOFF_SECONDS = 2
         private const val MAX_BACKOFF_SECONDS = 300
