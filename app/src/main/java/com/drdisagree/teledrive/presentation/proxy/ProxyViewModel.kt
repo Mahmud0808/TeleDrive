@@ -7,6 +7,7 @@ import com.drdisagree.teledrive.R
 import com.drdisagree.teledrive.core.common.AppError
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.core.telegram.ProxyLink
+import com.drdisagree.teledrive.core.proxy.ProxyProbeResult
 import com.drdisagree.teledrive.core.telegram.TelegramProxy
 import com.drdisagree.teledrive.domain.model.ProxyServer
 import com.drdisagree.teledrive.domain.repository.ProxyRepository
@@ -47,15 +48,13 @@ class ProxyViewModel @Inject constructor(
     val uiState: StateFlow<ProxyUiState> = combine(
         proxyRepository.observeProxies(),
         settingsRepository.preferences.map { it.proxyEnabled }.distinctUntilChanged(),
-        reachability,
-        proxyRepository.observeTestable().distinctUntilChanged()
-    ) { proxies, enabled, results, testable ->
+        reachability
+    ) { proxies, enabled, results ->
         ProxyUiState(
             proxies = proxies,
             enabled = enabled,
             loading = false,
-            reachability = results,
-            testable = testable
+            reachability = results
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), ProxyUiState())
 
@@ -99,12 +98,8 @@ class ProxyViewModel @Inject constructor(
             }
             reachability.update { it + (proxy.id to ProxyReachability.TESTING) }
             val result = proxyRepository.test(proxy)
-            reachability.update {
-                it + (proxy.id to
-                        if (result is AppResult.Success) ProxyReachability.REACHABLE
-                        else ProxyReachability.UNREACHABLE)
-            }
-            report(result)
+            reachability.update { it + (proxy.id to result.toReachability()) }
+            if (result is AppResult.Failure) report(result)
         }
     }
 
@@ -117,6 +112,15 @@ class ProxyViewModel @Inject constructor(
         }
         save(parsed.toServer())
         _messages.tryEmit(context.getString(R.string.proxy_link_imported, parsed.host))
+    }
+
+    private fun AppResult<ProxyProbeResult>.toReachability(): ProxyReachability = when (this) {
+        is AppResult.Success -> when (value) {
+            ProxyProbeResult.ANSWERED -> ProxyReachability.ANSWERED
+            else -> ProxyReachability.REACHABLE
+        }
+
+        is AppResult.Failure -> ProxyReachability.UNREACHABLE
     }
 
     private fun report(result: AppResult<Unit>) {

@@ -33,6 +33,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.Delete
@@ -164,18 +165,6 @@ fun ProxyScreen(
                     modifier = Modifier.animateItem()
                 )
             }
-            if (!state.loading && !state.testable) {
-                item(key = TESTING_NOTE_KEY) {
-                    Text(
-                        text = stringResource(R.string.proxy_test_needs_keys),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier
-                            .animateItem()
-                            .padding(horizontal = 28.dp, vertical = 12.dp)
-                    )
-                }
-            }
             if (state.loading) {
                 return@LazyColumn
             }
@@ -206,7 +195,6 @@ fun ProxyScreen(
                         proxy = proxy,
                         routing = state.enabled,
                         reachability = state.reachability[proxy.id],
-                        testable = state.testable,
                         modifier = Modifier.animateItem(),
                         onSelect = { viewModel.select(proxy.id) },
                         onTest = { viewModel.test(proxy) },
@@ -341,7 +329,6 @@ private fun ProxyCard(
     proxy: ProxyServer,
     routing: Boolean,
     reachability: ProxyReachability?,
-    testable: Boolean,
     modifier: Modifier = Modifier,
     onSelect: () -> Unit,
     onTest: () -> Unit,
@@ -419,7 +406,6 @@ private fun ProxyCard(
                                 contentDescription = null
                             )
                         },
-                        enabled = testable,
                         onClick = {
                             menuOpen = false
                             onTest()
@@ -452,7 +438,8 @@ private fun ProxyCard(
 private fun ReachabilityLine(reachability: ProxyReachability) {
     val tint: Color = when (reachability) {
         ProxyReachability.TESTING -> MaterialTheme.colorScheme.onSurfaceVariant
-        ProxyReachability.REACHABLE -> MaterialTheme.colorScheme.primary
+        ProxyReachability.ANSWERED -> MaterialTheme.colorScheme.primary
+        ProxyReachability.REACHABLE -> MaterialTheme.colorScheme.tertiary
         ProxyReachability.UNREACHABLE -> MaterialTheme.colorScheme.error
     }
     Row(
@@ -461,8 +448,15 @@ private fun ReachabilityLine(reachability: ProxyReachability) {
     ) {
         when (reachability) {
             ProxyReachability.TESTING -> LoadingIndicator(modifier = Modifier.size(16.dp))
-            ProxyReachability.REACHABLE -> Icon(
+            ProxyReachability.ANSWERED -> Icon(
                 imageVector = Icons.Filled.CheckCircle,
+                contentDescription = null,
+                tint = tint,
+                modifier = Modifier.size(16.dp)
+            )
+
+            ProxyReachability.REACHABLE -> Icon(
+                imageVector = Icons.Filled.Bolt,
                 contentDescription = null,
                 tint = tint,
                 modifier = Modifier.size(16.dp)
@@ -480,7 +474,8 @@ private fun ReachabilityLine(reachability: ProxyReachability) {
             text = stringResource(
                 when (reachability) {
                     ProxyReachability.TESTING -> R.string.proxy_testing
-                    ProxyReachability.REACHABLE -> R.string.proxy_reachable
+                    ProxyReachability.ANSWERED -> R.string.proxy_reachable
+                    ProxyReachability.REACHABLE -> R.string.proxy_server_reachable
                     ProxyReachability.UNREACHABLE -> R.string.proxy_unreachable
                 }
             ),
@@ -714,7 +709,6 @@ private fun ImportLinkSheet(onImport: (String) -> Unit, onDismiss: () -> Unit) {
 private const val ROUTING_CARD_KEY = "routing"
 private const val EMPTY_STATE_KEY = "empty"
 private const val LIST_HEADER_KEY = "header"
-private const val TESTING_NOTE_KEY = "testing-note"
 private const val COLOR_LABEL = "container"
 private const val SUMMARY_LABEL = "summary"
 private const val CREDENTIALS_LABEL = "credentials"

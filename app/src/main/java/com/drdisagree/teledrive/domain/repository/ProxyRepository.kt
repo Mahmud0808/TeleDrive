@@ -1,6 +1,7 @@
 package com.drdisagree.teledrive.domain.repository
 
 import com.drdisagree.teledrive.core.common.AppResult
+import com.drdisagree.teledrive.core.proxy.ProxyProbeResult
 import com.drdisagree.teledrive.domain.model.ProxyServer
 import kotlinx.coroutines.flow.Flow
 
@@ -27,13 +28,6 @@ interface ProxyRepository {
      */
     suspend fun rotate(): AppResult<Boolean>
 
-    /** Succeeds when Telegram answers through [proxy]. */
-    suspend fun test(proxy: ProxyServer): AppResult<Unit>
-
-    /**
-     * Whether a proxy can be tried at all. Testing runs through Telegram's own
-     * client, which does not exist until the API keys are in, so the action is
-     * offered only once there is something to test with.
-     */
-    fun observeTestable(): Flow<Boolean>
+    /** Reports how far a check through [proxy] got. */
+    suspend fun test(proxy: ProxyServer): AppResult<ProxyProbeResult>
 }

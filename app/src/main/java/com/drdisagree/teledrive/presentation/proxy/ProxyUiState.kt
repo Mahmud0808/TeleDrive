@@ -6,6 +6,5 @@ data class ProxyUiState(
     val proxies: List<ProxyServer> = emptyList(),
     val enabled: Boolean = false,
     val loading: Boolean = true,
-    val reachability: Map<String, ProxyReachability> = emptyMap(),
-    val testable: Boolean = false
+    val reachability: Map<String, ProxyReachability> = emptyMap()
 )

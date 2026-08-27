@@ -1,10 +1,11 @@
 package com.drdisagree.teledrive.data.repository
 
-import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.core.common.AppError
+import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.core.common.SafeLog
+import com.drdisagree.teledrive.core.proxy.ProxyProbe
+import com.drdisagree.teledrive.core.proxy.ProxyProbeResult
 import com.drdisagree.teledrive.core.telegram.TelegramClient
-import com.drdisagree.teledrive.core.telegram.TelegramAuthState
 import com.drdisagree.teledrive.core.telegram.TelegramException
 import com.drdisagree.teledrive.core.telegram.TelegramProxy
 import com.drdisagree.teledrive.data.local.dao.ProxyDao
@@ -30,7 +31,8 @@ import javax.inject.Singleton
 class ProxyRepositoryImpl @Inject constructor(
     private val proxyDao: ProxyDao,
     private val settingsRepository: SettingsRepository,
-    private val telegramClient: TelegramClient
+    private val telegramClient: TelegramClient,
+    private val proxyProbe: ProxyProbe
 ) : ProxyRepository {
 
     override fun observeProxies(): Flow<List<ProxyServer>> = combine(
@@ -79,12 +81,6 @@ class ProxyRepositoryImpl @Inject constructor(
         return applyAndReport()
     }
 
-    override fun observeTestable(): Flow<Boolean> = telegramClient.authState.map { state ->
-        state !is TelegramAuthState.Uninitialized &&
-                state !is TelegramAuthState.Initializing &&
-                state !is TelegramAuthState.Closed
-    }
-
     override suspend fun rotate(): AppResult<Boolean> {
         val saved = proxyDao.all()
         if (saved.size < 2) return AppResult.Success(false)
@@ -103,18 +99,25 @@ class ProxyRepositoryImpl @Inject constructor(
             .onFailure { SafeLog.w(TAG, "Could not apply the proxy", it) }
     }
 
-    override suspend fun test(proxy: ProxyServer): AppResult<Unit> = try {
+    override suspend fun test(proxy: ProxyServer): AppResult<ProxyProbeResult> = try {
         telegramClient.testProxy(proxy.toTelegram())
-        AppResult.Success(Unit)
+        AppResult.Success(ProxyProbeResult.ANSWERED)
     } catch (e: TelegramException) {
-        SafeLog.w(TAG, "Proxy test failed", e)
-        AppResult.Failure(
-            if (e.code == UNAUTHORIZED) {
-                AppError.AuthenticationRequired
-            } else {
-                AppError.TelegramError(e.code, e.message)
-            }
-        )
+        if (e.code == UNAUTHORIZED) {
+            probe(proxy)
+        } else {
+            SafeLog.w(TAG, "Proxy test failed", e)
+            AppResult.Failure(AppError.TelegramError(e.code, e.message))
+        }
+    }
+
+    private suspend fun probe(proxy: ProxyServer): AppResult<ProxyProbeResult> {
+        val result = proxyProbe.probe(proxy.toTelegram())
+        return if (result == ProxyProbeResult.UNREACHABLE) {
+            AppResult.Failure(AppError.NetworkUnavailable)
+        } else {
+            AppResult.Success(result)
+        }
     }
 
     @Volatile

@@ -670,7 +670,7 @@
     <string name="proxy_saved">Saved servers</string>
     <string name="proxy_secret">Secret</string>
     <string name="proxy_test">Test</string>
-    <string name="proxy_test_needs_keys">Testing needs your Telegram API keys. Save a proxy here, then enter your keys, and it is used from the first connection.</string>
+    <string name="proxy_server_reachable">Server reachable, sign in for a full test</string>
     <string name="proxy_testing">Testing</string>
     <string name="proxy_title">Proxy</string>
     <string name="proxy_type_http">HTTP</string>
