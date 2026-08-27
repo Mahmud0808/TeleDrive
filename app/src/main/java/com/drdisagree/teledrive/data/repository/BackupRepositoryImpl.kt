@@ -156,9 +156,9 @@ class BackupRepositoryImpl @Inject constructor(
         )
         backupDao.upsertSession(session)
 
-        for (candidate in toBackup) {
-            val fileId = registerFile(candidate, backupFolderIdFor(candidate))
-            transferRepository.enqueueBackup(fileId, session.id)
+        for (batch in toBackup.chunked(ENQUEUE_BATCH)) {
+            val fileIds = batch.map { registerFile(it, backupFolderIdFor(it), activeChatId) }
+            transferRepository.enqueueBackupBatch(fileIds, session.id)
         }
         return AppResult.Success(session.id)
     }
@@ -250,7 +250,11 @@ class BackupRepositoryImpl @Inject constructor(
         return normalized.trimStart('/')
     }
 
-    private suspend fun registerFile(source: File, folderId: String?): String {
+    private suspend fun registerFile(
+        source: File,
+        folderId: String?,
+        chatId: Long?
+    ): String {
         fileDao.byLocalPath(source.absolutePath)?.let { return it.id }
 
         val mime = MimeTypes.fromFileName(source.name)
@@ -258,7 +262,7 @@ class BackupRepositoryImpl @Inject constructor(
         val now = System.currentTimeMillis()
         val entity = FileEntity(
             id = UUID.randomUUID().toString(),
-            chatId = settingsRepository.preferences.first().storageChatId,
+            chatId = chatId,
             folderId = folderId,
             name = source.name,
             sizeBytes = source.length(),
@@ -358,6 +362,7 @@ class BackupRepositoryImpl @Inject constructor(
 
     companion object {
         private const val TAG = "BackupRepository"
+        private const val ENQUEUE_BATCH = 500
         private const val VOLUME_MOUNT_ROOT = "/storage/"
     }
 }

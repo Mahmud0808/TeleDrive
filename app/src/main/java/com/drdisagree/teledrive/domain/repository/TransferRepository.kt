@@ -26,6 +26,14 @@ interface TransferRepository {
     /** Queues every file held only on this device. Returns how many were added. */
     suspend fun enqueuePendingUploads(): AppResult<Int>
 
+    /**
+     * Queues a whole backup at once. The checks a single transfer repeats per
+     * file are answered once for the run, and the rows are written in batches,
+     * so a scan of tens of thousands of files does not spend a Telegram round
+     * trip and a separate write on each one.
+     */
+    suspend fun enqueueBackupBatch(fileIds: List<String>, sessionId: String): AppResult<Int>
+
     /** Queues a download of [fileId]'s remote copy into local storage. */
     suspend fun enqueueDownload(fileId: String, priority: Int = 0): AppResult<String>
 

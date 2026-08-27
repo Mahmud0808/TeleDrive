@@ -68,11 +68,7 @@ class TransferRepositoryImpl @Inject constructor(
     override suspend fun enqueuePendingUploads(): AppResult<Int> {
         val chatId = settingsRepository.preferences.first().storageChatId
         val pending = fileDao.localOnlyFileIds(chatId)
-        var queued = 0
-        for (fileId in pending) {
-            if (enqueue(fileId, TransferType.UPLOAD, priority = 0) is AppResult.Success) queued++
-        }
-        return AppResult.Success(queued)
+        return AppResult.Success(enqueueBatch(pending, TransferType.UPLOAD, sessionId = null))
     }
 
     override suspend fun enqueueDownload(fileId: String, priority: Int): AppResult<String> {
@@ -104,6 +100,73 @@ class TransferRepositoryImpl @Inject constructor(
         sessionId: String,
         priority: Int = 0
     ): AppResult<String> = enqueue(fileId, TransferType.BACKUP, priority, sessionId)
+
+    override suspend fun enqueueBackupBatch(
+        fileIds: List<String>,
+        sessionId: String
+    ): AppResult<Int> = AppResult.Success(
+        enqueueBatch(fileIds, TransferType.BACKUP, sessionId)
+    )
+
+    private suspend fun enqueueBatch(
+        fileIds: List<String>,
+        type: TransferType,
+        sessionId: String?
+    ): Int {
+        if (fileIds.isEmpty()) return 0
+
+        val limits = currentLimits()
+        val prefs = settingsRepository.preferences.first()
+        val availableBytes = storageInspector.availableBytes()
+        var queued = 0
+
+        for (chunk in fileIds.chunked(SQL_BATCH)) {
+            val alreadyQueued = transferDao.unfinishedFileIds(chunk).toSet()
+            val now = System.currentTimeMillis()
+            val transfers = mutableListOf<TransferEntity>()
+            for (fileId in chunk) {
+                if (fileId in alreadyQueued) continue
+                val entity = fileDao.byId(fileId) ?: continue
+                if (entity.localPath == null) continue
+                val scratch = if (prefs.encryptFiles) {
+                    minOf(entity.sizeBytes, FileParts.PART_SIZE)
+                } else {
+                    0
+                }
+                val rejected = validateUpload(
+                    fileSizeBytes = entity.sizeBytes,
+                    limits = limits,
+                    availableLocalBytes = availableBytes,
+                    requiredScratchBytes = scratch,
+                    splitsIfTooLarge = true
+                )
+                if (rejected != null) continue
+                fileDao.setBackupStateIfLocalOnly(entity.id, BackupState.QUEUED)
+                transfers += TransferEntity(
+                    id = UUID.randomUUID().toString(),
+                    type = type,
+                    fileId = entity.id,
+                    displayName = entity.name,
+                    localPath = null,
+                    chatId = null,
+                    messageId = null,
+                    remoteFileId = null,
+                    sizeBytes = entity.sizeBytes,
+                    state = TransferState.QUEUED,
+                    priority = 0,
+                    backupSessionId = sessionId,
+                    createdAt = now,
+                    updatedAt = now
+                )
+            }
+            if (transfers.isNotEmpty()) {
+                transferDao.upsertAll(transfers)
+                queued += transfers.size
+            }
+        }
+        if (queued > 0) kickWorker()
+        return queued
+    }
 
     private suspend fun enqueue(
         fileId: String,

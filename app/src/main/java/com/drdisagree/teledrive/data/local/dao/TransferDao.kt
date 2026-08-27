@@ -16,6 +16,15 @@ interface TransferDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(transfer: TransferEntity)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertAll(transfers: List<TransferEntity>)
+
+    @Query(
+        """SELECT fileId FROM transfers
+           WHERE fileId IN (:fileIds) AND state IN ('QUEUED', 'RUNNING', 'PAUSED')"""
+    )
+    suspend fun unfinishedFileIds(fileIds: List<String>): List<String>
+
     @Update
     suspend fun update(transfer: TransferEntity)
 
