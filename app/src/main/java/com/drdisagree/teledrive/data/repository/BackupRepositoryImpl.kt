@@ -17,6 +17,7 @@ import com.drdisagree.teledrive.data.local.entity.FileEntity
 import com.drdisagree.teledrive.data.local.entity.TransferEntity
 import com.drdisagree.teledrive.data.mapper.toDomain
 import com.drdisagree.teledrive.domain.model.BackupDecision
+import com.drdisagree.teledrive.domain.model.ExclusionType
 import com.drdisagree.teledrive.domain.model.BackupSession
 import com.drdisagree.teledrive.domain.model.BackupSessionStatus
 import com.drdisagree.teledrive.domain.model.BackupState
@@ -83,12 +84,13 @@ class BackupRepositoryImpl @Inject constructor(
         backupDao.deleteOrphanedRecords()
         val exclusions = exclusionRepository.getEnabled()
         val maxSizeBytes = prefs.backupMaxFileSizeMb.toLong() * 1024 * 1024
+        val skipHidden = exclusions.any { it.type == ExclusionType.HIDDEN }
         val candidates = mutableListOf<File>()
         for (folderPath in folders) {
             val root = File(folderPath)
             if (!root.exists()) continue
             root.walkTopDown()
-                .onEnter { dir -> !isHiddenDir(dir) }
+                .onEnter { dir -> dir == root || !skipHidden || !isHiddenName(dir) }
                 .filter { it.isFile && it.length() > 0 }
                 .forEach { candidates.add(it) }
         }
@@ -347,8 +349,12 @@ class BackupRepositoryImpl @Inject constructor(
         }
     }
 
-    private fun isHiddenDir(dir: File): Boolean =
-        dir.name.startsWith('.') || File(dir, ".nomedia").exists()
+    /**
+     * Only the item itself is hidden by its name. A marker file such as
+     * .nomedia says how a gallery should index a folder, never whether its
+     * contents are worth keeping, so it excludes nothing but itself.
+     */
+    private fun isHiddenName(file: File): Boolean = file.name.startsWith('.')
 
     companion object {
         private const val TAG = "BackupRepository"
