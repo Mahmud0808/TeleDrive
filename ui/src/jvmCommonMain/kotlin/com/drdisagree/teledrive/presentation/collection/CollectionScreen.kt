@@ -1,7 +1,6 @@
 package com.drdisagree.teledrive.presentation.collection
 
-import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.backhandler.BackHandler
+import com.drdisagree.teledrive.presentation.common.AppBackHandler
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -54,7 +53,7 @@ import com.drdisagree.teledrive.presentation.components.rememberDragSelect
 import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
 import com.drdisagree.teledrive.presentation.preview.PreviewSequence
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CollectionScreen(
     onBack: () -> Unit,
@@ -67,7 +66,7 @@ fun CollectionScreen(
     val allSelected by viewModel.allSelected.collectAsStateWithLifecycle()
     var confirmTrash by remember { mutableStateOf(false) }
 
-    BackHandler(enabled = selectionMode) { viewModel.clearSelection() }
+    AppBackHandler(enabled = selectionMode) { viewModel.clearSelection() }
 
     if (confirmTrash) {
         ConfirmDialog(

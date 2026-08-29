@@ -47,6 +47,7 @@ dependencies {
     implementation(libs.cmp.components.resources)
     implementation(libs.cmp.material3)
     implementation(libs.kotlinx.coroutines.swing)
+    implementation(libs.coil.compose)
     implementation(platform(libs.koin.bom))
     implementation(libs.koin.core)
     implementation(libs.koin.compose)

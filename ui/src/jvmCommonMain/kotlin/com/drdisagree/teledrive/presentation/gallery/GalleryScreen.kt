@@ -1,7 +1,6 @@
 package com.drdisagree.teledrive.presentation.gallery
 
-import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.backhandler.BackHandler
+import com.drdisagree.teledrive.presentation.common.AppBackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -120,7 +119,7 @@ private fun DayHeaderRow(dayStartMillis: Long, modifier: Modifier = Modifier) {
     )
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun GalleryTabSelector(
     selected: GalleryTab,
@@ -200,7 +199,7 @@ private fun AlbumGrid(
 
 private const val UNFILED_ALBUM_KEY = "__unfiled__"
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GalleryScreen(
     onOpenFile: (String, PreviewSequence) -> Unit,
@@ -242,7 +241,7 @@ fun GalleryScreen(
         )
     }
 
-    BackHandler(enabled = state.selectionMode) { viewModel.clearSelection() }
+    AppBackHandler(enabled = state.selectionMode) { viewModel.clearSelection() }
 
     val mediaListState = rememberLazyListState()
     val allSelected by viewModel.allSelected.collectAsStateWithLifecycle()
@@ -377,6 +376,7 @@ fun GalleryScreen(
         LaunchedEffect(mediaScrolls) { if (!mediaScrolls) tabsVisible = true }
         val tabScrollConnection = remember {
             object : NestedScrollConnection {
+                @Suppress("SameReturnValue")
                 override fun onPreScroll(
                     available: Offset,
                     source: NestedScrollSource
