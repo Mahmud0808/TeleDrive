@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import org.koin.compose.koinInject
+import com.drdisagree.teledrive.desktop.files.DesktopFileRevealer
 import com.drdisagree.teledrive.desktop.BuildInfo
 import androidx.compose.foundation.Image
 import androidx.compose.ui.Modifier
@@ -19,6 +20,7 @@ import com.drdisagree.teledrive.presentation.platform.LocalDeviceOwnerGate
 import com.drdisagree.teledrive.presentation.platform.LocalDownloadLocationConfigurable
 import com.drdisagree.teledrive.presentation.platform.LocalFilePicker
 import com.drdisagree.teledrive.presentation.platform.LocalFileSharer
+import com.drdisagree.teledrive.presentation.platform.LocalFileRevealer
 import com.drdisagree.teledrive.presentation.platform.LocalFolderPicker
 import com.drdisagree.teledrive.presentation.platform.LocalMultiFilePicker
 import com.drdisagree.teledrive.presentation.platform.LocalPermissionRequester
@@ -103,6 +105,7 @@ fun ProvideDesktopPlatformActions(content: @Composable () -> Unit) {
     val deleteConsentLauncher = remember {
         DeleteConsentLauncher { _, onResult -> onResult(true) }
     }
+    val fileRevealer = remember { DesktopFileRevealer() }
     val permissionRequester = remember {
         PermissionRequester { _, onDone -> onDone() }
     }
@@ -138,6 +141,7 @@ fun ProvideDesktopPlatformActions(content: @Composable () -> Unit) {
         LocalAppVersion provides BuildInfo.VERSION,
         LocalDownloadLocationConfigurable provides true,
         LocalPlatformScreens provides DesktopPlatformScreens,
+        LocalFileRevealer provides fileRevealer,
         LocalPlatformCapabilities provides capabilities,
         content = content
     )

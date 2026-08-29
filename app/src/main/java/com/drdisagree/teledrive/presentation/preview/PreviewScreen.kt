@@ -96,6 +96,8 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.koin.compose.koinInject
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.util.UnstableApi
+import com.drdisagree.teledrive.resources.files_hide
+import com.drdisagree.teledrive.resources.files_unhide
 import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.file_count
 import com.drdisagree.teledrive.resources.folder_count
@@ -379,7 +381,10 @@ fun PreviewScreen(
                                 }
                                 DropdownMenuItem(
                                     text = {
-                                        Text(if (currentFile.isHidden) "Unhide" else "Hide")
+                                        Text(
+                                            if (currentFile.isHidden) stringResource(Res.string.files_unhide)
+                                            else stringResource(Res.string.files_hide)
+                                        )
                                     },
                                     onClick = {
                                         showOverflow = false

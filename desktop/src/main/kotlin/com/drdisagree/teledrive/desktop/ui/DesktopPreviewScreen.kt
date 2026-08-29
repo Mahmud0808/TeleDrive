@@ -1,5 +1,11 @@
 package com.drdisagree.teledrive.desktop.ui
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,11 +26,15 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Audiotrack
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
@@ -69,23 +79,43 @@ import com.drdisagree.teledrive.presentation.common.Formatters
 import com.drdisagree.teledrive.presentation.common.LinkedText
 import com.drdisagree.teledrive.presentation.common.load
 import com.drdisagree.teledrive.presentation.common.MarkdownText
+import com.drdisagree.teledrive.presentation.components.ConfirmDialog
 import com.drdisagree.teledrive.presentation.components.EmptyState
+import com.drdisagree.teledrive.presentation.components.FileInfoSheet
 import com.drdisagree.teledrive.presentation.components.ErrorState
 import com.drdisagree.teledrive.presentation.components.LoadingState
+import com.drdisagree.teledrive.presentation.components.RenameDialog
+import com.drdisagree.teledrive.presentation.platform.LocalFileRevealer
 import com.drdisagree.teledrive.presentation.platform.LocalUrlOpener
 import com.drdisagree.teledrive.presentation.preview.PreviewContent
 import com.drdisagree.teledrive.presentation.preview.PreviewViewModel
 import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.common_actions
 import com.drdisagree.teledrive.resources.common_back
 import com.drdisagree.teledrive.resources.common_download
+import com.drdisagree.teledrive.resources.common_free_space
+import com.drdisagree.teledrive.resources.common_move_trash
+import com.drdisagree.teledrive.resources.common_rename
+import com.drdisagree.teledrive.resources.common_rename_file
+import com.drdisagree.teledrive.resources.common_upload
+import com.drdisagree.teledrive.resources.files_hide
+import com.drdisagree.teledrive.resources.files_show_in_file_manager
+import com.drdisagree.teledrive.resources.files_unhide
+import com.drdisagree.teledrive.resources.preview_add_favorites
+import com.drdisagree.teledrive.resources.preview_archive
+import com.drdisagree.teledrive.resources.preview_confirm_trash_file_message
+import com.drdisagree.teledrive.resources.preview_file_info
+import com.drdisagree.teledrive.resources.preview_move_to_trash
 import com.drdisagree.teledrive.resources.preview_next
 import com.drdisagree.teledrive.resources.preview_no_preview
 import com.drdisagree.teledrive.resources.preview_preparing
 import com.drdisagree.teledrive.resources.preview_previous
 import com.drdisagree.teledrive.resources.preview_progress_bytes
+import com.drdisagree.teledrive.resources.preview_remove_favorites
 import com.drdisagree.teledrive.resources.preview_requires_download
 import com.drdisagree.teledrive.resources.preview_download_view
 import com.drdisagree.teledrive.resources.preview_truncated_download_view
+import com.drdisagree.teledrive.resources.preview_unarchive
 import java.awt.Desktop
 import java.io.File
 import org.jetbrains.compose.resources.getString
@@ -108,6 +138,10 @@ fun DesktopPreviewScreen(
 
     var index by remember(state.ready) { mutableStateOf(state.initialIndex) }
     val file = state.files.getOrNull(index.coerceIn(0, (state.files.size - 1).coerceAtLeast(0)))
+    val infoTarget by viewModel.infoTarget.collectAsState()
+    var showOverflow by remember { mutableStateOf(false) }
+    var renameTarget by remember { mutableStateOf<DriveFile?>(null) }
+    var trashTarget by remember { mutableStateOf<DriveFile?>(null) }
 
     val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect(Unit) {
@@ -130,6 +164,32 @@ fun DesktopPreviewScreen(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(Res.string.common_back)
                         )
+                    }
+                },
+                actions = {
+                    file?.let { currentFile ->
+                        IconButton(onClick = { viewModel.showInfo(currentFile) }) {
+                            Icon(
+                                Icons.Filled.Info,
+                                contentDescription = stringResource(Res.string.preview_file_info)
+                            )
+                        }
+                        Box {
+                            IconButton(onClick = { showOverflow = true }) {
+                                Icon(
+                                    Icons.Filled.MoreVert,
+                                    contentDescription = stringResource(Res.string.common_actions)
+                                )
+                            }
+                            PreviewOverflowMenu(
+                                expanded = showOverflow,
+                                file = currentFile,
+                                viewModel = viewModel,
+                                onDismiss = { showOverflow = false },
+                                onRename = { renameTarget = it },
+                                onTrash = { trashTarget = it }
+                            )
+                        }
                     }
                 }
             )
@@ -163,11 +223,26 @@ fun DesktopPreviewScreen(
         ) {
             when {
                 !state.ready || file == null -> LoadingState()
-                else -> PreviewPane(
-                    viewModel = viewModel,
-                    file = file,
-                    snackbarHostState = snackbarHostState
-                )
+                else -> AnimatedContent(
+                    targetState = index to file,
+                    transitionSpec = {
+                        val forward = targetState.first >= initialState.first
+                        val enter = slideInHorizontally { width ->
+                            if (forward) width else -width
+                        } + fadeIn()
+                        val exit = slideOutHorizontally { width ->
+                            if (forward) -width else width
+                        } + fadeOut()
+                        enter togetherWith exit
+                    },
+                    contentKey = { it.second.id }
+                ) { (_, pageFile) ->
+                    PreviewPane(
+                        viewModel = viewModel,
+                        file = pageFile,
+                        snackbarHostState = snackbarHostState
+                    )
+                }
             }
             if (state.files.size > 1) {
                 PreviewPagerButton(
@@ -186,6 +261,137 @@ fun DesktopPreviewScreen(
                 )
             }
         }
+    }
+
+    renameTarget?.let { target ->
+        RenameDialog(
+            title = stringResource(Res.string.common_rename_file),
+            initialValue = target.name,
+            confirmLabel = stringResource(Res.string.common_rename),
+            onConfirm = {
+                viewModel.rename(target, it)
+                renameTarget = null
+            },
+            onDismiss = { renameTarget = null }
+        )
+    }
+    trashTarget?.let { target ->
+        ConfirmDialog(
+            title = stringResource(Res.string.preview_move_to_trash),
+            message = stringResource(Res.string.preview_confirm_trash_file_message, target.name),
+            confirmLabel = stringResource(Res.string.common_move_trash),
+            destructive = true,
+            onConfirm = {
+                viewModel.moveToTrash(target)
+                trashTarget = null
+            },
+            onDismiss = { trashTarget = null }
+        )
+    }
+    infoTarget?.let { target ->
+        FileInfoSheet(file = target, onDismiss = viewModel::dismissInfo)
+    }
+}
+
+@Composable
+private fun PreviewOverflowMenu(
+    expanded: Boolean,
+    file: DriveFile,
+    viewModel: PreviewViewModel,
+    onDismiss: () -> Unit,
+    onRename: (DriveFile) -> Unit,
+    onTrash: (DriveFile) -> Unit
+) {
+    val fileRevealer = LocalFileRevealer.current
+    DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
+        DropdownMenuItem(
+            text = {
+                Text(
+                    if (file.isFavorite) stringResource(Res.string.preview_remove_favorites)
+                    else stringResource(Res.string.preview_add_favorites)
+                )
+            },
+            onClick = {
+                onDismiss()
+                viewModel.setFavorite(file, !file.isFavorite)
+            }
+        )
+        val localPath = file.localPath
+        if (fileRevealer != null && localPath != null) {
+            DropdownMenuItem(
+                text = { Text(stringResource(Res.string.files_show_in_file_manager)) },
+                enabled = remember(localPath) { File(localPath).exists() },
+                onClick = {
+                    onDismiss()
+                    fileRevealer.reveal(localPath)
+                }
+            )
+        }
+        if (file.hasRemoteCopy && !file.hasLocalCopy) {
+            DropdownMenuItem(
+                text = { Text(stringResource(Res.string.common_download)) },
+                onClick = {
+                    onDismiss()
+                    viewModel.download(file)
+                }
+            )
+        }
+        if (!file.hasRemoteCopy) {
+            DropdownMenuItem(
+                text = { Text(stringResource(Res.string.common_upload)) },
+                onClick = {
+                    onDismiss()
+                    viewModel.upload(file)
+                }
+            )
+        }
+        if (file.hasRemoteCopy && file.hasLocalCopy) {
+            DropdownMenuItem(
+                text = { Text(stringResource(Res.string.common_free_space)) },
+                onClick = {
+                    onDismiss()
+                    viewModel.freeUpSpace(file)
+                }
+            )
+        }
+        DropdownMenuItem(
+            text = {
+                Text(
+                    if (file.isHidden) stringResource(Res.string.files_unhide)
+                    else stringResource(Res.string.files_hide)
+                )
+            },
+            onClick = {
+                onDismiss()
+                viewModel.setHidden(file, !file.isHidden)
+            }
+        )
+        DropdownMenuItem(
+            text = {
+                Text(
+                    if (file.isArchived) stringResource(Res.string.preview_unarchive)
+                    else stringResource(Res.string.preview_archive)
+                )
+            },
+            onClick = {
+                onDismiss()
+                viewModel.setArchived(file, !file.isArchived)
+            }
+        )
+        DropdownMenuItem(
+            text = { Text(stringResource(Res.string.common_rename)) },
+            onClick = {
+                onDismiss()
+                onRename(file)
+            }
+        )
+        DropdownMenuItem(
+            text = { Text(stringResource(Res.string.common_move_trash)) },
+            onClick = {
+                onDismiss()
+                onTrash(file)
+            }
+        )
     }
 }
 

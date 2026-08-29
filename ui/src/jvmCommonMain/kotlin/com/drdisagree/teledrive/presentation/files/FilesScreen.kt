@@ -108,6 +108,7 @@ import com.drdisagree.teledrive.presentation.navigation.FabBottomBarInset
 import com.drdisagree.teledrive.presentation.navigation.LocalBottomBarInset
 import com.drdisagree.teledrive.presentation.platform.FileDropArea
 import com.drdisagree.teledrive.presentation.platform.LocalDeleteConsentLauncher
+import com.drdisagree.teledrive.presentation.platform.LocalFileRevealer
 import com.drdisagree.teledrive.presentation.platform.LocalFileSharer
 import com.drdisagree.teledrive.presentation.platform.LocalMultiFilePicker
 import com.drdisagree.teledrive.presentation.preview.PreviewSequence
@@ -150,6 +151,7 @@ import com.drdisagree.teledrive.resources.files_rename_folder
 import com.drdisagree.teledrive.resources.files_search
 import com.drdisagree.teledrive.resources.files_share_destination_confirm
 import com.drdisagree.teledrive.resources.files_share_destination_title
+import com.drdisagree.teledrive.resources.files_show_in_file_manager
 import com.drdisagree.teledrive.resources.files_sort
 import com.drdisagree.teledrive.resources.files_sort_ascending
 import com.drdisagree.teledrive.resources.files_sort_backup_status
@@ -165,6 +167,7 @@ import com.drdisagree.teledrive.resources.note_new
 import com.drdisagree.teledrive.resources.preview_share_chooser_title
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
+import java.io.File
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(
@@ -328,6 +331,21 @@ fun FilesScreen(
                                             viewModel.uploadSelected()
                                         }
                                     )
+                                    val fileRevealer = LocalFileRevealer.current
+                                    if (fileRevealer != null) {
+                                        val revealPath = state.capabilities.soleLocalPath
+                                        DropdownMenuItem(
+                                            text = {
+                                                Text(stringResource(Res.string.files_show_in_file_manager))
+                                            },
+                                            enabled = revealPath != null &&
+                                                    remember(revealPath) { File(revealPath).exists() },
+                                            onClick = {
+                                                showSelectionOverflow = false
+                                                revealPath?.let(fileRevealer::reveal)
+                                            }
+                                        )
+                                    }
                                     DropdownMenuItem(
                                         text = { Text(stringResource(Res.string.note_edit_action)) },
                                         enabled = state.selectionCount == 1 &&

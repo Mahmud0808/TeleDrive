@@ -309,6 +309,7 @@
     <string name="files_share_destination_confirm">Save here</string>
     <string name="files_share_destination_title">Save shared files to</string>
     <string name="files_share_needs_local">Download these files before sharing them</string>
+    <string name="files_show_in_file_manager">Show in file manager</string>
     <string name="files_sort">Sort</string>
     <string name="files_sort_ascending">Ascending</string>
     <string name="files_sort_backup_status">Backup status</string>
@@ -318,6 +319,7 @@
     <string name="files_sort_name">Name</string>
     <string name="files_sort_size">Size</string>
     <string name="files_sort_type">Type</string>
+    <string name="files_unhide">Unhide</string>
     <string name="files_copied_all">Copied %1$d</string>
     <string name="files_copied_partial">Copied %1$d of %2$d</string>
     <string name="files_moving_to_trash">Moving %1$d to trash…</string>
