@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imeAnimationTarget
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
@@ -127,6 +126,7 @@ import com.drdisagree.teledrive.resources.proxy_username_optional
 import com.drdisagree.teledrive.core.telegram.ProxyLink
 import com.drdisagree.teledrive.core.telegram.TelegramProxyType
 import com.drdisagree.teledrive.domain.model.ProxyServer
+import com.drdisagree.teledrive.presentation.common.imeTargetBottomInset
 import com.drdisagree.teledrive.presentation.common.CollectSnackbarMessages
 import com.drdisagree.teledrive.presentation.common.add
 import com.drdisagree.teledrive.presentation.components.ConfirmDialog
@@ -763,11 +763,10 @@ private val InsetSpec = tween<Dp>(durationMillis = 250, easing = FastOutSlowInEa
 private val SheetTopInset: WindowInsets
     @Composable get() = WindowInsets.safeDrawing.only(WindowInsetsSides.Top)
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun sheetBottomPadding(): Dp {
     val density = LocalDensity.current
-    val keyboard = WindowInsets.imeAnimationTarget.getBottom(density)
+    val keyboard = imeTargetBottomInset()
     val navigation = WindowInsets.navigationBars.getBottom(density)
     val target = with(density) { maxOf(keyboard, navigation).toDp() }
     val padding by animateDpAsState(

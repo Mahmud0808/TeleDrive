@@ -1,6 +1,7 @@
 package com.drdisagree.teledrive.presentation.gallery
 
-import androidx.activity.compose.BackHandler
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -119,7 +120,7 @@ private fun DayHeaderRow(dayStartMillis: Long, modifier: Modifier = Modifier) {
     )
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalComposeUiApi::class)
 @Composable
 private fun GalleryTabSelector(
     selected: GalleryTab,
@@ -199,7 +200,7 @@ private fun AlbumGrid(
 
 private const val UNFILED_ALBUM_KEY = "__unfiled__"
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun GalleryScreen(
     onOpenFile: (String, PreviewSequence) -> Unit,
