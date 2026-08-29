@@ -36,3 +36,4 @@ dependencyResolutionManagement {
 rootProject.name = "TeleDrive"
 include(":app")
 include(":shared")
+include(":desktop")

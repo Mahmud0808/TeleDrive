@@ -1,12 +1,12 @@
 package com.drdisagree.teledrive.core.crypto
 
-import android.content.Context
 import com.drdisagree.teledrive.core.common.SafeLog
+import com.drdisagree.teledrive.core.files.AppStoragePaths
 import com.drdisagree.teledrive.core.telegram.TdlibDatabaseKeyProvider
 import java.io.File
 
 class TdlibDatabaseKeyProviderImpl(
-    private val context: Context,
+    private val storagePaths: AppStoragePaths,
     private val wrappedKeyRepository: WrappedKeyRepository
 ) : TdlibDatabaseKeyProvider {
 
@@ -18,7 +18,7 @@ class TdlibDatabaseKeyProviderImpl(
     override fun databaseKey(): ByteArray {
         val key = wrappedKeyRepository.getOrCreate(CryptoKeys.TDLIB_DATABASE)
         if (wrappedKeyRepository.wasRecreated(CryptoKeys.TDLIB_DATABASE)) {
-            val database = File(context.filesDir, TDLIB_DIR)
+            val database = File(storagePaths.filesDir, TDLIB_DIR)
             if (database.exists()) {
                 SafeLog.w(TAG, "Dropping a session database this device cannot open")
                 database.deleteRecursively()

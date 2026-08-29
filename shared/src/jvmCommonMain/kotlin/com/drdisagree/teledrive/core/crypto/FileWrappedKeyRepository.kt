@@ -1,17 +1,17 @@
 package com.drdisagree.teledrive.core.crypto
 
-import android.content.Context
 import com.drdisagree.teledrive.core.common.SafeLog
+import com.drdisagree.teledrive.core.files.AppStoragePaths
 import java.io.File
 import java.security.SecureRandom
 
 /**
- * Persists random raw keys wrapped by the Keystore master key. Raw keys never
- * touch disk unencrypted; unwrapped copies are cached in memory only.
+ * Persists random raw keys wrapped by the platform's credential cipher. Raw
+ * keys never touch disk unencrypted; unwrapped copies are cached in memory only.
  */
-class KeystoreWrappedKeyRepository(
-    private val context: Context,
-    private val keystoreManager: KeystoreManager
+class FileWrappedKeyRepository(
+    private val storagePaths: AppStoragePaths,
+    private val cipher: CredentialCipher
 ) : WrappedKeyRepository {
 
     private val cache = mutableMapOf<String, ByteArray>()
@@ -29,7 +29,7 @@ class KeystoreWrappedKeyRepository(
         cache[name]?.let { return it }
         val file = keyFile(name)
         if (file.exists()) {
-            val stored = runCatching { keystoreManager.decrypt(file.readBytes()) }.getOrNull()
+            val stored = runCatching { cipher.decrypt(file.readBytes()) }.getOrNull()
             if (stored != null) {
                 cache[name] = stored
                 return stored
@@ -41,7 +41,7 @@ class KeystoreWrappedKeyRepository(
         }
         val fresh = ByteArray(sizeBytes).also(secureRandom::nextBytes)
         file.parentFile?.mkdirs()
-        file.writeBytes(keystoreManager.encrypt(fresh))
+        file.writeBytes(cipher.encrypt(fresh))
         cache[name] = fresh
         return fresh
     }
@@ -59,7 +59,7 @@ class KeystoreWrappedKeyRepository(
         cache[name]?.let { return it }
         val file = keyFile(name)
         if (!file.exists()) return null
-        return runCatching { keystoreManager.decrypt(file.readBytes()) }
+        return runCatching { cipher.decrypt(file.readBytes()) }
             .onFailure { SafeLog.w(TAG, "Wrapped key $name cannot be unwrapped") }
             .getOrNull()
             ?.also { cache[name] = it }
@@ -75,12 +75,12 @@ class KeystoreWrappedKeyRepository(
     override fun store(name: String, key: ByteArray) {
         val file = keyFile(name)
         file.parentFile?.mkdirs()
-        file.writeBytes(keystoreManager.encrypt(key))
+        file.writeBytes(cipher.encrypt(key))
         cache[name] = key
     }
 
     private fun keyFile(name: String): File =
-        File(File(context.filesDir, "keys"), "$name.bin")
+        File(File(storagePaths.filesDir, "keys"), "$name.bin")
 
     private companion object {
         const val TAG = "WrappedKeyRepository"
