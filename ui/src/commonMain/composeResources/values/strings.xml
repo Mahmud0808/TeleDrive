@@ -284,6 +284,8 @@
     <string name="files_copy_to">Copy to</string>
     <string name="files_delete_local">Delete local</string>
     <string name="files_delete_local_copies">Delete local copies?</string>
+    <string name="files_drop_folders_unsupported">Folders can't be uploaded</string>
+    <string name="files_drop_to_upload">Drop files to upload</string>
     <string name="files_hide">Hide</string>
     <string name="files_import_copied">Copied %1$d already in Telegram</string>
     <string name="files_import_duplicates">%1$d already in your drive</string>
