@@ -53,6 +53,7 @@
 
     <!-- Preview -->
     <string name="preview_open_externally">Open with the system app</string>
+    <string name="preview_stream">Play in the system player</string>
     <string name="preview_open_failed">Could not open the file with a system app</string>
 
     <!-- Transfer errors -->

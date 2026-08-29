@@ -58,6 +58,8 @@ import com.drdisagree.teledrive.desktop.files.DesktopStandardFolderPaths
 import com.drdisagree.teledrive.desktop.files.DesktopStoragePaths
 import com.drdisagree.teledrive.desktop.media.DesktopMediaMetadataExtractor
 import com.drdisagree.teledrive.desktop.media.DesktopThumbnailStore
+import com.drdisagree.teledrive.desktop.media.ExternalMediaPlayer
+import com.drdisagree.teledrive.desktop.media.MediaStreamServer
 import com.drdisagree.teledrive.desktop.media.NoopThumbnailMemoryCache
 import com.drdisagree.teledrive.desktop.network.DesktopNetworkMonitor
 import com.drdisagree.teledrive.desktop.permissions.DesktopPermissionChecker
@@ -102,6 +104,8 @@ val desktopModule = module {
     singleOf(::DesktopNetworkMonitor) bind NetworkMonitor::class
     singleOf(::DesktopTransferErrorMessages) bind TransferErrorMessages::class
     singleOf(::DesktopDownloadWriter) bind DownloadWriter::class
+    singleOf(::MediaStreamServer)
+    singleOf(::ExternalMediaPlayer)
     singleOf(::DesktopFileImporter) bind FileImporter::class
     singleOf(::DesktopPendingShare) bind PendingShare::class
     singleOf(::DesktopLocalCopyDeleter) bind LocalCopyDeleter::class

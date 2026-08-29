@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -70,10 +71,19 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.drdisagree.teledrive.core.crypto.CryptoKeys
+import com.drdisagree.teledrive.core.crypto.StreamCrypto
+import com.drdisagree.teledrive.core.crypto.WrappedKeyRepository
 import com.drdisagree.teledrive.core.files.MimeTypes
+import com.drdisagree.teledrive.core.media.PartedMediaByteSource
+import com.drdisagree.teledrive.core.media.TelegramMediaByteSource
+import com.drdisagree.teledrive.core.telegram.TelegramClient
+import com.drdisagree.teledrive.desktop.media.ExternalMediaPlayer
+import com.drdisagree.teledrive.desktop.media.MediaStreamServer
 import com.drdisagree.teledrive.desktop.resources.Res as DesktopRes
 import com.drdisagree.teledrive.desktop.resources.preview_open_externally
 import com.drdisagree.teledrive.desktop.resources.preview_open_failed
+import com.drdisagree.teledrive.desktop.resources.preview_stream
 import com.drdisagree.teledrive.domain.model.DriveFile
 import com.drdisagree.teledrive.presentation.common.Formatters
 import com.drdisagree.teledrive.presentation.common.LinkedText
@@ -120,6 +130,7 @@ import java.awt.Desktop
 import java.io.File
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
@@ -490,9 +501,11 @@ private fun PreviewPane(
             snackbarHostState = snackbarHostState
         )
 
-        is PreviewContent.StreamedMedia -> DownloadState(
-            sizeBytes = file.sizeBytes,
-            onDownload = { viewModel.download(file) }
+        is PreviewContent.StreamedMedia -> StreamState(
+            file = file,
+            content = current,
+            onDownload = { viewModel.download(file) },
+            snackbarHostState = snackbarHostState
         )
 
         is PreviewContent.PlainText -> Column(
@@ -613,6 +626,71 @@ private fun OpenExternallyState(
         )
         Button(onClick = { if (!openExternally(path)) openFailed = true }) {
             Text(stringResource(DesktopRes.string.preview_open_externally))
+        }
+    }
+}
+
+@Composable
+private fun StreamState(
+    file: DriveFile,
+    content: PreviewContent.StreamedMedia,
+    onDownload: () -> Unit,
+    snackbarHostState: SnackbarHostState
+) {
+    val streamServer = koinInject<MediaStreamServer>()
+    val player = koinInject<ExternalMediaPlayer>()
+    val telegramClient = koinInject<TelegramClient>()
+    val streamCrypto = koinInject<StreamCrypto>()
+    val wrappedKeyRepository = koinInject<WrappedKeyRepository>()
+
+    var playFailed by remember(file.id) { mutableStateOf(false) }
+    if (playFailed) {
+        LaunchedEffect(file.id) {
+            snackbarHostState.showSnackbar(getString(DesktopRes.string.preview_open_failed))
+            playFailed = false
+        }
+    }
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Icon(
+            imageVector = if (content.isAudio) Icons.Filled.Audiotrack else Icons.Filled.Movie,
+            contentDescription = null,
+            modifier = Modifier.size(56.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = Formatters.bytes(file.sizeBytes),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Button(onClick = {
+            val url = streamServer.serve(file.name, file.mimeType) {
+                if (content.parts.isEmpty()) {
+                    TelegramMediaByteSource(telegramClient, content.remoteFileId)
+                } else {
+                    PartedMediaByteSource(
+                        telegramClient = telegramClient,
+                        streamCrypto = streamCrypto,
+                        parts = content.parts,
+                        encrypted = content.encrypted,
+                        contentKey = if (content.encrypted) {
+                            wrappedKeyRepository.get(CryptoKeys.CONTENT)
+                        } else {
+                            null
+                        }
+                    )
+                }
+            }
+            if (!player.play(url)) playFailed = true
+        }) {
+            Text(stringResource(DesktopRes.string.preview_stream))
+        }
+        OutlinedButton(onClick = onDownload) {
+            Text(stringResource(Res.string.common_download))
         }
     }
 }
