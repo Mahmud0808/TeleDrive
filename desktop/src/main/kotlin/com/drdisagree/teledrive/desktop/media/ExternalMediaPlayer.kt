@@ -28,7 +28,11 @@ class ExternalMediaPlayer {
                 "$programFilesX86\\VideoLAN\\VLC\\vlc.exe",
                 "$programFiles\\mpv\\mpv.exe",
                 "$programFiles\\MPC-HC\\mpc-hc64.exe",
-                "$programFilesX86\\MPC-HC\\mpc-hc.exe"
+                "$programFilesX86\\MPC-HC\\mpc-hc.exe",
+                "$programFiles\\DAUM\\PotPlayer\\PotPlayerMini64.exe",
+                "$programFilesX86\\DAUM\\PotPlayer\\PotPlayerMini.exe",
+                "$programFilesX86\\Windows Media Player\\wmplayer.exe",
+                "$programFiles\\Windows Media Player\\wmplayer.exe"
             )
         }
 
