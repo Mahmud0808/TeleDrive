@@ -13,20 +13,21 @@ enum class OnboardingStep {
     BACKUP_SETUP,
     DONE;
 
-    val displayNumber: Int
-        get() = COUNTED.indexOfLast { it.ordinal <= ordinal }.coerceAtLeast(0) + 1
+    fun displayNumber(counted: List<OnboardingStep>): Int =
+        counted.indexOfLast { it.ordinal <= ordinal }.coerceAtLeast(0) + 1
 
     companion object {
-        private val COUNTED = listOf(
-            WELCOME,
-            API_CREDENTIALS,
-            PHONE,
-            CODE,
-            PERMISSIONS,
-            CHANNEL_SELECT,
-            BACKUP_SETUP
-        )
-
-        val displayTotal: Int = COUNTED.size
+        fun counted(
+            includePermissions: Boolean,
+            includeBackup: Boolean
+        ): List<OnboardingStep> = buildList {
+            add(WELCOME)
+            add(API_CREDENTIALS)
+            add(PHONE)
+            add(CODE)
+            if (includePermissions) add(PERMISSIONS)
+            add(CHANNEL_SELECT)
+            if (includeBackup) add(BACKUP_SETUP)
+        }
     }
 }

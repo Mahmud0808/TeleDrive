@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.common_back
 import com.drdisagree.teledrive.resources.settings
+import com.drdisagree.teledrive.presentation.platform.LocalPlatformCapabilities
 import com.drdisagree.teledrive.presentation.components.liftedTopAppBarColors
 import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
 import com.drdisagree.teledrive.presentation.navigation.LocalBottomBarInset
@@ -72,8 +73,13 @@ fun SettingsScreen(
                 .verticalScroll(scrollState)
         ) {
             Spacer(Modifier.height(8.dp))
+            val capabilities = LocalPlatformCapabilities.current
+            val hiddenSections = buildSet {
+                if (!capabilities.supportsAutoBackup) add(SettingsSectionType.BACKUP)
+                if (!capabilities.requiresPermissions) add(SettingsSectionType.PERMISSIONS)
+            }
             SettingsGroup {
-                SettingsSectionType.entries.forEach { section ->
+                SettingsSectionType.entries.filterNot { it in hiddenSections }.forEach { section ->
                     add { SectionRow(section = section, onClick = { onOpenSection(section) }) }
                 }
             }

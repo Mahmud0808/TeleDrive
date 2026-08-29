@@ -8,6 +8,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
+import org.koin.compose.koinInject
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.fragment.app.FragmentActivity
@@ -25,6 +26,7 @@ import com.drdisagree.teledrive.presentation.common.shareLocalFiles
 
 @Composable
 fun ProvidePlatformActions(content: @Composable () -> Unit) {
+    val capabilities = koinInject<PlatformCapabilities>()
     val context = LocalContext.current
     val activity = LocalActivity.current
 
@@ -160,6 +162,7 @@ fun ProvidePlatformActions(content: @Composable () -> Unit) {
         LocalDeviceOwnerGate provides deviceOwnerGate,
         LocalAppVersion provides BuildConfig.VERSION_NAME,
         LocalPlatformScreens provides AndroidPlatformScreens,
+        LocalPlatformCapabilities provides capabilities,
         content = content
     )
 }

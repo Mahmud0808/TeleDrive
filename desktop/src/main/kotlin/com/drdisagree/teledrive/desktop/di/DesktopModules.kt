@@ -46,6 +46,7 @@ import com.drdisagree.teledrive.data.local.database.daosModule
 import com.drdisagree.teledrive.data.repository.LocalDataWiper
 import com.drdisagree.teledrive.data.repository.repositoryModule
 import com.drdisagree.teledrive.desktop.BuildInfo
+import com.drdisagree.teledrive.desktop.DesktopPlatformCapabilities
 import com.drdisagree.teledrive.desktop.crypto.DpapiCredentialCipher
 import com.drdisagree.teledrive.desktop.data.DesktopLocalDataWiper
 import com.drdisagree.teledrive.desktop.crypto.LocalKeyCredentialCipher
@@ -66,6 +67,7 @@ import com.drdisagree.teledrive.desktop.transfer.DesktopMaintenanceScheduler
 import com.drdisagree.teledrive.desktop.transfer.DesktopTransferScheduler
 import com.drdisagree.teledrive.domain.usecase.useCaseModule
 import com.drdisagree.teledrive.presentation.di.sharedUiModule
+import com.drdisagree.teledrive.presentation.platform.PlatformCapabilities
 import com.drdisagree.teledrive.presentation.platform.StandardFolderPaths
 import java.io.File
 import kotlinx.coroutines.Dispatchers
@@ -95,6 +97,7 @@ val desktopModule = module {
     single { UpdateChecker(BuildInfo.VERSION) }
     singleOf(::DesktopPermissionChecker) bind PermissionChecker::class
     singleOf(::DesktopStandardFolderPaths) bind StandardFolderPaths::class
+    singleOf(::DesktopPlatformCapabilities) bind PlatformCapabilities::class
     singleOf(::PublishOutboxDrainer)
     singleOf(::DesktopNetworkMonitor) bind NetworkMonitor::class
     singleOf(::DesktopTransferErrorMessages) bind TransferErrorMessages::class

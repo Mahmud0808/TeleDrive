@@ -195,6 +195,7 @@ import com.drdisagree.teledrive.resources.onboarding_where_i_get_these
 import com.drdisagree.teledrive.core.permissions.AppPermission
 import com.drdisagree.teledrive.core.permissions.PermissionChecker
 import com.drdisagree.teledrive.presentation.platform.LocalPermissionRequester
+import com.drdisagree.teledrive.presentation.platform.LocalPlatformCapabilities
 import com.drdisagree.teledrive.presentation.platform.LocalSystemScreens
 import com.drdisagree.teledrive.presentation.platform.LocalTelegramLinkOpener
 import com.drdisagree.teledrive.resources.ic_launcher_monochrome
@@ -467,8 +468,13 @@ private fun ChannelSelectStep(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun StepHeader(step: OnboardingStep, modifier: Modifier = Modifier) {
-    val stepNumber = step.displayNumber
-    val totalSteps = OnboardingStep.displayTotal
+    val capabilities = LocalPlatformCapabilities.current
+    val counted = OnboardingStep.counted(
+        includePermissions = capabilities.requiresPermissions,
+        includeBackup = capabilities.supportsAutoBackup
+    )
+    val stepNumber = step.displayNumber(counted)
+    val totalSteps = counted.size
     Column(modifier = modifier) {
         Surface(
             shape = RoundedCornerShape(100),

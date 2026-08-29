@@ -3,6 +3,7 @@ package com.drdisagree.teledrive.desktop.ui
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
+import org.koin.compose.koinInject
 import com.drdisagree.teledrive.desktop.BuildInfo
 import androidx.compose.foundation.Image
 import androidx.compose.ui.Modifier
@@ -21,10 +22,12 @@ import com.drdisagree.teledrive.presentation.platform.LocalFileSharer
 import com.drdisagree.teledrive.presentation.platform.LocalFolderPicker
 import com.drdisagree.teledrive.presentation.platform.LocalMultiFilePicker
 import com.drdisagree.teledrive.presentation.platform.LocalPermissionRequester
+import com.drdisagree.teledrive.presentation.platform.LocalPlatformCapabilities
 import com.drdisagree.teledrive.presentation.platform.LocalPlatformScreens
 import com.drdisagree.teledrive.presentation.platform.LocalSystemScreens
 import com.drdisagree.teledrive.presentation.platform.LocalUrlOpener
 import com.drdisagree.teledrive.presentation.platform.PermissionRequester
+import com.drdisagree.teledrive.presentation.platform.PlatformCapabilities
 import com.drdisagree.teledrive.presentation.platform.MultiFilePicker
 import com.drdisagree.teledrive.presentation.platform.PickResult
 import com.drdisagree.teledrive.presentation.platform.SystemScreens
@@ -42,6 +45,7 @@ import kotlin.concurrent.thread
 
 @Composable
 fun ProvideDesktopPlatformActions(content: @Composable () -> Unit) {
+    val capabilities = koinInject<PlatformCapabilities>()
     val urlOpener = remember {
         UrlOpener { url ->
             runCatching { Desktop.getDesktop().browse(URI(url)) }
@@ -134,6 +138,7 @@ fun ProvideDesktopPlatformActions(content: @Composable () -> Unit) {
         LocalAppVersion provides BuildInfo.VERSION,
         LocalDownloadLocationConfigurable provides true,
         LocalPlatformScreens provides DesktopPlatformScreens,
+        LocalPlatformCapabilities provides capabilities,
         content = content
     )
 }

@@ -18,6 +18,7 @@ import com.drdisagree.teledrive.domain.repository.ChannelRepository
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.repository.SyncRepository
 import com.drdisagree.teledrive.domain.repository.TelegramAuthRepository
+import com.drdisagree.teledrive.presentation.platform.PlatformCapabilities
 import com.drdisagree.teledrive.presentation.platform.StandardFolderPaths
 import com.drdisagree.teledrive.presentation.common.UiText
 import com.drdisagree.teledrive.presentation.common.toUiText
@@ -37,7 +38,8 @@ class OnboardingViewModel(
     private val syncRepository: SyncRepository,
     private val maintenanceScheduler: MaintenanceScheduler,
     private val channelRepository: ChannelRepository,
-    private val standardFolderPaths: StandardFolderPaths
+    private val standardFolderPaths: StandardFolderPaths,
+    private val platformCapabilities: PlatformCapabilities
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(OnboardingUiState())
@@ -121,7 +123,11 @@ class OnboardingViewModel(
                         )
                     ) {
                         current.copy(
-                            step = OnboardingStep.PERMISSIONS,
+                            step = if (platformCapabilities.requiresPermissions) {
+                                OnboardingStep.PERMISSIONS
+                            } else {
+                                OnboardingStep.CHANNEL_SELECT
+                            },
                             working = false,
                             error = null
                         )
@@ -300,13 +306,23 @@ class OnboardingViewModel(
 
     fun confirmChannel() {
         val chatId = _uiState.value.selectedChatId ?: run {
-            _uiState.update { it.copy(step = OnboardingStep.BACKUP_SETUP) }
+            advancePastChannel()
             return
         }
         _uiState.update { it.copy(working = true) }
         viewModelScope.launch {
             channelRepository.switchTo(chatId, index = false)
-            _uiState.update { it.copy(step = OnboardingStep.BACKUP_SETUP, working = false) }
+            _uiState.update { it.copy(working = false) }
+            advancePastChannel()
+        }
+    }
+
+    private fun advancePastChannel() {
+        if (platformCapabilities.supportsAutoBackup) {
+            _uiState.update { it.copy(step = OnboardingStep.BACKUP_SETUP) }
+        } else {
+            _uiState.update { it.copy(autoBackupEnabled = false) }
+            finishSetup()
         }
     }
 
