@@ -60,11 +60,32 @@ dependencies {
 compose.desktop {
     application {
         mainClass = "com.drdisagree.teledrive.desktop.MainKt"
+        providers.gradleProperty("desktopJavaHome").orNull?.let { javaHome = it }
 
         nativeDistributions {
             targetFormats(TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Dmg)
             packageName = "TeleDrive"
             packageVersion = libs.versions.appVersion.get()
+            description = "Private cloud storage on your own Telegram channel"
+            vendor = "DrDisagree"
+            licenseFile.set(rootProject.file("LICENSE"))
+
+            windows {
+                iconFile.set(project.file("icons/TeleDrive.ico"))
+                menuGroup = "TeleDrive"
+                shortcut = true
+                dirChooser = true
+                upgradeUuid = "b7e35f74-33a4-43d9-98b1-84babb95f8a7"
+            }
+
+            linux {
+                iconFile.set(project.file("icons/TeleDrive.png"))
+            }
+
+            macOS {
+                iconFile.set(project.file("icons/TeleDrive.icns"))
+                bundleID = "com.drdisagree.teledrive"
+            }
         }
     }
 }
