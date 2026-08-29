@@ -1,10 +1,20 @@
 package com.drdisagree.teledrive.presentation.settings
 
-import android.content.Context
 import android.content.IntentSender
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.files_removed_local_copies
+import com.drdisagree.teledrive.resources.settings_nothing_to_remove
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.about_no_update
+import com.drdisagree.teledrive.resources.message_backing_up_new_folder
+import com.drdisagree.teledrive.resources.message_cache_cleared
+import com.drdisagree.teledrive.resources.message_key_backup_saved
+import com.drdisagree.teledrive.resources.message_key_restored
+import com.drdisagree.teledrive.resources.message_rebuild_done
+import com.drdisagree.teledrive.resources.message_thumbnails_cleared
+import com.drdisagree.teledrive.resources.message_wrong_passphrase
+import com.drdisagree.teledrive.resources.rebuild_locked_files
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.core.permissions.PermissionChecker
 import com.drdisagree.teledrive.core.security.AppLockManager
@@ -24,7 +34,8 @@ import com.drdisagree.teledrive.domain.repository.KeyBackupRepository
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.repository.SyncRepository
 import com.drdisagree.teledrive.domain.repository.TelegramAuthRepository
-import com.drdisagree.teledrive.presentation.common.toUserMessage
+import com.drdisagree.teledrive.presentation.common.UiText
+import com.drdisagree.teledrive.presentation.common.toUiText
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -61,7 +72,6 @@ data class SettingsUiState(
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SettingsViewModel(
-    private val context: Context,
     private val settingsRepository: SettingsRepository,
     private val telegramAuthRepository: TelegramAuthRepository,
     private val telegramClient: TelegramClient,
@@ -84,7 +94,7 @@ class SettingsViewModel(
     private val _updateState = MutableStateFlow<UpdateState>(UpdateState.Idle)
     val updateState: StateFlow<UpdateState> = _updateState.asStateFlow()
 
-    private val _messages = MutableSharedFlow<String>(extraBufferCapacity = 8)
+    private val _messages = MutableSharedFlow<UiText>(extraBufferCapacity = 8)
     val messages = _messages.asSharedFlow()
 
     private val _keyBackupWorking = MutableStateFlow(false)
@@ -139,7 +149,7 @@ class SettingsViewModel(
     private suspend fun scanForNewBackupWork() {
         when (val result = backupRepository.startBackup(BackupTrigger.MANUAL)) {
             is AppResult.Success -> result.value?.let {
-                _messages.tryEmit(context.getString(R.string.message_backing_up_new_folder))
+                _messages.tryEmit(UiText.Resource(Res.string.message_backing_up_new_folder))
             }
 
             is AppResult.Failure -> Unit
@@ -190,7 +200,7 @@ class SettingsViewModel(
         }
     }
 
-    fun notify(message: String) {
+    fun notify(message: UiText) {
         _messages.tryEmit(message)
     }
 
@@ -214,10 +224,10 @@ class SettingsViewModel(
                             encryptFiles = if (enableEncryption) true else it.encryptFiles
                         )
                     }
-                    _messages.tryEmit(context.getString(R.string.message_key_backup_saved))
+                    _messages.tryEmit(UiText.Resource(Res.string.message_key_backup_saved))
                 }
 
-                is AppResult.Failure -> _messages.tryEmit(result.error.toUserMessage(context))
+                is AppResult.Failure -> _messages.tryEmit(result.error.toUiText())
             }
         }
     }
@@ -254,14 +264,14 @@ class SettingsViewModel(
                 is AppResult.Success -> {
                     if (result.value) {
                         settingsRepository.update { it.copy(keyBackupCreated = true) }
-                        _messages.tryEmit(context.getString(R.string.message_key_restored))
+                        _messages.tryEmit(UiText.Resource(Res.string.message_key_restored))
                         syncRepository.fullResync()
                     } else {
-                        _messages.tryEmit(context.getString(R.string.message_wrong_passphrase))
+                        _messages.tryEmit(UiText.Resource(Res.string.message_wrong_passphrase))
                     }
                 }
 
-                is AppResult.Failure -> _messages.tryEmit(result.error.toUserMessage(context))
+                is AppResult.Failure -> _messages.tryEmit(result.error.toUiText())
             }
         }
     }
@@ -285,13 +295,19 @@ class SettingsViewModel(
                         _deleteConsentRequests.tryEmit(consent)
                     } else {
                         _messages.tryEmit(
-                            if (result.value.deletedCount == 0) "Nothing to remove"
-                            else "Removed ${result.value.deletedCount} local copies"
+                            if (result.value.deletedCount == 0) {
+                                UiText.Resource(Res.string.settings_nothing_to_remove)
+                            } else {
+                                UiText.Resource(
+                                    Res.string.files_removed_local_copies,
+                                    result.value.deletedCount
+                                )
+                            }
                         )
                     }
                 }
 
-                is AppResult.Failure -> _messages.tryEmit(result.error.toUserMessage(context))
+                is AppResult.Failure -> _messages.tryEmit(result.error.toUiText())
             }
         }
     }
@@ -299,14 +315,14 @@ class SettingsViewModel(
     fun clearCache() {
         viewModelScope.launch {
             cacheRepository.clearAll()
-            _messages.tryEmit(context.getString(R.string.message_cache_cleared))
+            _messages.tryEmit(UiText.Resource(Res.string.message_cache_cleared))
         }
     }
 
     fun clearThumbnails() {
         viewModelScope.launch {
             cacheRepository.clearThumbnails()
-            _messages.tryEmit(context.getString(R.string.message_thumbnails_cleared))
+            _messages.tryEmit(UiText.Resource(Res.string.message_thumbnails_cleared))
         }
     }
 
@@ -318,7 +334,7 @@ class SettingsViewModel(
             settingsRepository.update { it.copy(notifiedUpdateVersion = release?.version ?: "") }
             settingsRepository.update { it.copy(lastUpdateCheckAt = System.currentTimeMillis()) }
             _updateState.value = if (release == null) {
-                _messages.tryEmit(context.getString(R.string.about_no_update))
+                _messages.tryEmit(UiText.Resource(Res.string.about_no_update))
                 UpdateState.Idle
             } else {
                 UpdateState.Available(release)
@@ -335,14 +351,11 @@ class SettingsViewModel(
             when (val result = syncRepository.fullResync()) {
                 is AppResult.Success -> _messages.tryEmit(
                     if (result.value.lockedFiles > 0) {
-                        context.resources.getQuantityString(
-                            R.plurals.rebuild_locked_files,
-                            result.value.lockedFiles,
+                        UiText.PluralResource(Res.plurals.rebuild_locked_files, result.value.lockedFiles,
                             result.value.lockedFiles
                         )
                     } else {
-                        context.getString(
-                            R.string.message_rebuild_done,
+                        UiText.Resource(Res.string.message_rebuild_done,
                             result.value.inserted,
                             result.value.updated,
                             result.value.detachedFromRemote
@@ -350,7 +363,7 @@ class SettingsViewModel(
                     }
                 )
 
-                is AppResult.Failure -> _messages.tryEmit(result.error.toUserMessage(context))
+                is AppResult.Failure -> _messages.tryEmit(result.error.toUiText())
             }
         }
     }
@@ -374,7 +387,7 @@ class SettingsViewModel(
                     onLoggedOut()
                 }
 
-                is AppResult.Failure -> _messages.tryEmit(result.error.toUserMessage(context))
+                is AppResult.Failure -> _messages.tryEmit(result.error.toUiText())
             }
         }
     }

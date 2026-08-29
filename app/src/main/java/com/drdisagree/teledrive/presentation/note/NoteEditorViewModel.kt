@@ -1,15 +1,16 @@
 package com.drdisagree.teledrive.presentation.note
 
-import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.note_saved
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.domain.repository.FileRepository
 import com.drdisagree.teledrive.domain.repository.TransferRepository
-import com.drdisagree.teledrive.presentation.common.toUserMessage
+import com.drdisagree.teledrive.presentation.common.UiText
+import com.drdisagree.teledrive.presentation.common.toUiText
 import com.drdisagree.teledrive.presentation.navigation.Route
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,7 +29,6 @@ data class NoteEditorUiState(
 )
 
 class NoteEditorViewModel(
-    private val context: Context,
     private val fileRepository: FileRepository,
     private val transferRepository: TransferRepository,
     savedStateHandle: SavedStateHandle
@@ -39,7 +39,7 @@ class NoteEditorViewModel(
     private val _uiState = MutableStateFlow(NoteEditorUiState(isNew = route.fileId == null))
     val uiState: StateFlow<NoteEditorUiState> = _uiState.asStateFlow()
 
-    private val _messages = MutableSharedFlow<String>(extraBufferCapacity = 2)
+    private val _messages = MutableSharedFlow<UiText>(extraBufferCapacity = 2)
     val messages = _messages.asSharedFlow()
 
     private val _saved = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
@@ -61,7 +61,7 @@ class NoteEditorViewModel(
             }
 
             is AppResult.Failure -> {
-                _messages.tryEmit(result.error.toUserMessage(context))
+                _messages.tryEmit(result.error.toUiText())
                 _uiState.update { it.copy(loading = false) }
             }
         }
@@ -85,12 +85,12 @@ class NoteEditorViewModel(
             when (result) {
                 is AppResult.Success -> {
                     transferRepository.enqueueUpload(result.value)
-                    _messages.tryEmit(context.getString(R.string.note_saved))
+                    _messages.tryEmit(UiText.Resource(Res.string.note_saved))
                     _saved.tryEmit(Unit)
                 }
 
                 is AppResult.Failure -> {
-                    _messages.tryEmit(result.error.toUserMessage(context))
+                    _messages.tryEmit(result.error.toUiText())
                     _uiState.update { it.copy(saving = false) }
                 }
             }

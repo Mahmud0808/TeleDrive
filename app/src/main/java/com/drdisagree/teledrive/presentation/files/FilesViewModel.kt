@@ -1,6 +1,5 @@
 package com.drdisagree.teledrive.presentation.files
 
-import android.content.Context
 import android.content.IntentSender
 import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
@@ -9,7 +8,30 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.files_import_copied
+import com.drdisagree.teledrive.resources.files_import_duplicates
+import com.drdisagree.teledrive.resources.files_import_failed
+import com.drdisagree.teledrive.resources.files_import_restored
+import com.drdisagree.teledrive.resources.files_import_uploading
+import com.drdisagree.teledrive.resources.files_import_uploading_copied
+import com.drdisagree.teledrive.resources.files_import_uploading_duplicates
+import com.drdisagree.teledrive.resources.files_import_uploading_failed
+import com.drdisagree.teledrive.resources.files_import_uploading_restored
+import com.drdisagree.teledrive.resources.files_moving_to_trash
+import com.drdisagree.teledrive.resources.files_queued_for_upload
+import com.drdisagree.teledrive.resources.files_queued_for_download
+import com.drdisagree.teledrive.resources.files_queued_partial
+import com.drdisagree.teledrive.resources.files_copied_all
+import com.drdisagree.teledrive.resources.files_copied_partial
+import com.drdisagree.teledrive.resources.files_removed_local_copies
+import com.drdisagree.teledrive.resources.files_root_name
+import com.drdisagree.teledrive.resources.files_sync_result
+import com.drdisagree.teledrive.resources.files_share_needs_local
+import com.drdisagree.teledrive.resources.message_moved_count
+import com.drdisagree.teledrive.resources.message_moved_to_trash_count
+import com.drdisagree.teledrive.resources.message_nothing_to_download
+import com.drdisagree.teledrive.resources.note_not_editable
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.core.files.FileImporter
 import com.drdisagree.teledrive.core.files.MimeTypes
@@ -27,7 +49,8 @@ import com.drdisagree.teledrive.domain.repository.SyncRepository
 import com.drdisagree.teledrive.domain.repository.TransferRepository
 import com.drdisagree.teledrive.domain.repository.TrashRepository
 import com.drdisagree.teledrive.presentation.common.ListPosition
-import com.drdisagree.teledrive.presentation.common.toUserMessage
+import com.drdisagree.teledrive.presentation.common.UiText
+import com.drdisagree.teledrive.presentation.common.toUiText
 import com.drdisagree.teledrive.presentation.components.GridZoomLevel
 import com.drdisagree.teledrive.presentation.components.SelectionCapabilities
 import com.drdisagree.teledrive.presentation.components.zoomedIn
@@ -65,7 +88,7 @@ data class RenameTarget(
 
 data class FilesUiState(
     val folderId: String? = null,
-    val folderName: String = "",
+    val folderName: UiText = UiText.Plain(""),
     val breadcrumbs: List<FolderCrumb> = emptyList(),
     val folders: List<DriveFolder> = emptyList(),
     val selection: Set<String> = emptySet(),
@@ -85,7 +108,6 @@ data class FilesUiState(
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class FilesViewModel(
-    private val context: Context,
     savedStateHandle: SavedStateHandle,
     private val fileRepository: FileRepository,
     private val trashRepository: TrashRepository,
@@ -103,14 +125,14 @@ class FilesViewModel(
     private val selection = MutableStateFlow<Set<String>>(emptySet())
     private val folderSelection = MutableStateFlow<Set<String>>(emptySet())
 
-    private val _working = MutableStateFlow<String?>(null)
-    val working: StateFlow<String?> = _working.asStateFlow()
+    private val _working = MutableStateFlow<UiText?>(null)
+    val working: StateFlow<UiText?> = _working.asStateFlow()
 
     private var rangeBase: Pair<Set<String>, Set<String>>? = null
     private val _allSelected = MutableStateFlow(false)
     val allSelected: StateFlow<Boolean> = _allSelected.asStateFlow()
 
-    private val _messages = MutableSharedFlow<String>(extraBufferCapacity = 8)
+    private val _messages = MutableSharedFlow<UiText>(extraBufferCapacity = 8)
     val messages = _messages.asSharedFlow()
 
     private val _folderInfoTarget = MutableStateFlow<DriveFolder?>(null)
@@ -142,12 +164,16 @@ class FilesViewModel(
                     val stats = result.value
                     if (stats.inserted > 0 || stats.updated > 0) {
                         _messages.tryEmit(
-                            "${stats.inserted} new, ${stats.updated} updated"
+                            UiText.Resource(
+                                Res.string.files_sync_result,
+                                stats.inserted,
+                                stats.updated
+                            )
                         )
                     }
                 }
 
-                is AppResult.Failure -> _messages.tryEmit(result.error.toUserMessage(context))
+                is AppResult.Failure -> _messages.tryEmit(result.error.toUiText())
             }
             val elapsed = System.currentTimeMillis() - startedAt
             if (elapsed < MIN_REFRESH_VISIBLE_MS) delay((MIN_REFRESH_VISIBLE_MS - elapsed).milliseconds)
@@ -210,7 +236,8 @@ class FilesViewModel(
         val (selected, capabilities) = selectionState
         FilesUiState(
             folderId = folderId,
-            folderName = folder?.name ?: context.getString(R.string.files_root_name),
+            folderName = folder?.name?.let(UiText::Plain)
+                ?: UiText.Resource(Res.string.files_root_name),
             breadcrumbs = breadcrumbsFor(folder),
             folders = folders,
             selection = selected,
@@ -234,10 +261,10 @@ class FilesViewModel(
         var current = folder
         var guard = 0
         while (current != null && guard++ < MAX_BREADCRUMB_DEPTH) {
-            trail.addFirst(FolderCrumb(current.id, current.name))
+            trail.addFirst(FolderCrumb(current.id, UiText.Plain(current.name)))
             current = current.parentId?.let { fileRepository.getFolder(it) }
         }
-        trail.addFirst(FolderCrumb(null, context.getString(R.string.files_root_name)))
+        trail.addFirst(FolderCrumb(null, UiText.Resource(Res.string.files_root_name)))
         return trail.toList()
     }
 
@@ -304,7 +331,7 @@ class FilesViewModel(
         when (val result = fileRepository.createFolder(parentId, name)) {
             is AppResult.Success -> true
             is AppResult.Failure -> {
-                _messages.tryEmit(result.error.toUserMessage(context))
+                _messages.tryEmit(result.error.toUiText())
                 false
             }
         }
@@ -313,7 +340,7 @@ class FilesViewModel(
         viewModelScope.launch {
             when (val result = fileRepository.createFolder(folderId, name)) {
                 is AppResult.Success -> Unit
-                is AppResult.Failure -> _messages.tryEmit(result.error.toUserMessage(context))
+                is AppResult.Failure -> _messages.tryEmit(result.error.toUiText())
             }
         }
     }
@@ -355,7 +382,7 @@ class FilesViewModel(
     fun renameFile(fileId: String, newName: String) {
         viewModelScope.launch {
             fileRepository.renameFile(fileId, newName).let {
-                if (it is AppResult.Failure) _messages.tryEmit(it.error.toUserMessage(context))
+                if (it is AppResult.Failure) _messages.tryEmit(it.error.toUiText())
             }
         }
     }
@@ -363,7 +390,7 @@ class FilesViewModel(
     fun renameFolder(id: String, newName: String) {
         viewModelScope.launch {
             fileRepository.renameFolder(id, newName).let {
-                if (it is AppResult.Failure) _messages.tryEmit(it.error.toUserMessage(context))
+                if (it is AppResult.Failure) _messages.tryEmit(it.error.toUiText())
             }
         }
     }
@@ -373,14 +400,14 @@ class FilesViewModel(
         val folderIds = folderSelection.value.toList()
         val total = ids.size + folderIds.size
         clearSelection()
-        _working.value = "Moving $total to trash…"
+        _working.value = UiText.Resource(Res.string.files_moving_to_trash, total)
         viewModelScope.launch {
             withContext(NonCancellable) {
                 if (ids.isNotEmpty()) trashRepository.moveFilesToTrash(ids)
                 folderIds.forEach { trashRepository.moveFolderToTrash(it) }
             }
             _working.value = null
-            _messages.tryEmit(context.getString(R.string.message_moved_to_trash_count, total))
+            _messages.tryEmit(UiText.Resource(Res.string.message_moved_to_trash_count, total))
         }
     }
 
@@ -393,8 +420,11 @@ class FilesViewModel(
                 if (transferRepository.enqueueUpload(id) is AppResult.Failure) failures++
             }
             _messages.tryEmit(
-                if (failures == 0) "${ids.size} queued for upload"
-                else "${ids.size - failures} queued, $failures failed"
+                if (failures == 0) {
+                    UiText.Resource(Res.string.files_queued_for_upload, ids.size)
+                } else {
+                    UiText.Resource(Res.string.files_queued_partial, ids.size - failures, failures)
+                }
             )
         }
     }
@@ -408,7 +438,7 @@ class FilesViewModel(
                     fileIds + folderIds.flatMap { fileRepository.fileIdsInTree(it) }
                     ).distinct()
             if (ids.isEmpty()) {
-                _messages.tryEmit(context.getString(R.string.message_nothing_to_download))
+                _messages.tryEmit(UiText.Resource(Res.string.message_nothing_to_download))
                 return@launch
             }
             var failures = 0
@@ -416,8 +446,11 @@ class FilesViewModel(
                 if (transferRepository.enqueueDownload(id) is AppResult.Failure) failures++
             }
             _messages.tryEmit(
-                if (failures == 0) "${ids.size} queued for download"
-                else "${ids.size - failures} queued, $failures failed"
+                if (failures == 0) {
+                    UiText.Resource(Res.string.files_queued_for_download, ids.size)
+                } else {
+                    UiText.Resource(Res.string.files_queued_partial, ids.size - failures, failures)
+                }
             )
         }
     }
@@ -453,7 +486,7 @@ class FilesViewModel(
             if (ids.isNotEmpty()) {
                 val result = fileRepository.moveFiles(ids, targetFolderId)
                 if (result is AppResult.Failure) {
-                    _messages.tryEmit(result.error.toUserMessage(context))
+                    _messages.tryEmit(result.error.toUiText())
                     return@launch
                 }
             }
@@ -461,12 +494,11 @@ class FilesViewModel(
                 val result = fileRepository.moveFolder(id, targetFolderId)
                 if (result is AppResult.Failure) {
                     failures++
-                    _messages.tryEmit(result.error.toUserMessage(context))
+                    _messages.tryEmit(result.error.toUiText())
                 }
             }
             if (failures == 0) _messages.tryEmit(
-                context.getString(
-                    R.string.message_moved_count,
+                UiText.Resource(Res.string.message_moved_count,
                     ids.size + folderIds.size
                 )
             )
@@ -480,11 +512,14 @@ class FilesViewModel(
         viewModelScope.launch {
             when (val result = fileRepository.copyFiles(ids, targetFolderId)) {
                 is AppResult.Success -> _messages.tryEmit(
-                    if (result.value == ids.size) "Copied ${result.value}"
-                    else "Copied ${result.value} of ${ids.size}"
+                    if (result.value == ids.size) {
+                        UiText.Resource(Res.string.files_copied_all, result.value)
+                    } else {
+                        UiText.Resource(Res.string.files_copied_partial, result.value, ids.size)
+                    }
                 )
 
-                is AppResult.Failure -> _messages.tryEmit(result.error.toUserMessage(context))
+                is AppResult.Failure -> _messages.tryEmit(result.error.toUiText())
             }
             _copying.update { false }
         }
@@ -525,12 +560,15 @@ class FilesViewModel(
                     } else {
                         pendingLocalCopyIds = emptyList()
                         _messages.tryEmit(
-                            "Removed ${result.value.deletedCount} local copies"
+                            UiText.Resource(
+                                Res.string.files_removed_local_copies,
+                                result.value.deletedCount
+                            )
                         )
                     }
                 }
 
-                is AppResult.Failure -> _messages.tryEmit(result.error.toUserMessage(context))
+                is AppResult.Failure -> _messages.tryEmit(result.error.toUiText())
             }
         }
     }
@@ -601,30 +639,30 @@ class FilesViewModel(
         duplicates: Int,
         copied: Int,
         failed: Int
-    ): String = when {
+    ): UiText = when {
         imported == 0 && restored == 0 && duplicates == 0 && copied > 0 ->
-            context.getString(R.string.files_import_copied, copied)
+            UiText.Resource(Res.string.files_import_copied, copied)
 
         imported > 0 && copied > 0 ->
-            context.getString(R.string.files_import_uploading_copied, imported, copied)
+            UiText.Resource(Res.string.files_import_uploading_copied, imported, copied)
 
         imported == 0 && restored == 0 && duplicates > 0 ->
-            context.getString(R.string.files_import_duplicates, duplicates)
+            UiText.Resource(Res.string.files_import_duplicates, duplicates)
 
         imported > 0 && duplicates > 0 ->
-            context.getString(R.string.files_import_uploading_duplicates, imported, duplicates)
+            UiText.Resource(Res.string.files_import_uploading_duplicates, imported, duplicates)
 
         imported == 0 && restored > 0 && failed == 0 ->
-            context.getString(R.string.files_import_restored, restored)
+            UiText.Resource(Res.string.files_import_restored, restored)
 
         imported == 0 && restored == 0 ->
-            context.getString(R.string.files_import_failed)
+            UiText.Resource(Res.string.files_import_failed)
 
         restored > 0 && failed == 0 ->
-            context.getString(R.string.files_import_uploading_restored, imported, restored)
+            UiText.Resource(Res.string.files_import_uploading_restored, imported, restored)
 
-        failed == 0 -> context.getString(R.string.files_import_uploading, imported)
-        else -> context.getString(R.string.files_import_uploading_failed, imported, failed)
+        failed == 0 -> UiText.Resource(Res.string.files_import_uploading, imported)
+        else -> UiText.Resource(Res.string.files_import_uploading_failed, imported, failed)
     }
 
     /** Opens the selected text file in the note editor. */
@@ -634,7 +672,7 @@ class FilesViewModel(
         viewModelScope.launch {
             val file = fileRepository.getFiles(listOf(fileId)).firstOrNull() ?: return@launch
             if (!MimeTypes.isText(file.mimeType)) {
-                _messages.tryEmit(context.getString(R.string.note_not_editable))
+                _messages.tryEmit(UiText.Resource(Res.string.note_not_editable))
                 return@launch
             }
             _editRequests.tryEmit(
@@ -652,13 +690,13 @@ class FilesViewModel(
             val files = fileRepository.getFiles(ids)
             val paths = files.mapNotNull { it.localPath }
             if (paths.isEmpty()) {
-                _messages.tryEmit(context.getString(R.string.files_share_needs_local))
+                _messages.tryEmit(UiText.Resource(Res.string.files_share_needs_local))
                 return@launch
             }
             val mimeType = files.map { it.mimeType }.distinct().singleOrNull() ?: "*/*"
             _shareRequests.tryEmit(ShareRequest(paths, mimeType))
             if (paths.size < files.size) {
-                _messages.tryEmit(context.getString(R.string.files_share_needs_local))
+                _messages.tryEmit(UiText.Resource(Res.string.files_share_needs_local))
             }
         }
     }

@@ -140,6 +140,7 @@ import com.drdisagree.teledrive.domain.model.DriveFolder
 import com.drdisagree.teledrive.domain.model.FileSortField
 import com.drdisagree.teledrive.domain.model.SortDirection
 import com.drdisagree.teledrive.domain.model.ViewMode
+import com.drdisagree.teledrive.presentation.common.resolve
 import com.drdisagree.teledrive.presentation.common.CollectSnackbarMessages
 import com.drdisagree.teledrive.presentation.common.add
 import com.drdisagree.teledrive.presentation.common.isInitialLoad
@@ -213,7 +214,7 @@ fun FilesScreen(
     }
 
     val working by viewModel.working.collectAsStateWithLifecycle()
-    working?.let { BlockingProgressDialog(message = it) }
+    working?.let { BlockingProgressDialog(message = it.resolve()) }
 
     BackHandler(enabled = state.selectionMode) { viewModel.clearSelection() }
 
@@ -707,7 +708,7 @@ private fun Breadcrumbs(
                 ) {
                     collapsed.forEach { crumb ->
                         DropdownMenuItem(
-                            text = { Text(crumb.name) },
+                            text = { Text(crumb.name.resolve()) },
                             onClick = {
                                 showCollapsed = false
                                 onOpen(crumb.id)
@@ -721,7 +722,7 @@ private fun Breadcrumbs(
         inline.forEachIndexed { index, crumb ->
             if (index > 0) CrumbSeparator()
             CrumbLabel(
-                text = crumb.name,
+                text = crumb.name.resolve(),
                 current = index == inline.lastIndex,
                 onClick = { onOpen(crumb.id) },
                 modifier = Modifier.weight(1f, fill = false)

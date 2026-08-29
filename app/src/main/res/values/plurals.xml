@@ -1,4 +1,5 @@
 <resources>
+    <!-- App-wide -->
     <plurals name="file_count">
         <item quantity="one">%1$d file</item>
         <item quantity="other">%1$d files</item>
@@ -10,13 +11,5 @@
     <plurals name="item_count">
         <item quantity="one">%1$d item</item>
         <item quantity="other">%1$d items</item>
-    </plurals>
-    <plurals name="rebuild_locked_files">
-        <item quantity="one">%d encrypted file skipped. Restore your key backup to index it.</item>
-        <item quantity="other">%d encrypted files skipped. Restore your key backup to index them.</item>
-    </plurals>
-    <plurals name="home_queued_files">
-        <item quantity="one">%d file queued</item>
-        <item quantity="other">%d files queued</item>
     </plurals>
 </resources>

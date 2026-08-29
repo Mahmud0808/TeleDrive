@@ -1,9 +1,11 @@
 package com.drdisagree.teledrive.presentation.proxy
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.proxy_add_one_first
+import com.drdisagree.teledrive.resources.proxy_link_imported
+import com.drdisagree.teledrive.resources.proxy_link_not_recognised
 import com.drdisagree.teledrive.core.common.AppError
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.core.telegram.ProxyLink
@@ -12,7 +14,8 @@ import com.drdisagree.teledrive.core.telegram.TelegramProxy
 import com.drdisagree.teledrive.domain.model.ProxyServer
 import com.drdisagree.teledrive.domain.repository.ProxyRepository
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
-import com.drdisagree.teledrive.presentation.common.toUserMessage
+import com.drdisagree.teledrive.presentation.common.UiText
+import com.drdisagree.teledrive.presentation.common.toUiText
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -30,7 +33,6 @@ import java.util.UUID
 import kotlin.time.Duration.Companion.milliseconds
 
 class ProxyViewModel(
-    private val context: Context,
     private val proxyRepository: ProxyRepository,
     settingsRepository: SettingsRepository
 ) : ViewModel() {
@@ -38,7 +40,7 @@ class ProxyViewModel(
     private val reachability = MutableStateFlow<Map<String, ProxyReachability>>(emptyMap())
     private val testJobs = mutableMapOf<String, Job>()
 
-    private val _messages = MutableSharedFlow<String>(extraBufferCapacity = 8)
+    private val _messages = MutableSharedFlow<UiText>(extraBufferCapacity = 8)
     val messages = _messages.asSharedFlow()
 
     val uiState: StateFlow<ProxyUiState> = combine(
@@ -78,7 +80,7 @@ class ProxyViewModel(
         viewModelScope.launch {
             val result = proxyRepository.setEnabled(enabled)
             if (result is AppResult.Failure && result.error is AppError.NotFound) {
-                _messages.tryEmit(context.getString(R.string.proxy_add_one_first))
+                _messages.tryEmit(UiText.Resource(Res.string.proxy_add_one_first))
                 return@launch
             }
             report(result)
@@ -103,11 +105,11 @@ class ProxyViewModel(
     fun importLink(link: String) {
         val parsed = ProxyLink.parse(link)
         if (parsed == null) {
-            _messages.tryEmit(context.getString(R.string.proxy_link_not_recognised))
+            _messages.tryEmit(UiText.Resource(Res.string.proxy_link_not_recognised))
             return
         }
         save(parsed.toServer())
-        _messages.tryEmit(context.getString(R.string.proxy_link_imported, parsed.host))
+        _messages.tryEmit(UiText.Resource(Res.string.proxy_link_imported, parsed.host))
     }
 
     private fun AppResult<ProxyProbeResult>.toReachability(): ProxyReachability = when (this) {
@@ -121,7 +123,7 @@ class ProxyViewModel(
 
     private fun report(result: AppResult<Unit>) {
         if (result is AppResult.Failure) {
-            _messages.tryEmit(result.error.toUserMessage(context))
+            _messages.tryEmit(result.error.toUiText())
         }
     }
 

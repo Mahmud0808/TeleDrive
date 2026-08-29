@@ -13,12 +13,13 @@ import kotlinx.coroutines.launch
  * snackbar is dismissed and the next one shown right away.
  */
 @Composable
-fun CollectSnackbarMessages(messages: Flow<String>, hostState: SnackbarHostState) {
+fun CollectSnackbarMessages(messages: Flow<UiText>, hostState: SnackbarHostState) {
     val scope = rememberCoroutineScope()
     LaunchedEffect(messages, hostState) {
         messages.collect { message ->
+            val text = message.load()
             hostState.currentSnackbarData?.dismiss()
-            scope.launch { hostState.showSnackbar(message) }
+            scope.launch { hostState.showSnackbar(text) }
         }
     }
 }

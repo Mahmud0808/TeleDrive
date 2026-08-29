@@ -208,6 +208,8 @@ import com.drdisagree.teledrive.core.permissions.openAllFilesAccess
 import com.drdisagree.teledrive.core.telegram.CodeDeliveryChannel
 import com.drdisagree.teledrive.domain.model.Country
 import com.drdisagree.teledrive.domain.model.DriveChannel
+import com.drdisagree.teledrive.presentation.common.UiText
+import com.drdisagree.teledrive.presentation.common.resolve
 import com.drdisagree.teledrive.presentation.components.ChannelAvatar
 import com.drdisagree.teledrive.presentation.components.QrCode
 
@@ -373,7 +375,7 @@ private fun ChannelSelectStep(
     selectedChatId: Long?,
     justCreated: Boolean,
     working: Boolean,
-    error: String?,
+    error: UiText?,
     onSelect: (Long) -> Unit,
     onRetry: () -> Unit,
     onContinue: () -> Unit
@@ -388,7 +390,7 @@ private fun ChannelSelectStep(
             else -> stringResource(Res.string.onboarding_choose_drive)
         },
         description = when {
-            channels.isEmpty() && error != null -> error
+            channels.isEmpty() && error != null -> error.resolve()
 
             justCreated -> stringResource(Res.string.onboarding_drive_created_desc)
 
@@ -590,7 +592,7 @@ private fun WelcomeStep(onContinue: () -> Unit) {
 @Composable
 private fun CredentialsStep(
     working: Boolean,
-    error: String?,
+    error: UiText?,
     onSubmit: (String, String) -> Unit
 ) {
     var apiId by rememberSaveable { mutableStateOf("") }
@@ -792,7 +794,7 @@ private fun InstructionCard(number: Int, content: @Composable () -> Unit) {
 @Composable
 private fun QrStep(
     working: Boolean,
-    error: String?,
+    error: UiText?,
     link: String?,
     onCancel: () -> Unit
 ) {
@@ -870,7 +872,7 @@ private fun QrStep(
         Spacer(Modifier.height(16.dp))
         if (error != null) {
             Text(
-                text = error,
+                text = error.resolve(),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.error
             )
@@ -950,7 +952,7 @@ private fun QrInstruction(number: Int, text: String) {
 @Composable
 private fun PhoneStep(
     working: Boolean,
-    error: String?,
+    error: UiText?,
     registrationRequired: Boolean,
     countries: List<Country>,
     selectedCountry: Country?,
@@ -1180,7 +1182,7 @@ private fun codeDeliveryText(channel: CodeDeliveryChannel, target: String): Stri
 @Composable
 private fun EmailAddressStep(
     working: Boolean,
-    error: String?,
+    error: UiText?,
     onSubmit: (String) -> Unit
 ) {
     var email by rememberSaveable { mutableStateOf("") }
@@ -1209,7 +1211,7 @@ private fun EmailAddressStep(
 @Composable
 private fun EmailCodeStep(
     working: Boolean,
-    error: String?,
+    error: UiText?,
     emailPattern: String,
     codeLength: Int?,
     onSubmit: (String) -> Unit
@@ -1244,7 +1246,7 @@ private fun EmailCodeStep(
 @Composable
 private fun CodeStep(
     working: Boolean,
-    error: String?,
+    error: UiText?,
     phoneNumber: String,
     channel: CodeDeliveryChannel,
     codeLength: Int?,
@@ -1286,7 +1288,7 @@ private fun CodeStep(
 @Composable
 private fun PasswordStep(
     working: Boolean,
-    error: String?,
+    error: UiText?,
     hint: String?,
     onSubmit: (String) -> Unit
 ) {
@@ -1532,7 +1534,7 @@ private fun BigButton(
 @Composable
 private fun ErrorAndAction(
     working: Boolean,
-    error: String?,
+    error: UiText?,
     actionLabel: String,
     enabled: Boolean,
     onAction: () -> Unit
@@ -1546,7 +1548,7 @@ private fun ErrorAndAction(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = it,
+                    text = it.resolve(),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onErrorContainer,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)

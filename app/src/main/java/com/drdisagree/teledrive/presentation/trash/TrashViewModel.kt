@@ -1,14 +1,22 @@
 package com.drdisagree.teledrive.presentation.trash
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.trash_emptying
+import com.drdisagree.teledrive.resources.trash_delete_partial
+import com.drdisagree.teledrive.resources.trash_deleted_permanently
+import com.drdisagree.teledrive.resources.trash_deleting_items
+import com.drdisagree.teledrive.resources.trash_restored_partial
+import com.drdisagree.teledrive.resources.trash_restored
+import com.drdisagree.teledrive.resources.trash_restoring_items
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.message_trash_emptied
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.domain.model.TrashItem
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.repository.TrashRepository
-import com.drdisagree.teledrive.presentation.common.toUserMessage
+import com.drdisagree.teledrive.presentation.common.UiText
+import com.drdisagree.teledrive.presentation.common.toUiText
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,25 +35,24 @@ data class TrashUiState(
     val rows: List<TrashRow> = emptyList(),
     val selection: Set<String> = emptySet(),
     val autoClearDays: Int = 30,
-    val working: String? = null,
+    val working: UiText? = null,
     val loading: Boolean = true
 ) {
     val selectionMode: Boolean get() = selection.isNotEmpty()
 }
 
 class TrashViewModel(
-    private val context: Context,
     private val trashRepository: TrashRepository,
     private val settingsRepository: SettingsRepository
 ) : ViewModel() {
 
     private val selection = MutableStateFlow<Set<String>>(emptySet())
-    private val working = MutableStateFlow<String?>(null)
+    private val working = MutableStateFlow<UiText?>(null)
     private val expanded = MutableStateFlow<Set<String>>(emptySet())
     private val cache = MutableStateFlow(TrashTreeCache())
     private var rangeBase: Set<String>? = null
 
-    private val _messages = MutableSharedFlow<String>(extraBufferCapacity = 8)
+    private val _messages = MutableSharedFlow<UiText>(extraBufferCapacity = 8)
     val messages = _messages.asSharedFlow()
 
     private val trashTree = trashRepository.observeTrash().map { items ->
@@ -178,7 +185,7 @@ class TrashViewModel(
         val total = fileIds.size + folderIds.size
         clearSelection()
         viewModelScope.launch {
-            working.value = "Restoring $total item${if (total == 1) "" else "s"}…"
+            working.value = UiText.PluralResource(Res.plurals.trash_restoring_items, total, total)
             var failed = 0
             withContext(NonCancellable) {
                 if (fileIds.isNotEmpty() &&
@@ -192,7 +199,11 @@ class TrashViewModel(
             }
             working.value = null
             _messages.tryEmit(
-                if (failed == 0) "Restored $total" else "Restored ${total - failed}, $failed failed"
+                if (failed == 0) {
+                    UiText.Resource(Res.string.trash_restored, total)
+                } else {
+                    UiText.Resource(Res.string.trash_restored_partial, total - failed, failed)
+                }
             )
         }
     }
@@ -202,30 +213,31 @@ class TrashViewModel(
         val total = fileIds.size + folderIds.size
         clearSelection()
         viewModelScope.launch {
-            working.value = "Deleting $total item${if (total == 1) "" else "s"}…"
+            working.value = UiText.PluralResource(Res.plurals.trash_deleting_items, total, total)
             var failed = 0
-            var lastError: String? = null
+            var lastError: UiText? = null
             withContext(NonCancellable) {
                 if (fileIds.isNotEmpty()) {
                     val result = trashRepository.deleteFilesPermanently(fileIds)
                     if (result is AppResult.Failure) {
                         failed += fileIds.size
-                        lastError = result.error.toUserMessage(context)
+                        lastError = result.error.toUiText()
                     }
                 }
                 folderIds.forEach { folderId ->
                     val result = trashRepository.deleteFolderPermanently(folderId)
                     if (result is AppResult.Failure) {
                         failed++
-                        lastError = result.error.toUserMessage(context)
+                        lastError = result.error.toUiText()
                     }
                 }
             }
             working.value = null
             _messages.tryEmit(
                 when {
-                    failed == 0 -> "Deleted $total permanently"
-                    else -> lastError ?: "$failed of $total could not be deleted"
+                    failed == 0 -> UiText.Resource(Res.string.trash_deleted_permanently, total)
+                    else -> lastError
+                        ?: UiText.Resource(Res.string.trash_delete_partial, failed, total)
                 }
             )
         }
@@ -233,12 +245,12 @@ class TrashViewModel(
 
     fun emptyTrash() {
         viewModelScope.launch {
-            working.value = "Emptying trash…"
+            working.value = UiText.Resource(Res.string.trash_emptying)
             val result = withContext(NonCancellable) { trashRepository.emptyTrash() }
             working.value = null
             when (result) {
-                is AppResult.Success -> _messages.tryEmit(context.getString(R.string.message_trash_emptied))
-                is AppResult.Failure -> _messages.tryEmit(result.error.toUserMessage(context))
+                is AppResult.Success -> _messages.tryEmit(UiText.Resource(Res.string.message_trash_emptied))
+                is AppResult.Failure -> _messages.tryEmit(result.error.toUiText())
             }
         }
     }

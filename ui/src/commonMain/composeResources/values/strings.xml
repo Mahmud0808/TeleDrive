@@ -2,12 +2,57 @@
     <!-- App-wide -->
     <string name="app_name">TeleDrive</string>
     <string name="app_backed_up">Backed up</string>
+    <string name="app_drive_recreated">Your drive was deleted in Telegram, so a new empty one was created</string>
     <string name="app_no_results">No results</string>
     <string name="app_not_backed_up">Not backed up</string>
     <string name="app_nothing_matches_search">Nothing matches your search.</string>
     <string name="app_search_drive">Search your drive</string>
     <string name="app_search_files">Search files</string>
     <string name="app_search_name_filter_type">Search by name, or filter by type and backup status.</string>
+    <plurals name="file_count">
+        <item quantity="one">%1$d file</item>
+        <item quantity="other">%1$d files</item>
+    </plurals>
+    <plurals name="folder_count">
+        <item quantity="one">%1$d folder</item>
+        <item quantity="other">%1$d folders</item>
+    </plurals>
+    <plurals name="backup_age_minutes">
+        <item quantity="one">%1$d minute ago</item>
+        <item quantity="other">%1$d minutes ago</item>
+    </plurals>
+    <plurals name="backup_age_hours">
+        <item quantity="one">%1$d hour ago</item>
+        <item quantity="other">%1$d hours ago</item>
+    </plurals>
+    <plurals name="backup_age_days">
+        <item quantity="one">%1$d day ago</item>
+        <item quantity="other">%1$d days ago</item>
+    </plurals>
+    <plurals name="item_count">
+        <item quantity="one">%1$d item</item>
+        <item quantity="other">%1$d items</item>
+    </plurals>
+    <plurals name="rebuild_indexed_files">
+        <item quantity="one">Indexed %d file</item>
+        <item quantity="other">Indexed %d files</item>
+    </plurals>
+    <plurals name="rebuild_locked_files">
+        <item quantity="one">%d encrypted file skipped. Restore your key backup to index it.</item>
+        <item quantity="other">%d encrypted files skipped. Restore your key backup to index them.</item>
+    </plurals>
+    <plurals name="home_back_up_pending">
+        <item quantity="one">Back up %d file</item>
+        <item quantity="other">Back up %d files</item>
+    </plurals>
+    <plurals name="home_queued_files">
+        <item quantity="one">%d file queued</item>
+        <item quantity="other">%d files queued</item>
+    </plurals>
+    <plurals name="transfers_more_queued">
+        <item quantity="one">%d more not shown</item>
+        <item quantity="other">%d more not shown</item>
+    </plurals>
 
     <!-- Bottom navigation -->
     <string name="nav_files">Files</string>
@@ -99,7 +144,9 @@
     <!-- Onboarding: API credentials -->
     <string name="onboarding_api_access">API access</string>
     <string name="onboarding_api_hash">API hash</string>
+    <string name="onboarding_api_hash_short">API hash looks too short</string>
     <string name="onboarding_api_id">API ID</string>
+    <string name="onboarding_api_id_number">API ID must be a number</string>
     <string name="onboarding_get_api_keys">Get your API keys</string>
     <string name="onboarding_my_telegram_org">my.telegram.org</string>
     <string name="onboarding_one_time_setup_keys">One-time setup. Your keys stay on this device, encrypted.</string>
@@ -129,7 +176,9 @@
     <string name="onboarding_email_title">Login email</string>
     <string name="onboarding_enter_code">Enter the code</string>
     <string name="onboarding_enter_password">Enter your Telegram password.</string>
+    <string name="onboarding_enter_phone">Enter your phone number</string>
     <string name="onboarding_include_country_code_like">Include the country code, like +1 or +49</string>
+    <string name="onboarding_no_account">This number has no Telegram account. Create one in the official Telegram app first.</string>
     <string name="onboarding_no_country_match">No country matches that search.</string>
     <string name="onboarding_number">Your number</string>
     <string name="onboarding_password">Password</string>
@@ -186,6 +235,7 @@
     <!-- Home -->
     <string name="home_active_transfers">%1$d active transfers</string>
     <string name="home_backing_up">Backing up…</string>
+    <string name="home_backing_up_new_files">Backing up new files</string>
     <string name="home_backup_all_in_telegram">Every file is in Telegram</string>
     <string name="home_backup_at">Last backup %1$s</string>
     <string name="home_backup_auto_off">Automatic backup is off</string>
@@ -200,6 +250,7 @@
     <string name="home_failed_count">%1$d failed</string>
     <string name="home_lock_app">Lock app</string>
     <string name="home_not_backed_up_count">%1$d not backed up</string>
+    <string name="home_nothing_new_to_back_up">Nothing new to back up</string>
     <string name="home_open_drives">Switch drive</string>
     <string name="home_queued_uploads_discarded_files">Queued uploads are discarded. Files already uploaded stay in Telegram, and you can start the backup again later.</string>
     <string name="home_scan_now">Scan now</string>
@@ -234,6 +285,15 @@
     <string name="files_delete_local">Delete local</string>
     <string name="files_delete_local_copies">Delete local copies?</string>
     <string name="files_hide">Hide</string>
+    <string name="files_import_copied">Copied %1$d already in Telegram</string>
+    <string name="files_import_duplicates">%1$d already in your drive</string>
+    <string name="files_import_failed">Could not import the selected files</string>
+    <string name="files_import_restored">Restored %1$d from trash</string>
+    <string name="files_import_uploading">Uploading %1$d</string>
+    <string name="files_import_uploading_copied">Uploading %1$d, copied %2$d already in Telegram</string>
+    <string name="files_import_uploading_duplicates">Uploading %1$d, %2$d already in your drive</string>
+    <string name="files_import_uploading_failed">Uploading %1$d, %2$d failed</string>
+    <string name="files_import_uploading_restored">Uploading %1$d, restored %2$d</string>
     <string name="files_move">Move</string>
     <string name="files_move_here">Move here</string>
     <string name="files_move_to">Move to</string>
@@ -242,9 +302,11 @@
     <string name="files_only_files_verified_telegram">Only files with a verified Telegram backup will be removed from this device.</string>
     <string name="files_rename_file">Rename file</string>
     <string name="files_rename_folder">Rename folder</string>
+    <string name="files_root_name">Files</string>
     <string name="files_search">Search</string>
     <string name="files_share_destination_confirm">Save here</string>
     <string name="files_share_destination_title">Save shared files to</string>
+    <string name="files_share_needs_local">Download these files before sharing them</string>
     <string name="files_sort">Sort</string>
     <string name="files_sort_ascending">Ascending</string>
     <string name="files_sort_backup_status">Backup status</string>
@@ -254,6 +316,14 @@
     <string name="files_sort_name">Name</string>
     <string name="files_sort_size">Size</string>
     <string name="files_sort_type">Type</string>
+    <string name="files_copied_all">Copied %1$d</string>
+    <string name="files_copied_partial">Copied %1$d of %2$d</string>
+    <string name="files_moving_to_trash">Moving %1$d to trash…</string>
+    <string name="files_queued_for_download">%1$d queued for download</string>
+    <string name="files_queued_for_upload">%1$d queued for upload</string>
+    <string name="files_queued_partial">%1$d queued, %2$d failed</string>
+    <string name="files_removed_local_copies">Removed %1$d local copies</string>
+    <string name="files_sync_result">%1$d new, %2$d updated</string>
 
     <!-- File and folder info -->
     <string name="info_added">Added</string>
@@ -293,8 +363,10 @@
     <string name="note_link_text">text</string>
     <string name="note_link_url">https://</string>
     <string name="note_new">New note</string>
+    <string name="note_not_editable">Only text files can be edited here</string>
     <string name="note_quote">Quote</string>
     <string name="note_save">Save</string>
+    <string name="note_saved">Note saved</string>
     <string name="note_strikethrough">Strikethrough</string>
     <string name="note_title_hint">Title (optional)</string>
 
@@ -312,11 +384,13 @@
 
     <!-- Preview -->
     <string name="preview_add_favorites">Add to favorites</string>
+    <string name="preview_added_favorites">Added to favorites</string>
     <string name="preview_archive">Archive</string>
     <string name="preview_archive_failed">Could not open archive</string>
     <string name="preview_archive_format_title">%1$s archive</string>
     <string name="preview_archive_packed_summary">%1$s packed from %2$s</string>
     <string name="preview_archive_packed_summary_saved">%1$s packed from %2$s, %3$d% smaller</string>
+    <string name="preview_archived">Archived</string>
     <string name="preview_back_10_seconds">Back 10 seconds</string>
     <string name="preview_chevron">chevron</string>
     <string name="preview_confirm_trash_file_message">\"%1$s\" will move to trash. You can restore it later.</string>
@@ -325,11 +399,14 @@
     <string name="preview_fetch_failed">Could not fetch file</string>
     <string name="preview_file_info">File info</string>
     <string name="preview_forward_10_seconds">Forward 10 seconds</string>
+    <string name="preview_hidden">Hidden</string>
+    <string name="preview_local_copy_removed">Local copy removed</string>
     <string name="preview_move_to_trash">Move to trash?</string>
     <string name="preview_next_audio_track">Next audio track</string>
     <string name="preview_no_copy_available">No local or remote copy available</string>
     <string name="preview_no_preview">No preview</string>
     <string name="preview_no_preview_for_type">No preview for this file type</string>
+    <string name="preview_nothing_to_remove">Nothing to remove</string>
     <string name="preview_only_zip">Only ZIP archives can be browsed.</string>
     <string name="preview_open_link">Open link</string>
     <string name="preview_page_number">Page %1$d</string>
@@ -339,11 +416,14 @@
     <string name="preview_progress_bytes">%1$s of %2$s</string>
     <string name="preview_read_failed">Could not read file</string>
     <string name="preview_remove_favorites">Remove from favorites</string>
+    <string name="preview_removed_favorites">Removed from favorites</string>
     <string name="preview_requires_download">This file is %1$s and is not downloaded on this device.</string>
     <string name="preview_share_chooser_title">Share</string>
     <string name="preview_share_copy">Share a copy</string>
     <string name="preview_truncated_download_view">\nPreview truncated. Download to view the full file.</string>
     <string name="preview_unarchive">Unarchive</string>
+    <string name="preview_unarchived">Unarchived</string>
+    <string name="preview_unhidden">Unhidden</string>
 
     <!-- Player -->
     <string name="player_fewer_controls">Fewer controls</string>
@@ -381,6 +461,13 @@
     <string name="trash_items_permanently_deleted_device">All items will be permanently deleted from this device and Telegram. This cannot be undone.</string>
     <string name="trash_restores_with_folder">Restores with the folder</string>
     <string name="trash_trashed_at">Trashed %1$s</string>
+    <string name="trash_delete_partial">%1$d of %2$d could not be deleted</string>
+    <string name="trash_deleted_permanently">Deleted %1$d permanently</string>
+    <string name="trash_emptying">Emptying trash…</string>
+    <string name="trash_restored">Restored %1$d</string>
+    <string name="trash_restored_partial">Restored %1$d, %2$d failed</string>
+    <plurals name="trash_deleting_items"><item quantity="one">Deleting %1$d item…</item><item quantity="other">Deleting %1$d items…</item></plurals>
+    <plurals name="trash_restoring_items"><item quantity="one">Restoring %1$d item…</item><item quantity="other">Restoring %1$d items…</item></plurals>
 
     <!-- Transfers -->
     <string name="transfer_stage_joining">Merging parts</string>
@@ -412,18 +499,24 @@
     <string name="channels_channel_container">channel-container</string>
     <string name="channels_create_one_teledrive_store">Create one and TeleDrive will store your files in that private channel.</string>
     <string name="channels_creates_private_channel_account">Creates a private channel on your account. The name helps you tell your drives apart.</string>
+    <string name="channels_creating_drive">Creating drive</string>
     <string name="channels_delete_confirm_hint">Type %1$s to confirm</string>
     <string name="channels_delete_message">The channel and all %1$d files in it (%2$s) are deleted from Telegram for good. This cannot be undone.</string>
     <string name="channels_delete_telegram">Delete from Telegram</string>
     <string name="channels_delete_title">Delete %1$s?</string>
+    <string name="channels_deleting">Deleting channel</string>
     <string name="channels_drive_actions">Drive actions</string>
     <string name="channels_drive_name">Drive name</string>
     <string name="channels_look_drives">Look for drives</string>
+    <string name="channels_looking_for_drives">Looking for drives</string>
     <string name="channels_new_drive">New drive</string>
     <string name="channels_no_drives_yet">No drives yet</string>
     <string name="channels_open_drive">Open drive</string>
+    <string name="channels_opening_drive">Opening drive</string>
+    <string name="channels_removed_missing">Removed %1$d drive whose channel no longer exists</string>
     <string name="channels_rename_drive">Rename drive</string>
     <string name="channels_renames_channel_telegram_well">Renames the channel in Telegram as well.</string>
+    <string name="channels_renaming">Renaming</string>
 
     <!-- Settings home -->
     <string name="settings">Settings</string>
@@ -528,6 +621,7 @@
     <string name="settings_turn_off_app_lock">Turn off app lock</string>
     <string name="settings_unlock_files_encrypted_earlier">Unlock files encrypted with an earlier passphrase, on this device or another one</string>
     <string name="settings_uploads_stay_unencrypted_set">Uploads stay unencrypted until you set one. Files already encrypted on this device can still be covered.</string>
+    <string name="settings_nothing_to_remove">Nothing to remove</string>
 
     <!-- Settings: appearance -->
     <string name="settings_archived_shortcut">Archived shortcut</string>
@@ -595,6 +689,7 @@
 
     <!-- Proxy -->
     <string name="proxy_add">Add proxy</string>
+    <string name="proxy_add_one_first">Save a proxy before turning this on</string>
     <string name="proxy_delete_action">Delete</string>
     <string name="proxy_delete_message">%1$s will be removed from the list.</string>
     <string name="proxy_delete_title">Delete this proxy?</string>
@@ -603,6 +698,8 @@
     <string name="proxy_host">Server</string>
     <string name="proxy_import">Import</string>
     <string name="proxy_link">Proxy link</string>
+    <string name="proxy_link_imported">Saved %1$s</string>
+    <string name="proxy_link_not_recognised">That link is not a proxy link</string>
     <string name="proxy_name_optional">Name (optional)</string>
     <string name="proxy_none_saved">No proxies saved</string>
     <string name="proxy_none_saved_summary">Add one, or paste a link someone shared with you</string>
@@ -641,7 +738,6 @@
 
     <!-- Permissions -->
     <string name="permission_all_files_rationale">Needed to back up documents, downloads and SD card folders</string>
-    <string name="permissions_not_allowed_optional">Not allowed, optional</string>
     <string name="permission_all_files_title">All files access</string>
     <string name="permission_missing_message">TeleDrive cannot read your %1$s without permission.</string>
     <string name="permission_not_allowed">Not allowed \u00b7 %1$s</string>
@@ -654,6 +750,7 @@
     <string name="permission_videos_title">Videos</string>
     <string name="permissions_allowed">Allowed</string>
     <string name="permissions_not_allowed">Not allowed</string>
+    <string name="permissions_not_allowed_optional">Not allowed, optional</string>
 
     <!-- About -->
     <string name="about_auto_check">Check automatically</string>
@@ -663,6 +760,7 @@
     <string name="about_checking">Checking…</string>
     <string name="about_donate">Buy me a coffee</string>
     <string name="about_donate_summary">Support the work behind the app</string>
+    <string name="about_no_update">You are on the latest version</string>
     <string name="about_section_project">Project</string>
     <string name="about_section_updates">Updates</string>
     <string name="about_source_code">Source code</string>
@@ -676,42 +774,54 @@
     <string name="about_update_ready">Version %1$s is ready to download</string>
     <string name="about_update_title">Update to %1$s</string>
     <string name="about_version">Version %1$s</string>
-    <plurals name="file_count">
-        <item quantity="one">%1$d file</item>
-        <item quantity="other">%1$d files</item>
-    </plurals>
-    <plurals name="folder_count">
-        <item quantity="one">%1$d folder</item>
-        <item quantity="other">%1$d folders</item>
-    </plurals>
-    <plurals name="backup_age_minutes">
-        <item quantity="one">%1$d minute ago</item>
-        <item quantity="other">%1$d minutes ago</item>
-    </plurals>
-    <plurals name="backup_age_hours">
-        <item quantity="one">%1$d hour ago</item>
-        <item quantity="other">%1$d hours ago</item>
-    </plurals>
-    <plurals name="backup_age_days">
-        <item quantity="one">%1$d day ago</item>
-        <item quantity="other">%1$d days ago</item>
-    </plurals>
-    <plurals name="item_count">
-        <item quantity="one">%1$d item</item>
-        <item quantity="other">%1$d items</item>
-    </plurals>
-    <plurals name="rebuild_indexed_files">
-        <item quantity="one">Indexed %d file</item>
-        <item quantity="other">Indexed %d files</item>
-    </plurals>
-    <plurals name="home_back_up_pending">
-        <item quantity="one">Back up %d file</item>
-        <item quantity="other">Back up %d files</item>
-    </plurals>
-    <plurals name="transfers_more_queued">
-        <item quantity="one">%d more not shown</item>
-        <item quantity="other">%d more not shown</item>
-    </plurals>
+
+    <!-- Snackbar messages -->
+    <string name="message_backing_up_new_folder">Backing up new folder</string>
+    <string name="message_cache_cleared">Cache cleared</string>
+    <string name="message_created_drive">Created %1$s</string>
+    <string name="message_download_queued">Download queued</string>
+    <string name="message_key_backup_saved">Key backup saved to Telegram</string>
+    <string name="message_key_restored">Encryption key restored, reindexing</string>
+    <string name="message_moved_count">Moved %1$d</string>
+    <string name="message_moved_to_trash">Moved to trash</string>
+    <string name="message_moved_to_trash_count">%1$d moved to trash</string>
+    <string name="message_nothing_to_download">Nothing to download</string>
+    <string name="message_rebuild_done">Rebuilt: %1$d added, %2$d updated, %3$d removed</string>
+    <string name="message_renamed">Renamed</string>
+    <string name="message_thumbnails_cleared">Thumbnails cleared</string>
+    <string name="message_trash_emptied">Trash emptied</string>
+    <string name="message_upload_queued">Upload queued</string>
+    <string name="message_wrong_passphrase">Wrong passphrase</string>
+
+    <!-- Error messages -->
+    <string name="error_authentication_failed">Authentication failed</string>
+    <string name="error_backup_running">A backup is already running</string>
+    <string name="error_channel_limit">Your Telegram account has reached its limit for channels and groups. Leave or delete a few in Telegram, then try again.</string>
+    <string name="error_encryption_failed">Encryption failed</string>
+    <string name="error_file_too_large">File is %1$s. Limit is %2$s</string>
+    <string name="error_folder_exists">A folder with this name already exists</string>
+    <string name="error_folder_into_itself">A folder cannot be moved inside itself</string>
+    <string name="error_incorrect_code">Incorrect code</string>
+    <string name="error_incorrect_password">Incorrect password</string>
+    <string name="error_insufficient_storage">Not enough space. %1$s needed, %2$s free</string>
+    <string name="error_invalid_api">Invalid API ID or API hash</string>
+    <string name="error_invalid_phone">Invalid phone number</string>
+    <string name="error_key_unreadable">This device cannot read its encryption key. Restore your key backup with its passphrase first.</string>
+    <string name="error_last_drive">This is your only drive. Create another one before deleting it.</string>
+    <string name="error_no_internet">No internet connection</string>
+    <string name="error_no_local_copy">File has no local copy</string>
+    <string name="error_no_remote_copy">File has no remote copy</string>
+    <string name="error_not_found">Not found</string>
+    <string name="error_not_supported">Not supported</string>
+    <string name="error_permission_denied">Permission denied</string>
+    <string name="error_rate_limited">Telegram rate limit. Try again in %1$ds</string>
+    <string name="error_sign_in_required">Sign in to Telegram to continue</string>
+    <string name="error_telegram">Telegram error: %1$s</string>
+    <string name="error_timed_out">The operation timed out</string>
+    <string name="error_transfer_incomplete">Transfer did not finish</string>
+    <string name="error_unknown">Something went wrong</string>
+
+    <!-- Settings choice labels -->
     <string-array name="backup_interval_labels">
         <item>Every hour</item>
         <item>Every 2 hours</item>

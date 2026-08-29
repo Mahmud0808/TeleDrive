@@ -89,6 +89,7 @@ import com.drdisagree.teledrive.resources.common_delete_forever
 import com.drdisagree.teledrive.resources.common_rename
 import com.drdisagree.teledrive.resources.common_storage_channels
 import com.drdisagree.teledrive.domain.model.DriveChannel
+import com.drdisagree.teledrive.presentation.common.resolve
 import com.drdisagree.teledrive.presentation.common.CollectSnackbarMessages
 import com.drdisagree.teledrive.presentation.common.Formatters
 import com.drdisagree.teledrive.presentation.common.add
@@ -118,7 +119,7 @@ fun ChannelsScreen(
 
     CollectSnackbarMessages(viewModel.messages, snackbarHostState)
 
-    working?.let { BlockingProgressDialog(message = it) }
+    working?.let { BlockingProgressDialog(message = it.resolve()) }
 
     if (showCreate) {
         ChannelNameDialog(

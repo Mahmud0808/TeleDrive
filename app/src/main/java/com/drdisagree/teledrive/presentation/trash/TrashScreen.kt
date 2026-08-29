@@ -67,6 +67,7 @@ import com.drdisagree.teledrive.resources.trash_items_permanently_deleted_device
 import com.drdisagree.teledrive.resources.trash_restores_with_folder
 import com.drdisagree.teledrive.resources.trash_trashed_at
 import com.drdisagree.teledrive.domain.model.TrashItem
+import com.drdisagree.teledrive.presentation.common.resolve
 import com.drdisagree.teledrive.presentation.common.CollectSnackbarMessages
 import com.drdisagree.teledrive.presentation.common.Formatters
 import com.drdisagree.teledrive.presentation.common.add
@@ -92,7 +93,7 @@ fun TrashScreen(
     CollectSnackbarMessages(viewModel.messages, snackbarHostState)
 
     state.working?.let { message ->
-        BlockingProgressDialog(message = message)
+        BlockingProgressDialog(message = message.resolve())
     }
 
     BackHandler(enabled = state.selectionMode) { viewModel.clearSelection() }

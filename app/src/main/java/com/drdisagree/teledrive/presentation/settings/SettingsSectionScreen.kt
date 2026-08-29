@@ -164,6 +164,7 @@ import com.drdisagree.teledrive.domain.model.AppTheme
 import com.drdisagree.teledrive.domain.model.LayoutDensity
 import com.drdisagree.teledrive.domain.model.ViewMode
 import com.drdisagree.teledrive.presentation.applock.requireDeviceOwner
+import com.drdisagree.teledrive.presentation.common.UiText
 import com.drdisagree.teledrive.presentation.common.CollectSnackbarMessages
 import com.drdisagree.teledrive.presentation.common.Formatters
 import com.drdisagree.teledrive.presentation.components.ChoiceDialog
@@ -375,7 +376,7 @@ private fun BackupSection(
     val prefs = state.preferences
     var folderToRemove by remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
-    val folderUnreadableMessage = stringResource(Res.string.settings_folder_unreadable)
+    val folderUnreadableMessage = UiText.Resource(Res.string.settings_folder_unreadable)
     val folderPicker = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocumentTree()
     ) { uri ->
@@ -661,7 +662,7 @@ private fun StorageSection(
 
 @Composable
 private fun SecuritySection(state: SettingsUiState, viewModel: SettingsViewModel) {
-    val encryptionOffMessage = stringResource(Res.string.settings_encryption_stays_off)
+    val encryptionOffMessage = UiText.Resource(Res.string.settings_encryption_stays_off)
     val prefs = state.preferences
     val activity = LocalActivity.current as? FragmentActivity
     val keyBackupWorking by viewModel.keyBackupWorking.collectAsStateWithLifecycle()
@@ -741,7 +742,7 @@ private fun SecuritySection(state: SettingsUiState, viewModel: SettingsViewModel
                             title = lockPromptTitle,
                             subtitle = lockPromptSubtitle,
                             onDenied = { error ->
-                                error?.let(viewModel::notify)
+                                error?.let { viewModel.notify(UiText.Plain(it)) }
                             }
                         ) {
                             viewModel.update { it.copy(appLockEnabled = false) }

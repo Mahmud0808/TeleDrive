@@ -1,9 +1,11 @@
 package com.drdisagree.teledrive.presentation.home
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.home_backing_up_new_files
+import com.drdisagree.teledrive.resources.home_nothing_new_to_back_up
+import com.drdisagree.teledrive.resources.home_queued_files
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.core.network.NetworkMonitor
 import com.drdisagree.teledrive.core.network.NetworkStatus
@@ -27,7 +29,8 @@ import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.repository.SyncRepository
 import com.drdisagree.teledrive.domain.repository.TelegramAuthRepository
 import com.drdisagree.teledrive.domain.repository.TransferRepository
-import com.drdisagree.teledrive.presentation.common.toUserMessage
+import com.drdisagree.teledrive.presentation.common.UiText
+import com.drdisagree.teledrive.presentation.common.toUiText
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -72,7 +75,6 @@ data class HomeUiState(
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModel(
-    private val context: Context,
     private val fileRepository: FileRepository,
     private val transferRepository: TransferRepository,
     private val backupRepository: BackupRepository,
@@ -89,10 +91,10 @@ class HomeViewModel(
 
     private val missingPermissions = MutableStateFlow(permissionChecker.missingCritical())
     private val _scanning = MutableStateFlow(false)
-    private val _messages = MutableSharedFlow<String>(extraBufferCapacity = 4)
+    private val _messages = MutableSharedFlow<UiText>(extraBufferCapacity = 4)
 
     val scanning: StateFlow<Boolean> = _scanning.asStateFlow()
-    val messages: SharedFlow<String> = _messages.asSharedFlow()
+    val messages: SharedFlow<UiText> = _messages.asSharedFlow()
 
     /** The drive that is open right now, which owns its own folder selection. */
     private val activeDrive: Flow<DriveChannel?> = activeChannel.observe()
@@ -207,16 +209,14 @@ class HomeViewModel(
             _scanning.value = true
             val message = when (val result = transferRepository.enqueuePendingUploads()) {
                 is AppResult.Success -> if (result.value == 0) {
-                    context.getString(R.string.home_nothing_new_to_back_up)
+                    UiText.Resource(Res.string.home_nothing_new_to_back_up)
                 } else {
-                    context.resources.getQuantityString(
-                        R.plurals.home_queued_files,
-                        result.value,
+                    UiText.PluralResource(Res.plurals.home_queued_files, result.value,
                         result.value
                     )
                 }
 
-                is AppResult.Failure -> result.error.toUserMessage(context)
+                is AppResult.Failure -> result.error.toUiText()
             }
             _scanning.value = false
             _messages.tryEmit(message)
@@ -230,12 +230,12 @@ class HomeViewModel(
             val message = when (val result = backupRepository.startBackup(BackupTrigger.MANUAL)) {
                 is AppResult.Success ->
                     if (result.value == null) {
-                        context.getString(R.string.home_nothing_new_to_back_up)
+                        UiText.Resource(Res.string.home_nothing_new_to_back_up)
                     } else {
-                        context.getString(R.string.home_backing_up_new_files)
+                        UiText.Resource(Res.string.home_backing_up_new_files)
                     }
 
-                is AppResult.Failure -> result.error.toUserMessage(context)
+                is AppResult.Failure -> result.error.toUiText()
             }
             _scanning.value = false
             _messages.tryEmit(message)

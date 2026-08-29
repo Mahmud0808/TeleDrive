@@ -1,12 +1,23 @@
 package com.drdisagree.teledrive.presentation.preview
 
-import android.content.Context
 import android.content.IntentSender
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.message_download_queued
+import com.drdisagree.teledrive.resources.message_moved_to_trash
+import com.drdisagree.teledrive.resources.message_renamed
+import com.drdisagree.teledrive.resources.message_upload_queued
+import com.drdisagree.teledrive.resources.preview_added_favorites
+import com.drdisagree.teledrive.resources.preview_archived
+import com.drdisagree.teledrive.resources.preview_hidden
+import com.drdisagree.teledrive.resources.preview_local_copy_removed
+import com.drdisagree.teledrive.resources.preview_nothing_to_remove
+import com.drdisagree.teledrive.resources.preview_removed_favorites
+import com.drdisagree.teledrive.resources.preview_unarchived
+import com.drdisagree.teledrive.resources.preview_unhidden
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.domain.model.FileQuerySpec
 import com.drdisagree.teledrive.domain.model.DriveFile
@@ -18,7 +29,8 @@ import com.drdisagree.teledrive.domain.repository.FileRepository
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.repository.TransferRepository
 import com.drdisagree.teledrive.domain.repository.TrashRepository
-import com.drdisagree.teledrive.presentation.common.toUserMessage
+import com.drdisagree.teledrive.presentation.common.UiText
+import com.drdisagree.teledrive.presentation.common.toUiText
 import com.drdisagree.teledrive.presentation.navigation.Route
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -47,7 +59,6 @@ data class PreviewUiState(
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class PreviewViewModel(
-    private val context: Context,
     savedStateHandle: SavedStateHandle,
     private val fileRepository: FileRepository,
     private val trashRepository: TrashRepository,
@@ -61,7 +72,7 @@ class PreviewViewModel(
     private val _uiState = MutableStateFlow(PreviewUiState())
     val uiState: StateFlow<PreviewUiState> = _uiState.asStateFlow()
 
-    private val _messages = MutableSharedFlow<String>(extraBufferCapacity = 8)
+    private val _messages = MutableSharedFlow<UiText>(extraBufferCapacity = 8)
     val messages = _messages.asSharedFlow()
 
     private val _infoTarget = MutableStateFlow<DriveFile?>(null)
@@ -176,8 +187,8 @@ class PreviewViewModel(
     fun download(file: DriveFile) {
         viewModelScope.launch {
             when (val result = transferRepository.enqueueDownload(file.id)) {
-                is AppResult.Success -> _messages.tryEmit(context.getString(R.string.message_download_queued))
-                is AppResult.Failure -> _messages.tryEmit(result.error.toUserMessage(context))
+                is AppResult.Success -> _messages.tryEmit(UiText.Resource(Res.string.message_download_queued))
+                is AppResult.Failure -> _messages.tryEmit(result.error.toUiText())
             }
         }
     }
@@ -185,8 +196,8 @@ class PreviewViewModel(
     fun upload(file: DriveFile) {
         viewModelScope.launch {
             when (val result = transferRepository.enqueueUpload(file.id)) {
-                is AppResult.Success -> _messages.tryEmit(context.getString(R.string.message_upload_queued))
-                is AppResult.Failure -> _messages.tryEmit(result.error.toUserMessage(context))
+                is AppResult.Success -> _messages.tryEmit(UiText.Resource(Res.string.message_upload_queued))
+                is AppResult.Failure -> _messages.tryEmit(result.error.toUiText())
             }
         }
     }
@@ -222,16 +233,16 @@ class PreviewViewModel(
                         pendingLocalCopyId = null
                         _messages.tryEmit(
                             if (result.value.deletedCount > 0) {
-                                context.getString(R.string.preview_local_copy_removed)
+                                UiText.Resource(Res.string.preview_local_copy_removed)
                             } else {
-                                context.getString(R.string.preview_nothing_to_remove)
+                                UiText.Resource(Res.string.preview_nothing_to_remove)
                             }
                         )
                     }
                     refreshFile(fileId)
                 }
 
-                is AppResult.Failure -> _messages.tryEmit(result.error.toUserMessage(context))
+                is AppResult.Failure -> _messages.tryEmit(result.error.toUiText())
             }
         }
     }
@@ -241,8 +252,7 @@ class PreviewViewModel(
             fileRepository.setFilesFavorite(listOf(file.id), favorite)
             refreshFile(file.id)
             _messages.tryEmit(
-                if (favorite) context.getString(R.string.preview_added_favorites) else context.getString(
-                    R.string.preview_removed_favorites
+                if (favorite) UiText.Resource(Res.string.preview_added_favorites) else UiText.Resource(Res.string.preview_removed_favorites
                 )
             )
         }
@@ -253,8 +263,7 @@ class PreviewViewModel(
             fileRepository.setFilesHidden(listOf(file.id), hidden)
             refreshFile(file.id)
             _messages.tryEmit(
-                if (hidden) context.getString(R.string.preview_hidden) else context.getString(
-                    R.string.preview_unhidden
+                if (hidden) UiText.Resource(Res.string.preview_hidden) else UiText.Resource(Res.string.preview_unhidden
                 )
             )
         }
@@ -265,8 +274,7 @@ class PreviewViewModel(
             fileRepository.setFilesArchived(listOf(file.id), archived)
             refreshFile(file.id)
             _messages.tryEmit(
-                if (archived) context.getString(R.string.preview_archived) else context.getString(
-                    R.string.preview_unarchived
+                if (archived) UiText.Resource(Res.string.preview_archived) else UiText.Resource(Res.string.preview_unarchived
                 )
             )
         }
@@ -277,10 +285,10 @@ class PreviewViewModel(
             when (val result = fileRepository.renameFile(file.id, newName)) {
                 is AppResult.Success -> {
                     refreshFile(file.id)
-                    _messages.tryEmit(context.getString(R.string.message_renamed))
+                    _messages.tryEmit(UiText.Resource(Res.string.message_renamed))
                 }
 
-                is AppResult.Failure -> _messages.tryEmit(result.error.toUserMessage(context))
+                is AppResult.Failure -> _messages.tryEmit(result.error.toUiText())
             }
         }
     }
@@ -288,7 +296,7 @@ class PreviewViewModel(
     fun moveToTrash(file: DriveFile) {
         viewModelScope.launch {
             trashRepository.moveFilesToTrash(listOf(file.id))
-            _messages.tryEmit(context.getString(R.string.message_moved_to_trash))
+            _messages.tryEmit(UiText.Resource(Res.string.message_moved_to_trash))
             val remaining = _uiState.value.files.filterNot { it.id == file.id }
             if (remaining.isEmpty()) {
                 _uiState.update { it.copy(closed = true) }

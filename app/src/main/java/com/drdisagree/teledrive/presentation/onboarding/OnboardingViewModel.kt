@@ -1,9 +1,12 @@
 package com.drdisagree.teledrive.presentation.onboarding
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.onboarding_api_hash_short
+import com.drdisagree.teledrive.resources.onboarding_api_id_number
+import com.drdisagree.teledrive.resources.onboarding_enter_phone
+import com.drdisagree.teledrive.resources.onboarding_no_account
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.core.files.StandardBackupFolder
 import com.drdisagree.teledrive.core.telegram.CodeDeliveryChannel
@@ -16,7 +19,8 @@ import com.drdisagree.teledrive.domain.repository.ChannelRepository
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.repository.SyncRepository
 import com.drdisagree.teledrive.domain.repository.TelegramAuthRepository
-import com.drdisagree.teledrive.presentation.common.toUserMessage
+import com.drdisagree.teledrive.presentation.common.UiText
+import com.drdisagree.teledrive.presentation.common.toUiText
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -28,7 +32,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 
 class OnboardingViewModel(
-    private val context: Context,
     private val telegramAuthRepository: TelegramAuthRepository,
     private val settingsRepository: SettingsRepository,
     private val syncRepository: SyncRepository,
@@ -98,12 +101,12 @@ class OnboardingViewModel(
                 is TelegramAuthState.RegistrationRequired -> current.copy(
                     working = false,
                     registrationRequired = true,
-                    error = context.getString(R.string.onboarding_no_account)
+                    error = UiText.Resource(Res.string.onboarding_no_account)
                 )
 
                 is TelegramAuthState.Failed -> current.copy(
                     working = false,
-                    error = state.message
+                    error = UiText.Plain(state.message)
                 )
 
                 is TelegramAuthState.Ready ->
@@ -135,11 +138,11 @@ class OnboardingViewModel(
     fun submitCredentials(apiIdText: String, apiHash: String) {
         val apiId = apiIdText.trim().toIntOrNull()
         if (apiId == null || apiId <= 0) {
-            _uiState.update { it.copy(error = context.getString(R.string.onboarding_api_id_number)) }
+            _uiState.update { it.copy(error = UiText.Resource(Res.string.onboarding_api_id_number)) }
             return
         }
         if (apiHash.trim().length < 16) {
-            _uiState.update { it.copy(error = context.getString(R.string.onboarding_api_hash_short)) }
+            _uiState.update { it.copy(error = UiText.Resource(Res.string.onboarding_api_hash_short)) }
             return
         }
         runAction {
@@ -194,7 +197,7 @@ class OnboardingViewModel(
 
     fun submitPhone(phone: String) {
         if (phone.isBlank()) {
-            _uiState.update { it.copy(error = context.getString(R.string.onboarding_enter_phone)) }
+            _uiState.update { it.copy(error = UiText.Resource(Res.string.onboarding_enter_phone)) }
             return
         }
         _uiState.update { it.copy(qrLink = null, qrMode = false) }
@@ -265,11 +268,11 @@ class OnboardingViewModel(
     private suspend fun loadOrCreateDrive() {
         var channels = refreshChannels()
         var created = false
-        var failure: String? = null
+        var failure: UiText? = null
         if (channels.isEmpty()) {
             when (val result = channelRepository.create(DEFAULT_DRIVE_LABEL)) {
                 is AppResult.Success -> created = true
-                is AppResult.Failure -> failure = result.error.toUserMessage(context)
+                is AppResult.Failure -> failure = result.error.toUiText()
             }
             channels = refreshChannels()
         }
@@ -354,7 +357,7 @@ class OnboardingViewModel(
             when (val result = block()) {
                 is AppResult.Success -> Unit
                 is AppResult.Failure -> _uiState.update {
-                    it.copy(working = false, error = result.error.toUserMessage(context))
+                    it.copy(working = false, error = result.error.toUiText())
                 }
             }
         }
