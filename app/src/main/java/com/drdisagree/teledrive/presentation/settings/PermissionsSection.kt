@@ -39,6 +39,7 @@ import com.drdisagree.teledrive.resources.permissions_allowed
 import com.drdisagree.teledrive.resources.permissions_not_allowed_optional
 import com.drdisagree.teledrive.resources.permissions_not_allowed
 import com.drdisagree.teledrive.core.permissions.AppPermission
+import com.drdisagree.teledrive.core.permissions.manifestPermission
 import com.drdisagree.teledrive.core.permissions.PermissionChecker
 import com.drdisagree.teledrive.core.permissions.openAllFilesAccess
 

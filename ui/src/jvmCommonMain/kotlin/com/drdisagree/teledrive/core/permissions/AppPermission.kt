@@ -1,7 +1,5 @@
 package com.drdisagree.teledrive.core.permissions
 
-import android.Manifest
-import android.os.Build
 import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.permission_all_files_rationale
 import com.drdisagree.teledrive.resources.permission_all_files_title
@@ -42,33 +40,6 @@ enum class AppPermission(
         rationaleRes = Res.string.permission_all_files_rationale,
         critical = true
     );
-
-    /** Null when the permission is not a runtime permission on this device. */
-    val manifestPermission: String?
-        get() = when (this) {
-            MEDIA_IMAGES ->
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    Manifest.permission.READ_MEDIA_IMAGES
-                } else {
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-                }
-
-            MEDIA_VIDEO ->
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    Manifest.permission.READ_MEDIA_VIDEO
-                } else {
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-                }
-
-            NOTIFICATIONS ->
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    Manifest.permission.POST_NOTIFICATIONS
-                } else {
-                    null
-                }
-
-            ALL_FILES -> null
-        }
 
     /** Special access granted from a system settings screen, not a dialog. */
     val isSpecialAccess: Boolean get() = this == ALL_FILES

@@ -5,17 +5,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import com.google.android.material.color.MaterialColors
 
 /**
  * Pulls an authored color toward the active primary so it belongs to the
- * current palette while staying recognisably itself. Under dynamic color the
+ * current palette while staying recognizably itself. Under dynamic color the
  * primary follows the wallpaper, so the whole chart re-tints with the system.
  */
 @Composable
 fun Color.harmonizedWithPrimary(): Color {
     val primary = MaterialTheme.colorScheme.primary
     return remember(this, primary) {
-        Color(MaterialColors.harmonize(toArgb(), primary.toArgb()))
+        Color(harmonizeColor(toArgb(), primary.toArgb()))
     }
 }

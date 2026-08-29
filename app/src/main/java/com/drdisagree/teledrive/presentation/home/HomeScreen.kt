@@ -76,6 +76,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.drdisagree.teledrive.core.permissions.manifestPermission
 import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.app_backed_up
 import com.drdisagree.teledrive.resources.app_name

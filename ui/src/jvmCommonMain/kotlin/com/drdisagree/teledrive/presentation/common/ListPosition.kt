@@ -1,6 +1,5 @@
 package com.drdisagree.teledrive.presentation.common
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.runtime.Composable
@@ -38,7 +37,6 @@ class ListPosition(private val state: SavedStateHandle) {
  * enough of them exist. Each new page is another chance to get there, and
  * scrolling to the end asks Paging for the next one.
  */
-@SuppressLint("ComposableNaming")
 @Composable
 fun LazyGridState.rememberPosition(position: ListPosition, itemCount: Int) {
     var restored by remember { mutableStateOf(false) }
@@ -60,7 +58,6 @@ fun LazyGridState.rememberPosition(position: ListPosition, itemCount: Int) {
     }
 }
 
-@SuppressLint("ComposableNaming")
 @Composable
 fun LazyListState.rememberPosition(position: ListPosition, itemCount: Int) {
     var restored by remember { mutableStateOf(false) }

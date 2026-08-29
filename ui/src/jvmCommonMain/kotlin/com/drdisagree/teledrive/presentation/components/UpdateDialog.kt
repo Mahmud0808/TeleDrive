@@ -15,24 +15,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.unit.dp
-import com.drdisagree.teledrive.BuildConfig
 import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.about_update_download
 import com.drdisagree.teledrive.resources.about_update_from
 import com.drdisagree.teledrive.resources.about_update_later
 import com.drdisagree.teledrive.resources.about_update_title
 import com.drdisagree.teledrive.core.update.AppRelease
-import androidx.compose.ui.platform.LocalContext
 import com.drdisagree.teledrive.presentation.common.MarkdownText
-import com.drdisagree.teledrive.presentation.common.openLink
 
 @Composable
 fun UpdateDialog(
     release: AppRelease,
+    currentVersion: String,
+    onOpenUrl: (String) -> Unit,
     onDownload: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    val context = LocalContext.current
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(Res.string.about_update_title, release.version)) },
@@ -41,7 +39,7 @@ fun UpdateDialog(
                 Text(
                     text = stringResource(
                         Res.string.about_update_from,
-                        BuildConfig.VERSION_NAME,
+                        currentVersion,
                         release.version
                     ),
                     style = MaterialTheme.typography.bodyMedium,
@@ -51,7 +49,7 @@ fun UpdateDialog(
                     Spacer(Modifier.height(12.dp))
                     MarkdownText(
                         text = release.notes,
-                        onOpenUrl = { url -> openLink(context, url) }
+                        onOpenUrl = onOpenUrl
                     )
                 }
             }

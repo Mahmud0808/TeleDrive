@@ -155,7 +155,10 @@ fun AboutSection(state: SettingsUiState, viewModel: SettingsViewModel) {
     }
 
     (updateState as? UpdateState.Available)?.let { available ->
+        val updateContext = LocalContext.current
         UpdateDialog(
+            currentVersion = BuildConfig.VERSION_NAME,
+            onOpenUrl = { url -> openLink(updateContext, url) },
             release = available.release,
             onDownload = {
                 viewModel.dismissUpdate()

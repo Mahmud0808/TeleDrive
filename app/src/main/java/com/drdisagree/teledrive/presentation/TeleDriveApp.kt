@@ -75,6 +75,7 @@ import androidx.window.core.layout.WindowSizeClass
 import com.drdisagree.teledrive.core.common.AppNotifications
 import com.drdisagree.teledrive.core.files.PendingShare
 import com.drdisagree.teledrive.domain.model.AppTheme
+import com.drdisagree.teledrive.BuildConfig
 import com.drdisagree.teledrive.presentation.applock.LockScreen
 import com.drdisagree.teledrive.presentation.components.LoadingState
 import com.drdisagree.teledrive.presentation.components.LocalCompactLayout
@@ -144,7 +145,10 @@ fun TeleDriveApp(
                 SessionBrokenDialog(onSignInAgain = viewModel::resetSession)
             }
             pendingUpdate?.takeIf { !state.loading && !state.locked }?.let { release ->
+                val updateContext = LocalContext.current
                 UpdateDialog(
+                    currentVersion = BuildConfig.VERSION_NAME,
+                    onOpenUrl = { url -> openLink(updateContext, url) },
                     release = release,
                     onDownload = {
                         viewModel.dismissUpdate()
