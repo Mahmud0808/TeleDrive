@@ -87,7 +87,7 @@ class MainActivity : FragmentActivity() {
         val shared = sharedUris(intent)
         val sharedText = intent?.takeIf { it.action == Intent.ACTION_SEND }
             ?.getStringExtra(Intent.EXTRA_TEXT)
-        pendingShare.offer(shared)
+        pendingShare.offer(shared.map { it.toString() })
         pendingShare.offerText(sharedText)
         destination.value = when {
             shared.isNotEmpty() -> AppNotifications.DESTINATION_FILES

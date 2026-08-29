@@ -1,7 +1,5 @@
 package com.drdisagree.teledrive.presentation.files
 
-import android.content.IntentSender
-import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -32,6 +30,7 @@ import com.drdisagree.teledrive.resources.message_moved_count
 import com.drdisagree.teledrive.resources.message_moved_to_trash_count
 import com.drdisagree.teledrive.resources.message_nothing_to_download
 import com.drdisagree.teledrive.resources.note_not_editable
+import com.drdisagree.teledrive.core.files.DeleteConsentRequest
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.core.files.FileImporter
 import com.drdisagree.teledrive.core.files.MimeTypes
@@ -534,7 +533,7 @@ class FilesViewModel(
 
     suspend fun parentFolderId(id: String): String? = fileRepository.getFolder(id)?.parentId
 
-    private val _deleteConsentRequests = MutableSharedFlow<IntentSender>(extraBufferCapacity = 1)
+    private val _deleteConsentRequests = MutableSharedFlow<DeleteConsentRequest>(extraBufferCapacity = 1)
     val deleteConsentRequests = _deleteConsentRequests.asSharedFlow()
     private var pendingLocalCopyIds: List<String> = emptyList()
 
@@ -574,17 +573,17 @@ class FilesViewModel(
     }
 
     /** Imports picked documents into the drive and queues them for upload. */
-    val sharedUris: StateFlow<List<Uri>> = pendingShare.uris
+    val sharedUris: StateFlow<List<String>> = pendingShare.uris
 
     /** Takes files handed over by another app into [target]. */
-    fun acceptShare(uris: List<Uri>, target: String?) {
+    fun acceptShare(uris: List<String>, target: String?) {
         pendingShare.clear()
         importAndUpload(uris, target)
     }
 
     fun dismissShare() = pendingShare.clear()
 
-    fun importAndUpload(uris: List<Uri>, target: String? = folderId) {
+    fun importAndUpload(uris: List<String>, target: String? = folderId) {
         if (uris.isEmpty()) return
         viewModelScope.launch {
             var imported = 0

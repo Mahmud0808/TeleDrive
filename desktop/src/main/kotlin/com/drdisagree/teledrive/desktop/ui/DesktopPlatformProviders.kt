@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import com.drdisagree.teledrive.presentation.platform.DeleteConsentLauncher
 import com.drdisagree.teledrive.presentation.platform.DeviceOwnerGate
 import com.drdisagree.teledrive.presentation.platform.FilePicker
+import com.drdisagree.teledrive.presentation.platform.FileSharer
 import com.drdisagree.teledrive.presentation.platform.FolderPicker
 import com.drdisagree.teledrive.presentation.platform.LocalAppIcon
 import com.drdisagree.teledrive.presentation.platform.LocalAppVersion
@@ -16,11 +17,14 @@ import com.drdisagree.teledrive.presentation.platform.LocalDeleteConsentLauncher
 import com.drdisagree.teledrive.presentation.platform.LocalDeviceOwnerGate
 import com.drdisagree.teledrive.presentation.platform.LocalDownloadLocationConfigurable
 import com.drdisagree.teledrive.presentation.platform.LocalFilePicker
+import com.drdisagree.teledrive.presentation.platform.LocalFileSharer
 import com.drdisagree.teledrive.presentation.platform.LocalFolderPicker
+import com.drdisagree.teledrive.presentation.platform.LocalMultiFilePicker
 import com.drdisagree.teledrive.presentation.platform.LocalPermissionRequester
 import com.drdisagree.teledrive.presentation.platform.LocalSystemScreens
 import com.drdisagree.teledrive.presentation.platform.LocalUrlOpener
 import com.drdisagree.teledrive.presentation.platform.PermissionRequester
+import com.drdisagree.teledrive.presentation.platform.MultiFilePicker
 import com.drdisagree.teledrive.presentation.platform.PickResult
 import com.drdisagree.teledrive.presentation.platform.SystemScreens
 import com.drdisagree.teledrive.presentation.platform.UrlOpener
@@ -72,6 +76,25 @@ fun ProvideDesktopPlatformActions(content: @Composable () -> Unit) {
             }
         }
     }
+    val multiFilePicker = remember {
+        MultiFilePicker { onPicked ->
+            thread {
+                val dialog = FileDialog(null as Frame?, "", FileDialog.LOAD)
+                dialog.isMultipleMode = true
+                dialog.isVisible = true
+                onPicked(dialog.files.orEmpty().map { it.absolutePath })
+            }
+        }
+    }
+    val fileSharer = remember {
+        FileSharer { paths, _, _ ->
+            paths.firstOrNull()?.let { path ->
+                runCatching {
+                    Desktop.getDesktop().open(File(path).parentFile)
+                }
+            }
+        }
+    }
     val deleteConsentLauncher = remember {
         DeleteConsentLauncher { _, onResult -> onResult(true) }
     }
@@ -101,6 +124,8 @@ fun ProvideDesktopPlatformActions(content: @Composable () -> Unit) {
         LocalUrlOpener provides urlOpener,
         LocalFolderPicker provides folderPicker,
         LocalFilePicker provides filePicker,
+        LocalMultiFilePicker provides multiFilePicker,
+        LocalFileSharer provides fileSharer,
         LocalDeleteConsentLauncher provides deleteConsentLauncher,
         LocalPermissionRequester provides permissionRequester,
         LocalSystemScreens provides systemScreens,

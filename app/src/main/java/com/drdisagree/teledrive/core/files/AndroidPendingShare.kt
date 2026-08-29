@@ -1,6 +1,5 @@
 package com.drdisagree.teledrive.core.files
 
-import android.net.Uri
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -11,25 +10,25 @@ import kotlinx.coroutines.flow.update
  * to choose where they land. Held outside the back stack so the hand-off
  * survives the navigation that follows the intent.
  */
-class PendingShare {
+class AndroidPendingShare : PendingShare {
 
-    private val _uris = MutableStateFlow<List<Uri>>(emptyList())
-    val uris: StateFlow<List<Uri>> = _uris.asStateFlow()
+    private val _uris = MutableStateFlow<List<String>>(emptyList())
+    override val uris: StateFlow<List<String>> = _uris.asStateFlow()
 
-    fun offer(incoming: List<Uri>) {
+    override fun offer(incoming: List<String>) {
         if (incoming.isEmpty()) return
         _uris.update { incoming }
     }
 
-    fun clear() = _uris.update { emptyList() }
+    override fun clear() = _uris.update { emptyList() }
 
     private val _text = MutableStateFlow<String?>(null)
-    val text: StateFlow<String?> = _text.asStateFlow()
+    override val text: StateFlow<String?> = _text.asStateFlow()
 
-    fun offerText(incoming: String?) {
+    override fun offerText(incoming: String?) {
         if (incoming.isNullOrBlank()) return
         _text.update { incoming }
     }
 
-    fun clearText() = _text.update { null }
+    override fun clearText() = _text.update { null }
 }

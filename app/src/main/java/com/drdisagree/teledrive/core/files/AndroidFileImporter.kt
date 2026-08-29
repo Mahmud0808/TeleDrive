@@ -3,6 +3,7 @@ package com.drdisagree.teledrive.core.files
 import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
+import androidx.core.net.toUri
 import android.provider.OpenableColumns
 import com.drdisagree.teledrive.core.common.SafeLog
 import java.io.File
@@ -15,22 +16,21 @@ import java.io.File
  * (cloud providers, in-memory providers) is copied into app storage, because a
  * content URI permission is not guaranteed to survive a reboot.
  */
-class FileImporter(
+class AndroidFileImporter(
     private val context: Context
-) {
+) : FileImporter {
 
-    /** [name] is what the drive shows; [path] may carry a staging suffix. */
-    data class Imported(val path: String, val name: String, val sizeBytes: Long)
+    override fun import(reference: String): ImportedFile? = import(reference.toUri())
 
-    fun import(uri: Uri): Imported? {
+    private fun import(uri: Uri): ImportedFile? {
         if (uri.scheme == ContentResolver.SCHEME_FILE) {
             val direct = uri.path?.let(::File)?.takeIf { it.isFile }
             if (direct != null) {
-                return Imported(direct.absolutePath, direct.name, direct.length())
+                return ImportedFile(direct.absolutePath, direct.name, direct.length())
             }
         }
         readablePath(uri)?.let { source ->
-            return Imported(source.absolutePath, source.name, source.length())
+            return ImportedFile(source.absolutePath, source.name, source.length())
         }
 
         val metadata = queryMetadata(uri) ?: return null
@@ -39,7 +39,7 @@ class FileImporter(
 
         val staged = File(targetDir, displayName)
         if (staged.isFile && staged.length() == metadata.second && metadata.second > 0) {
-            return Imported(staged.absolutePath, displayName, staged.length())
+            return ImportedFile(staged.absolutePath, displayName, staged.length())
         }
 
         val existingNames = targetDir.list()?.toSet().orEmpty()
@@ -50,7 +50,7 @@ class FileImporter(
             context.contentResolver.openInputStream(uri)?.use { input ->
                 target.outputStream().buffered().use { output -> input.copyTo(output) }
             } ?: return null
-            Imported(target.absolutePath, displayName, target.length())
+            ImportedFile(target.absolutePath, displayName, target.length())
         }.getOrElse {
             SafeLog.w(TAG, "Import failed", it)
             target.delete()
@@ -59,7 +59,7 @@ class FileImporter(
     }
 
     /** Drops a staged copy the drive turned out not to need. */
-    fun discard(imported: Imported) {
+    override fun discard(imported: ImportedFile) {
         val staged = File(imported.path)
         if (staged.parentFile?.name == IMPORT_DIR) staged.delete()
     }

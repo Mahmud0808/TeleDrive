@@ -1,10 +1,7 @@
 package com.drdisagree.teledrive.presentation.files
 
-import android.app.Activity
-import androidx.activity.compose.BackHandler
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.IntentSenderRequest
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -74,7 +71,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -145,7 +141,9 @@ import com.drdisagree.teledrive.presentation.common.CollectSnackbarMessages
 import com.drdisagree.teledrive.presentation.common.add
 import com.drdisagree.teledrive.presentation.common.isInitialLoad
 import com.drdisagree.teledrive.presentation.common.rememberPosition
-import com.drdisagree.teledrive.presentation.common.shareLocalFiles
+import com.drdisagree.teledrive.presentation.platform.LocalDeleteConsentLauncher
+import com.drdisagree.teledrive.presentation.platform.LocalFileSharer
+import com.drdisagree.teledrive.presentation.platform.LocalMultiFilePicker
 import com.drdisagree.teledrive.presentation.components.BlockingProgressDialog
 import com.drdisagree.teledrive.presentation.components.BottomBarSnackbarHost
 import com.drdisagree.teledrive.presentation.components.ConfirmDialog
@@ -168,7 +166,7 @@ import com.drdisagree.teledrive.presentation.navigation.LocalBottomBarInset
 import com.drdisagree.teledrive.presentation.preview.PreviewSequence
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun FilesScreen(
     onOpenFolder: (String) -> Unit,
@@ -196,20 +194,21 @@ fun FilesScreen(
     var showCopyPicker by remember { mutableStateOf(false) }
     var showSelectionOverflow by remember { mutableStateOf(false) }
     var confirmTrash by remember { mutableStateOf(false) }
-    val uploadPicker = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenMultipleDocuments()
-    ) { uris -> viewModel.importAndUpload(uris) }
-
-    val deleteConsentLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartIntentSenderForResult()
-    ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) viewModel.retryLocalCopyRemoval()
+    val uploadPicker = LocalMultiFilePicker.current
+    val onPickUploads = {
+        uploadPicker.pick { references ->
+            if (references.isNotEmpty()) viewModel.importAndUpload(references)
+        }
     }
+
+    val deleteConsentLauncher = LocalDeleteConsentLauncher.current
 
     CollectSnackbarMessages(viewModel.messages, snackbarHostState)
     LaunchedEffect(Unit) {
         viewModel.deleteConsentRequests.collect { request ->
-            deleteConsentLauncher.launch(IntentSenderRequest.Builder(request).build())
+            deleteConsentLauncher.launch(request) { granted ->
+                if (granted) viewModel.retryLocalCopyRemoval()
+            }
         }
     }
 
@@ -498,7 +497,7 @@ fun FilesScreen(
                     FloatingActionButtonMenuItem(
                         onClick = {
                             showAddMenu = false
-                            uploadPicker.launch(arrayOf("*/*"))
+                            onPickUploads()
                         },
                         icon = { Icon(Icons.Filled.Upload, contentDescription = null) },
                         text = { Text(stringResource(Res.string.files_add_files)) }
@@ -646,11 +645,11 @@ fun FilesScreen(
         }
     }
 
-    val shareContext = LocalContext.current
+    val fileSharer = LocalFileSharer.current
     val shareChooserTitle = stringResource(Res.string.preview_share_chooser_title)
     LaunchedEffect(Unit) {
         viewModel.shareRequests.collect { request ->
-            shareLocalFiles(shareContext, request.paths, request.mimeType, shareChooserTitle)
+            fileSharer.share(request.paths, request.mimeType, shareChooserTitle)
         }
     }
 

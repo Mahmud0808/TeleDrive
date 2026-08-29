@@ -17,6 +17,8 @@ import com.drdisagree.teledrive.core.dispatchers.DefaultDispatcherProvider
 import com.drdisagree.teledrive.core.dispatchers.DispatcherProvider
 import com.drdisagree.teledrive.core.files.AppStoragePaths
 import com.drdisagree.teledrive.core.files.DownloadWriter
+import com.drdisagree.teledrive.core.files.FileImporter
+import com.drdisagree.teledrive.core.files.PendingShare
 import com.drdisagree.teledrive.core.files.LocalCopyDeleter
 import com.drdisagree.teledrive.core.files.sharedFilesModule
 import com.drdisagree.teledrive.core.media.MediaMetadataExtractor
@@ -48,6 +50,8 @@ import com.drdisagree.teledrive.desktop.crypto.DpapiCredentialCipher
 import com.drdisagree.teledrive.desktop.data.DesktopLocalDataWiper
 import com.drdisagree.teledrive.desktop.crypto.LocalKeyCredentialCipher
 import com.drdisagree.teledrive.desktop.files.DesktopDownloadWriter
+import com.drdisagree.teledrive.desktop.files.DesktopFileImporter
+import com.drdisagree.teledrive.desktop.files.DesktopPendingShare
 import com.drdisagree.teledrive.desktop.files.DesktopLocalCopyDeleter
 import com.drdisagree.teledrive.desktop.files.DesktopStandardFolderPaths
 import com.drdisagree.teledrive.desktop.files.DesktopStoragePaths
@@ -95,6 +99,8 @@ val desktopModule = module {
     singleOf(::DesktopNetworkMonitor) bind NetworkMonitor::class
     singleOf(::DesktopTransferErrorMessages) bind TransferErrorMessages::class
     singleOf(::DesktopDownloadWriter) bind DownloadWriter::class
+    singleOf(::DesktopFileImporter) bind FileImporter::class
+    singleOf(::DesktopPendingShare) bind PendingShare::class
     singleOf(::DesktopLocalCopyDeleter) bind LocalCopyDeleter::class
     singleOf(::DesktopMediaMetadataExtractor) bind MediaMetadataExtractor::class
     singleOf(::DesktopThumbnailStore) bind ThumbnailStore::class

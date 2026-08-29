@@ -1,6 +1,5 @@
 package com.drdisagree.teledrive.presentation
 
-import com.drdisagree.teledrive.presentation.files.FilesViewModel
 import com.drdisagree.teledrive.presentation.di.sharedUiModule
 import com.drdisagree.teledrive.presentation.platform.AndroidStandardFolderPaths
 import com.drdisagree.teledrive.presentation.platform.StandardFolderPaths
@@ -16,6 +15,5 @@ val presentationModule = module {
     includes(sharedUiModule)
     singleOf(::PreviewContentResolver)
     viewModelOf(::AppViewModel)
-    viewModelOf(::FilesViewModel)
     viewModelOf(::PreviewViewModel)
 }

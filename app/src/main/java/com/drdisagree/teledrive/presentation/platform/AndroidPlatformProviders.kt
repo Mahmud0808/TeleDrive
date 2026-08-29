@@ -21,6 +21,7 @@ import com.drdisagree.teledrive.core.permissions.openAllFilesAccess
 import com.drdisagree.teledrive.core.permissions.openAppSettings
 import com.drdisagree.teledrive.presentation.applock.requireDeviceOwner
 import com.drdisagree.teledrive.presentation.common.openLink
+import com.drdisagree.teledrive.presentation.common.shareLocalFiles
 
 @Composable
 fun ProvidePlatformActions(content: @Composable () -> Unit) {
@@ -66,6 +67,23 @@ fun ProvidePlatformActions(content: @Composable () -> Unit) {
         FilePicker { onPicked ->
             fileCallback.arm(onPicked)
             fileLauncher.launch(arrayOf("*/*"))
+        }
+    }
+
+    val multiCallback = remember { CallbackHolder<List<String>>() }
+    val multiLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenMultipleDocuments()
+    ) { uris -> multiCallback.fire(uris.map { it.toString() }) }
+    val multiFilePicker = remember {
+        MultiFilePicker { onPicked ->
+            multiCallback.arm(onPicked)
+            multiLauncher.launch(arrayOf("*/*"))
+        }
+    }
+
+    val fileSharer = remember(context) {
+        FileSharer { paths, mimeType, chooserTitle ->
+            shareLocalFiles(context, paths, mimeType, chooserTitle)
         }
     }
 
@@ -134,6 +152,8 @@ fun ProvidePlatformActions(content: @Composable () -> Unit) {
         LocalUrlOpener provides urlOpener,
         LocalFolderPicker provides folderPicker,
         LocalFilePicker provides filePicker,
+        LocalMultiFilePicker provides multiFilePicker,
+        LocalFileSharer provides fileSharer,
         LocalDeleteConsentLauncher provides deleteConsentLauncher,
         LocalPermissionRequester provides permissionRequester,
         LocalSystemScreens provides systemScreens,
