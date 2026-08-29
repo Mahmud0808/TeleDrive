@@ -72,6 +72,9 @@ class DesktopTelegramClient(
 
     @Volatile
     private var parametersReady = false
+
+    @Volatile
+    private var databaseDropped = false
     private var clientGeneration = 0
 
     private val _authState = MutableStateFlow<TelegramAuthState>(TelegramAuthState.Uninitialized)
@@ -89,7 +92,12 @@ class DesktopTelegramClient(
     override suspend fun start(credentials: TelegramCredentials) {
         clientMutex.withLock {
             this.credentials = credentials
-            if (client == null || _authState.value == TelegramAuthState.Closed) {
+            val failed = _authState.value is TelegramAuthState.Failed
+            if (client == null || failed || _authState.value == TelegramAuthState.Closed) {
+                if (failed) {
+                    client?.let { stale -> runCatching { stale.send(TdApi.Close()) { } } }
+                    client = null
+                }
                 _authState.value = TelegramAuthState.Initializing
                 parametersReady = false
                 client = createClient()
@@ -234,7 +242,14 @@ class DesktopTelegramClient(
         activeClient.send(parameters) { result ->
             if (result is TdApi.Error) {
                 SafeLog.e(TAG, "SetTdlibParameters failed: ${result.code}")
-                _authState.value = TelegramAuthState.Failed(result.message)
+                if (result.code == WRONG_DATABASE_KEY_CODE && !databaseDropped) {
+                    databaseDropped = true
+                    SafeLog.w(TAG, "Dropping a session database this device cannot open")
+                    base.deleteRecursively()
+                    scope.launch { sendTdlibParameters() }
+                } else {
+                    _authState.value = TelegramAuthState.Failed(result.message)
+                }
             } else {
                 parametersReady = true
             }
@@ -1291,6 +1306,7 @@ class DesktopTelegramClient(
         private const val PHOTO_PRIORITY = 16
         private const val MAX_LABEL_LENGTH = 48
         private const val STORAGE_CHAT_TITLE = "TeleDrive"
+        private const val WRONG_DATABASE_KEY_CODE = 401
         private const val CLOSE_WAIT_LIMIT_MS = 5_000L
         private const val PREVIEW_PRIORITY = 1
         const val STORAGE_CHAT_MARKER = "#teledrive-storage"

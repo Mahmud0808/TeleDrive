@@ -61,6 +61,9 @@ class TdLibTelegramClient(
 
     @Volatile
     private var parametersReady = false
+
+    @Volatile
+    private var databaseDropped = false
     private var clientGeneration = 0
 
     private val _authState = MutableStateFlow<TelegramAuthState>(TelegramAuthState.Uninitialized)
@@ -78,7 +81,12 @@ class TdLibTelegramClient(
     override suspend fun start(credentials: TelegramCredentials) {
         clientMutex.withLock {
             this.credentials = credentials
-            if (client == null || _authState.value == TelegramAuthState.Closed) {
+            val failed = _authState.value is TelegramAuthState.Failed
+            if (client == null || failed || _authState.value == TelegramAuthState.Closed) {
+                if (failed) {
+                    client?.let { stale -> runCatching { stale.send(TdApi.Close()) { } } }
+                    client = null
+                }
                 _authState.value = TelegramAuthState.Initializing
                 parametersReady = false
                 client = createClient()
@@ -214,7 +222,14 @@ class TdLibTelegramClient(
         activeClient.send(parameters) { result ->
             if (result is TdApi.Error) {
                 SafeLog.e(TAG, "SetTdlibParameters failed: ${result.code}")
-                _authState.value = TelegramAuthState.Failed(result.message)
+                if (result.code == WRONG_DATABASE_KEY_CODE && !databaseDropped) {
+                    databaseDropped = true
+                    SafeLog.w(TAG, "Dropping a session database this device cannot open")
+                    base.deleteRecursively()
+                    scope.launch { sendTdlibParameters() }
+                } else {
+                    _authState.value = TelegramAuthState.Failed(result.message)
+                }
             } else {
                 parametersReady = true
             }
@@ -1257,7 +1272,8 @@ class TdLibTelegramClient(
 
     companion object {
         private const val TAG = "TdLibTelegramClient"
-        private const val CLIENT_WAIT_LIMIT_MS = 5_000
+        private const val WRONG_DATABASE_KEY_CODE = 401
+ const val CLIENT_WAIT_LIMIT_MS = 5_000
         private const val REQUEST_TIMEOUT_MS = 45_000L
         private const val PROXY_TEST_DC = 2
         private const val PROXY_NEEDS_CLIENT_CODE = 401

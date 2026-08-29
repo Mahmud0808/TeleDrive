@@ -2,11 +2,6 @@ package com.drdisagree.teledrive.presentation.onboarding
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.drdisagree.teledrive.resources.Res
-import com.drdisagree.teledrive.resources.onboarding_api_hash_short
-import com.drdisagree.teledrive.resources.onboarding_api_id_number
-import com.drdisagree.teledrive.resources.onboarding_enter_phone
-import com.drdisagree.teledrive.resources.onboarding_no_account
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.core.telegram.CodeDeliveryChannel
 import com.drdisagree.teledrive.core.telegram.TelegramAuthState
@@ -18,10 +13,15 @@ import com.drdisagree.teledrive.domain.repository.ChannelRepository
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.repository.SyncRepository
 import com.drdisagree.teledrive.domain.repository.TelegramAuthRepository
-import com.drdisagree.teledrive.presentation.platform.PlatformCapabilities
-import com.drdisagree.teledrive.presentation.platform.StandardFolderPaths
 import com.drdisagree.teledrive.presentation.common.UiText
 import com.drdisagree.teledrive.presentation.common.toUiText
+import com.drdisagree.teledrive.presentation.platform.PlatformCapabilities
+import com.drdisagree.teledrive.presentation.platform.StandardFolderPaths
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.onboarding_api_hash_short
+import com.drdisagree.teledrive.resources.onboarding_api_id_number
+import com.drdisagree.teledrive.resources.onboarding_enter_phone
+import com.drdisagree.teledrive.resources.onboarding_no_account
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlin.time.Duration.Companion.milliseconds
 
 class OnboardingViewModel(
     private val telegramAuthRepository: TelegramAuthRepository,
@@ -122,15 +123,16 @@ class OnboardingViewModel(
                             OnboardingStep.API_CREDENTIALS
                         )
                     ) {
-                        current.copy(
-                            step = if (platformCapabilities.requiresPermissions) {
-                                OnboardingStep.PERMISSIONS
-                            } else {
-                                OnboardingStep.CHANNEL_SELECT
-                            },
-                            working = false,
-                            error = null
-                        )
+                        if (!platformCapabilities.requiresPermissions) {
+                            viewModelScope.launch { loadOrCreateDrive() }
+                            current.copy(working = true, error = null)
+                        } else {
+                            current.copy(
+                                step = OnboardingStep.PERMISSIONS,
+                                working = false,
+                                error = null
+                            )
+                        }
                     } else current
 
                 else -> current
@@ -171,19 +173,19 @@ class OnboardingViewModel(
         if (_uiState.value.countries.isNotEmpty()) return
         _uiState.update { it.copy(countryLoadState = CountryLoadState.LOADING) }
         viewModelScope.launch {
-            val fetched = withTimeoutOrNull(COUNTRY_LOAD_TIMEOUT_MS) {
+            val fetched = withTimeoutOrNull(COUNTRY_LOAD_TIMEOUT_MS.milliseconds) {
                 telegramAuthRepository.countries()
             }
             if (fetched == null) {
                 _uiState.update { it.copy(countryLoadState = CountryLoadState.FAILED) }
                 return@launch
             }
-            when (val result = fetched) {
+            when (fetched) {
                 is AppResult.Success -> _uiState.update { current ->
                     current.copy(
-                        countries = result.value.countries,
-                        selectedCountry = current.selectedCountry ?: result.value.detected,
-                        countryLoadState = if (result.value.countries.isEmpty()) {
+                        countries = fetched.value.countries,
+                        selectedCountry = current.selectedCountry ?: fetched.value.detected,
+                        countryLoadState = if (fetched.value.countries.isEmpty()) {
                             CountryLoadState.FAILED
                         } else {
                             CountryLoadState.READY
