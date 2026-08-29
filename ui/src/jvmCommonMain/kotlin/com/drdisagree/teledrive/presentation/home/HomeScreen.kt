@@ -131,6 +131,7 @@ import com.drdisagree.teledrive.presentation.common.CollectSnackbarMessages
 import com.drdisagree.teledrive.presentation.common.Formatters
 import com.drdisagree.teledrive.presentation.common.add
 import com.drdisagree.teledrive.presentation.platform.LocalPermissionRequester
+import com.drdisagree.teledrive.presentation.platform.LocalPlatformCapabilities
 import com.drdisagree.teledrive.presentation.components.BottomBarSnackbarHost
 import com.drdisagree.teledrive.presentation.components.ChannelAvatar
 import com.drdisagree.teledrive.presentation.components.ConfirmDialog
@@ -166,6 +167,7 @@ fun HomeScreen(
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val lifecycleOwner = LocalLifecycleOwner.current
     val permissionRequester = LocalPermissionRequester.current
+    val capabilities = LocalPlatformCapabilities.current
 
     var confirmCancelBackup by remember { mutableStateOf<String?>(null) }
     confirmCancelBackup?.let { sessionId ->
@@ -274,17 +276,19 @@ fun HomeScreen(
                     )
                 }
             }
-            item {
-                BackupCard(
-                    state = state,
-                    scanning = scanning,
-                    onChooseFolders = onOpenBackupSettings,
-                    onScanNow = viewModel::scanNow,
-                    onBackUpPending = viewModel::backUpPending,
-                    onPause = viewModel::pauseBackup,
-                    onResume = viewModel::resumeBackup,
-                    onCancel = { confirmCancelBackup = it }
-                )
+            if (capabilities.supportsAutoBackup) {
+                item {
+                    BackupCard(
+                        state = state,
+                        scanning = scanning,
+                        onChooseFolders = onOpenBackupSettings,
+                        onScanNow = viewModel::scanNow,
+                        onBackUpPending = viewModel::backUpPending,
+                        onPause = viewModel::pauseBackup,
+                        onResume = viewModel::resumeBackup,
+                        onCancel = { confirmCancelBackup = it }
+                    )
+                }
             }
             if (state.favoriteFolders.isNotEmpty()) {
                 item {

@@ -13,6 +13,15 @@ interface PlatformCapabilities {
 
     /** True on touch platforms where the pull gesture does not fight scrolling. */
     val supportsPullToRefresh: Boolean
+
+    /** True where the app can lock itself behind the device owner's credential. */
+    val supportsAppLock: Boolean
+
+    /** True where the window can refuse screenshots and screen recording. */
+    val supportsScreenCaptureBlocking: Boolean
+
+    /** True where the system offers wallpaper-derived color schemes. */
+    val supportsDynamicColor: Boolean
 }
 
 val LocalPlatformCapabilities = staticCompositionLocalOf<PlatformCapabilities> {

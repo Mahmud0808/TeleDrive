@@ -164,6 +164,7 @@ import com.drdisagree.teledrive.presentation.platform.LocalDeleteConsentLauncher
 import com.drdisagree.teledrive.presentation.platform.LocalStandardFolders
 import com.drdisagree.teledrive.presentation.platform.LocalDeviceOwnerGate
 import com.drdisagree.teledrive.presentation.platform.LocalFolderPicker
+import com.drdisagree.teledrive.presentation.platform.LocalPlatformCapabilities
 import com.drdisagree.teledrive.presentation.platform.PickResult
 import com.drdisagree.teledrive.presentation.common.UiText
 import com.drdisagree.teledrive.presentation.common.CollectSnackbarMessages
@@ -753,8 +754,9 @@ private fun SecuritySection(state: SettingsUiState, viewModel: SettingsViewModel
         )
     }
 
+    val capabilities = LocalPlatformCapabilities.current
     SettingsGroup {
-        add {
+        add(visible = capabilities.supportsAppLock) {
             SettingsSwitchRow(
                 title = stringResource(Res.string.settings_app_lock),
                 subtitle = stringResource(Res.string.settings_require_fingerprint_screen_lock),
@@ -776,14 +778,14 @@ private fun SecuritySection(state: SettingsUiState, viewModel: SettingsViewModel
                 }
             )
         }
-        add(visible = prefs.appLockEnabled) {
+        add(visible = capabilities.supportsAppLock && prefs.appLockEnabled) {
             SettingsClickRow(
                 title = stringResource(Res.string.settings_auto_lock),
                 subtitle = lockTimeoutLabel(prefs.autoLockTimeoutMinutes),
                 onClick = { showLockTimeoutDialog = true }
             )
         }
-        add {
+        add(visible = capabilities.supportsScreenCaptureBlocking) {
             SettingsSwitchRow(
                 title = stringResource(Res.string.settings_block_screenshots),
                 subtitle = stringResource(Res.string.settings_hides_app_screenshots_screen),
@@ -895,6 +897,7 @@ private fun KeyBackupWarning(onSetPassphrase: () -> Unit) {
 @Composable
 private fun AppearanceSection(state: SettingsUiState, viewModel: SettingsViewModel) {
     val prefs = state.preferences
+    val capabilities = LocalPlatformCapabilities.current
     var showThemeDialog by remember { mutableStateOf(false) }
 
     if (showThemeDialog) {
@@ -922,7 +925,7 @@ private fun AppearanceSection(state: SettingsUiState, viewModel: SettingsViewMod
                 onClick = { showThemeDialog = true }
             )
         }
-        add {
+        add(visible = capabilities.supportsDynamicColor) {
             SettingsSwitchRow(
                 title = stringResource(Res.string.settings_dynamic_color),
                 subtitle = stringResource(Res.string.settings_use_wallpaper_colors_available),

@@ -10,4 +10,10 @@ class DesktopPlatformCapabilities : PlatformCapabilities {
     override val requiresPermissions: Boolean = false
 
     override val supportsPullToRefresh: Boolean = false
+
+    override val supportsAppLock: Boolean = false
+
+    override val supportsScreenCaptureBlocking: Boolean = false
+
+    override val supportsDynamicColor: Boolean = false
 }
