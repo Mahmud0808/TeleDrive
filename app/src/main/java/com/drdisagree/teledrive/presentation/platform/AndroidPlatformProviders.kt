@@ -159,6 +159,7 @@ fun ProvidePlatformActions(content: @Composable () -> Unit) {
         LocalSystemScreens provides systemScreens,
         LocalDeviceOwnerGate provides deviceOwnerGate,
         LocalAppVersion provides BuildConfig.VERSION_NAME,
+        LocalPlatformScreens provides AndroidPlatformScreens,
         content = content
     )
 }

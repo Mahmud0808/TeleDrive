@@ -1,7 +1,5 @@
 package com.drdisagree.teledrive.presentation.applock
 
-import androidx.biometric.BiometricManager
-import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -23,21 +21,18 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
-import androidx.fragment.app.FragmentActivity
+import com.drdisagree.teledrive.presentation.platform.LocalDeviceOwnerGate
 import com.drdisagree.teledrive.resources.Res
-import com.drdisagree.teledrive.resources.lock_no_screen_lock
 import com.drdisagree.teledrive.resources.lock_prompt_title
 import com.drdisagree.teledrive.resources.lock_screen_title
-import com.drdisagree.teledrive.resources.lock_too_many_attempts
 import com.drdisagree.teledrive.resources.lock_unlock
 
 /**
@@ -48,55 +43,19 @@ import com.drdisagree.teledrive.resources.lock_unlock
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun LockScreen(onUnlocked: () -> Unit) {
-    val context = LocalContext.current
-    val activity = context as? FragmentActivity
+    val deviceOwnerGate = LocalDeviceOwnerGate.current
     var statusText by remember { mutableStateOf<String?>(null) }
-    var promptTrigger by remember { mutableStateOf(0) }
-    val noScreenLockMessage = stringResource(Res.string.lock_no_screen_lock)
-    val tooManyAttemptsMessage = stringResource(Res.string.lock_too_many_attempts)
+    var promptTrigger by remember { mutableIntStateOf(0) }
     val promptTitle = stringResource(Res.string.lock_prompt_title)
 
     LaunchedEffect(promptTrigger) {
-        val host = activity ?: return@LaunchedEffect
-        val authenticators = BiometricManager.Authenticators.BIOMETRIC_STRONG or
-                BiometricManager.Authenticators.DEVICE_CREDENTIAL
-        val availability = BiometricManager.from(host).canAuthenticate(authenticators)
-        if (availability != BiometricManager.BIOMETRIC_SUCCESS) {
-            statusText = noScreenLockMessage
+        deviceOwnerGate.require(
+            title = promptTitle,
+            subtitle = "",
+            onDenied = { error -> statusText = error }
+        ) {
             onUnlocked()
-            return@LaunchedEffect
         }
-
-        val prompt = BiometricPrompt(
-            host,
-            ContextCompat.getMainExecutor(host),
-            object : BiometricPrompt.AuthenticationCallback() {
-                override fun onAuthenticationSucceeded(
-                    result: BiometricPrompt.AuthenticationResult
-                ) {
-                    onUnlocked()
-                }
-
-                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                    statusText = when (errorCode) {
-                        BiometricPrompt.ERROR_LOCKOUT,
-                        BiometricPrompt.ERROR_LOCKOUT_PERMANENT ->
-                            tooManyAttemptsMessage
-
-                        BiometricPrompt.ERROR_USER_CANCELED,
-                        BiometricPrompt.ERROR_NEGATIVE_BUTTON,
-                        BiometricPrompt.ERROR_CANCELED -> null
-
-                        else -> errString.toString()
-                    }
-                }
-            }
-        )
-        val promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setTitle(promptTitle)
-            .setAllowedAuthenticators(authenticators)
-            .build()
-        prompt.authenticate(promptInfo)
     }
 
     Surface(modifier = Modifier.fillMaxSize()) {
@@ -114,26 +73,27 @@ fun LockScreen(onUnlocked: () -> Unit) {
                 modifier = Modifier.size(56.dp),
                 tint = MaterialTheme.colorScheme.primary
             )
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(20.dp))
             Text(
                 text = stringResource(Res.string.lock_screen_title),
-                style = MaterialTheme.typography.headlineSmall
+                style = MaterialTheme.typography.titleLarge
             )
-            statusText?.let {
+            statusText?.let { message ->
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    text = it,
+                    text = message,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(28.dp))
             Button(
                 onClick = { promptTrigger++ },
                 shapes = ButtonDefaults.shapes()
             ) {
                 Icon(Icons.Filled.Fingerprint, contentDescription = null)
-                Text("  " + stringResource(Res.string.lock_unlock))
+                Spacer(Modifier.size(8.dp))
+                Text(stringResource(Res.string.lock_unlock))
             }
         }
     }

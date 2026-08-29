@@ -1,6 +1,5 @@
 package com.drdisagree.teledrive.presentation.preview
 
-import android.content.Context
 import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.preview_archive_failed
 import com.drdisagree.teledrive.resources.preview_fetch_failed
@@ -8,6 +7,7 @@ import com.drdisagree.teledrive.resources.preview_no_copy_available
 import com.drdisagree.teledrive.resources.preview_no_preview_for_type
 import com.drdisagree.teledrive.resources.preview_only_zip
 import com.drdisagree.teledrive.resources.preview_read_failed
+import com.drdisagree.teledrive.core.files.AppStoragePaths
 import com.drdisagree.teledrive.core.crypto.CryptoKeys
 import com.drdisagree.teledrive.core.crypto.StreamCrypto
 import com.drdisagree.teledrive.core.crypto.WrappedKeyRepository
@@ -36,7 +36,7 @@ import java.io.File
  * always plaintext; only remote copies and caches are ever encrypted.
  */
 class PreviewContentResolver(
-    private val context: Context,
+    private val storagePaths: AppStoragePaths,
     private val telegramClient: TelegramClient,
     private val streamCrypto: StreamCrypto,
     private val wrappedKeyRepository: WrappedKeyRepository,
@@ -173,7 +173,7 @@ class PreviewContentResolver(
         file: DriveFile,
         onProgress: suspend (Long, Long) -> Unit
     ): File? {
-        val previewDir = File(context.cacheDir, "previews").apply { mkdirs() }
+        val previewDir = File(storagePaths.cacheDir, "previews").apply { mkdirs() }
         val target = File(previewDir, "${file.id}-${file.name}")
         if (target.exists() && target.length() > 0) {
             cacheDao.touch(target.absolutePath, System.currentTimeMillis())

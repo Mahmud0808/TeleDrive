@@ -1,6 +1,5 @@
 package com.drdisagree.teledrive.presentation
 
-import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -72,13 +71,14 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.window.core.layout.WindowSizeClass
-import com.drdisagree.teledrive.core.common.AppNotifications
+import com.drdisagree.teledrive.core.common.NotificationDestinations
 import com.drdisagree.teledrive.core.files.PendingShare
 import com.drdisagree.teledrive.domain.model.AppTheme
-import com.drdisagree.teledrive.BuildConfig
 import com.drdisagree.teledrive.presentation.applock.LockScreen
 import com.drdisagree.teledrive.presentation.components.LoadingState
 import com.drdisagree.teledrive.presentation.components.LocalCompactLayout
+import com.drdisagree.teledrive.presentation.platform.LocalAppVersion
+import com.drdisagree.teledrive.presentation.platform.LocalUrlOpener
 import com.drdisagree.teledrive.presentation.navigation.AppNavHost
 import com.drdisagree.teledrive.presentation.navigation.BottomBarHeight
 import com.drdisagree.teledrive.presentation.navigation.LocalBottomBarHeight
@@ -90,9 +90,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.time.Duration.Companion.milliseconds
-import com.drdisagree.teledrive.presentation.common.openLink
 import com.drdisagree.teledrive.presentation.components.UpdateDialog
-import androidx.compose.ui.platform.LocalContext
 import com.drdisagree.teledrive.presentation.components.SessionBrokenDialog
 
 @Composable
@@ -125,7 +123,7 @@ fun TeleDriveApp(
 
     val pendingUpdate by viewModel.pendingUpdate.collectAsStateWithLifecycle()
     val sessionBroken by viewModel.sessionBroken.collectAsStateWithLifecycle()
-    val context = LocalContext.current
+    val urlOpener = LocalUrlOpener.current
 
     TeleDriveTheme(darkTheme = darkTheme, dynamicColor = state.dynamicColor) {
         CompositionLocalProvider(LocalCompactLayout provides state.compactLayout) {
@@ -145,14 +143,13 @@ fun TeleDriveApp(
                 SessionBrokenDialog(onSignInAgain = viewModel::resetSession)
             }
             pendingUpdate?.takeIf { !state.loading && !state.locked }?.let { release ->
-                val updateContext = LocalContext.current
                 UpdateDialog(
-                    currentVersion = BuildConfig.VERSION_NAME,
-                    onOpenUrl = { url -> openLink(updateContext, url) },
+                    currentVersion = LocalAppVersion.current,
+                    onOpenUrl = urlOpener::open,
                     release = release,
                     onDownload = {
                         viewModel.dismissUpdate()
-                        openLink(context, release.pageUrl)
+                        urlOpener.open(release.pageUrl)
                     },
                     onDismiss = viewModel::dismissUpdate
                 )
@@ -218,13 +215,13 @@ private fun MainScaffold(
         if (!graphReady) return@LaunchedEffect
 
         when (target) {
-            AppNotifications.DESTINATION_TRANSFERS -> navController.navigate(Route.Transfers)
-            AppNotifications.DESTINATION_FILES -> navController.navigate(Route.Files())
-            AppNotifications.DESTINATION_NOTE -> navController.navigate(
+            NotificationDestinations.TRANSFERS -> navController.navigate(Route.Transfers)
+            NotificationDestinations.FILES -> navController.navigate(Route.Files())
+            NotificationDestinations.NOTE -> navController.navigate(
                 Route.NoteEditor(sharedText = pendingShare.text.value)
             )
 
-            AppNotifications.DESTINATION_UPDATE -> onUpdateRequested()
+            NotificationDestinations.UPDATE -> onUpdateRequested()
 
             else -> Unit
         }
@@ -312,7 +309,6 @@ private fun MainScaffold(
  * one also reveals its icon, and a single pill slides between them instead of
  * each item drawing its own indicator.
  */
-@SuppressLint("UseOfNonLambdaOffsetOverload")
 @Composable
 private fun FloatingNavigationBar(
     selectedIndex: Int,

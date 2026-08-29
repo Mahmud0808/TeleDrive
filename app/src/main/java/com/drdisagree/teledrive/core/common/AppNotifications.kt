@@ -141,10 +141,10 @@ class AppNotifications(
         const val ACTION_OPEN_DESTINATION = "com.drdisagree.teledrive.OPEN"
         const val EXTRA_DESTINATION = "destination"
         const val EXTRA_VERSION = "version"
-        const val DESTINATION_TRANSFERS = "transfers"
-        const val DESTINATION_FILES = "files"
-        const val DESTINATION_NOTE = "note"
-        const val DESTINATION_UPDATE = "update"
+        const val DESTINATION_TRANSFERS = NotificationDestinations.TRANSFERS
+        const val DESTINATION_FILES = NotificationDestinations.FILES
+        const val DESTINATION_NOTE = NotificationDestinations.NOTE
+        const val DESTINATION_UPDATE = NotificationDestinations.UPDATE
         private const val REQUEST_FAILURE = 1
         private const val REQUEST_BACKUP = 2
         private const val REQUEST_QUEUE = 3

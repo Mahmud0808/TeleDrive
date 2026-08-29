@@ -51,6 +51,10 @@
     <string name="drive_queued">Queued</string>
     <string name="drive_upload_chooser_title">Choose a file to upload</string>
 
+    <!-- Preview -->
+    <string name="preview_open_externally">Open with the system app</string>
+    <string name="preview_download_first">This file has no local copy yet. Download it to open it here.</string>
+
     <!-- Transfer errors -->
     <string name="transfer_error_key_missing">Encryption key missing. Restore it in Settings.</string>
     <string name="transfer_error_no_file_reference">Transfer has no file reference</string>

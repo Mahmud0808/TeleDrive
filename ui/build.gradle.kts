@@ -21,6 +21,9 @@ kotlin {
     sourceSets {
         val jvmCommonMain = create("jvmCommonMain") {
             dependsOn(commonMain.get())
+            dependencies {
+                implementation(libs.zip4j)
+            }
         }
         named("androidMain") {
             dependsOn(jvmCommonMain)
@@ -43,6 +46,7 @@ kotlin {
                 api(libs.cmp.material3)
                 api(libs.cmp.material.icons.extended)
                 api(libs.jb.navigation.compose)
+                api(libs.jb.material3.adaptive)
                 api(libs.jb.lifecycle.viewmodel.compose)
                 api(libs.jb.lifecycle.runtime.compose)
                 implementation(project.dependencies.platform(libs.koin.bom))

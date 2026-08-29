@@ -1,6 +1,5 @@
 package com.drdisagree.teledrive.presentation.preview
 
-import android.content.IntentSender
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -18,6 +17,7 @@ import com.drdisagree.teledrive.resources.preview_nothing_to_remove
 import com.drdisagree.teledrive.resources.preview_removed_favorites
 import com.drdisagree.teledrive.resources.preview_unarchived
 import com.drdisagree.teledrive.resources.preview_unhidden
+import com.drdisagree.teledrive.core.files.DeleteConsentRequest
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.domain.model.FileQuerySpec
 import com.drdisagree.teledrive.domain.model.DriveFile
@@ -202,7 +202,7 @@ class PreviewViewModel(
         }
     }
 
-    private val _deleteConsentRequests = MutableSharedFlow<IntentSender>(extraBufferCapacity = 1)
+    private val _deleteConsentRequests = MutableSharedFlow<DeleteConsentRequest>(extraBufferCapacity = 1)
     val deleteConsentRequests = _deleteConsentRequests.asSharedFlow()
     private var pendingLocalCopyId: String? = null
 

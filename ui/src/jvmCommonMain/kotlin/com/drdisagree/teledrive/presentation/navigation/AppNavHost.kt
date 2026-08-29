@@ -15,11 +15,11 @@ import com.drdisagree.teledrive.presentation.collection.CollectionScreen
 import com.drdisagree.teledrive.presentation.files.FilesScreen
 import com.drdisagree.teledrive.presentation.gallery.GalleryScreen
 import com.drdisagree.teledrive.presentation.home.HomeScreen
+import com.drdisagree.teledrive.presentation.platform.LocalPlatformScreens
 import com.drdisagree.teledrive.presentation.navigation.NavigationTransitions.isPeerSwitch
 import com.drdisagree.teledrive.presentation.navigation.NavigationTransitions.movesForward
 import com.drdisagree.teledrive.presentation.note.NoteEditorScreen
 import com.drdisagree.teledrive.presentation.onboarding.OnboardingScreen
-import com.drdisagree.teledrive.presentation.preview.PreviewScreen
 import com.drdisagree.teledrive.presentation.search.SearchScreen
 import com.drdisagree.teledrive.presentation.proxy.ProxyScreen
 import com.drdisagree.teledrive.presentation.settings.ExclusionsScreen
@@ -142,7 +142,7 @@ fun AppNavHost(
             popEnterTransition = { NavigationTransitions.fadeThroughEnter() },
             popExitTransition = { NavigationTransitions.previewExit() }
         ) {
-            PreviewScreen(
+            LocalPlatformScreens.current.Preview(
                 onBack = { navController.popBackStackOnce() },
                 onEditNote = { fileId, title ->
                     navController.navigateOnce(
