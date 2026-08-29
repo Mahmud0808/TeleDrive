@@ -284,8 +284,9 @@ class FileRepositoryImpl(
             )
 
             val remoteFileId = source.remoteFileId
-            if (remoteFileId != null && source.chatId != null) {
-                when (val result = copyRemote(copy, remoteFileId, source.chatId)) {
+            val sourceChatId = source.chatId
+            if (remoteFileId != null && sourceChatId != null) {
+                when (val result = copyRemote(copy, remoteFileId, sourceChatId)) {
                     is AppResult.Success -> {
                         fileDao.upsert(result.value)
                         existingNames.add(name)

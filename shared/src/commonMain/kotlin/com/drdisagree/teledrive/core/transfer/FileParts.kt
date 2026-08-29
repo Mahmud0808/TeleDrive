@@ -25,7 +25,7 @@ object FileParts {
     fun indexOf(plainOffset: Long): Int = (plainOffset / PART_SIZE).toInt()
 
     fun nameFor(name: String, partIndex: Int): String =
-        "%s.%03d".format(name, partIndex + 1)
+        name + "." + (partIndex + 1).toString().padStart(3, '0')
 
     fun splits(sizeBytes: Long, limitBytes: Long): Boolean = sizeBytes > limitBytes
 }

@@ -6,8 +6,8 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.RawQuery
+import androidx.room.RoomRawQuery
 import androidx.room.Update
-import androidx.sqlite.db.SupportSQLiteQuery
 import com.drdisagree.teledrive.data.local.entity.AlbumSummary
 import com.drdisagree.teledrive.data.local.entity.FileEntity
 import com.drdisagree.teledrive.domain.model.BackupState
@@ -76,13 +76,13 @@ interface FileDao {
     suspend fun trashedMatches(name: String, sizeBytes: Long): List<FileEntity>
 
     @RawQuery(observedEntities = [FileEntity::class])
-    fun pagingSource(query: SupportSQLiteQuery): PagingSource<Int, FileEntity>
+    fun pagingSource(query: RoomRawQuery): PagingSource<Int, FileEntity>
 
     @RawQuery(observedEntities = [FileEntity::class])
-    fun observeList(query: SupportSQLiteQuery): Flow<List<FileEntity>>
+    fun observeList(query: RoomRawQuery): Flow<List<FileEntity>>
 
     @RawQuery
-    suspend fun idList(query: SupportSQLiteQuery): List<String>
+    suspend fun idList(query: RoomRawQuery): List<String>
 
     @Query(
         """SELECT * FROM files

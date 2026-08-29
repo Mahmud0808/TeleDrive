@@ -2,7 +2,6 @@ package com.drdisagree.teledrive.domain.usecase
 
 import com.drdisagree.teledrive.domain.model.Exclusion
 import com.drdisagree.teledrive.domain.model.ExclusionType
-import java.util.Locale
 
 /**
  * Pure exclusion matching. Paths are compared case-insensitively because
@@ -18,11 +17,11 @@ class EvaluateExclusionsUseCase {
     )
 
     operator fun invoke(candidate: Candidate, exclusions: List<Exclusion>): Boolean {
-        val path = candidate.absolutePath.replace('\\', '/').lowercase(Locale.ROOT)
+        val path = candidate.absolutePath.replace('\\', '/').lowercase()
         val fileName = path.substringAfterLast('/')
         for (exclusion in exclusions) {
             if (!exclusion.enabled) continue
-            val value = exclusion.value.lowercase(Locale.ROOT)
+            val value = exclusion.value.lowercase()
             val matched = when (exclusion.type) {
                 ExclusionType.FILE_PATH -> path == value.replace('\\', '/')
                 ExclusionType.FOLDER_PATH -> {
@@ -34,7 +33,7 @@ class EvaluateExclusionsUseCase {
                     fileName.substringAfterLast('.', "") == value.removePrefix(".")
 
                 ExclusionType.MIME_TYPE ->
-                    candidate.mimeType.lowercase(Locale.ROOT).startsWith(value)
+                    candidate.mimeType.lowercase().startsWith(value)
 
                 ExclusionType.PATH_PATTERN -> globMatches(value, path)
                 ExclusionType.MAX_SIZE ->

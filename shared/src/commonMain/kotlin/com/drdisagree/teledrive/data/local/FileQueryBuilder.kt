@@ -1,7 +1,6 @@
 package com.drdisagree.teledrive.data.local
 
-import androidx.sqlite.db.SimpleSQLiteQuery
-import androidx.sqlite.db.SupportSQLiteQuery
+import androidx.room.RoomRawQuery
 import com.drdisagree.teledrive.data.local.FileQueryBuilder.build
 import com.drdisagree.teledrive.domain.model.FileQuerySpec
 import com.drdisagree.teledrive.domain.model.FileSortField
@@ -13,12 +12,12 @@ import com.drdisagree.teledrive.domain.model.SortDirection
  * compile-time queries without an explosion of variants, hence raw queries.
  */
 object FileQueryBuilder {
-    fun build(spec: FileQuerySpec): SupportSQLiteQuery = query("*", spec)
+    fun build(spec: FileQuerySpec): RoomRawQuery = query("*", spec)
 
     /** Same filter and order as [build], reading only the ids of every match. */
-    fun buildIds(spec: FileQuerySpec): SupportSQLiteQuery = query("id", spec)
+    fun buildIds(spec: FileQuerySpec): RoomRawQuery = query("id", spec)
 
-    private fun query(projection: String, spec: FileQuerySpec): SupportSQLiteQuery {
+    private fun query(projection: String, spec: FileQuerySpec): RoomRawQuery {
         val where = StringBuilder("trashedAt IS NULL")
         val args = mutableListOf<Any>()
 
@@ -88,7 +87,16 @@ object FileQueryBuilder {
 
         val sql = "SELECT $projection FROM files WHERE $where " +
                 "ORDER BY $orderColumn $direction, id ASC"
-        return SimpleSQLiteQuery(sql, args.toTypedArray())
+        return RoomRawQuery(sql) { statement ->
+            args.forEachIndexed { index, value ->
+                when (value) {
+                    is String -> statement.bindText(index + 1, value)
+                    is Long -> statement.bindLong(index + 1, value)
+                    is Int -> statement.bindLong(index + 1, value.toLong())
+                    else -> error("Unsupported query argument: $value")
+                }
+            }
+        }
     }
 
     private fun escapeLike(value: String): String =

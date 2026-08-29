@@ -1,5 +1,6 @@
 package com.drdisagree.teledrive.data.local.database
 
+import androidx.room.ConstructedBy
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.drdisagree.teledrive.data.local.dao.BackupDao
@@ -44,6 +45,7 @@ import com.drdisagree.teledrive.data.local.entity.TransferEntity
     version = 9,
     exportSchema = true
 )
+@ConstructedBy(TeleDriveDatabaseConstructor::class)
 abstract class TeleDriveDatabase : RoomDatabase() {
     abstract fun fileDao(): FileDao
     abstract fun folderDao(): FolderDao
