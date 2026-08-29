@@ -29,6 +29,7 @@ import com.drdisagree.teledrive.domain.repository.TrashRepository
 import com.drdisagree.teledrive.presentation.common.Formatters
 import com.drdisagree.teledrive.presentation.common.ListPosition
 import com.drdisagree.teledrive.presentation.components.GridZoomLevel
+import com.drdisagree.teledrive.presentation.components.MAX_GRID_COLUMNS
 import com.drdisagree.teledrive.presentation.components.MIN_GRID_COLUMNS
 import com.drdisagree.teledrive.presentation.components.SelectionCapabilities
 import com.drdisagree.teledrive.presentation.components.zoomedIn
@@ -252,7 +253,7 @@ class GalleryViewModel(
             settingsRepository.update { prefs ->
                 prefs.copy(
                     albumGridSize = (prefs.albumGridSize + step)
-                        .coerceIn(MIN_GRID_COLUMNS, MAX_ALBUM_COLUMNS)
+                        .coerceIn(MIN_GRID_COLUMNS, MAX_GRID_COLUMNS)
                 )
             }
         }
@@ -344,6 +345,5 @@ class GalleryViewModel(
 
     companion object {
         private const val MIN_REFRESH_VISIBLE_MS = 700L
-        private const val MAX_ALBUM_COLUMNS = 4
     }
 }
