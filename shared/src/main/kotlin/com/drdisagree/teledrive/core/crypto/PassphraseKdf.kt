@@ -3,16 +3,13 @@ package com.drdisagree.teledrive.core.crypto
 import java.security.SecureRandom
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Derives a key-encryption key from a user passphrase with PBKDF2-HMAC-SHA256.
  * Used only for the optional cloud key backup, so losing the device does not
  * mean losing access to encrypted backups.
  */
-@Singleton
-class PassphraseKdf @Inject constructor() {
+class PassphraseKdf {
 
     private val secureRandom = SecureRandom()
 

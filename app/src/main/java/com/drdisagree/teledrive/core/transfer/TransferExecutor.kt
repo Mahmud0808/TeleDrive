@@ -48,7 +48,7 @@ import kotlin.time.Duration.Companion.milliseconds
  * Executes one transfer end to end: staging (optional encryption), the
  * Telegram operation, progress persistence, and remote-mapping bookkeeping.
  * Pause and cancel are cooperative: the DB row's state is checked on every
- * progress event and the underlying TDLib operation is cancelled by aborting
+ * progress event and the underlying TDLib operation is canceled by aborting
  * flow collection.
  */
 @Singleton

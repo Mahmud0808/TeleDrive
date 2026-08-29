@@ -388,7 +388,7 @@ class TdLibTelegramClient @Inject constructor(
         )
         val active = client?.takeIf { parametersReady } ?: throw TelegramException(
             PROXY_NEEDS_CLIENT_CODE,
-            "Telegram is not initialised yet"
+            "Telegram is not initialized yet"
         )
         awaitAuthorizedOrParameters()
         sendVia(active, request)

@@ -21,7 +21,7 @@ fun FileCategory.label(): String = stringResource(
 )
 
 /**
- * Chart colour per category. Authored hues keep the categories apart; the
+ * Chart color per category. Authored hues keep the categories apart; the
  * harmonization step keeps them in the theme's palette.
  */
 @Composable

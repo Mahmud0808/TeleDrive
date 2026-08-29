@@ -2,8 +2,6 @@ package com.drdisagree.teledrive.core.crypto
 
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Serializes the content key wrapped with a passphrase-derived key so it can
@@ -17,8 +15,7 @@ import javax.inject.Singleton
  * Layout: MAGIC(4) VERSION(1) iterations(4) salt(16) hintLength(2) hint(utf-8)
  * then AES-GCM blob (nonce || ciphertext+tag) from [StreamCrypto.encryptBytes].
  */
-@Singleton
-class KeyBackupCodec @Inject constructor(
+class KeyBackupCodec(
     private val passphraseKdf: PassphraseKdf,
     private val streamCrypto: StreamCrypto
 ) {

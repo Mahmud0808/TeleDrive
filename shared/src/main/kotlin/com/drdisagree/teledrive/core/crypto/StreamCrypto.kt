@@ -8,8 +8,6 @@ import java.security.SecureRandom
 import javax.crypto.Cipher
 import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Chunked AES-256-GCM for large files, following the segment layout used by
@@ -23,8 +21,7 @@ import javax.inject.Singleton
  * carries the chunk index and whether it is the last chunk, so dropped
  * trailing chunks fail authentication instead of decrypting to truncated data.
  */
-@Singleton
-class StreamCrypto @Inject constructor() {
+class StreamCrypto {
 
     private val secureRandom = SecureRandom()
 

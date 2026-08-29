@@ -2,8 +2,6 @@ package com.drdisagree.teledrive.core.crypto
 
 import java.io.File
 import java.security.SecureRandom
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Best-effort secure deletion: overwrite once with random data, then delete.
@@ -11,8 +9,7 @@ import javax.inject.Singleton
  * that limitation is documented in SECURITY.md. Encrypted-at-rest files are
  * already unreadable once their key is discarded.
  */
-@Singleton
-class SecureFileDeleter @Inject constructor() {
+class SecureFileDeleter {
 
     private val secureRandom = SecureRandom()
 

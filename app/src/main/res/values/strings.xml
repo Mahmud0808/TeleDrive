@@ -437,14 +437,14 @@
     <string name="transfers_cancel_transfers">Cancel all transfers?</string>
     <string name="transfers_clear_finished">Clear finished</string>
     <string name="transfers_clear_finished_transfers">Clear finished transfers?</string>
-    <string name="transfers_completed_cancelled_entries_removed">Completed and cancelled entries are removed from this list. Your files are not affected.</string>
+    <string name="transfers_completed_canceled_entries_removed">Completed and canceled entries are removed from this list. Your files are not affected.</string>
     <string name="transfers_failed">Failed</string>
     <string name="transfers_failed_downloads">Failed downloads</string>
     <string name="transfers_failed_transfers">Failed transfers</string>
     <string name="transfers_failed_uploads">Failed uploads</string>
     <string name="transfers_no_transfers">No transfers</string>
     <string name="transfers_pause">Pause all</string>
-    <string name="transfers_queued_running_paused_failed">Queued, running, paused and failed transfers are cancelled. Files already uploaded stay in Telegram.</string>
+    <string name="transfers_queued_running_paused_failed">Queued, running, paused and failed transfers are canceled. Files already uploaded stay in Telegram.</string>
     <string name="transfers_resume">Resume all</string>
     <string name="transfers_section_active">Active</string>
     <string name="transfers_section_finished">Finished</string>
