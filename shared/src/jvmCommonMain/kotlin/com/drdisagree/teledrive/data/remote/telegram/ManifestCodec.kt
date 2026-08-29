@@ -1,6 +1,6 @@
 package com.drdisagree.teledrive.data.remote.telegram
 
-import android.util.Base64
+import kotlin.io.encoding.Base64
 import com.drdisagree.teledrive.core.crypto.CryptoKeys
 import com.drdisagree.teledrive.core.crypto.StreamCrypto
 import com.drdisagree.teledrive.core.crypto.WrappedKeyRepository
@@ -26,9 +26,8 @@ class ManifestCodec(
         val payload = json.encodeToString(RemoteFileManifest.serializer(), manifest)
         return if (encrypt) {
             val key = wrappedKeyRepository.getOrCreate(CryptoKeys.CONTENT)
-            PREFIX_ENCRYPTED + Base64.encodeToString(
-                streamCrypto.encryptBytes(key, payload.toByteArray(Charsets.UTF_8)),
-                Base64.NO_WRAP
+            PREFIX_ENCRYPTED + Base64.encode(
+                streamCrypto.encryptBytes(key, payload.toByteArray(Charsets.UTF_8))
             )
         } else {
             PREFIX_PLAIN + payload
@@ -48,7 +47,7 @@ class ManifestCodec(
                 val key = wrappedKeyRepository.get(CryptoKeys.CONTENT) ?: return null
                 val plaintext = streamCrypto.decryptBytes(
                     key,
-                    Base64.decode(caption.removePrefix(PREFIX_ENCRYPTED), Base64.NO_WRAP)
+                    Base64.decode(caption.removePrefix(PREFIX_ENCRYPTED))
                 )
                 json.decodeFromString(
                     RemoteFileManifest.serializer(),

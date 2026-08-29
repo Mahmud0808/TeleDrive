@@ -54,6 +54,7 @@ class TeleDriveApplication : Application(), SingletonImageLoader.Factory {
 
     override fun onCreate() {
         super.onCreate()
+        SafeLog.verbose = BuildConfig.DEBUG
         startKoin {
             androidContext(this@TeleDriveApplication)
             workManagerFactory()

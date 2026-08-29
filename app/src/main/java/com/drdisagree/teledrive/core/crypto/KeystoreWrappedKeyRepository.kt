@@ -9,10 +9,10 @@ import java.security.SecureRandom
  * Persists random raw keys wrapped by the Keystore master key. Raw keys never
  * touch disk unencrypted; unwrapped copies are cached in memory only.
  */
-class WrappedKeyRepository(
+class KeystoreWrappedKeyRepository(
     private val context: Context,
     private val keystoreManager: KeystoreManager
-) {
+) : WrappedKeyRepository {
 
     private val cache = mutableMapOf<String, ByteArray>()
     private val recreated = mutableSetOf<String>()
@@ -25,7 +25,7 @@ class WrappedKeyRepository(
      * would quietly make every encrypted upload unreadable.
      */
     @Synchronized
-    fun getOrCreate(name: String, sizeBytes: Int = 32): ByteArray {
+    override fun getOrCreate(name: String, sizeBytes: Int): ByteArray {
         cache[name]?.let { return it }
         val file = keyFile(name)
         if (file.exists()) {
@@ -48,14 +48,14 @@ class WrappedKeyRepository(
 
     /** True when [name] had to be replaced, so whatever it guarded is now junk. */
     @Synchronized
-    fun wasRecreated(name: String): Boolean = name in recreated
+    override fun wasRecreated(name: String): Boolean = name in recreated
 
     /**
      * Reads a key without ever creating one. Decryption paths must use this:
      * minting a fresh key there would silently make existing data unreadable.
      */
     @Synchronized
-    fun get(name: String): ByteArray? {
+    override fun get(name: String): ByteArray? {
         cache[name]?.let { return it }
         val file = keyFile(name)
         if (!file.exists()) return null
@@ -69,10 +69,10 @@ class WrappedKeyRepository(
      * Whether the key is present and this device can actually unwrap it.
      */
     @Synchronized
-    fun exists(name: String): Boolean = get(name) != null
+    override fun exists(name: String): Boolean = get(name) != null
 
     @Synchronized
-    fun store(name: String, key: ByteArray) {
+    override fun store(name: String, key: ByteArray) {
         val file = keyFile(name)
         file.parentFile?.mkdirs()
         file.writeBytes(keystoreManager.encrypt(key))
@@ -91,7 +91,3 @@ class WrappedKeyRepository(
         )
     }
 }
-
-/** Raised for a key that guards data a new key would destroy. */
-class KeyUnavailableException(name: String) :
-    Exception("Encryption key $name cannot be read on this device")

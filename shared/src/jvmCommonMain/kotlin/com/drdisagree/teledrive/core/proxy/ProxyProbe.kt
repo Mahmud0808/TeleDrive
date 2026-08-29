@@ -1,6 +1,6 @@
 package com.drdisagree.teledrive.core.proxy
 
-import android.util.Base64
+import kotlin.io.encoding.Base64
 import com.drdisagree.teledrive.core.dispatchers.DispatcherProvider
 import com.drdisagree.teledrive.core.telegram.TelegramProxy
 import com.drdisagree.teledrive.core.telegram.TelegramProxyType
@@ -101,10 +101,7 @@ class ProxyProbe(
         val username = proxy.username.orEmpty()
         val password = proxy.password.orEmpty()
         if (username.isNotEmpty() || password.isNotEmpty()) {
-            val credentials = Base64.encodeToString(
-                "$username:$password".toByteArray(),
-                Base64.NO_WRAP
-            )
+            val credentials = Base64.encode("$username:$password".toByteArray())
             request.append("Proxy-Authorization: Basic ").append(credentials).append("\r\n")
         }
         request.append("\r\n")

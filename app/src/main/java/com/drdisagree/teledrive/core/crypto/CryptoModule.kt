@@ -11,6 +11,6 @@ val cryptoModule = module {
     singleOf(::KeyBackupCodec)
     singleOf(::SecureFileDeleter)
     singleOf(::KeystoreManager)
-    singleOf(::WrappedKeyRepository)
+    singleOf(::KeystoreWrappedKeyRepository) bind WrappedKeyRepository::class
     singleOf(::TdlibDatabaseKeyProviderImpl) bind TdlibDatabaseKeyProvider::class
 }
