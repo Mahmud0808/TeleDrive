@@ -15,12 +15,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
@@ -41,13 +41,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -90,6 +90,7 @@ import com.drdisagree.teledrive.domain.model.ViewMode
 import com.drdisagree.teledrive.presentation.common.DayBucket
 import com.drdisagree.teledrive.presentation.common.Formatters
 import com.drdisagree.teledrive.presentation.common.isInitialLoad
+import com.drdisagree.teledrive.presentation.components.RefreshableContent
 import com.drdisagree.teledrive.presentation.components.ConfirmDialog
 import com.drdisagree.teledrive.presentation.components.EmptyState
 import com.drdisagree.teledrive.presentation.components.FileGridItem
@@ -243,10 +244,14 @@ fun GalleryScreen(
 
     AppBackHandler(enabled = state.selectionMode) { viewModel.clearSelection() }
 
-    val mediaListState = rememberLazyListState()
+    val mediaListState = rememberSaveable(state.tab, saver = LazyListState.Saver) {
+        LazyListState()
+    }
     val allSelected by viewModel.allSelected.collectAsStateWithLifecycle()
     val previewSequence by viewModel.previewSequence.collectAsStateWithLifecycle()
-    val mediaGridState = rememberLazyGridState()
+    val mediaGridState = rememberSaveable(state.tab, saver = LazyGridState.Saver) {
+        LazyGridState()
+    }
     val scrolled = if (state.viewMode == ViewMode.LIST) mediaListState else mediaGridState
     if (state.viewMode == ViewMode.LIST) {
         mediaListState.rememberPosition(viewModel.listPosition, media.itemCount)
@@ -369,7 +374,7 @@ fun GalleryScreen(
         }
     ) { padding ->
         var tabsVisible by remember { mutableStateOf(true) }
-        val mediaScrolls by remember {
+        val mediaScrolls by remember(scrolled) {
             derivedStateOf { scrolled.canScrollForward || scrolled.canScrollBackward }
         }
         LaunchedEffect(state.tab) { tabsVisible = true }
@@ -445,7 +450,7 @@ fun GalleryScreen(
                 },
                 onEnd = viewModel::endRangeSelection
             )
-            PullToRefreshBox(
+            RefreshableContent(
                 isRefreshing = refreshing,
                 onRefresh = viewModel::refresh,
                 modifier = Modifier.fillMaxSize()

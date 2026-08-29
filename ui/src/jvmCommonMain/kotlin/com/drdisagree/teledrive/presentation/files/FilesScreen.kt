@@ -51,7 +51,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleFloatingActionButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -87,6 +86,7 @@ import com.drdisagree.teledrive.presentation.common.add
 import com.drdisagree.teledrive.presentation.common.isInitialLoad
 import com.drdisagree.teledrive.presentation.common.rememberPosition
 import com.drdisagree.teledrive.presentation.common.resolve
+import com.drdisagree.teledrive.presentation.components.RefreshableContent
 import com.drdisagree.teledrive.presentation.components.BlockingProgressDialog
 import com.drdisagree.teledrive.presentation.components.BottomBarSnackbarHost
 import com.drdisagree.teledrive.presentation.components.ConfirmDialog
@@ -541,7 +541,7 @@ fun FilesScreen(
                 if (state.breadcrumbs.size > 1) {
                     Breadcrumbs(crumbs = state.breadcrumbs, onOpen = onOpenCrumb)
                 }
-                PullToRefreshBox(
+                RefreshableContent(
                     isRefreshing = refreshing,
                     onRefresh = viewModel::refresh,
                     modifier = Modifier.fillMaxSize()

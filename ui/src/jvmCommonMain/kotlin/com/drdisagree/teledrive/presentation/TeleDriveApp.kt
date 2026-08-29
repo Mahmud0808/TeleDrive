@@ -234,13 +234,13 @@ private fun MainScaffold(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            NavigationRail {
+            NavigationRail(containerColor = MaterialTheme.colorScheme.surfaceContainer) {
                 TopLevelDestination.entries.forEach { destination ->
                     val selected =
                         currentDestination?.hasRoute(destination.route::class) == true
                     NavigationRailItem(
                         selected = selected,
-                        onClick = { navigateTopLevel(navController, destination) },
+                        onClick = { if (!selected) navigateTopLevel(navController, destination) },
                         icon = {
                             Icon(
                                 if (selected) destination.selectedIcon else destination.icon,

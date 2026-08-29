@@ -6,11 +6,11 @@ sealed interface GalleryListItem {
 
     val key: String
 
-    data class Media(val file: DriveFile) : GalleryListItem {
-        override val key: String get() = file.id
+    data class Media(val file: DriveFile, val scope: String) : GalleryListItem {
+        override val key: String get() = "$scope:${file.id}"
     }
 
-    data class DayHeader(val dayStartMillis: Long) : GalleryListItem {
-        override val key: String get() = "day-$dayStartMillis"
+    data class DayHeader(val dayStartMillis: Long, val scope: String) : GalleryListItem {
+        override val key: String get() = "$scope:day-$dayStartMillis"
     }
 }

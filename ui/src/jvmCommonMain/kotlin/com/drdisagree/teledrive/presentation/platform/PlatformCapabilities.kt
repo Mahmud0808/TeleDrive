@@ -10,6 +10,9 @@ interface PlatformCapabilities {
 
     /** True where file access needs runtime permissions. */
     val requiresPermissions: Boolean
+
+    /** True on touch platforms where the pull gesture does not fight scrolling. */
+    val supportsPullToRefresh: Boolean
 }
 
 val LocalPlatformCapabilities = staticCompositionLocalOf<PlatformCapabilities> {

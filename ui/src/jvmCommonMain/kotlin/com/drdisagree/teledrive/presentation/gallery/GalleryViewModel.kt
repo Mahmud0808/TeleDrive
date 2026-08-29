@@ -195,7 +195,8 @@ class GalleryViewModel(
         data: PagingData<DriveFile>,
         spec: FileQuerySpec
     ): PagingData<GalleryListItem> {
-        val mapped = data.map<DriveFile, GalleryListItem> { GalleryListItem.Media(it) }
+        val scope = spec.categories.joinToString("+") { it.name }
+        val mapped = data.map<DriveFile, GalleryListItem> { GalleryListItem.Media(it, scope) }
         if (spec.sortField != FileSortField.DATE_MODIFIED &&
             spec.sortField != FileSortField.DATE_ADDED
         ) {
@@ -207,7 +208,7 @@ class GalleryViewModel(
             val previous = (before as? GalleryListItem.Media)?.file
             val previousDay = previous
                 ?.let { Formatters.dayStart(timestampFor(it, spec.sortField)) }
-            if (previousDay == nextDay) null else GalleryListItem.DayHeader(nextDay)
+            if (previousDay == nextDay) null else GalleryListItem.DayHeader(nextDay, scope)
         }
     }
 

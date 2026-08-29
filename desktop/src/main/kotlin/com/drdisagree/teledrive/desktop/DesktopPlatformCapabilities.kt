@@ -8,4 +8,6 @@ class DesktopPlatformCapabilities : PlatformCapabilities {
     override val supportsAutoBackup: Boolean = false
 
     override val requiresPermissions: Boolean = false
+
+    override val supportsPullToRefresh: Boolean = false
 }
