@@ -29,9 +29,18 @@ class TelegramMediaByteSource(
         resolve()
         val toRead = minOf(count.toLong(), totalSize - position)
         if (toRead <= 0) return ByteArray(0)
+        readDownloaded(fileId, position, toRead)?.let { return it }
         awaitAvailable(position, toRead)
         return telegramClient.readFilePart(fileId, position, toRead)
     }
+
+    private suspend fun readDownloaded(
+        fileId: Int,
+        position: Long,
+        count: Long
+    ): ByteArray? = runCatching {
+        telegramClient.readFilePart(fileId, position, count).takeIf { it.isNotEmpty() }
+    }.getOrNull()
 
     private suspend fun resolve() {
         if (totalSize >= 0) return

@@ -62,9 +62,18 @@ class PartedMediaByteSource(
     }
 
     private suspend fun readPlain(active: OpenPart, within: Long, count: Int): ByteArray {
+        readDownloaded(active.fileId, within, count.toLong())?.let { return it }
         awaitAvailable(active.fileId, within, count.toLong())
         return telegramClient.readFilePart(active.fileId, within, count.toLong())
     }
+
+    private suspend fun readDownloaded(
+        fileId: Int,
+        position: Long,
+        count: Long
+    ): ByteArray? = runCatching {
+        telegramClient.readFilePart(fileId, position, count).takeIf { it.isNotEmpty() }
+    }.getOrNull()
 
     /**
      * Frames are a fixed plaintext size, so the sealed bytes covering a position
@@ -82,8 +91,10 @@ class PartedMediaByteSource(
                 streamCrypto.frameStoredSize(StreamCrypto.CHUNK_SIZE).toLong(),
                 active.storedSize - start
             )
-            awaitAvailable(active.fileId, start, span)
-            val sealed = telegramClient.readFilePart(active.fileId, start, span)
+            val sealed = readDownloaded(active.fileId, start, span) ?: run {
+                awaitAvailable(active.fileId, start, span)
+                telegramClient.readFilePart(active.fileId, start, span)
+            }
             frame = streamCrypto.decryptFrame(key, salt, wanted, sealed)
             frameIndex = wanted
         }
