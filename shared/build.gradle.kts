@@ -40,6 +40,10 @@ kotlin {
         }
         named("desktopMain") {
             dependsOn(jvmCommonMain)
+            dependencies {
+                implementation(libs.tdlight.java)
+                implementation("it.tdlight:tdlight-natives:${libs.versions.tdlightNatives.get()}:windows_amd64")
+            }
         }
         named("desktopTest") {
             dependsOn(jvmCommonTest)

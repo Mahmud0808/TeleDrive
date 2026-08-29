@@ -25,6 +25,11 @@ dependencyResolutionManagement {
                 includeGroup("com.github.tdlibx")
             }
         }
+        maven("https://mvn.mchv.eu/repository/mchv/") {
+            content {
+                includeGroup("it.tdlight")
+            }
+        }
     }
 }
 
