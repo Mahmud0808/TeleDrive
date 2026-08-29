@@ -8,7 +8,7 @@ plugins {
 kotlin {
     jvmToolchain(17)
 
-    androidLibrary {
+    android {
         namespace = "com.drdisagree.teledrive.shared"
         compileSdk = 37
         minSdk = 26
@@ -24,17 +24,22 @@ kotlin {
                 api(libs.androidx.room.runtime)
                 api(libs.androidx.room.paging)
                 api(libs.androidx.sqlite.bundled)
+                api(libs.androidx.datastore.preferences.core)
             }
         }
-        val jvmCommonMain by creating {
+        val jvmCommonMain = create("jvmCommonMain") {
             dependsOn(commonMain.get())
         }
-        val jvmCommonTest by creating {
+        val jvmCommonTest = create("jvmCommonTest") {
             dependsOn(commonTest.get())
         }
-        getByName("androidMain").dependsOn(jvmCommonMain)
-        getByName("desktopMain").dependsOn(jvmCommonMain)
-        getByName("desktopTest") {
+        named("androidMain") {
+            dependsOn(jvmCommonMain)
+        }
+        named("desktopMain") {
+            dependsOn(jvmCommonMain)
+        }
+        named("desktopTest") {
             dependsOn(jvmCommonTest)
             dependencies {
                 implementation(libs.junit)
