@@ -15,11 +15,11 @@ import java.io.File
  * it; on Android 11+ without all-files access that deletion needs one system
  * confirmation, which is returned as an IntentSender instead of failing quietly.
  */
-class LocalCopyDeleter(
+class MediaStoreLocalCopyDeleter(
     private val context: Context
-) {
+) : LocalCopyDeleter {
 
-    fun delete(paths: List<String>): LocalCleanup {
+    override fun delete(paths: List<String>): LocalCleanup {
         if (paths.isEmpty()) return LocalCleanup(0)
 
         val mediaUris = paths.mapNotNull { mediaUriFor(it) }
@@ -37,7 +37,7 @@ class LocalCopyDeleter(
         return LocalCleanup(deleted)
     }
 
-    fun isGone(path: String): Boolean = !File(path).exists()
+    override fun isGone(path: String): Boolean = !File(path).exists()
 
     private fun deleteOne(path: String): Boolean {
         val uri = mediaUriFor(path)

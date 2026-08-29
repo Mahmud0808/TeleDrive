@@ -1,10 +1,8 @@
 package com.drdisagree.teledrive.data.repository
 
-import android.content.Context
-import coil3.ImageLoader
-import coil3.memory.MemoryCache
+import com.drdisagree.teledrive.core.files.AppStoragePaths
 import com.drdisagree.teledrive.core.files.StorageInspector
-import com.drdisagree.teledrive.core.media.thumbnailCacheKey
+import com.drdisagree.teledrive.core.media.ThumbnailMemoryCache
 import com.drdisagree.teledrive.data.local.dao.CacheDao
 import com.drdisagree.teledrive.data.local.dao.ThumbnailDao
 import com.drdisagree.teledrive.data.local.entity.CacheEntryType
@@ -14,11 +12,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import java.io.File
 
 class CacheRepositoryImpl(
-    private val context: Context,
+    private val storagePaths: AppStoragePaths,
     private val cacheDao: CacheDao,
     private val thumbnailDao: ThumbnailDao,
     private val storageInspector: StorageInspector,
-    private val imageLoader: ImageLoader
+    private val thumbnailMemoryCache: ThumbnailMemoryCache
 ) : CacheRepository {
 
     private val stats = MutableStateFlow(CacheRepository.CacheStats(0, 0, 0, 0, 0))
@@ -38,7 +36,7 @@ class CacheRepositoryImpl(
     override suspend fun clearThumbnails() {
         thumbnailDir().deleteRecursively()
         thumbnailDao.deleteAll()
-        imageLoader.memoryCache?.clear()
+        thumbnailMemoryCache.clear()
         refreshStats()
     }
 
@@ -46,7 +44,7 @@ class CacheRepositoryImpl(
         for (thumbnail in thumbnailDao.textFileThumbnails()) {
             File(thumbnail.path).delete()
             thumbnailDao.delete(thumbnail.fileId)
-            imageLoader.memoryCache?.remove(MemoryCache.Key(thumbnailCacheKey(thumbnail.fileId)))
+            thumbnailMemoryCache.remove(thumbnail.fileId)
         }
         refreshStats()
     }
@@ -103,19 +101,19 @@ class CacheRepositoryImpl(
         }
     }
 
-    private fun thumbnailDir(): File = File(context.cacheDir, "thumbnails")
+    private fun thumbnailDir(): File = File(storagePaths.cacheDir, "thumbnails")
 
-    private fun stagingDir(): File = File(context.cacheDir, "staging")
+    private fun stagingDir(): File = File(storagePaths.cacheDir, "staging")
 
     private fun stagingSize(): Long = storageInspector.directorySize(stagingDir())
 
-    private fun partsDir(): File = File(context.cacheDir, "parts")
+    private fun partsDir(): File = File(storagePaths.cacheDir, "parts")
 
-    private fun assemblyDir(): File = File(context.cacheDir, "assembly")
+    private fun assemblyDir(): File = File(storagePaths.cacheDir, "assembly")
 
     private fun partSize(): Long =
         storageInspector.directorySize(partsDir()) +
                 storageInspector.directorySize(assemblyDir())
 
-    private fun tdlibFilesDir(): File = File(File(context.filesDir, "tdlib"), "files")
+    private fun tdlibFilesDir(): File = File(File(storagePaths.filesDir, "tdlib"), "files")
 }

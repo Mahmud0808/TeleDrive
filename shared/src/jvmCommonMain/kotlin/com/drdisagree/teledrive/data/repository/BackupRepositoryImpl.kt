@@ -1,9 +1,9 @@
 package com.drdisagree.teledrive.data.repository
 
-import android.os.Environment
 import com.drdisagree.teledrive.core.common.AppError
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.core.common.SafeLog
+import com.drdisagree.teledrive.core.files.AppStoragePaths
 import com.drdisagree.teledrive.core.files.Hashing
 import com.drdisagree.teledrive.core.files.MimeTypes
 import com.drdisagree.teledrive.core.media.MediaMetadataExtractor
@@ -49,7 +49,8 @@ class BackupRepositoryImpl(
     private val mediaMetadataExtractor: MediaMetadataExtractor,
     private val folderPathResolver: FolderPathResolver,
     private val fileRepository: FileRepository,
-    private val channelRepository: ChannelRepository
+    private val channelRepository: ChannelRepository,
+    private val storagePaths: AppStoragePaths
 ) : BackupRepository {
 
     override fun observeActiveSession(): Flow<BackupSession?> =
@@ -236,9 +237,11 @@ class BackupRepositoryImpl(
     /** Strips the primary or removable volume mount point from [absolutePath]. */
     private fun relativeToStorageRoot(absolutePath: String): String {
         val normalized = absolutePath.trimEnd('/')
-        val primary = Environment.getExternalStorageDirectory().absolutePath.trimEnd('/')
-        if (normalized == primary) return ""
-        if (normalized.startsWith("$primary/")) return normalized.removePrefix("$primary/")
+        val primary = storagePaths.externalStorageRoot?.absolutePath?.trimEnd('/')
+        if (primary != null) {
+            if (normalized == primary) return ""
+            if (normalized.startsWith("$primary/")) return normalized.removePrefix("$primary/")
+        }
         if (normalized.startsWith(VOLUME_MOUNT_ROOT)) {
             val rest = normalized.removePrefix(VOLUME_MOUNT_ROOT)
             val separator = rest.indexOf('/')

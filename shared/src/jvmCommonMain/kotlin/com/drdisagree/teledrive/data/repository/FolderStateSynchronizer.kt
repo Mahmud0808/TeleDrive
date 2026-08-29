@@ -1,6 +1,6 @@
 package com.drdisagree.teledrive.data.repository
 
-import android.content.Context
+import com.drdisagree.teledrive.core.files.AppStoragePaths
 import com.drdisagree.teledrive.core.common.SafeLog
 import com.drdisagree.teledrive.core.crypto.CryptoKeys
 import com.drdisagree.teledrive.core.crypto.StreamCrypto
@@ -28,7 +28,7 @@ import java.io.File
  * Pushes are debounced because a bulk operation can touch many folders.
  */
 class FolderStateSynchronizer(
-    private val context: Context,
+    private val storagePaths: AppStoragePaths,
     private val telegramClient: TelegramClient,
     private val folderDao: FolderDao,
     private val settingsRepository: SettingsRepository,
@@ -59,7 +59,7 @@ class FolderStateSynchronizer(
         )
 
         val existing = findStateDocument(chatId)
-        val staging = File(context.cacheDir, RemoteFolderState.FILE_NAME)
+        val staging = File(storagePaths.cacheDir, RemoteFolderState.FILE_NAME)
         val payload = json.encodeToString(RemoteFolderState.serializer(), state)
             .toByteArray(Charsets.UTF_8)
         val prefs = settingsRepository.preferences.first()

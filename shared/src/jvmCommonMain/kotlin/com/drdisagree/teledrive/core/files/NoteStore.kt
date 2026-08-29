@@ -1,15 +1,14 @@
 package com.drdisagree.teledrive.core.files
 
-import android.content.Context
 import java.io.File
 
 /** Local copies of notes, kept beside the app's other staged files. */
 class NoteStore(
-    private val context: Context
+    private val storagePaths: AppStoragePaths
 ) {
 
     fun write(name: String, body: String, existingPath: String?): File {
-        val directory = File(context.filesDir, NOTE_DIR).apply { mkdirs() }
+        val directory = File(storagePaths.filesDir, NOTE_DIR).apply { mkdirs() }
         val target = existingPath?.let(::File)?.takeIf { it.parentFile == directory }
             ?: File(directory, name)
         if (target.name != name) {

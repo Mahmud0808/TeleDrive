@@ -1,6 +1,6 @@
 package com.drdisagree.teledrive.data.repository
 
-import androidx.room.withTransaction
+import com.drdisagree.teledrive.data.local.database.inImmediateTransaction
 import com.drdisagree.teledrive.core.common.AppError
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.core.common.SafeLog
@@ -132,7 +132,7 @@ class SyncRepositoryImpl(
 
             var reachedKnown = false
             val known = existingForPage(page.documents)
-            database.withTransaction {
+            database.inImmediateTransaction {
                 for (document in page.documents) {
                     seenMessageIds.add(document.messageId)
                     // Still in the chat, but a delete is owed for it.
@@ -188,7 +188,7 @@ class SyncRepositoryImpl(
                 messageId != null && entity.chatId == chatId && messageId !in seenMessageIds
             }
             if (stale.isNotEmpty()) {
-                database.withTransaction {
+                database.inImmediateTransaction {
                     val (orphaned, localOnly) = stale.partition { it.localPath == null }
                     if (orphaned.isNotEmpty()) {
                         fileDao.deleteByIds(orphaned.map { it.id })

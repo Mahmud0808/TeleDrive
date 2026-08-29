@@ -1,7 +1,7 @@
 package com.drdisagree.teledrive.data.repository
 
-import android.content.Context
 import com.drdisagree.teledrive.core.common.AppError
+import com.drdisagree.teledrive.core.files.AppStoragePaths
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.core.crypto.CryptoKeys
 import com.drdisagree.teledrive.core.crypto.KeyBackupCodec
@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.first
 import java.io.File
 
 class KeyBackupRepositoryImpl(
-    private val context: Context,
+    private val storagePaths: AppStoragePaths,
     private val telegramClient: TelegramClient,
     private val keyBackupCodec: KeyBackupCodec,
     private val wrappedKeyRepository: WrappedKeyRepository,
@@ -47,7 +47,7 @@ class KeyBackupRepositoryImpl(
             telegramClient.deleteMessages(chatId, listOf(it.messageId))
         }
 
-        val staging = File(context.cacheDir, KeyBackupCodec.BACKUP_FILE_NAME)
+        val staging = File(storagePaths.cacheDir, KeyBackupCodec.BACKUP_FILE_NAME)
         staging.writeBytes(blob)
         try {
             telegramClient.uploadDocument(

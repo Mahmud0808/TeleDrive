@@ -9,15 +9,15 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import java.util.concurrent.TimeUnit
 
-class PublishScheduler(
+class WorkPublishScheduler(
     private val context: Context
-) {
+) : PublishScheduler {
 
     /**
      * Queues a drain of the publish outbox. Appending rather than keeping means
      * a row marked while the worker is already draining still gets a pass.
      */
-    fun kick() {
+    override fun kick() {
         val request = OneTimeWorkRequestBuilder<PublishOutboxWorker>()
             .setConstraints(
                 Constraints.Builder()

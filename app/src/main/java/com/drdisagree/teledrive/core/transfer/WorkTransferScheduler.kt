@@ -9,9 +9,9 @@ import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
 import androidx.core.content.edit
 
-class TransferScheduler(
+class WorkTransferScheduler(
     private val context: Context
-) {
+) : TransferScheduler {
 
     private val state =
         context.getSharedPreferences(SCHEDULER_PREFS, Context.MODE_PRIVATE)
@@ -22,7 +22,7 @@ class TransferScheduler(
      * Wi-Fi after the user allows mobile data. The constraint that was used is
      * remembered and the work is replaced whenever the rule changes.
      */
-    fun kick(allowMetered: Boolean) {
+    override fun kick(allowMetered: Boolean) {
         val policy = if (state.getBoolean(KEY_ALLOW_METERED, false) == allowMetered &&
             state.contains(KEY_ALLOW_METERED)
         ) {
@@ -34,7 +34,7 @@ class TransferScheduler(
     }
 
     /** Restarts the worker so a waiting queue reacts to a settings change now. */
-    fun rekick(allowMetered: Boolean) {
+    override fun rekick(allowMetered: Boolean) {
         enqueue(allowMetered, ExistingWorkPolicy.REPLACE, expedited = false)
     }
 

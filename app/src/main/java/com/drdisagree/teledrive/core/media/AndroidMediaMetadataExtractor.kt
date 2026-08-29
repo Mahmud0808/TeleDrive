@@ -5,15 +5,9 @@ import android.media.MediaMetadataRetriever
 import com.drdisagree.teledrive.core.files.MimeTypes
 import java.io.File
 
-class MediaMetadataExtractor {
+class AndroidMediaMetadataExtractor : MediaMetadataExtractor {
 
-    data class MediaInfo(
-        val width: Int?,
-        val height: Int?,
-        val durationMs: Long?
-    )
-
-    fun extract(file: File, mimeType: String): MediaInfo = when {
+    override fun extract(file: File, mimeType: String): MediaInfo = when {
         MimeTypes.isImage(mimeType) -> imageInfo(file)
         MimeTypes.isVideo(mimeType) || MimeTypes.isAudio(mimeType) -> videoInfo(file)
         else -> MediaInfo(null, null, null)

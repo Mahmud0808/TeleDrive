@@ -13,7 +13,7 @@ import javax.crypto.spec.GCMParameterSpec
  * to encrypt small blobs (wrapped content keys); bulk data uses [StreamCrypto]
  * with raw keys unwrapped through this class.
  */
-class KeystoreManager {
+class KeystoreManager : CredentialCipher {
 
     private val keyStore: KeyStore = KeyStore.getInstance(ANDROID_KEYSTORE).apply { load(null) }
 
@@ -37,14 +37,14 @@ class KeystoreManager {
     }
 
     /** Output layout: IV (12 bytes) || ciphertext+tag. */
-    fun encrypt(plaintext: ByteArray): ByteArray {
+    override fun encrypt(plaintext: ByteArray): ByteArray {
         val cipher = Cipher.getInstance(TRANSFORMATION)
         cipher.init(Cipher.ENCRYPT_MODE, masterKey())
         val ciphertext = cipher.doFinal(plaintext)
         return cipher.iv + ciphertext
     }
 
-    fun decrypt(blob: ByteArray): ByteArray {
+    override fun decrypt(blob: ByteArray): ByteArray {
         require(blob.size > IV_LENGTH) { "Encrypted blob too short" }
         val cipher = Cipher.getInstance(TRANSFORMATION)
         val spec = GCMParameterSpec(TAG_BITS, blob, 0, IV_LENGTH)

@@ -1,7 +1,7 @@
 package com.drdisagree.teledrive.data.repository
 
-import android.content.Context
 import com.drdisagree.teledrive.core.common.AppError
+import com.drdisagree.teledrive.core.files.AppStoragePaths
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.core.common.SafeLog
 import com.drdisagree.teledrive.core.crypto.SecureFileDeleter
@@ -27,7 +27,7 @@ import java.io.File
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class TrashRepositoryImpl(
-    private val context: Context,
+    private val storagePaths: AppStoragePaths,
     private val fileDao: FileDao,
     private val folderDao: FolderDao,
     private val backupDao: BackupDao,
@@ -220,7 +220,7 @@ class TrashRepositoryImpl(
      * elsewhere on the device are never touched here.
      */
     private fun deleteStagedCopy(file: File) {
-        val staging = File(context.filesDir, IMPORT_DIR)
+        val staging = File(storagePaths.filesDir, IMPORT_DIR)
         if (!file.absolutePath.startsWith(staging.absolutePath + File.separator)) return
         secureFileDeleter.delete(file)
     }

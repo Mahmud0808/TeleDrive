@@ -1,16 +1,13 @@
 package com.drdisagree.teledrive.core.files
 
-import android.webkit.MimeTypeMap
-import java.util.Locale
-
 object MimeTypes {
 
     const val GENERIC = "application/octet-stream"
 
     fun fromFileName(fileName: String): String {
-        val extension = fileName.substringAfterLast('.', "").lowercase(Locale.ROOT)
+        val extension = fileName.substringAfterLast('.', "").lowercase()
         if (extension.isEmpty()) return GENERIC
-        return MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension) ?: when (extension) {
+        return platformMimeTypeFromExtension(extension) ?: when (extension) {
             "mkv" -> "video/x-matroska"
             "flac" -> "audio/flac"
             "opus" -> "audio/opus"

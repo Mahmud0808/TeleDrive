@@ -1,10 +1,10 @@
 package com.drdisagree.teledrive.data.repository
 
-import android.util.Base64
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
-import com.drdisagree.teledrive.core.crypto.KeystoreManager
+import com.drdisagree.teledrive.core.crypto.CredentialCipher
+import kotlin.io.encoding.Base64
 import com.drdisagree.teledrive.core.telegram.TelegramCredentials
 import com.drdisagree.teledrive.data.local.preferences.PreferenceKeys
 import com.drdisagree.teledrive.domain.model.UserPreferences
@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.map
 
 class SettingsRepositoryImpl(
     private val dataStore: DataStore<Preferences>,
-    private val keystoreManager: KeystoreManager
+    private val credentialCipher: CredentialCipher
 ) : SettingsRepository {
 
     override val preferences: Flow<UserPreferences> = dataStore.data.map { it.toUserPreferences() }
@@ -39,28 +39,17 @@ class SettingsRepositoryImpl(
         val apiHashEnc = data[PreferenceKeys.API_HASH_ENCRYPTED] ?: return null
         return runCatching {
             TelegramCredentials(
-                apiId = String(
-                    keystoreManager.decrypt(
-                        Base64.decode(
-                            apiIdEnc,
-                            Base64.NO_WRAP
-                        )
-                    )
-                ).toInt(),
-                apiHash = String(keystoreManager.decrypt(Base64.decode(apiHashEnc, Base64.NO_WRAP)))
+                apiId = credentialCipher.decrypt(Base64.decode(apiIdEnc))
+                    .decodeToString()
+                    .toInt(),
+                apiHash = credentialCipher.decrypt(Base64.decode(apiHashEnc)).decodeToString()
             )
         }.getOrNull()
     }
 
     override suspend fun setTelegramCredentials(credentials: TelegramCredentials) {
-        val apiIdEnc = Base64.encodeToString(
-            keystoreManager.encrypt(credentials.apiId.toString().toByteArray()),
-            Base64.NO_WRAP
-        )
-        val apiHashEnc = Base64.encodeToString(
-            keystoreManager.encrypt(credentials.apiHash.toByteArray()),
-            Base64.NO_WRAP
-        )
+        val apiIdEnc = Base64.encode(credentialCipher.encrypt(credentials.apiId.toString().encodeToByteArray()))
+        val apiHashEnc = Base64.encode(credentialCipher.encrypt(credentials.apiHash.encodeToByteArray()))
         dataStore.edit {
             it[PreferenceKeys.API_ID_ENCRYPTED] = apiIdEnc
             it[PreferenceKeys.API_HASH_ENCRYPTED] = apiHashEnc
