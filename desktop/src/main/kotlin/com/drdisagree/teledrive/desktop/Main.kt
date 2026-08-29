@@ -1,6 +1,7 @@
 package com.drdisagree.teledrive.desktop
 
 import androidx.compose.ui.unit.dp
+import java.awt.Dimension
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.key.Keyer
@@ -33,6 +34,7 @@ fun main() {
             title = "TeleDrive",
             state = rememberWindowState(width = 1200.dp, height = 800.dp)
         ) {
+            window.minimumSize = Dimension(MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT)
             setSingletonImageLoaderFactory { context ->
                 ImageLoader.Builder(context)
                     .components {
@@ -56,3 +58,6 @@ fun main() {
         }
     }
 }
+
+private const val MIN_WINDOW_WIDTH = 480
+private const val MIN_WINDOW_HEIGHT = 600
