@@ -19,19 +19,15 @@ import com.drdisagree.teledrive.data.mapper.toDomain
 import com.drdisagree.teledrive.domain.model.TrashItem
 import com.drdisagree.teledrive.domain.repository.TransferRepository
 import com.drdisagree.teledrive.domain.repository.TrashRepository
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import java.io.File
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@Singleton
-class TrashRepositoryImpl @Inject constructor(
-    @param:ApplicationContext private val context: Context,
+class TrashRepositoryImpl(
+    private val context: Context,
     private val fileDao: FileDao,
     private val folderDao: FolderDao,
     private val backupDao: BackupDao,

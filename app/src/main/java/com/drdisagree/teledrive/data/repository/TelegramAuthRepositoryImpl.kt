@@ -14,12 +14,9 @@ import com.drdisagree.teledrive.domain.repository.TelegramAuthRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
-import javax.inject.Inject
-import javax.inject.Singleton
 import com.drdisagree.teledrive.domain.repository.ProxyRepository
 
-@Singleton
-class TelegramAuthRepositoryImpl @Inject constructor(
+class TelegramAuthRepositoryImpl(
     private val telegramClient: TelegramClient,
     private val settingsRepository: SettingsRepository,
     private val proxyRepository: ProxyRepository

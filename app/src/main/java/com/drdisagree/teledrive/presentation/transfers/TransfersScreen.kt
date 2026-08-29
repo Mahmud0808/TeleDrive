@@ -45,7 +45,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import org.koin.androidx.compose.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.drdisagree.teledrive.R
 import com.drdisagree.teledrive.domain.model.TransferStage
@@ -63,7 +63,7 @@ import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
 @Composable
 fun TransfersScreen(
     onBack: () -> Unit,
-    viewModel: TransfersViewModel = hiltViewModel()
+    viewModel: TransfersViewModel = koinViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     var confirmClearFinished by remember { mutableStateOf(false) }
@@ -73,7 +73,7 @@ fun TransfersScreen(
     if (confirmClearFinished) {
         ConfirmDialog(
             title = stringResource(R.string.transfers_clear_finished_transfers),
-            message = stringResource(R.string.transfers_completed_cancelled_entries_removed),
+            message = stringResource(R.string.transfers_completed_canceled_entries_removed),
             confirmLabel = stringResource(R.string.common_clear),
             onConfirm = {
                 confirmClearFinished = false

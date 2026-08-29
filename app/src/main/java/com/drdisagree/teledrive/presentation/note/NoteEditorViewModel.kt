@@ -11,8 +11,6 @@ import com.drdisagree.teledrive.domain.repository.FileRepository
 import com.drdisagree.teledrive.domain.repository.TransferRepository
 import com.drdisagree.teledrive.presentation.common.toUserMessage
 import com.drdisagree.teledrive.presentation.navigation.Route
-import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,7 +18,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 data class NoteEditorUiState(
     val title: String = "",
@@ -30,9 +27,8 @@ data class NoteEditorUiState(
     val isNew: Boolean = true
 )
 
-@HiltViewModel
-class NoteEditorViewModel @Inject constructor(
-    @param:ApplicationContext private val context: Context,
+class NoteEditorViewModel(
+    private val context: Context,
     private val fileRepository: FileRepository,
     private val transferRepository: TransferRepository,
     savedStateHandle: SavedStateHandle

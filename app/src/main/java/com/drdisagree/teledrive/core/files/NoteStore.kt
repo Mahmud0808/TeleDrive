@@ -1,15 +1,11 @@
 package com.drdisagree.teledrive.core.files
 
 import android.content.Context
-import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /** Local copies of notes, kept beside the app's other staged files. */
-@Singleton
-class NoteStore @Inject constructor(
-    @param:ApplicationContext private val context: Context
+class NoteStore(
+    private val context: Context
 ) {
 
     fun write(name: String, body: String, existingPath: String?): File {

@@ -25,8 +25,6 @@ import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.repository.SyncRepository
 import com.drdisagree.teledrive.domain.repository.TelegramAuthRepository
 import com.drdisagree.teledrive.presentation.common.toUserMessage
-import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -43,7 +41,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 import com.drdisagree.teledrive.core.update.AppRelease
 import com.drdisagree.teledrive.core.update.UpdateChecker
 
@@ -63,9 +60,8 @@ data class SettingsUiState(
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@HiltViewModel
-class SettingsViewModel @Inject constructor(
-    @param:ApplicationContext private val context: Context,
+class SettingsViewModel(
+    private val context: Context,
     private val settingsRepository: SettingsRepository,
     private val telegramAuthRepository: TelegramAuthRepository,
     private val telegramClient: TelegramClient,

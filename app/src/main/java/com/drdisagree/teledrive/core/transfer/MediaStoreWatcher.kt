@@ -10,7 +10,6 @@ import com.drdisagree.teledrive.core.common.SafeLog
 import com.drdisagree.teledrive.domain.model.BackupTrigger
 import com.drdisagree.teledrive.domain.repository.BackupRepository
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -18,9 +17,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-import javax.inject.Provider
-import javax.inject.Singleton
 
 /**
  * Watches MediaStore while the app process is alive. The WorkManager content
@@ -28,11 +24,10 @@ import javax.inject.Singleton
  * and can hold it for minutes; this picks a new shot up straight away whenever
  * the app is running, which is when the user is watching for it.
  */
-@Singleton
-class MediaStoreWatcher @Inject constructor(
-    @param:ApplicationContext private val context: Context,
+class MediaStoreWatcher(
+    private val context: Context,
     private val settingsRepository: SettingsRepository,
-    private val backupRepository: Provider<BackupRepository>
+    private val backupRepository: Lazy<BackupRepository>
 ) {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -60,7 +55,7 @@ class MediaStoreWatcher @Inject constructor(
         val prefs = settingsRepository.preferences.first()
         if (!prefs.autoBackupEnabled || !prefs.instantBackupEnabled) return
         SafeLog.d(TAG, "New media seen while running, scanning")
-        backupRepository.get().startBackup(BackupTrigger.AUTOMATIC)
+        backupRepository.value.startBackup(BackupTrigger.AUTOMATIC)
     }
 
     private companion object {

@@ -9,23 +9,19 @@ import com.drdisagree.teledrive.data.local.entity.TransferEntity
 import com.drdisagree.teledrive.domain.model.BackupSessionStatus
 import com.drdisagree.teledrive.domain.model.TransferState
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Recomputes a backup session from the transfers that belong to it. Counting
  * live rows instead of incrementing counters keeps the session honest when
  * transfers are canceled, for example after a folder is unselected mid-run.
  */
-@Singleton
-class BackupSessionTracker @Inject constructor(
+class BackupSessionTracker(
     private val transferDao: TransferDao,
     private val backupDao: BackupDao,
     private val settingsRepository: SettingsRepository,
     private val appNotifications: AppNotifications,
-    @param:ApplicationContext private val context: Context
+    private val context: Context
 ) {
 
     /** Recomputes whichever session is still running or paused. */

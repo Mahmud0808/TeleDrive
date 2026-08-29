@@ -7,10 +7,7 @@ import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import com.drdisagree.teledrive.core.common.SafeLog
-import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Removes local files that are already backed up. Media indexed by MediaStore
@@ -18,9 +15,8 @@ import javax.inject.Singleton
  * it; on Android 11+ without all-files access that deletion needs one system
  * confirmation, which is returned as an IntentSender instead of failing quietly.
  */
-@Singleton
-class LocalCopyDeleter @Inject constructor(
-    @param:ApplicationContext private val context: Context
+class LocalCopyDeleter(
+    private val context: Context
 ) {
 
     fun delete(paths: List<String>): LocalCleanup {

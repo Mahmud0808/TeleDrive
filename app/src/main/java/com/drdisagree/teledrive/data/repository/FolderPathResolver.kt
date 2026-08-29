@@ -5,16 +5,13 @@ import com.drdisagree.teledrive.data.local.entity.FolderEntity
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.UUID
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Maps between folder ids and slash-separated paths used in remote manifests.
  * Creating missing segments is serialized to avoid duplicate folders when the
  * sync engine and uploads race.
  */
-@Singleton
-class FolderPathResolver @Inject constructor(
+class FolderPathResolver(
     private val folderDao: FolderDao,
     private val activeChannel: ActiveChannel
 ) {

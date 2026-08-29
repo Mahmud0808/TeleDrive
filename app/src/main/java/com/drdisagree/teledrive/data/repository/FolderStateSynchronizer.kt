@@ -14,14 +14,11 @@ import com.drdisagree.teledrive.data.local.dao.FolderDao
 import com.drdisagree.teledrive.data.local.entity.FolderEntity
 import com.drdisagree.teledrive.data.remote.telegram.RemoteFolderState
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
 import java.io.File
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Mirrors the folder tree into a single document in the storage chat. File
@@ -30,9 +27,8 @@ import javax.inject.Singleton
  *
  * Pushes are debounced because a bulk operation can touch many folders.
  */
-@Singleton
-class FolderStateSynchronizer @Inject constructor(
-    @param:ApplicationContext private val context: Context,
+class FolderStateSynchronizer(
+    private val context: Context,
     private val telegramClient: TelegramClient,
     private val folderDao: FolderDao,
     private val settingsRepository: SettingsRepository,

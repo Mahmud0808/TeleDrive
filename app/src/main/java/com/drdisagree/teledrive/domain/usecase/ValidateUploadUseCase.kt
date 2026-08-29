@@ -2,13 +2,12 @@ package com.drdisagree.teledrive.domain.usecase
 
 import com.drdisagree.teledrive.core.common.AppError
 import com.drdisagree.teledrive.core.telegram.TelegramLimits
-import javax.inject.Inject
 
 /**
  * Pre-flight checks before a transfer is queued, so obvious failures surface
  * immediately instead of near the end of a long upload.
  */
-class ValidateUploadUseCase @Inject constructor() {
+class ValidateUploadUseCase {
 
     /**
      * @param requiredScratchBytes extra local space needed, e.g. for an

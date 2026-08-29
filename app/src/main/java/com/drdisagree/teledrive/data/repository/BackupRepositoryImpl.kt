@@ -36,11 +36,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.io.File
 import java.util.UUID
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class BackupRepositoryImpl @Inject constructor(
+class BackupRepositoryImpl(
     private val backupDao: BackupDao,
     private val fileDao: FileDao,
     private val transferDao: TransferDao,

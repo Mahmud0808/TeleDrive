@@ -5,10 +5,7 @@ import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
 import com.drdisagree.teledrive.core.common.SafeLog
-import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Turns a SAF-picked document into a real path the transfer engine can upload
@@ -18,9 +15,8 @@ import javax.inject.Singleton
  * (cloud providers, in-memory providers) is copied into app storage, because a
  * content URI permission is not guaranteed to survive a reboot.
  */
-@Singleton
-class FileImporter @Inject constructor(
-    @param:ApplicationContext private val context: Context
+class FileImporter(
+    private val context: Context
 ) {
 
     /** [name] is what the drive shows; [path] may carry a staging suffix. */

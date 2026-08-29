@@ -1,7 +1,6 @@
 package com.drdisagree.teledrive.core.publish
 
 import android.content.Context
-import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.drdisagree.teledrive.core.common.AppError
@@ -11,8 +10,6 @@ import com.drdisagree.teledrive.data.local.dao.FileDao
 import com.drdisagree.teledrive.data.local.dao.FolderDao
 import com.drdisagree.teledrive.data.repository.FileManifestPublisher
 import com.drdisagree.teledrive.data.repository.FolderStateSynchronizer
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
 import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.core.telegram.TelegramException
 import com.drdisagree.teledrive.data.local.dao.PendingDeleteDao
@@ -25,10 +22,9 @@ import kotlin.time.Duration.Companion.milliseconds
  * afterward. Rows keep their flag until the caption is accepted, so a failed
  * edit is retried instead of being reverted by the next sync.
  */
-@HiltWorker
-class PublishOutboxWorker @AssistedInject constructor(
-    @Assisted appContext: Context,
-    @Assisted params: WorkerParameters,
+class PublishOutboxWorker(
+    appContext: Context,
+    params: WorkerParameters,
     private val fileDao: FileDao,
     private val folderDao: FolderDao,
     private val pendingDeleteDao: PendingDeleteDao,

@@ -19,8 +19,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.io.File
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.withTimeoutOrNull
 
@@ -29,8 +27,7 @@ import kotlinx.coroutines.withTimeoutOrNull
  * the channel that owns them, so switching is only a matter of pointing the
  * app at another chat id; nothing is deleted and nothing is re-downloaded.
  */
-@Singleton
-class ChannelRepositoryImpl @Inject constructor(
+class ChannelRepositoryImpl(
     private val channelDao: StorageChannelDao,
     private val telegramClient: TelegramClient,
     private val settingsRepository: SettingsRepository,

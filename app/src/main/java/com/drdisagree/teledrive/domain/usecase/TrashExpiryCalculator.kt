@@ -1,8 +1,7 @@
 package com.drdisagree.teledrive.domain.usecase
 
-import javax.inject.Inject
 
-class TrashExpiryCalculator @Inject constructor() {
+class TrashExpiryCalculator {
 
     /** [autoClearDays] <= 0 means never expire. */
     fun isExpired(trashedAt: Long, autoClearDays: Int, now: Long): Boolean {

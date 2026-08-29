@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.pm.ServiceInfo
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
@@ -20,8 +19,6 @@ import com.drdisagree.teledrive.domain.model.TransferState
 import com.drdisagree.teledrive.domain.model.TransferType
 import com.drdisagree.teledrive.domain.model.UserPreferences
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
@@ -40,10 +37,9 @@ import kotlin.time.Duration.Companion.milliseconds
  * with exponential backoff up to the configured retry count; rate limits honor
  * the server-provided delay.
  */
-@HiltWorker
-class TransferQueueWorker @AssistedInject constructor(
-    @Assisted appContext: Context,
-    @Assisted params: WorkerParameters,
+class TransferQueueWorker(
+    appContext: Context,
+    params: WorkerParameters,
     private val transferDao: TransferDao,
     private val fileDao: FileDao,
     private val transferExecutor: TransferExecutor,

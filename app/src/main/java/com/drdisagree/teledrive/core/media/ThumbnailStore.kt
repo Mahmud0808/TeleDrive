@@ -17,14 +17,11 @@ import com.drdisagree.teledrive.data.local.dao.FileDao
 import com.drdisagree.teledrive.data.local.dao.ThumbnailDao
 import com.drdisagree.teledrive.data.local.entity.ThumbnailEntity
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import java.io.ByteArrayOutputStream
 import java.io.File
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Generates and caches thumbnails. Cache files are AES-GCM sealed when
@@ -32,9 +29,8 @@ import javax.inject.Singleton
  * the cache directory. Falls back to the Telegram mini-thumbnail when no
  * local copy exists.
  */
-@Singleton
-class ThumbnailStore @Inject constructor(
-    @param:ApplicationContext private val context: Context,
+class ThumbnailStore(
+    private val context: Context,
     private val fileDao: FileDao,
     private val thumbnailDao: ThumbnailDao,
     private val telegramClient: TelegramClient,

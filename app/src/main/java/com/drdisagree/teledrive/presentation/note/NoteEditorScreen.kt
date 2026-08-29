@@ -46,7 +46,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import org.koin.androidx.compose.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.drdisagree.teledrive.R
 import com.drdisagree.teledrive.presentation.common.CollectSnackbarMessages
@@ -57,7 +57,7 @@ import com.drdisagree.teledrive.presentation.components.LoadingState
 @Composable
 fun NoteEditorScreen(
     onBack: () -> Unit,
-    viewModel: NoteEditorViewModel = hiltViewModel()
+    viewModel: NoteEditorViewModel = koinViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }

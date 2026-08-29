@@ -17,24 +17,20 @@ import com.drdisagree.teledrive.data.local.entity.CacheEntryType
 import com.drdisagree.teledrive.domain.model.DriveFile
 import com.drdisagree.teledrive.domain.model.FileCategory
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import net.lingala.zip4j.ZipFile
 import java.io.File
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Turns a [DriveFile] into displayable preview content, fetching remote files
  * into the preview cache when they are small enough. Original local files are
  * always plaintext; only remote copies and caches are ever encrypted.
  */
-@Singleton
-class PreviewContentResolver @Inject constructor(
-    @param:ApplicationContext private val context: Context,
+class PreviewContentResolver(
+    private val context: Context,
     private val telegramClient: TelegramClient,
     private val streamCrypto: StreamCrypto,
     private val wrappedKeyRepository: WrappedKeyRepository,

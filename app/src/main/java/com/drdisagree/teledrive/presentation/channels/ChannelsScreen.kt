@@ -64,7 +64,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import org.koin.androidx.compose.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.drdisagree.teledrive.R
 import com.drdisagree.teledrive.domain.model.DriveChannel
@@ -85,7 +85,7 @@ import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
 @Composable
 fun ChannelsScreen(
     onBack: () -> Unit,
-    viewModel: ChannelsViewModel = hiltViewModel()
+    viewModel: ChannelsViewModel = koinViewModel()
 ) {
     val channels by viewModel.channels.collectAsStateWithLifecycle()
     val working by viewModel.working.collectAsStateWithLifecycle()

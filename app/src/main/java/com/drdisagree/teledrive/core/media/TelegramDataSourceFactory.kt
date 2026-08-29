@@ -6,10 +6,9 @@ import com.drdisagree.teledrive.core.crypto.CryptoKeys
 import com.drdisagree.teledrive.core.crypto.StreamCrypto
 import com.drdisagree.teledrive.core.crypto.WrappedKeyRepository
 import com.drdisagree.teledrive.core.telegram.TelegramClient
-import javax.inject.Inject
 
 @UnstableApi
-class TelegramDataSourceFactory @Inject constructor(
+class TelegramDataSourceFactory(
     private val telegramClient: TelegramClient,
     private val streamCrypto: StreamCrypto,
     private val wrappedKeyRepository: WrappedKeyRepository

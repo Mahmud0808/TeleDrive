@@ -7,11 +7,8 @@ import android.os.Environment
 import android.provider.MediaStore
 import androidx.annotation.RequiresApi
 import com.drdisagree.teledrive.core.common.SafeLog
-import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import java.io.OutputStream
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Writes finished downloads to the shared Downloads/TeleDrive folder, so they
@@ -19,9 +16,8 @@ import javax.inject.Singleton
  * the gallery. MediaStore owns the entry on Android 10 and above; older
  * releases and devices with all-files access write the file directly.
  */
-@Singleton
-class DownloadWriter @Inject constructor(
-    @param:ApplicationContext private val context: Context
+class DownloadWriter(
+    private val context: Context
 ) {
 
     /**

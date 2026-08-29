@@ -14,14 +14,10 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.drdisagree.teledrive.R
 import com.drdisagree.teledrive.presentation.MainActivity
-import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
-import javax.inject.Singleton
 import com.drdisagree.teledrive.core.update.UpdateSkipReceiver
 
-@Singleton
-class AppNotifications @Inject constructor(
-    @param:ApplicationContext private val context: Context
+class AppNotifications(
+    private val context: Context
 ) {
 
     @SuppressLint("MissingPermission")

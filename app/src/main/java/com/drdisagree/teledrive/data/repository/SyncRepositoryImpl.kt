@@ -30,8 +30,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.UUID
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
@@ -40,8 +38,7 @@ import kotlin.time.Duration.Companion.milliseconds
  * and local rows pointing at deleted messages are detached. After a complete
  * local wipe this rebuilds the whole drive, including the folder tree.
  */
-@Singleton
-class SyncRepositoryImpl @Inject constructor(
+class SyncRepositoryImpl(
     private val telegramClient: TelegramClient,
     private val fileDao: FileDao,
     private val manifestCodec: ManifestCodec,

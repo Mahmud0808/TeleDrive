@@ -17,8 +17,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Saved routes to Telegram, for networks where it is blocked.
@@ -27,8 +25,7 @@ import javax.inject.Singleton
  * deleted on an auth reset, and a user who reaches Telegram only through a
  * proxy would otherwise lose the way back in.
  */
-@Singleton
-class ProxyRepositoryImpl @Inject constructor(
+class ProxyRepositoryImpl(
     private val proxyDao: ProxyDao,
     private val settingsRepository: SettingsRepository,
     private val telegramClient: TelegramClient,

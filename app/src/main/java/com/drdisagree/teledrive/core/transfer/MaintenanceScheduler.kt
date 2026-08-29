@@ -6,15 +6,11 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
 import com.drdisagree.teledrive.core.update.UpdateCheckWorker
 
-@Singleton
-class MaintenanceScheduler @Inject constructor(
-    @param:ApplicationContext private val context: Context,
+class MaintenanceScheduler(
+    private val context: Context,
     private val mediaTriggerScheduler: MediaTriggerScheduler
 ) {
 

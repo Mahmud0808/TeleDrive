@@ -13,8 +13,6 @@ import java.net.InetSocketAddress
 import java.net.Socket
 import java.net.SocketTimeoutException
 import kotlin.random.Random
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Checks a proxy without TDLib, which refuses every request until it has been
@@ -23,8 +21,7 @@ import javax.inject.Singleton
  * MTProto hides its handshake behind the secret, so only the connection itself
  * can be confirmed.
  */
-@Singleton
-class ProxyProbe @Inject constructor(
+class ProxyProbe(
     private val dispatchers: DispatcherProvider
 ) {
 

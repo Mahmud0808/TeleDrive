@@ -7,14 +7,10 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
-import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
-import javax.inject.Singleton
 import androidx.core.content.edit
 
-@Singleton
-class TransferScheduler @Inject constructor(
-    @param:ApplicationContext private val context: Context
+class TransferScheduler(
+    private val context: Context
 ) {
 
     private val state =

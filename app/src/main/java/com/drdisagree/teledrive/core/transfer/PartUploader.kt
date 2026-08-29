@@ -13,15 +13,12 @@ import com.drdisagree.teledrive.data.local.entity.FileEntity
 import com.drdisagree.teledrive.data.local.entity.FilePartEntity
 import com.drdisagree.teledrive.data.remote.telegram.ManifestCodec
 import com.drdisagree.teledrive.data.remote.telegram.RemoteFileManifest
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.InputStream
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Uploads a file Telegram will not take whole, one part at a time.
@@ -31,9 +28,8 @@ import javax.inject.Singleton
  * file. Parts already recorded are skipped, which is what makes a paused or
  * interrupted upload continue from the part it stopped on rather than the start.
  */
-@Singleton
-class PartUploader @Inject constructor(
-    @param:ApplicationContext private val context: Context,
+class PartUploader(
+    private val context: Context,
     private val telegramClient: TelegramClient,
     private val filePartDao: FilePartDao,
     private val manifestCodec: ManifestCodec,

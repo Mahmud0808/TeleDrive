@@ -12,7 +12,6 @@ import com.drdisagree.teledrive.domain.repository.ChannelRepository
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.repository.SyncRepository
 import com.drdisagree.teledrive.domain.repository.TelegramAuthRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -26,7 +25,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 import com.drdisagree.teledrive.core.update.AppRelease
 import com.drdisagree.teledrive.core.update.UpdateChecker
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,8 +43,7 @@ data class AppUiState(
     val locked: Boolean = false
 )
 
-@HiltViewModel
-class AppViewModel @Inject constructor(
+class AppViewModel(
     private val settingsRepository: SettingsRepository,
     private val telegramAuthRepository: TelegramAuthRepository,
     private val syncRepository: SyncRepository,

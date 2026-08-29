@@ -47,13 +47,10 @@ import kotlinx.coroutines.flow.map
 import java.io.File
 import java.net.URI
 import java.util.UUID
-import javax.inject.Inject
-import javax.inject.Singleton
 import com.drdisagree.teledrive.core.publish.PublishScheduler
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@Singleton
-class FileRepositoryImpl @Inject constructor(
+class FileRepositoryImpl(
     private val fileDao: FileDao,
     private val folderDao: FolderDao,
     private val publishScheduler: PublishScheduler,

@@ -3,14 +3,10 @@ package com.drdisagree.teledrive.core.crypto
 import android.content.Context
 import com.drdisagree.teledrive.core.common.SafeLog
 import com.drdisagree.teledrive.core.telegram.TdlibDatabaseKeyProvider
-import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class TdlibDatabaseKeyProviderImpl @Inject constructor(
-    @param:ApplicationContext private val context: Context,
+class TdlibDatabaseKeyProviderImpl(
+    private val context: Context,
     private val wrappedKeyRepository: WrappedKeyRepository
 ) : TdlibDatabaseKeyProvider {
 

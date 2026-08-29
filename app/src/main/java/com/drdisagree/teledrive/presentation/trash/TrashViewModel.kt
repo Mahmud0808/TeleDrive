@@ -9,8 +9,6 @@ import com.drdisagree.teledrive.domain.model.TrashItem
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.repository.TrashRepository
 import com.drdisagree.teledrive.presentation.common.toUserMessage
-import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,7 +21,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
 data class TrashUiState(
     val items: List<TrashItem> = emptyList(),
@@ -36,9 +33,8 @@ data class TrashUiState(
     val selectionMode: Boolean get() = selection.isNotEmpty()
 }
 
-@HiltViewModel
-class TrashViewModel @Inject constructor(
-    @param:ApplicationContext private val context: Context,
+class TrashViewModel(
+    private val context: Context,
     private val trashRepository: TrashRepository,
     private val settingsRepository: SettingsRepository
 ) : ViewModel() {

@@ -31,7 +31,6 @@ import com.drdisagree.teledrive.presentation.components.zoomedIn
 import com.drdisagree.teledrive.presentation.components.zoomedOut
 import com.drdisagree.teledrive.presentation.navigation.Route
 import com.drdisagree.teledrive.presentation.preview.PreviewSequence
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -49,7 +48,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 enum class GalleryTab(@param:StringRes val labelRes: Int) {
     ALL(R.string.gallery_tab_all),
@@ -76,8 +74,7 @@ data class GalleryUiState(
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@HiltViewModel
-class GalleryViewModel @Inject constructor(
+class GalleryViewModel(
     savedStateHandle: SavedStateHandle,
     private val fileRepository: FileRepository,
     private val trashRepository: TrashRepository,

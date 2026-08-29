@@ -7,14 +7,10 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class PublishScheduler @Inject constructor(
-    @param:ApplicationContext private val context: Context
+class PublishScheduler(
+    private val context: Context
 ) {
 
     /**

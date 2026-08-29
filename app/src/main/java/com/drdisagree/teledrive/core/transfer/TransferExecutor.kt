@@ -29,7 +29,6 @@ import com.drdisagree.teledrive.domain.model.TransferStage
 import com.drdisagree.teledrive.domain.model.TransferState
 import com.drdisagree.teledrive.domain.model.TransferType
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -40,8 +39,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import java.io.File
 import java.util.UUID
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
@@ -51,9 +48,8 @@ import kotlin.time.Duration.Companion.milliseconds
  * progress event and the underlying TDLib operation is canceled by aborting
  * flow collection.
  */
-@Singleton
-class TransferExecutor @Inject constructor(
-    @param:ApplicationContext private val context: Context,
+class TransferExecutor(
+    private val context: Context,
     private val telegramClient: TelegramClient,
     private val transferDao: TransferDao,
     private val fileDao: FileDao,

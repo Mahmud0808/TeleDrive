@@ -2,14 +2,10 @@ package com.drdisagree.teledrive.core.files
 
 import android.content.Context
 import android.os.StatFs
-import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class StorageInspector @Inject constructor(
-    @param:ApplicationContext private val context: Context
+class StorageInspector(
+    private val context: Context
 ) {
 
     fun availableBytes(directory: File = context.filesDir): Long = runCatching {

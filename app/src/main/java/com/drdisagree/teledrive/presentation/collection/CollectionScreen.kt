@@ -28,7 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import org.koin.androidx.compose.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
@@ -48,7 +48,7 @@ import com.drdisagree.teledrive.presentation.preview.PreviewSequence
 fun CollectionScreen(
     onBack: () -> Unit,
     onOpenFile: (String, PreviewSequence) -> Unit,
-    viewModel: CollectionViewModel = hiltViewModel()
+    viewModel: CollectionViewModel = koinViewModel()
 ) {
     val files = viewModel.files.collectAsLazyPagingItems()
     val selection by viewModel.selection.collectAsStateWithLifecycle()

@@ -4,11 +4,8 @@ import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import com.drdisagree.teledrive.core.files.MimeTypes
 import java.io.File
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class MediaMetadataExtractor @Inject constructor() {
+class MediaMetadataExtractor {
 
     data class MediaInfo(
         val width: Int?,

@@ -14,15 +14,11 @@ import com.drdisagree.teledrive.core.telegram.TelegramException
 import com.drdisagree.teledrive.core.telegram.TelegramUploadEvent
 import com.drdisagree.teledrive.domain.repository.KeyBackupRepository
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
 import java.io.File
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class KeyBackupRepositoryImpl @Inject constructor(
-    @param:ApplicationContext private val context: Context,
+class KeyBackupRepositoryImpl(
+    private val context: Context,
     private val telegramClient: TelegramClient,
     private val keyBackupCodec: KeyBackupCodec,
     private val wrappedKeyRepository: WrappedKeyRepository,

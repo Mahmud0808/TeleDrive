@@ -6,8 +6,7 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.drdisagree.teledrive.core.common.SafeLog
-import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
+import org.koin.android.ext.android.inject
 
 /**
  * Watches MediaStore for new photos and videos through JobScheduler directly.
@@ -17,11 +16,9 @@ import javax.inject.Inject
  * so triggers were lost. A fixed job id makes re-arming deterministic: the next
  * job replaces the previous one, and the scan itself runs as ordinary work.
  */
-@AndroidEntryPoint
 class MediaTriggerService : JobService() {
 
-    @Inject
-    lateinit var mediaTriggerScheduler: MediaTriggerScheduler
+    private val mediaTriggerScheduler: MediaTriggerScheduler by inject()
 
     override fun onStartJob(params: JobParameters?): Boolean {
         SafeLog.d(TAG, "Media change reported")

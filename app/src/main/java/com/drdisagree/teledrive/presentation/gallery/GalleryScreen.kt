@@ -58,7 +58,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import org.koin.androidx.compose.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
@@ -183,7 +183,7 @@ fun GalleryScreen(
     onOpenFile: (String, PreviewSequence) -> Unit,
     onOpenAlbum: (MediaAlbum) -> Unit = {},
     onBack: (() -> Unit)? = null,
-    viewModel: GalleryViewModel = hiltViewModel()
+    viewModel: GalleryViewModel = koinViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val media = viewModel.pagedMedia.collectAsLazyPagingItems()

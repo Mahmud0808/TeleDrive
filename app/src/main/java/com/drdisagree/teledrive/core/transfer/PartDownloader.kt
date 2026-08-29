@@ -9,13 +9,10 @@ import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.core.telegram.TelegramDownloadEvent
 import com.drdisagree.teledrive.data.local.dao.FilePartDao
 import com.drdisagree.teledrive.data.local.entity.FilePartEntity
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import java.io.File
 import java.io.FileOutputStream
-import javax.inject.Inject
-import javax.inject.Singleton
 import com.drdisagree.teledrive.core.dispatchers.DispatcherProvider
 import kotlinx.coroutines.withContext
 
@@ -27,9 +24,8 @@ import kotlinx.coroutines.withContext
  * survived, which is what lets a paused or failed download carry on from the
  * part it reached instead of starting over.
  */
-@Singleton
-class PartDownloader @Inject constructor(
-    @param:ApplicationContext private val context: Context,
+class PartDownloader(
+    private val context: Context,
     private val telegramClient: TelegramClient,
     private val filePartDao: FilePartDao,
     private val streamCrypto: StreamCrypto,

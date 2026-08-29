@@ -12,11 +12,8 @@ import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class SettingsRepositoryImpl @Inject constructor(
+class SettingsRepositoryImpl(
     private val dataStore: DataStore<Preferences>,
     private val keystoreManager: KeystoreManager
 ) : SettingsRepository {

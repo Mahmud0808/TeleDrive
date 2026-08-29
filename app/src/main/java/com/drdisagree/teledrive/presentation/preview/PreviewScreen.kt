@@ -92,7 +92,8 @@ import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.util.UnstableApi
 import com.drdisagree.teledrive.R
@@ -116,20 +117,9 @@ import com.drdisagree.teledrive.presentation.components.FileInfoSheet
 import com.drdisagree.teledrive.presentation.components.LoadingState
 import com.drdisagree.teledrive.presentation.components.RenameDialog
 import com.drdisagree.teledrive.presentation.components.iconFor
-import dagger.hilt.EntryPoint
-import dagger.hilt.InstallIn
-import dagger.hilt.android.EntryPointAccessors
-import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.delay
 import java.io.File
 import kotlin.time.Duration.Companion.milliseconds
-
-@EntryPoint
-@InstallIn(SingletonComponent::class)
-interface PreviewEntryPoint {
-    @androidx.annotation.OptIn(UnstableApi::class)
-    fun telegramDataSourceFactory(): TelegramDataSourceFactory
-}
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @androidx.annotation.OptIn(UnstableApi::class)
@@ -138,7 +128,7 @@ interface PreviewEntryPoint {
 fun PreviewScreen(
     onBack: () -> Unit,
     onEditNote: (String, String) -> Unit,
-    viewModel: PreviewViewModel = hiltViewModel()
+    viewModel: PreviewViewModel = koinViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val infoTarget by viewModel.infoTarget.collectAsStateWithLifecycle()
@@ -146,12 +136,7 @@ fun PreviewScreen(
     val storedTextScale by viewModel.textScale.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
-    val dataSourceFactory = remember {
-        EntryPointAccessors.fromApplication(
-            context.applicationContext,
-            PreviewEntryPoint::class.java
-        ).telegramDataSourceFactory()
-    }
+    val dataSourceFactory = koinInject<TelegramDataSourceFactory>()
 
     var renameTarget by remember { mutableStateOf<DriveFile?>(null) }
     var deleteTarget by remember { mutableStateOf<DriveFile?>(null) }

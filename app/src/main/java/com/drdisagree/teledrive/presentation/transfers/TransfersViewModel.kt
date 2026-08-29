@@ -5,13 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.drdisagree.teledrive.domain.model.TransferSection
 import com.drdisagree.teledrive.domain.model.TransferTask
 import com.drdisagree.teledrive.domain.repository.TransferRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 data class TransfersUiState(
     val active: List<TransferTask> = emptyList(),
@@ -25,8 +23,7 @@ data class TransfersUiState(
     val loading: Boolean = true
 )
 
-@HiltViewModel
-class TransfersViewModel @Inject constructor(
+class TransfersViewModel(
     private val transferRepository: TransferRepository
 ) : ViewModel() {
 

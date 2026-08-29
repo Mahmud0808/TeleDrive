@@ -13,8 +13,6 @@ import com.drdisagree.teledrive.domain.model.ProxyServer
 import com.drdisagree.teledrive.domain.repository.ProxyRepository
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.presentation.common.toUserMessage
-import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -29,12 +27,10 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
-import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 
-@HiltViewModel
-class ProxyViewModel @Inject constructor(
-    @param:ApplicationContext private val context: Context,
+class ProxyViewModel(
+    private val context: Context,
     private val proxyRepository: ProxyRepository,
     settingsRepository: SettingsRepository
 ) : ViewModel() {

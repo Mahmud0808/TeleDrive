@@ -1,7 +1,6 @@
 package com.drdisagree.teledrive.core.transfer
 
 import android.content.Context
-import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.drdisagree.teledrive.core.common.AppResult
@@ -11,8 +10,6 @@ import com.drdisagree.teledrive.domain.model.BackupTrigger
 import com.drdisagree.teledrive.domain.repository.BackupRepository
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.repository.TelegramAuthRepository
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.time.Duration.Companion.milliseconds
@@ -23,10 +20,9 @@ import kotlin.time.Duration.Companion.milliseconds
  * makes sure nothing sits unbacked for long, and re-arms the trigger if it has
  * gone missing.
  */
-@HiltWorker
-class MediaSweepWorker @AssistedInject constructor(
-    @Assisted appContext: Context,
-    @Assisted params: WorkerParameters,
+class MediaSweepWorker(
+    appContext: Context,
+    params: WorkerParameters,
     private val backupRepository: BackupRepository,
     private val telegramAuthRepository: TelegramAuthRepository,
     private val settingsRepository: SettingsRepository,

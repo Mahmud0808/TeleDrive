@@ -7,8 +7,6 @@ import com.drdisagree.teledrive.core.telegram.TelegramException
 import com.drdisagree.teledrive.data.local.entity.FileEntity
 import com.drdisagree.teledrive.data.remote.telegram.ManifestCodec
 import com.drdisagree.teledrive.data.remote.telegram.RemoteFileManifest
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Rewrites the caption manifest of already-uploaded files so organisational
@@ -16,8 +14,7 @@ import javax.inject.Singleton
  * and survives a local wipe. Local rows are the fast path; the caption is the
  * durable copy.
  */
-@Singleton
-class FileManifestPublisher @Inject constructor(
+class FileManifestPublisher(
     private val telegramClient: TelegramClient,
     private val manifestCodec: ManifestCodec,
     private val folderPathResolver: FolderPathResolver

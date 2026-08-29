@@ -33,8 +33,6 @@ import com.drdisagree.teledrive.presentation.components.SelectionCapabilities
 import com.drdisagree.teledrive.presentation.components.zoomedIn
 import com.drdisagree.teledrive.presentation.components.zoomedOut
 import com.drdisagree.teledrive.presentation.navigation.Route
-import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
@@ -57,7 +55,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 
 data class RenameTarget(
@@ -87,9 +84,8 @@ data class FilesUiState(
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@HiltViewModel
-class FilesViewModel @Inject constructor(
-    @param:ApplicationContext private val context: Context,
+class FilesViewModel(
+    private val context: Context,
     savedStateHandle: SavedStateHandle,
     private val fileRepository: FileRepository,
     private val trashRepository: TrashRepository,

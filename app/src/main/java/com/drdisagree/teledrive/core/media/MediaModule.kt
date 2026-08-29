@@ -1,31 +1,27 @@
 package com.drdisagree.teledrive.core.media
 
-import android.content.Context
+import androidx.media3.common.util.UnstableApi
 import coil3.ImageLoader
 import coil3.key.Keyer
 import coil3.request.Options
 import coil3.request.crossfade
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
+import org.koin.android.ext.koin.androidContext
+import org.koin.core.module.dsl.factoryOf
+import org.koin.core.module.dsl.singleOf
+import org.koin.dsl.module
 
-@Module
-@InstallIn(SingletonComponent::class)
-object MediaModule {
-
-    @Provides
-    @Singleton
-    fun provideImageLoader(
-        @ApplicationContext context: Context,
-        thumbnailStore: ThumbnailStore
-    ): ImageLoader = ImageLoader.Builder(context)
-        .components {
-            add(ThumbnailFetcher.Factory(thumbnailStore))
-            add(Keyer<ThumbnailModel> { data, _: Options -> thumbnailCacheKey(data.fileId) })
-        }
-        .crossfade(true)
-        .build()
+@UnstableApi
+val mediaModule = module {
+    single {
+        ImageLoader.Builder(androidContext())
+            .components {
+                add(ThumbnailFetcher.Factory(get<ThumbnailStore>()))
+                add(Keyer<ThumbnailModel> { data, _: Options -> thumbnailCacheKey(data.fileId) })
+            }
+            .crossfade(true)
+            .build()
+    }
+    singleOf(::ThumbnailStore)
+    singleOf(::MediaMetadataExtractor)
+    factoryOf(::TelegramDataSourceFactory)
 }

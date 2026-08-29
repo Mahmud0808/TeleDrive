@@ -51,7 +51,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import org.koin.androidx.compose.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.drdisagree.teledrive.R
 import com.drdisagree.teledrive.core.files.DocumentTreePaths
@@ -67,7 +67,7 @@ import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
 @Composable
 fun ExclusionsScreen(
     onBack: () -> Unit,
-    viewModel: ExclusionsViewModel = hiltViewModel()
+    viewModel: ExclusionsViewModel = koinViewModel()
 ) {
     val exclusions by viewModel.exclusions.collectAsStateWithLifecycle()
     var showAddDialog by remember { mutableStateOf(false) }

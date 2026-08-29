@@ -23,22 +23,19 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.drdisagree.teledrive.core.common.AppNotifications
 import com.drdisagree.teledrive.core.files.PendingShare
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import javax.inject.Inject
+import org.koin.android.ext.android.inject
 
 /**
  * Extends FragmentActivity because androidx BiometricPrompt requires it for
  * the app lock flow.
  */
-@AndroidEntryPoint
 class MainActivity : FragmentActivity() {
 
-    @Inject
-    lateinit var settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository by inject()
 
 
     /**
@@ -74,8 +71,7 @@ class MainActivity : FragmentActivity() {
         }
     }
 
-    @Inject
-    lateinit var pendingShare: PendingShare
+    private val pendingShare: PendingShare by inject()
 
     private val destination = MutableStateFlow<String?>(null)
 

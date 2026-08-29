@@ -25,11 +25,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.util.UUID
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class TransferRepositoryImpl @Inject constructor(
+class TransferRepositoryImpl(
     private val transferDao: TransferDao,
     private val fileDao: FileDao,
     private val telegramClient: TelegramClient,

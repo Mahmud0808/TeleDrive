@@ -1,16 +1,9 @@
 package com.drdisagree.teledrive.core.network
 
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
+import org.koin.core.module.dsl.singleOf
+import org.koin.dsl.bind
+import org.koin.dsl.module
 
-@Module
-@InstallIn(SingletonComponent::class)
-interface NetworkModule {
-
-    @Binds
-    @Singleton
-    fun bindNetworkMonitor(impl: ConnectivityNetworkMonitor): NetworkMonitor
+val networkModule = module {
+    singleOf(::ConnectivityNetworkMonitor) bind NetworkMonitor::class
 }

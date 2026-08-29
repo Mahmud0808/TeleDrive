@@ -1,20 +1,16 @@
 package com.drdisagree.teledrive.core.transfer
 
 import android.content.Context
-import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.repository.TrashRepository
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.first
 
-@HiltWorker
-class TrashCleanupWorker @AssistedInject constructor(
-    @Assisted appContext: Context,
-    @Assisted params: WorkerParameters,
+class TrashCleanupWorker(
+    appContext: Context,
+    params: WorkerParameters,
     private val trashRepository: TrashRepository,
     private val settingsRepository: SettingsRepository
 ) : CoroutineWorker(appContext, params) {

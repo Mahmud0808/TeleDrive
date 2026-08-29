@@ -7,16 +7,13 @@ import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Wraps a non-exportable AES-256 key held in the Android Keystore. Used only
  * to encrypt small blobs (wrapped content keys); bulk data uses [StreamCrypto]
  * with raw keys unwrapped through this class.
  */
-@Singleton
-class KeystoreManager @Inject constructor() {
+class KeystoreManager {
 
     private val keyStore: KeyStore = KeyStore.getInstance(ANDROID_KEYSTORE).apply { load(null) }
 

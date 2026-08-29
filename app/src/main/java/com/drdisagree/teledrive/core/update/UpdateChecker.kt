@@ -9,16 +9,13 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.net.HttpURLConnection
 import java.net.URL
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Reads the latest GitHub release and compares its tag with the running build.
  * Nothing is sent along with the request: it is an anonymous read of a public
  * endpoint, so a check reveals no more than visiting the releases page.
  */
-@Singleton
-class UpdateChecker @Inject constructor() {
+class UpdateChecker {
 
     private val json = Json { ignoreUnknownKeys = true }
 

@@ -12,8 +12,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * A blocked proxy looks exactly like a slow one: Telegram simply never
@@ -21,8 +19,7 @@ import javax.inject.Singleton
  * start, the next saved proxy is tried, and then the one after that, until
  * either one answers or the list runs out.
  */
-@Singleton
-class ProxyFailover @Inject constructor(
+class ProxyFailover(
     private val authRepository: TelegramAuthRepository,
     private val proxyRepository: ProxyRepository,
     private val settingsRepository: SettingsRepository

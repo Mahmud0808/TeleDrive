@@ -1,19 +1,19 @@
 package com.drdisagree.teledrive
 
 import android.app.Application
-import androidx.hilt.work.HiltWorkerFactory
-import androidx.work.Configuration
 import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.SingletonImageLoader
 import com.drdisagree.teledrive.core.common.AppNotifications
 import com.drdisagree.teledrive.core.common.SafeLog
+import com.drdisagree.teledrive.core.proxy.ProxyFailover
+import com.drdisagree.teledrive.core.publish.PublishScheduler
 import com.drdisagree.teledrive.core.transfer.MaintenanceScheduler
 import com.drdisagree.teledrive.core.transfer.MediaStoreWatcher
+import com.drdisagree.teledrive.di.appModules
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.repository.TransferRepository
 import com.drdisagree.teledrive.domain.repository.TrashRepository
-import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -23,56 +23,42 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-import javax.inject.Provider
-import com.drdisagree.teledrive.core.publish.PublishScheduler
-import com.drdisagree.teledrive.core.proxy.ProxyFailover
+import org.koin.android.ext.android.inject
+import org.koin.android.ext.koin.androidContext
+import org.koin.androidx.workmanager.koin.workManagerFactory
+import org.koin.core.context.startKoin
 
-@HiltAndroidApp
-class TeleDriveApplication : Application(), Configuration.Provider, SingletonImageLoader.Factory {
+class TeleDriveApplication : Application(), SingletonImageLoader.Factory {
 
-    @Inject
-    lateinit var workerFactory: HiltWorkerFactory
+    private val imageLoader: ImageLoader by inject()
 
-    @Inject
-    lateinit var imageLoaderProvider: Provider<ImageLoader>
+    private val appNotifications: AppNotifications by inject()
 
-    @Inject
-    lateinit var appNotifications: AppNotifications
+    private val maintenanceScheduler: MaintenanceScheduler by inject()
 
-    @Inject
-    lateinit var maintenanceScheduler: MaintenanceScheduler
+    private val settingsRepository: SettingsRepository by inject()
 
-    @Inject
-    lateinit var settingsRepository: SettingsRepository
+    private val transferRepository: TransferRepository by inject()
 
-    @Inject
-    lateinit var transferRepository: TransferRepository
+    private val trashRepository: TrashRepository by inject()
 
-    @Inject
-    lateinit var trashRepository: TrashRepository
+    private val mediaStoreWatcher: MediaStoreWatcher by inject()
 
-    @Inject
-    lateinit var mediaStoreWatcher: MediaStoreWatcher
+    private val publishScheduler: PublishScheduler by inject()
 
-    @Inject
-    lateinit var publishScheduler: PublishScheduler
-
-    @Inject
-    lateinit var proxyFailover: ProxyFailover
+    private val proxyFailover: ProxyFailover by inject()
 
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
-    override val workManagerConfiguration: Configuration
-        get() = Configuration.Builder()
-            .setWorkerFactory(workerFactory)
-            .build()
-
-    override fun newImageLoader(context: PlatformContext): ImageLoader =
-        imageLoaderProvider.get()
+    override fun newImageLoader(context: PlatformContext): ImageLoader = imageLoader
 
     override fun onCreate() {
         super.onCreate()
+        startKoin {
+            androidContext(this@TeleDriveApplication)
+            workManagerFactory()
+            modules(appModules)
+        }
         appNotifications.createChannels()
         mediaStoreWatcher.start()
         proxyFailover.start(applicationScope)

@@ -4,8 +4,6 @@ import com.drdisagree.teledrive.core.common.SafeLog
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
@@ -14,8 +12,7 @@ import kotlin.time.Duration.Companion.milliseconds
  * than to one request, so the wait is held here and every caller respects it
  * instead of the other workers carrying on regardless.
  */
-@Singleton
-class TelegramPacer @Inject constructor() {
+class TelegramPacer {
 
     private val mutex = Mutex()
     private var tokens = BURST.toDouble()

@@ -9,16 +9,12 @@ import com.drdisagree.teledrive.data.local.dao.CacheDao
 import com.drdisagree.teledrive.data.local.dao.ThumbnailDao
 import com.drdisagree.teledrive.data.local.entity.CacheEntryType
 import com.drdisagree.teledrive.domain.repository.CacheRepository
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.io.File
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class CacheRepositoryImpl @Inject constructor(
-    @param:ApplicationContext private val context: Context,
+class CacheRepositoryImpl(
+    private val context: Context,
     private val cacheDao: CacheDao,
     private val thumbnailDao: ThumbnailDao,
     private val storageInspector: StorageInspector,

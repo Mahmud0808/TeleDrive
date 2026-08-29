@@ -5,8 +5,6 @@ import com.drdisagree.teledrive.core.crypto.CryptoKeys
 import com.drdisagree.teledrive.core.crypto.StreamCrypto
 import com.drdisagree.teledrive.core.crypto.WrappedKeyRepository
 import kotlinx.serialization.json.Json
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Caption wire format:
@@ -14,8 +12,7 @@ import javax.inject.Singleton
  *  - encrypted: "tde1:" + base64(AES-GCM(JSON)) using the content key, so a
  *    Telegram-side leak reveals no file names or structure for encrypted files.
  */
-@Singleton
-class ManifestCodec @Inject constructor(
+class ManifestCodec(
     private val streamCrypto: StreamCrypto,
     private val wrappedKeyRepository: WrappedKeyRepository
 ) {

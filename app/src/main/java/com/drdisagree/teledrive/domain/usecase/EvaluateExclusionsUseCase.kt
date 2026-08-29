@@ -3,13 +3,12 @@ package com.drdisagree.teledrive.domain.usecase
 import com.drdisagree.teledrive.domain.model.Exclusion
 import com.drdisagree.teledrive.domain.model.ExclusionType
 import java.util.Locale
-import javax.inject.Inject
 
 /**
  * Pure exclusion matching. Paths are compared case-insensitively because
  * Android external storage is case-insensitive in practice.
  */
-class EvaluateExclusionsUseCase @Inject constructor() {
+class EvaluateExclusionsUseCase {
 
     data class Candidate(
         val absolutePath: String,

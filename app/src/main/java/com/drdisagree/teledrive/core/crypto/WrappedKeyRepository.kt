@@ -2,19 +2,15 @@ package com.drdisagree.teledrive.core.crypto
 
 import android.content.Context
 import com.drdisagree.teledrive.core.common.SafeLog
-import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import java.security.SecureRandom
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Persists random raw keys wrapped by the Keystore master key. Raw keys never
  * touch disk unencrypted; unwrapped copies are cached in memory only.
  */
-@Singleton
-class WrappedKeyRepository @Inject constructor(
-    @param:ApplicationContext private val context: Context,
+class WrappedKeyRepository(
+    private val context: Context,
     private val keystoreManager: KeystoreManager
 ) {
 

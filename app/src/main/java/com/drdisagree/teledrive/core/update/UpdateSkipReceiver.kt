@@ -6,23 +6,21 @@ import android.content.Intent
 import androidx.core.app.NotificationManagerCompat
 import com.drdisagree.teledrive.core.common.AppNotifications
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import javax.inject.Inject
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 /**
  * Silences one version. Later releases are announced as usual, and a manual
  * check still reports the skipped one, so this hides a reminder rather than
  * hiding the update itself.
  */
-@AndroidEntryPoint
-class UpdateSkipReceiver : BroadcastReceiver() {
+class UpdateSkipReceiver : BroadcastReceiver(), KoinComponent {
 
-    @Inject
-    lateinit var settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository by inject()
 
     override fun onReceive(context: Context, intent: Intent) {
         val version = intent.getStringExtra(AppNotifications.EXTRA_VERSION).orEmpty()

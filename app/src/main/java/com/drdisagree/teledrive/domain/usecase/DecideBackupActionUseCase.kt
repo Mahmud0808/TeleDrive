@@ -2,14 +2,13 @@ package com.drdisagree.teledrive.domain.usecase
 
 import com.drdisagree.teledrive.domain.model.BackupDecision
 import com.drdisagree.teledrive.domain.model.Exclusion
-import javax.inject.Inject
 
 /**
  * Incremental backup decision for a single candidate file. Change detection
  * uses size + mtime first and falls back to the content hash when only the
  * mtime changed, so touched-but-identical files are not re-uploaded.
  */
-class DecideBackupActionUseCase @Inject constructor(
+class DecideBackupActionUseCase(
     private val evaluateExclusions: EvaluateExclusionsUseCase
 ) {
 

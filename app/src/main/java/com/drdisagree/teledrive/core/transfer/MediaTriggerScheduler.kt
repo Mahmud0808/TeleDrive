@@ -6,9 +6,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.provider.MediaStore
 import com.drdisagree.teledrive.core.common.SafeLog
-import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Arms the MediaStore content trigger under one fixed job id, so re-arming
@@ -16,9 +13,8 @@ import javax.inject.Singleton
  * no network or charging requirement: noticing a new photo has to happen even
  * on mobile data, and the upload it queues applies those preferences itself.
  */
-@Singleton
-class MediaTriggerScheduler @Inject constructor(
-    @param:ApplicationContext private val context: Context
+class MediaTriggerScheduler(
+    private val context: Context
 ) {
 
     fun schedule() {

@@ -4,10 +4,7 @@ import android.content.Context
 import com.drdisagree.teledrive.core.common.SafeLog
 import com.drdisagree.teledrive.data.local.database.TeleDriveDatabase
 import com.drdisagree.teledrive.domain.repository.CacheRepository
-import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Drops everything this device knows about the signed-in drive. Logging out
@@ -16,9 +13,8 @@ import javax.inject.Singleton
  * the new account has. Files in Telegram are untouched, and signing back in
  * rebuilds the index from the channel.
  */
-@Singleton
-class LocalDataWiper @Inject constructor(
-    @param:ApplicationContext private val context: Context,
+class LocalDataWiper(
+    private val context: Context,
     private val database: TeleDriveDatabase,
     private val cacheRepository: CacheRepository
 ) {

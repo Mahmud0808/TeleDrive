@@ -1,14 +1,11 @@
 package com.drdisagree.teledrive.core.update
 
 import android.content.Context
-import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.drdisagree.teledrive.R
 import com.drdisagree.teledrive.core.common.AppNotifications
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.first
 
 /**
@@ -16,10 +13,9 @@ import kotlinx.coroutines.flow.first
  * here: tapping it opens the app, which checks again and shows the dialog, so
  * the release notes are never served from a stale copy.
  */
-@HiltWorker
-class UpdateCheckWorker @AssistedInject constructor(
-    @Assisted appContext: Context,
-    @Assisted params: WorkerParameters,
+class UpdateCheckWorker(
+    appContext: Context,
+    params: WorkerParameters,
     private val updateChecker: UpdateChecker,
     private val settingsRepository: SettingsRepository,
     private val appNotifications: AppNotifications

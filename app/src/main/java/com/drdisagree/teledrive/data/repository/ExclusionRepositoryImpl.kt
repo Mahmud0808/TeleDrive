@@ -12,12 +12,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import java.util.UUID
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@Singleton
-class ExclusionRepositoryImpl @Inject constructor(
+class ExclusionRepositoryImpl(
     private val exclusionDao: ExclusionDao,
     private val activeChannel: ActiveChannel
 ) : ExclusionRepository {

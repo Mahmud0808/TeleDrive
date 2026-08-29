@@ -9,7 +9,6 @@ import com.drdisagree.teledrive.BuildConfig
 import com.drdisagree.teledrive.core.common.SafeLog
 import com.drdisagree.teledrive.domain.model.Country
 import com.drdisagree.teledrive.domain.model.LinkMetadata
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -41,15 +40,12 @@ import org.drinkless.tdlib.Client
 import org.drinkless.tdlib.TdApi
 import java.io.File
 import java.util.Locale
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.time.Duration.Companion.milliseconds
 
-@Singleton
-class TdLibTelegramClient @Inject constructor(
-    @param:ApplicationContext private val context: Context,
+class TdLibTelegramClient(
+    private val context: Context,
     private val databaseKeyProvider: TdlibDatabaseKeyProvider,
     private val pacer: TelegramPacer
 ) : TelegramClient {
