@@ -4,6 +4,8 @@ import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.isCtrlPressed
 import androidx.compose.ui.input.pointer.pointerInput
 import com.drdisagree.teledrive.domain.model.ViewMode
 
@@ -24,7 +26,7 @@ fun GridZoomLevel.zoomedOut(): GridZoomLevel = when {
 }
 
 fun Modifier.pinchZoom(onZoomIn: () -> Unit, onZoomOut: () -> Unit): Modifier =
-    pointerInput(onZoomIn, onZoomOut) {
+    wheelZoom(onZoomIn, onZoomOut).pointerInput(onZoomIn, onZoomOut) {
         awaitEachGesture {
             var accumulated = 1f
             var multitouch = false
@@ -48,6 +50,24 @@ fun Modifier.pinchZoom(onZoomIn: () -> Unit, onZoomOut: () -> Unit): Modifier =
                 }
                 if (multitouch) event.changes.forEach { it.consume() }
             } while (event.changes.any { it.pressed })
+        }
+    }
+
+/** Ctrl plus mouse wheel steps the grid the way a pinch does. */
+private fun Modifier.wheelZoom(onZoomIn: () -> Unit, onZoomOut: () -> Unit): Modifier =
+    pointerInput(onZoomIn, onZoomOut) {
+        awaitPointerEventScope {
+            while (true) {
+                val event = awaitPointerEvent(PointerEventPass.Initial)
+                if (event.type != PointerEventType.Scroll) continue
+                if (!event.keyboardModifiers.isCtrlPressed) continue
+                val delta = event.changes.firstOrNull()?.scrollDelta?.y ?: 0f
+                when {
+                    delta < 0f -> onZoomIn()
+                    delta > 0f -> onZoomOut()
+                }
+                event.changes.forEach { it.consume() }
+            }
         }
     }
 
