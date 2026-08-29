@@ -24,7 +24,6 @@ val repositoryModule = module {
     singleOf(::FileManifestPublisher)
     singleOf(::FolderPathResolver)
     singleOf(::FolderStateSynchronizer)
-    singleOf(::LocalDataWiper)
     singleOf(::SettingsRepositoryImpl) bind SettingsRepository::class
     singleOf(::FileRepositoryImpl) bind FileRepository::class
     singleOf(::TrashRepositoryImpl) bind TrashRepository::class

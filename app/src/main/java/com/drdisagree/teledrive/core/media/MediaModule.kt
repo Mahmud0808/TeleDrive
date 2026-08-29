@@ -22,7 +22,7 @@ val mediaModule = module {
             .crossfade(true)
             .build()
     }
-    singleOf(::ThumbnailStore)
+    singleOf(::AndroidThumbnailStore) bind ThumbnailStore::class
     singleOf(::AndroidMediaMetadataExtractor) bind MediaMetadataExtractor::class
     factoryOf(::TelegramDataSourceFactory)
     single<ThumbnailMemoryCache> { CoilThumbnailMemoryCache(get()) }

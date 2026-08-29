@@ -29,7 +29,7 @@ import java.io.File
  * the cache directory. Falls back to the Telegram mini-thumbnail when no
  * local copy exists.
  */
-class ThumbnailStore(
+class AndroidThumbnailStore(
     private val context: Context,
     private val fileDao: FileDao,
     private val thumbnailDao: ThumbnailDao,
@@ -37,11 +37,11 @@ class ThumbnailStore(
     private val streamCrypto: StreamCrypto,
     private val wrappedKeyRepository: WrappedKeyRepository,
     private val settingsRepository: SettingsRepository
-) {
+) : ThumbnailStore {
 
     private val generationSemaphore = Semaphore(3)
 
-    suspend fun thumbnailBytes(fileId: String): ByteArray? {
+    override suspend fun thumbnailBytes(fileId: String): ByteArray? {
         if (!settingsRepository.preferences.first().linkPreviews && isNote(fileId)) {
             thumbnailDao.delete(fileId)
             return null
@@ -62,7 +62,7 @@ class ThumbnailStore(
         return generationSemaphore.withPermit { generate(fileId) }
     }
 
-    suspend fun uploadThumbnailFile(fileId: String): File? {
+    override suspend fun uploadThumbnailFile(fileId: String): File? {
         val bytes = thumbnailBytes(fileId) ?: return null
         val dir = File(context.cacheDir, "upload-thumbs").apply { mkdirs() }
         val target = File(dir, "$fileId.jpg")

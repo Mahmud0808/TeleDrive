@@ -28,11 +28,33 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.core.telegram.TelegramAuthState
 import com.drdisagree.teledrive.core.telegram.TelegramCredentials
 import com.drdisagree.teledrive.domain.repository.TelegramAuthRepository
+import com.drdisagree.teledrive.desktop.resources.Res
+import com.drdisagree.teledrive.desktop.resources.app_name
+import com.drdisagree.teledrive.desktop.resources.auth_api_hash
+import com.drdisagree.teledrive.desktop.resources.auth_api_id
+import com.drdisagree.teledrive.desktop.resources.auth_code
+import com.drdisagree.teledrive.desktop.resources.auth_code_sent_to
+import com.drdisagree.teledrive.desktop.resources.auth_confirm_other_device
+import com.drdisagree.teledrive.desktop.resources.auth_connecting
+import com.drdisagree.teledrive.desktop.resources.auth_continue
+import com.drdisagree.teledrive.desktop.resources.auth_credentials_prompt
+import com.drdisagree.teledrive.desktop.resources.auth_email_address
+import com.drdisagree.teledrive.desktop.resources.auth_failed
+import com.drdisagree.teledrive.desktop.resources.auth_password
+import com.drdisagree.teledrive.desktop.resources.auth_password_hint
+import com.drdisagree.teledrive.desktop.resources.auth_password_prompt
+import com.drdisagree.teledrive.desktop.resources.auth_phone_number
+import com.drdisagree.teledrive.desktop.resources.auth_registration_required
+import com.drdisagree.teledrive.desktop.resources.auth_send_code
+import com.drdisagree.teledrive.desktop.resources.auth_session_closed
+import com.drdisagree.teledrive.desktop.resources.auth_sign_in
+import com.drdisagree.teledrive.desktop.resources.auth_signing_out
+import com.drdisagree.teledrive.desktop.resources.auth_verify
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 @Composable
@@ -49,7 +71,7 @@ fun AuthScreen() {
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
-                    text = "TeleDrive",
+                    text = stringResource(Res.string.app_name),
                     style = MaterialTheme.typography.displaySmall,
                     color = MaterialTheme.colorScheme.onBackground
                 )
@@ -60,27 +82,27 @@ fun AuthScreen() {
                         }
                     }
 
-                    is TelegramAuthState.Initializing -> LoadingStep("Connecting to Telegram")
+                    is TelegramAuthState.Initializing -> LoadingStep(stringResource(Res.string.auth_connecting))
 
                     is TelegramAuthState.WaitingForPhoneNumber -> PhoneStep { phone ->
                         scope.launch { authRepository.submitPhoneNumber(phone) }
                     }
 
                     is TelegramAuthState.WaitingForCode -> CodeStep(
-                        label = "Enter the code sent to ${state.phoneNumber}",
+                        label = stringResource(Res.string.auth_code_sent_to, state.phoneNumber),
                         onSubmit = { code -> scope.launch { authRepository.submitCode(code) } }
                     )
 
                     is TelegramAuthState.WaitingForEmailAddress -> InputStep(
-                        label = "Email address",
-                        button = "Continue",
+                        label = stringResource(Res.string.auth_email_address),
+                        button = stringResource(Res.string.auth_continue),
                         onSubmit = { email ->
                             scope.launch { authRepository.submitEmailAddress(email) }
                         }
                     )
 
                     is TelegramAuthState.WaitingForEmailCode -> CodeStep(
-                        label = "Enter the code sent to ${state.emailPattern}",
+                        label = stringResource(Res.string.auth_code_sent_to, state.emailPattern),
                         onSubmit = { code ->
                             scope.launch { authRepository.submitEmailCode(code) }
                         }
@@ -93,19 +115,19 @@ fun AuthScreen() {
                         }
                     )
 
-                    is TelegramAuthState.WaitingForQrScan -> LoadingStep("Confirm on another device")
+                    is TelegramAuthState.WaitingForQrScan -> LoadingStep(stringResource(Res.string.auth_confirm_other_device))
 
                     is TelegramAuthState.RegistrationRequired -> Message(
-                        "This number has no Telegram account. Register on a phone first."
+                        stringResource(Res.string.auth_registration_required)
                     )
 
-                    is TelegramAuthState.Ready -> ReadyStep(authRepository)
+                    is TelegramAuthState.Ready -> Unit
 
-                    is TelegramAuthState.LoggingOut -> LoadingStep("Signing out")
+                    is TelegramAuthState.LoggingOut -> LoadingStep(stringResource(Res.string.auth_signing_out))
 
-                    is TelegramAuthState.Closed -> Message("Session closed. Restart the app.")
+                    is TelegramAuthState.Closed -> Message(stringResource(Res.string.auth_session_closed))
 
-                    is TelegramAuthState.Failed -> Message("Sign in failed: ${state.message}")
+                    is TelegramAuthState.Failed -> Message(stringResource(Res.string.auth_failed, state.message))
                 }
             }
         }
@@ -128,18 +150,18 @@ private fun Message(text: String) {
 private fun CredentialsStep(onSubmit: (Int, String) -> Unit) {
     var apiId by remember { mutableStateOf("") }
     var apiHash by remember { mutableStateOf("") }
-    Message("Enter your Telegram API credentials from my.telegram.org")
+    Message(stringResource(Res.string.auth_credentials_prompt))
     OutlinedTextField(
         value = apiId,
         onValueChange = { apiId = it.filter(Char::isDigit) },
-        label = { Text("API ID") },
+        label = { Text(stringResource(Res.string.auth_api_id)) },
         singleLine = true,
         modifier = Modifier.fillMaxWidth()
     )
     OutlinedTextField(
         value = apiHash,
         onValueChange = { apiHash = it.trim() },
-        label = { Text("API hash") },
+        label = { Text(stringResource(Res.string.auth_api_hash)) },
         singleLine = true,
         modifier = Modifier.fillMaxWidth()
     )
@@ -148,25 +170,43 @@ private fun CredentialsStep(onSubmit: (Int, String) -> Unit) {
         enabled = apiId.isNotBlank() && apiHash.isNotBlank(),
         modifier = Modifier.fillMaxWidth()
     ) {
-        Text("Continue")
+        Text(stringResource(Res.string.auth_continue))
     }
 }
 
 @Composable
 private fun PhoneStep(onSubmit: (String) -> Unit) {
-    InputStep(label = "Phone number", button = "Send code", onSubmit = onSubmit)
+    InputStep(
+        label = stringResource(Res.string.auth_phone_number),
+        button = stringResource(Res.string.auth_send_code),
+        onSubmit = onSubmit
+    )
 }
 
 @Composable
 private fun CodeStep(label: String, onSubmit: (String) -> Unit) {
     Message(label)
-    InputStep(label = "Code", button = "Verify", onSubmit = onSubmit)
+    InputStep(
+        label = stringResource(Res.string.auth_code),
+        button = stringResource(Res.string.auth_verify),
+        onSubmit = onSubmit
+    )
 }
 
 @Composable
 private fun PasswordStep(hint: String?, onSubmit: (String) -> Unit) {
-    Message(if (hint == null) "Two-step password" else "Two-step password (hint: $hint)")
-    InputStep(label = "Password", button = "Sign in", onSubmit = onSubmit)
+    Message(
+        if (hint == null) {
+            stringResource(Res.string.auth_password_prompt)
+        } else {
+            stringResource(Res.string.auth_password_hint, hint)
+        }
+    )
+    InputStep(
+        label = stringResource(Res.string.auth_password),
+        button = stringResource(Res.string.auth_sign_in),
+        onSubmit = onSubmit
+    )
 }
 
 @Composable
@@ -185,24 +225,5 @@ private fun InputStep(label: String, button: String, onSubmit: (String) -> Unit)
         modifier = Modifier.fillMaxWidth()
     ) {
         Text(button)
-    }
-}
-
-@Composable
-private fun ReadyStep(authRepository: TelegramAuthRepository) {
-    val scope = rememberCoroutineScope()
-    var name by remember { mutableStateOf("") }
-    LaunchedEffect(Unit) {
-        name = when (val result = authRepository.getCurrentUser()) {
-            is AppResult.Success -> result.value.firstName
-            else -> "your account"
-        }
-    }
-    Message("Signed in as ${name.ifEmpty { "..." }}")
-    OutlinedButton(
-        onClick = { scope.launch { authRepository.logout() } },
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text("Sign out")
     }
 }

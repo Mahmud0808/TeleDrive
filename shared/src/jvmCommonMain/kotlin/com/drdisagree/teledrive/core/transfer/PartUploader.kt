@@ -1,6 +1,6 @@
 package com.drdisagree.teledrive.core.transfer
 
-import android.content.Context
+import com.drdisagree.teledrive.core.files.AppStoragePaths
 import com.drdisagree.teledrive.core.common.SafeLog
 import com.drdisagree.teledrive.core.crypto.CryptoKeys
 import com.drdisagree.teledrive.core.crypto.StreamCrypto
@@ -29,7 +29,7 @@ import java.io.InputStream
  * interrupted upload continue from the part it stopped on rather than the start.
  */
 class PartUploader(
-    private val context: Context,
+    private val storagePaths: AppStoragePaths,
     private val telegramClient: TelegramClient,
     private val filePartDao: FilePartDao,
     private val manifestCodec: ManifestCodec,
@@ -186,7 +186,7 @@ class PartUploader(
         }
     }
 
-    private fun scratchDir(): File = File(context.cacheDir, SCRATCH_DIR).apply { mkdirs() }
+    private fun scratchDir(): File = File(storagePaths.cacheDir, SCRATCH_DIR).apply { mkdirs() }
 
     private companion object {
         const val TAG = "PartUploader"

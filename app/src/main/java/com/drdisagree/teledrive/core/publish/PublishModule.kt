@@ -6,6 +6,7 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val publishModule = module {
+    singleOf(::PublishOutboxDrainer)
     singleOf(::WorkPublishScheduler) bind PublishScheduler::class
     workerOf(::PublishOutboxWorker)
 }

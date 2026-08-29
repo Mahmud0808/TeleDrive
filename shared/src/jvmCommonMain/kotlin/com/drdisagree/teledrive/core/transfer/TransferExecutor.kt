@@ -1,7 +1,6 @@
 package com.drdisagree.teledrive.core.transfer
 
-import android.content.Context
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.core.files.AppStoragePaths
 import com.drdisagree.teledrive.core.crypto.CryptoKeys
 import com.drdisagree.teledrive.core.crypto.KeyUnavailableException
 import com.drdisagree.teledrive.core.crypto.StreamCrypto
@@ -49,7 +48,8 @@ import kotlin.time.Duration.Companion.milliseconds
  * flow collection.
  */
 class TransferExecutor(
-    private val context: Context,
+    private val messages: TransferErrorMessages,
+    private val storagePaths: AppStoragePaths,
     private val telegramClient: TelegramClient,
     private val transferDao: TransferDao,
     private val fileDao: FileDao,
@@ -71,7 +71,7 @@ class TransferExecutor(
      * without an error simply stops emitting. Without this the collector waits
      * forever and the row stays RUNNING with no way back.
      */
-    private fun <T> Flow<T>.failWhenIdle(messageRes: Int): Flow<T> = channelFlow {
+    private fun <T> Flow<T>.failWhenIdle(message: String): Flow<T> = channelFlow {
         val relay = Channel<T>(Channel.BUFFERED)
         launch {
             try {
@@ -84,7 +84,7 @@ class TransferExecutor(
         while (true) {
             val received =
                 withTimeoutOrNull(STALL_TIMEOUT_MS.milliseconds) { relay.receiveCatching() }
-                    ?: throw TelegramException(STALL_CODE, context.getString(messageRes))
+                    ?: throw TelegramException(STALL_CODE, message)
             received.exceptionOrNull()?.let { throw it }
             if (received.isClosed) break
             send(received.getOrThrow())
@@ -94,7 +94,7 @@ class TransferExecutor(
     sealed interface Outcome {
         data object Completed : Outcome
         data object Paused : Outcome
-        data object Cancelled : Outcome
+        data object Canceled : Outcome
         data class Failed(val message: String, val retryAfterSeconds: Int? = null) : Outcome
     }
 
@@ -104,18 +104,18 @@ class TransferExecutor(
             TransferType.DOWNLOAD, TransferType.RESTORE -> executeDownload(transfer)
         }
     } catch (_: KeyUnavailableException) {
-        Outcome.Failed(context.getString(R.string.transfer_error_key_missing))
+        Outcome.Failed(messages.keyMissing)
     }
 
     private suspend fun executeUpload(transfer: TransferEntity): Outcome {
         val fileId = transfer.fileId
-            ?: return Outcome.Failed(context.getString(R.string.transfer_error_no_file_reference))
+            ?: return Outcome.Failed(messages.noFileReference)
         val entity = fileDao.byId(fileId)
-            ?: return Outcome.Failed(context.getString(R.string.transfer_error_file_record_missing))
+            ?: return Outcome.Failed(messages.fileRecordMissing)
         val localPath = entity.localPath
-            ?: return Outcome.Failed(context.getString(R.string.transfer_error_no_local_copy))
+            ?: return Outcome.Failed(messages.noLocalCopy)
         val sourceFile = File(localPath)
-        if (!sourceFile.exists()) return Outcome.Failed(context.getString(R.string.transfer_error_local_file_gone))
+        if (!sourceFile.exists()) return Outcome.Failed(messages.localFileGone)
 
         val prefs = settingsRepository.preferences.first()
         val chatId = transfer.chatId
@@ -186,7 +186,7 @@ class TransferExecutor(
 
         return try {
             var outcome: Outcome =
-                Outcome.Failed(context.getString(R.string.transfer_error_upload_ended))
+                Outcome.Failed(messages.uploadEnded)
             val previewPath = if (encrypt) {
                 null
             } else {
@@ -199,7 +199,7 @@ class TransferExecutor(
                 mimeType = if (encrypt) "application/octet-stream" else entity.mimeType,
                 caption = caption,
                 thumbnailPath = previewPath
-            ).failWhenIdle(R.string.transfer_error_upload_stalled).collect { event ->
+            ).failWhenIdle(messages.uploadStalled).collect { event ->
                 currentCoroutineContext().ensureActive()
                 when (event) {
                     is TelegramUploadEvent.Started -> Unit
@@ -247,7 +247,7 @@ class TransferExecutor(
                 entity.id,
                 if (e.paused) BackupState.QUEUED else BackupState.NONE
             )
-            if (e.paused) Outcome.Paused else Outcome.Cancelled
+            if (e.paused) Outcome.Paused else Outcome.Canceled
         } catch (e: TelegramException) {
             fileDao.setBackupStateIfLocalOnly(entity.id, BackupState.FAILED)
             Outcome.Failed(e.message, e.retryAfterSeconds)
@@ -281,7 +281,7 @@ class TransferExecutor(
     ): Outcome {
         val ticker = ProgressTicker().apply { start(0, System.currentTimeMillis()) }
         var outcome: Outcome =
-            Outcome.Failed(context.getString(R.string.transfer_error_upload_ended))
+            Outcome.Failed(messages.uploadEnded)
 
         return try {
             partUploader.upload(entity, sourceFile, chatId, manifest, encrypt)
@@ -349,7 +349,7 @@ class TransferExecutor(
                 if (e.paused) BackupState.QUEUED else BackupState.NONE
             )
             if (!e.paused) partUploader.discardParts(entity.id)
-            if (e.paused) Outcome.Paused else Outcome.Cancelled
+            if (e.paused) Outcome.Paused else Outcome.Canceled
         } catch (e: TelegramException) {
             fileDao.setBackupStateIfLocalOnly(entity.id, BackupState.FAILED)
             Outcome.Failed(e.message, e.retryAfterSeconds)
@@ -358,23 +358,23 @@ class TransferExecutor(
 
     private suspend fun executeDownload(transfer: TransferEntity): Outcome {
         val fileId = transfer.fileId
-            ?: return Outcome.Failed(context.getString(R.string.transfer_error_no_file_reference))
+            ?: return Outcome.Failed(messages.noFileReference)
         val entity = fileDao.byId(fileId)
-            ?: return Outcome.Failed(context.getString(R.string.transfer_error_file_record_missing))
+            ?: return Outcome.Failed(messages.fileRecordMissing)
 
         if (filePartDao.countOf(entity.id) > 1) return downloadInParts(transfer, entity)
 
         val remoteFileId = entity.remoteFileId
-            ?: return Outcome.Failed(context.getString(R.string.transfer_error_no_remote_copy))
+            ?: return Outcome.Failed(messages.noRemoteCopy)
 
         val startedAt = System.currentTimeMillis()
         val ticker = ProgressTicker().apply { start(0, startedAt) }
 
         return try {
             var outcome: Outcome =
-                Outcome.Failed(context.getString(R.string.transfer_error_download_ended))
+                Outcome.Failed(messages.downloadEnded)
             telegramClient.downloadDocument(remoteFileId)
-                .failWhenIdle(R.string.transfer_error_download_stalled)
+                .failWhenIdle(messages.downloadStalled)
                 .collect { event ->
                     currentCoroutineContext().ensureActive()
                     when (event) {
@@ -395,7 +395,7 @@ class TransferExecutor(
                 }
             outcome
         } catch (e: TransferControlException) {
-            if (e.paused) Outcome.Paused else Outcome.Cancelled
+            if (e.paused) Outcome.Paused else Outcome.Canceled
         } catch (e: TelegramException) {
             Outcome.Failed(e.message, e.retryAfterSeconds)
         }
@@ -407,11 +407,11 @@ class TransferExecutor(
     ): Outcome {
         val ticker = ProgressTicker().apply { start(0, System.currentTimeMillis()) }
         var outcome: Outcome =
-            Outcome.Failed(context.getString(R.string.transfer_error_download_ended))
+            Outcome.Failed(messages.downloadEnded)
 
         return try {
             partDownloader.download(entity.id, entity.isEncrypted)
-                .failWhenIdle(R.string.transfer_error_download_stalled)
+                .failWhenIdle(messages.downloadStalled)
                 .collect { event ->
                     currentCoroutineContext().ensureActive()
                     when (event) {
@@ -450,7 +450,7 @@ class TransferExecutor(
             outcome
         } catch (e: TransferControlException) {
             if (!e.paused) partDownloader.discardAssembly(entity.id)
-            if (e.paused) Outcome.Paused else Outcome.Cancelled
+            if (e.paused) Outcome.Paused else Outcome.Canceled
         } catch (e: TelegramException) {
             Outcome.Failed(e.message, e.retryAfterSeconds)
         }
@@ -463,13 +463,13 @@ class TransferExecutor(
         alreadyPlain: Boolean = false
     ): Outcome {
         val entity = fileDao.byId(fileId)
-            ?: return Outcome.Failed(context.getString(R.string.transfer_error_file_record_missing))
+            ?: return Outcome.Failed(messages.fileRecordMissing)
         val source = File(tdlibPath)
-        if (!source.exists()) return Outcome.Failed(context.getString(R.string.transfer_error_downloaded_missing))
+        if (!source.exists()) return Outcome.Failed(messages.downloadedMissing)
 
         val key = if (entity.isEncrypted && !alreadyPlain) {
             wrappedKeyRepository.get(CryptoKeys.CONTENT)
-                ?: return Outcome.Failed(context.getString(R.string.transfer_error_key_missing))
+                ?: return Outcome.Failed(messages.keyMissing)
         } else {
             null
         }
@@ -489,9 +489,9 @@ class TransferExecutor(
             }
         } ?: return Outcome.Failed(
             if (entity.isEncrypted) {
-                context.getString(R.string.transfer_error_decryption_failed)
+                messages.decryptionFailed
             } else {
-                context.getString(R.string.transfer_error_save_failed)
+                messages.saveFailed
             }
         )
 
@@ -509,7 +509,7 @@ class TransferExecutor(
     }
 
     private fun stagingDir(): File =
-        File(context.cacheDir, "staging").apply { mkdirs() }
+        File(storagePaths.cacheDir, "staging").apply { mkdirs() }
 
     private class TransferControlException(val paused: Boolean) : Exception()
 

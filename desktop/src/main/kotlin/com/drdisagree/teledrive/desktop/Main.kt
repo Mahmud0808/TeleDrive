@@ -7,8 +7,12 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.drdisagree.teledrive.core.common.SafeLog
 import com.drdisagree.teledrive.desktop.di.desktopModule
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import com.drdisagree.teledrive.core.telegram.TelegramAuthState
 import com.drdisagree.teledrive.desktop.ui.AuthScreen
 import com.drdisagree.teledrive.desktop.ui.DesktopTheme
+import com.drdisagree.teledrive.desktop.ui.DriveScreen
 import com.drdisagree.teledrive.domain.repository.TelegramAuthRepository
 import org.koin.core.context.startKoin
 import org.koin.java.KoinJavaComponent.getKoin
@@ -24,11 +28,17 @@ fun main() {
             title = "TeleDrive",
             state = rememberWindowState(width = 960.dp, height = 680.dp)
         ) {
+            val authRepository = getKoin().get<TelegramAuthRepository>()
             LaunchedEffect(Unit) {
-                getKoin().get<TelegramAuthRepository>().startFromStoredCredentials()
+                authRepository.startFromStoredCredentials()
             }
+            val authState by authRepository.authState.collectAsState()
             DesktopTheme {
-                AuthScreen()
+                if (authState == TelegramAuthState.Ready) {
+                    DriveScreen()
+                } else {
+                    AuthScreen()
+                }
             }
         }
     }

@@ -8,12 +8,10 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val transferModule = module {
+    single<TransferErrorMessages> { ResourceTransferErrorMessages(androidContext()) }
     singleOf(::NotifyingBackupSessionTracker) bind BackupSessionTracker::class
     singleOf(::MaintenanceScheduler)
     singleOf(::MediaTriggerScheduler)
-    singleOf(::PartDownloader)
-    singleOf(::PartUploader)
-    singleOf(::TransferExecutor)
     singleOf(::WorkTransferScheduler) bind TransferScheduler::class
     single { MediaStoreWatcher(androidContext(), get(), lazy { get<BackupRepository>() }) }
     workerOf(::CacheCleanupWorker)

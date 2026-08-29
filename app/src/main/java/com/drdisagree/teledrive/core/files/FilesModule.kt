@@ -6,10 +6,8 @@ import org.koin.dsl.module
 
 val filesModule = module {
     singleOf(::AndroidStoragePaths) bind AppStoragePaths::class
-    singleOf(::DownloadWriter)
+    singleOf(::MediaStoreDownloadWriter) bind DownloadWriter::class
     singleOf(::FileImporter)
     singleOf(::MediaStoreLocalCopyDeleter) bind LocalCopyDeleter::class
-    singleOf(::NoteStore)
     singleOf(::PendingShare)
-    singleOf(::StorageInspector)
 }

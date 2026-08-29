@@ -16,9 +16,9 @@ import java.io.OutputStream
  * the gallery. MediaStore owns the entry on Android 10 and above; older
  * releases and devices with all-files access write the file directly.
  */
-class DownloadWriter(
+class MediaStoreDownloadWriter(
     private val context: Context
-) {
+) : DownloadWriter {
 
     /**
      * Saves one download. [folderPath] mirrors the drive folder the file lives
@@ -26,10 +26,10 @@ class DownloadWriter(
      * Returns the absolute path of the saved copy, or null when it could not
      * be written.
      */
-    fun write(
+    override fun write(
         fileName: String,
         mimeType: String,
-        folderPath: String? = null,
+        folderPath: String?,
         body: (OutputStream) -> Unit
     ): String? =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

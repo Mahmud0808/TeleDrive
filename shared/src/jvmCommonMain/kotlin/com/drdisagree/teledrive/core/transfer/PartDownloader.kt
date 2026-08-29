@@ -1,6 +1,6 @@
 package com.drdisagree.teledrive.core.transfer
 
-import android.content.Context
+import com.drdisagree.teledrive.core.files.AppStoragePaths
 import com.drdisagree.teledrive.core.crypto.CryptoKeys
 import com.drdisagree.teledrive.core.crypto.KeyUnavailableException
 import com.drdisagree.teledrive.core.crypto.StreamCrypto
@@ -25,7 +25,7 @@ import kotlinx.coroutines.withContext
  * part it reached instead of starting over.
  */
 class PartDownloader(
-    private val context: Context,
+    private val storagePaths: AppStoragePaths,
     private val telegramClient: TelegramClient,
     private val filePartDao: FilePartDao,
     private val streamCrypto: StreamCrypto,
@@ -113,7 +113,7 @@ class PartDownloader(
         return index to covered
     }
 
-    private fun assemblyDir(): File = File(context.cacheDir, ASSEMBLY_DIR).apply { mkdirs() }
+    private fun assemblyDir(): File = File(storagePaths.cacheDir, ASSEMBLY_DIR).apply { mkdirs() }
 
     private companion object {
         const val ASSEMBLY_DIR = "assembly"

@@ -36,15 +36,22 @@ kotlin.sourceSets.named("main") {
     kotlin.srcDir(generateBuildInfo)
 }
 
+compose.resources {
+    packageOfResClass = "com.drdisagree.teledrive.desktop.resources"
+}
+
 dependencies {
     implementation(project(":shared"))
     implementation(compose.desktop.currentOs)
+    implementation(compose.components.resources)
     implementation(libs.cmp.material3)
     implementation(libs.kotlinx.coroutines.swing)
     implementation(platform(libs.koin.bom))
     implementation(libs.koin.core)
     implementation(libs.koin.compose)
     implementation(libs.jna.platform)
+    testImplementation(libs.junit)
+    testImplementation(libs.koin.test)
 }
 
 compose.desktop {
