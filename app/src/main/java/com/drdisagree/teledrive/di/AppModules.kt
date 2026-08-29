@@ -16,7 +16,6 @@ import com.drdisagree.teledrive.core.update.updateModule
 import com.drdisagree.teledrive.data.local.database.databaseModule
 import com.drdisagree.teledrive.data.local.preferences.preferencesModule
 import com.drdisagree.teledrive.data.repository.repositoryModule
-import com.drdisagree.teledrive.domain.usecase.useCaseModule
 import com.drdisagree.teledrive.presentation.presentationModule
 
 val appModules = listOf(

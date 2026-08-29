@@ -14,7 +14,7 @@ import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.core.files.FileImporter
 import com.drdisagree.teledrive.core.files.MimeTypes
 import com.drdisagree.teledrive.core.files.PendingShare
-import com.drdisagree.teledrive.data.local.FileQueryBuilder
+import com.drdisagree.teledrive.domain.model.FileQuerySpec
 import com.drdisagree.teledrive.domain.model.DriveFile
 import com.drdisagree.teledrive.domain.model.DriveFolder
 import com.drdisagree.teledrive.domain.model.FileSortField
@@ -155,9 +155,9 @@ class FilesViewModel(
         }
     }
 
-    private val querySpec: Flow<FileQueryBuilder.Spec> = settingsRepository.preferences
+    private val querySpec: Flow<FileQuerySpec> = settingsRepository.preferences
         .map { prefs ->
-            FileQueryBuilder.Spec(
+            FileQuerySpec(
                 folderId = folderId,
                 filterByFolder = true,
                 showHidden = false,

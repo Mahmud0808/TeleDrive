@@ -48,7 +48,8 @@ class PreviewContentResolver(
             return@flow
         }
 
-        if (!file.hasRemoteCopy || file.remoteFileId == null) {
+        val remoteFileId = file.remoteFileId
+        if (!file.hasRemoteCopy || remoteFileId == null) {
             emit(PreviewContent.Failed(R.string.preview_no_copy_available))
             return@flow
         }
@@ -61,7 +62,7 @@ class PreviewContentResolver(
             if (!file.isEncrypted || wrappedKeyRepository.exists(CryptoKeys.CONTENT)) {
                 emit(
                     PreviewContent.StreamedMedia(
-                        remoteFileId = file.remoteFileId,
+                        remoteFileId = remoteFileId,
                         isAudio = file.category == FileCategory.AUDIO,
                         parts = parts.mapNotNull { part ->
                             part.remoteFileId?.let {
@@ -79,7 +80,7 @@ class PreviewContentResolver(
             if (!file.isEncrypted) {
                 emit(
                     PreviewContent.StreamedMedia(
-                        remoteFileId = file.remoteFileId,
+                        remoteFileId = remoteFileId,
                         isAudio = file.category == FileCategory.AUDIO
                     )
                 )
@@ -89,9 +90,9 @@ class PreviewContentResolver(
             if (wrappedKeyRepository.exists(CryptoKeys.CONTENT)) {
                 emit(
                     PreviewContent.StreamedMedia(
-                        remoteFileId = file.remoteFileId,
+                        remoteFileId = remoteFileId,
                         isAudio = file.category == FileCategory.AUDIO,
-                        parts = listOf(MediaPart(file.remoteFileId, 0, file.sizeBytes)),
+                        parts = listOf(MediaPart(remoteFileId, 0, file.sizeBytes)),
                         encrypted = true
                     )
                 )

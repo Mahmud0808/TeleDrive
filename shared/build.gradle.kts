@@ -19,6 +19,7 @@ kotlin {
             dependsOn(commonMain.get())
             dependencies {
                 implementation(libs.kotlinx.coroutines.core)
+                api(libs.androidx.paging.common)
             }
         }
         val jvmCommonTest by creating {

@@ -2,7 +2,7 @@ package com.drdisagree.teledrive.presentation.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.drdisagree.teledrive.data.local.FileQueryBuilder
+import com.drdisagree.teledrive.domain.model.FileQuerySpec
 import com.drdisagree.teledrive.domain.model.DriveFile
 import com.drdisagree.teledrive.domain.model.DriveFolder
 import com.drdisagree.teledrive.domain.model.FileCategory
@@ -68,7 +68,7 @@ class SearchViewModel(
             } else {
                 searching.update { true }
                 fileRepository.observeFiles(
-                    FileQueryBuilder.Spec(
+                    FileQuerySpec(
                         nameQuery = text.takeIf { it.isNotBlank() },
                         categories = filterValues.category?.let { listOf(it) } ?: emptyList(),
                         backedUpOnly = filterValues.backedUpOnly,

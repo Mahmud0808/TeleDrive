@@ -10,9 +10,9 @@ import androidx.paging.cachedIn
 import androidx.paging.insertSeparators
 import androidx.paging.map
 import com.drdisagree.teledrive.R
-import com.drdisagree.teledrive.data.local.FileQueryBuilder
 import com.drdisagree.teledrive.domain.model.DriveFile
 import com.drdisagree.teledrive.domain.model.FileCategory
+import com.drdisagree.teledrive.domain.model.FileQuerySpec
 import com.drdisagree.teledrive.domain.model.FileSortField
 import com.drdisagree.teledrive.domain.model.MediaAlbum
 import com.drdisagree.teledrive.domain.model.SortDirection
@@ -48,6 +48,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 enum class GalleryTab(@param:StringRes val labelRes: Int) {
     ALL(R.string.gallery_tab_all),
@@ -100,12 +101,12 @@ class GalleryViewModel(
     private val _allSelected = MutableStateFlow(false)
     val allSelected: StateFlow<Boolean> = _allSelected.asStateFlow()
 
-    private val spec: Flow<FileQueryBuilder.Spec> = combine(
+    private val spec: Flow<FileQuerySpec> = combine(
         tab,
         sort,
         settingsRepository.preferences
     ) { currentTab, (field, direction), _ ->
-        FileQueryBuilder.Spec(
+        FileQuerySpec(
             folderId = albumFolderId,
             filterByFolder = isAlbumView,
             categories = when (currentTab) {
@@ -188,7 +189,7 @@ class GalleryViewModel(
 
     private fun withDayHeaders(
         data: PagingData<DriveFile>,
-        spec: FileQueryBuilder.Spec
+        spec: FileQuerySpec
     ): PagingData<GalleryListItem> {
         val mapped = data.map<DriveFile, GalleryListItem> { GalleryListItem.Media(it) }
         if (spec.sortField != FileSortField.DATE_MODIFIED &&
@@ -219,7 +220,7 @@ class GalleryViewModel(
             val startedAt = System.currentTimeMillis()
             syncRepository.incrementalSync()
             val elapsed = System.currentTimeMillis() - startedAt
-            if (elapsed < MIN_REFRESH_VISIBLE_MS) delay(MIN_REFRESH_VISIBLE_MS - elapsed)
+            if (elapsed < MIN_REFRESH_VISIBLE_MS) delay((MIN_REFRESH_VISIBLE_MS - elapsed).milliseconds)
             _refreshing.update { false }
         }
     }

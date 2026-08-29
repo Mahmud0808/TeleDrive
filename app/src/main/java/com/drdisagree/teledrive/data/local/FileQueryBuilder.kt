@@ -3,7 +3,7 @@ package com.drdisagree.teledrive.data.local
 import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteQuery
 import com.drdisagree.teledrive.data.local.FileQueryBuilder.build
-import com.drdisagree.teledrive.domain.model.FileCategory
+import com.drdisagree.teledrive.domain.model.FileQuerySpec
 import com.drdisagree.teledrive.domain.model.FileSortField
 import com.drdisagree.teledrive.domain.model.SortDirection
 
@@ -13,49 +13,28 @@ import com.drdisagree.teledrive.domain.model.SortDirection
  * compile-time queries without an explosion of variants, hence raw queries.
  */
 object FileQueryBuilder {
-
-    data class Spec(
-        val chatId: Long? = null,
-        val folderId: String? = null,
-        val filterByFolder: Boolean = false,
-        val categories: List<FileCategory> = emptyList(),
-        val nameQuery: String? = null,
-        val extension: String? = null,
-        val minSizeBytes: Long? = null,
-        val maxSizeBytes: Long? = null,
-        val modifiedAfter: Long? = null,
-        val modifiedBefore: Long? = null,
-        val backedUpOnly: Boolean = false,
-        val notBackedUpOnly: Boolean = false,
-        val favoritesOnly: Boolean = false,
-        val hiddenOnly: Boolean = false,
-        val archivedOnly: Boolean = false,
-        val showHidden: Boolean = false,
-        val showArchived: Boolean = false,
-        val sortField: FileSortField = FileSortField.NAME,
-        val sortDirection: SortDirection = SortDirection.ASCENDING
-    )
-
-    fun build(spec: Spec): SupportSQLiteQuery = query("*", spec)
+    fun build(spec: FileQuerySpec): SupportSQLiteQuery = query("*", spec)
 
     /** Same filter and order as [build], reading only the ids of every match. */
-    fun buildIds(spec: Spec): SupportSQLiteQuery = query("id", spec)
+    fun buildIds(spec: FileQuerySpec): SupportSQLiteQuery = query("id", spec)
 
-    private fun query(projection: String, spec: Spec): SupportSQLiteQuery {
+    private fun query(projection: String, spec: FileQuerySpec): SupportSQLiteQuery {
         val where = StringBuilder("trashedAt IS NULL")
         val args = mutableListOf<Any>()
 
-        if (spec.chatId != null) {
+        val chatId = spec.chatId
+        if (chatId != null) {
             where.append(" AND chatId = ?")
-            args.add(spec.chatId)
+            args.add(chatId)
         }
 
+        val folderId = spec.folderId
         if (spec.filterByFolder) {
-            if (spec.folderId == null) {
+            if (folderId == null) {
                 where.append(" AND folderId IS NULL")
             } else {
                 where.append(" AND folderId = ?")
-                args.add(spec.folderId)
+                args.add(folderId)
             }
         }
         if (spec.categories.isNotEmpty()) {

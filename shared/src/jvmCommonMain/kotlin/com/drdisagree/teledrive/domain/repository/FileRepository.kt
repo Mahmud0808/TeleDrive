@@ -3,7 +3,7 @@ package com.drdisagree.teledrive.domain.repository
 import androidx.paging.PagingData
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.core.files.LocalCleanup
-import com.drdisagree.teledrive.data.local.FileQueryBuilder
+import com.drdisagree.teledrive.domain.model.FileQuerySpec
 import com.drdisagree.teledrive.domain.model.DriveFile
 import com.drdisagree.teledrive.domain.model.DriveFolder
 import com.drdisagree.teledrive.domain.model.FileSortField
@@ -15,15 +15,15 @@ import kotlinx.coroutines.flow.Flow
 
 interface FileRepository {
 
-    fun pagedFiles(spec: FileQueryBuilder.Spec): Flow<PagingData<DriveFile>>
+    fun pagedFiles(spec: FileQuerySpec): Flow<PagingData<DriveFile>>
 
-    fun observeFiles(spec: FileQueryBuilder.Spec): Flow<List<DriveFile>>
+    fun observeFiles(spec: FileQuerySpec): Flow<List<DriveFile>>
 
     /** Ids of every file inside [folderId] and all of its subfolders. */
     suspend fun fileIdsInTree(folderId: String): List<String>
 
     /** Ids of every file matching [spec], including pages not loaded yet. */
-    suspend fun fileIds(spec: FileQueryBuilder.Spec): List<String>
+    suspend fun fileIds(spec: FileQuerySpec): List<String>
 
     fun observeFile(id: String): Flow<DriveFile?>
 

@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.drdisagree.teledrive.data.local.FileQueryBuilder
+import com.drdisagree.teledrive.domain.model.FileQuerySpec
 import com.drdisagree.teledrive.domain.model.DriveFile
 import com.drdisagree.teledrive.domain.model.FileSortField
 import com.drdisagree.teledrive.domain.model.SortDirection
@@ -39,7 +39,7 @@ class CollectionViewModel(
 
     private var rangeBase: Set<String>? = null
 
-    private val spec = FileQueryBuilder.Spec(
+    private val spec = FileQuerySpec(
         favoritesOnly = type == CollectionType.FAVORITES,
         hiddenOnly = type == CollectionType.HIDDEN,
         archivedOnly = type == CollectionType.ARCHIVED,

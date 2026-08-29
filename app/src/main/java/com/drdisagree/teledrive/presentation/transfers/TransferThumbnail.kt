@@ -47,9 +47,10 @@ fun TransferThumbnail(
             .background(MaterialTheme.colorScheme.surfaceContainerHighest),
         contentAlignment = Alignment.Center
     ) {
-        if (canHaveThumbnail && !failed) {
+        val fileId = transfer.fileId
+        if (canHaveThumbnail && fileId != null && !failed) {
             AsyncImage(
-                model = ThumbnailModel(transfer.fileId),
+                model = ThumbnailModel(fileId),
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop,

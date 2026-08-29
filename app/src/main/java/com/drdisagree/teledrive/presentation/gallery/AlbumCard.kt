@@ -50,9 +50,10 @@ fun AlbumCard(
                 .background(MaterialTheme.colorScheme.surfaceContainerHigh),
             contentAlignment = Alignment.Center
         ) {
-            if (album.coverFileId != null) {
+            val coverFileId = album.coverFileId
+            if (coverFileId != null) {
                 AsyncImage(
-                    model = ThumbnailModel(album.coverFileId),
+                    model = ThumbnailModel(coverFileId),
                     contentDescription = albumName,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()

@@ -20,6 +20,7 @@ import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.core.telegram.TelegramDownloadEvent
 import com.drdisagree.teledrive.core.telegram.TelegramException
 import com.drdisagree.teledrive.data.local.FileQueryBuilder
+import com.drdisagree.teledrive.domain.model.FileQuerySpec
 import com.drdisagree.teledrive.data.local.dao.FileDao
 import com.drdisagree.teledrive.data.local.dao.FolderDao
 import com.drdisagree.teledrive.data.local.entity.FileEntity
@@ -65,7 +66,7 @@ class FileRepositoryImpl(
     private val settingsRepository: SettingsRepository
 ) : FileRepository {
 
-    override fun pagedFiles(spec: FileQueryBuilder.Spec): Flow<PagingData<DriveFile>> =
+    override fun pagedFiles(spec: FileQuerySpec): Flow<PagingData<DriveFile>> =
         activeChannel.observe().flatMapLatest { chatId ->
             Pager(
                 config = PagingConfig(
@@ -79,7 +80,7 @@ class FileRepositoryImpl(
             ).flow.map { paging -> paging.map { it.toDomain() } }
         }
 
-    override fun observeFiles(spec: FileQueryBuilder.Spec): Flow<List<DriveFile>> =
+    override fun observeFiles(spec: FileQuerySpec): Flow<List<DriveFile>> =
         activeChannel.observe().flatMapLatest { chatId ->
             fileDao.observeList(FileQueryBuilder.build(spec.copy(chatId = chatId)))
                 .map { list -> list.map { it.toDomain() } }
@@ -98,7 +99,7 @@ class FileRepositoryImpl(
         return ids
     }
 
-    override suspend fun fileIds(spec: FileQueryBuilder.Spec): List<String> =
+    override suspend fun fileIds(spec: FileQuerySpec): List<String> =
         fileDao.idList(FileQueryBuilder.buildIds(spec.copy(chatId = activeChannel.id())))
 
     override fun observeFile(id: String): Flow<DriveFile?> =

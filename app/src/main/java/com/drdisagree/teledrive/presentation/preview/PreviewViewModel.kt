@@ -8,7 +8,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.drdisagree.teledrive.R
 import com.drdisagree.teledrive.core.common.AppResult
-import com.drdisagree.teledrive.data.local.FileQueryBuilder
+import com.drdisagree.teledrive.domain.model.FileQuerySpec
 import com.drdisagree.teledrive.domain.model.DriveFile
 import com.drdisagree.teledrive.domain.model.FileCategory
 import com.drdisagree.teledrive.domain.model.FileSortField
@@ -84,7 +84,7 @@ class PreviewViewModel(
             val sortField = route.sortField
                 ?.let { name -> runCatching { FileSortField.valueOf(name) }.getOrNull() }
             val spec = when {
-                sortField != null -> FileQueryBuilder.Spec(
+                sortField != null -> FileQuerySpec(
                     folderId = route.folderId,
                     filterByFolder = route.filterByFolder,
                     categories = categories,
@@ -102,7 +102,7 @@ class PreviewViewModel(
                     }
                 )
 
-                route.mediaOnly -> FileQueryBuilder.Spec(
+                route.mediaOnly -> FileQuerySpec(
                     categories = listOf(FileCategory.IMAGE, FileCategory.VIDEO),
                     showHidden = target.isHidden,
                     showArchived = target.isArchived,
@@ -110,7 +110,7 @@ class PreviewViewModel(
                     sortDirection = prefs.sortDirection
                 )
 
-                else -> FileQueryBuilder.Spec(
+                else -> FileQuerySpec(
                     folderId = target.folderId,
                     filterByFolder = true,
                     showHidden = target.isHidden,
