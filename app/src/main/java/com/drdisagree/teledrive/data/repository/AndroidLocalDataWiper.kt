@@ -13,13 +13,13 @@ import java.io.File
  * the new account has. Files in Telegram are untouched, and signing back in
  * rebuilds the index from the channel.
  */
-class LocalDataWiper(
+class AndroidLocalDataWiper(
     private val context: Context,
     private val database: TeleDriveDatabase,
     private val cacheRepository: CacheRepository
-) {
+) : LocalDataWiper {
 
-    suspend fun wipe() {
+    override suspend fun wipe() {
         runCatching { cacheRepository.clearAll() }
             .onFailure { SafeLog.w(TAG, "Cache clear failed during wipe", it) }
 

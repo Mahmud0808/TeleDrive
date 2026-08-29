@@ -6,24 +6,27 @@ import android.os.Build
 import android.os.Environment
 import androidx.core.content.ContextCompat
 
-class PermissionChecker(
+class AndroidPermissionChecker(
     private val context: Context
-) {
+) : PermissionChecker {
 
-    fun isGranted(permission: AppPermission): Boolean = when {
+    override fun isGranted(permission: AppPermission): Boolean = when {
         permission.isSpecialAccess -> hasAllFilesAccess()
         else -> permission.manifestPermission?.let {
             ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
         } ?: true
     }
 
-    fun hasAllFilesAccess(): Boolean =
+    override fun hasAllFilesAccess(): Boolean =
         Build.VERSION.SDK_INT < Build.VERSION_CODES.R ||
                 Environment.isExternalStorageManager()
 
-    fun statuses(): Map<AppPermission, Boolean> =
+    override fun statuses(): Map<AppPermission, Boolean> =
         AppPermission.entries.associateWith(::isGranted)
 
-    fun missingCritical(): List<AppPermission> =
+    override fun missingCritical(): List<AppPermission> =
         AppPermission.entries.filter { it.critical && !isGranted(it) }
+
+    override fun isRequestable(permission: AppPermission): Boolean =
+        permission.manifestPermission != null || permission.isSpecialAccess
 }

@@ -1,7 +1,5 @@
 package com.drdisagree.teledrive.presentation.settings
 
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -47,7 +45,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -79,9 +76,11 @@ import com.drdisagree.teledrive.resources.settings_no_exclusions
 import com.drdisagree.teledrive.resources.settings_remove
 import com.drdisagree.teledrive.resources.settings_remove_exclusion
 import com.drdisagree.teledrive.resources.settings_skips_every_file_folder
-import com.drdisagree.teledrive.core.files.DocumentTreePaths
 import com.drdisagree.teledrive.domain.model.Exclusion
 import com.drdisagree.teledrive.domain.model.ExclusionType
+import com.drdisagree.teledrive.presentation.platform.LocalFilePicker
+import com.drdisagree.teledrive.presentation.platform.LocalFolderPicker
+import com.drdisagree.teledrive.presentation.platform.PickResult
 import com.drdisagree.teledrive.presentation.common.add
 import com.drdisagree.teledrive.presentation.components.ConfirmDialog
 import com.drdisagree.teledrive.presentation.components.EmptyState
@@ -209,20 +208,11 @@ private fun AddExclusionDialog(
     var type by remember { mutableStateOf(ExclusionType.FOLDER_PATH) }
     var value by remember { mutableStateOf("") }
     var pickerError by remember { mutableStateOf(false) }
-    val context = LocalContext.current
-    val folderPicker = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenDocumentTree()
-    ) { uri ->
-        val path = uri?.let { DocumentTreePaths.treeToFilePath(context, it) }
-        pickerError = uri != null && path == null
-        path?.let { value = it }
-    }
-    val filePicker = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenDocument()
-    ) { uri ->
-        val path = uri?.let { DocumentTreePaths.documentToFilePath(context, it) }
-        pickerError = uri != null && path == null
-        path?.let { value = it }
+    val folderPicker = LocalFolderPicker.current
+    val filePicker = LocalFilePicker.current
+    val onPick: (PickResult) -> Unit = { result ->
+        pickerError = result is PickResult.Unreadable
+        if (result is PickResult.Picked) value = result.path
     }
 
     AlertDialog(
@@ -269,9 +259,9 @@ private fun AddExclusionDialog(
                         onClick = {
                             pickerError = false
                             if (isFile) {
-                                filePicker.launch(arrayOf("*/*"))
+                                filePicker.pick(onPick)
                             } else {
-                                folderPicker.launch(null)
+                                folderPicker.pick(onPick)
                             }
                         },
                         shapes = ButtonDefaults.shapes(),

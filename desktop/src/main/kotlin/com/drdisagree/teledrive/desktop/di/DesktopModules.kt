@@ -23,7 +23,9 @@ import com.drdisagree.teledrive.core.media.MediaMetadataExtractor
 import com.drdisagree.teledrive.core.media.ThumbnailMemoryCache
 import com.drdisagree.teledrive.core.media.ThumbnailStore
 import com.drdisagree.teledrive.core.network.NetworkMonitor
+import com.drdisagree.teledrive.core.permissions.PermissionChecker
 import com.drdisagree.teledrive.core.proxy.ProxyProbe
+import com.drdisagree.teledrive.core.security.AppLockManager
 import com.drdisagree.teledrive.core.publish.PublishOutboxDrainer
 import com.drdisagree.teledrive.core.publish.PublishScheduler
 import com.drdisagree.teledrive.core.telegram.DesktopTelegramClient
@@ -32,14 +34,18 @@ import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.core.telegram.TelegramPacer
 import com.drdisagree.teledrive.core.transfer.BackupSessionTracker
 import com.drdisagree.teledrive.core.transfer.CountingBackupSessionTracker
+import com.drdisagree.teledrive.core.transfer.MaintenanceScheduler
 import com.drdisagree.teledrive.core.transfer.TransferErrorMessages
 import com.drdisagree.teledrive.core.transfer.TransferScheduler
 import com.drdisagree.teledrive.core.transfer.transferEngineModule
+import com.drdisagree.teledrive.core.update.UpdateChecker
 import com.drdisagree.teledrive.data.local.database.TeleDriveDatabase
 import com.drdisagree.teledrive.data.local.database.daosModule
+import com.drdisagree.teledrive.data.repository.LocalDataWiper
 import com.drdisagree.teledrive.data.repository.repositoryModule
 import com.drdisagree.teledrive.desktop.BuildInfo
 import com.drdisagree.teledrive.desktop.crypto.DpapiCredentialCipher
+import com.drdisagree.teledrive.desktop.data.DesktopLocalDataWiper
 import com.drdisagree.teledrive.desktop.crypto.LocalKeyCredentialCipher
 import com.drdisagree.teledrive.desktop.files.DesktopDownloadWriter
 import com.drdisagree.teledrive.desktop.files.DesktopLocalCopyDeleter
@@ -48,8 +54,10 @@ import com.drdisagree.teledrive.desktop.media.DesktopMediaMetadataExtractor
 import com.drdisagree.teledrive.desktop.media.DesktopThumbnailStore
 import com.drdisagree.teledrive.desktop.media.NoopThumbnailMemoryCache
 import com.drdisagree.teledrive.desktop.network.DesktopNetworkMonitor
+import com.drdisagree.teledrive.desktop.permissions.DesktopPermissionChecker
 import com.drdisagree.teledrive.desktop.publish.DesktopPublishScheduler
 import com.drdisagree.teledrive.desktop.transfer.DesktopTransferErrorMessages
+import com.drdisagree.teledrive.desktop.transfer.DesktopMaintenanceScheduler
 import com.drdisagree.teledrive.desktop.transfer.DesktopTransferScheduler
 import com.drdisagree.teledrive.domain.usecase.useCaseModule
 import com.drdisagree.teledrive.presentation.di.sharedUiModule
@@ -77,6 +85,9 @@ val desktopModule = module {
     singleOf(::KeyBackupCodec)
     singleOf(::TelegramPacer)
     singleOf(::ProxyProbe)
+    singleOf(::AppLockManager)
+    single { UpdateChecker(BuildInfo.VERSION) }
+    singleOf(::DesktopPermissionChecker) bind PermissionChecker::class
     singleOf(::PublishOutboxDrainer)
     singleOf(::DesktopNetworkMonitor) bind NetworkMonitor::class
     singleOf(::DesktopTransferErrorMessages) bind TransferErrorMessages::class
@@ -87,6 +98,8 @@ val desktopModule = module {
     singleOf(::NoopThumbnailMemoryCache) bind ThumbnailMemoryCache::class
     singleOf(::CountingBackupSessionTracker) bind BackupSessionTracker::class
     singleOf(::DesktopTransferScheduler) bind TransferScheduler::class
+    singleOf(::DesktopMaintenanceScheduler) bind MaintenanceScheduler::class
+    singleOf(::DesktopLocalDataWiper) bind LocalDataWiper::class
     singleOf(::DesktopPublishScheduler) bind PublishScheduler::class
     single<TelegramClient> {
         DesktopTelegramClient(get(), get(), get(), BuildInfo.VERSION)

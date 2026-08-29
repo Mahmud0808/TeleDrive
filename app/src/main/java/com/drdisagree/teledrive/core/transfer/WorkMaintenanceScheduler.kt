@@ -9,12 +9,12 @@ import androidx.work.WorkManager
 import java.util.concurrent.TimeUnit
 import com.drdisagree.teledrive.core.update.UpdateCheckWorker
 
-class MaintenanceScheduler(
+class WorkMaintenanceScheduler(
     private val context: Context,
     private val mediaTriggerScheduler: MediaTriggerScheduler
-) {
+) : MaintenanceScheduler {
 
-    fun scheduleUpdateCheck(enabled: Boolean) {
+    override fun scheduleUpdateCheck(enabled: Boolean) {
         val workManager = WorkManager.getInstance(context)
         if (!enabled) {
             workManager.cancelUniqueWork(UpdateCheckWorker.UNIQUE_NAME)
@@ -33,13 +33,13 @@ class MaintenanceScheduler(
         )
     }
 
-    fun scheduleAll(
+    override fun scheduleAll(
         backupEnabled: Boolean,
         backupIntervalHours: Int,
         wifiOnly: Boolean,
         chargingOnly: Boolean,
-        instantBackup: Boolean = false,
-        updateChecks: Boolean = true
+        instantBackup: Boolean,
+        updateChecks: Boolean
     ) {
         val workManager = WorkManager.getInstance(context)
 

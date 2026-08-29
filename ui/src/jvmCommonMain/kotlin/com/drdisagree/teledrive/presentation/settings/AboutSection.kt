@@ -22,14 +22,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
-import com.drdisagree.teledrive.BuildConfig
-import com.drdisagree.teledrive.R
 import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.about_auto_check
 import com.drdisagree.teledrive.resources.about_auto_check_summary
@@ -49,13 +45,15 @@ import com.drdisagree.teledrive.resources.about_update_ready
 import com.drdisagree.teledrive.resources.about_version
 import com.drdisagree.teledrive.resources.app_name
 import com.drdisagree.teledrive.core.update.AppLinks
-import com.drdisagree.teledrive.presentation.common.openLink
+import com.drdisagree.teledrive.presentation.platform.LocalAppIcon
+import com.drdisagree.teledrive.presentation.platform.LocalAppVersion
+import com.drdisagree.teledrive.presentation.platform.LocalUrlOpener
 import com.drdisagree.teledrive.presentation.components.UpdateDialog
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AboutSection(state: SettingsUiState, viewModel: SettingsViewModel) {
-    val context = LocalContext.current
+    val urlOpener = LocalUrlOpener.current
     val updateState by viewModel.updateState.collectAsStateWithLifecycle()
     val checking = updateState is UpdateState.Checking
 
@@ -66,10 +64,8 @@ fun AboutSection(state: SettingsUiState, viewModel: SettingsViewModel) {
             .fillMaxWidth()
             .padding(horizontal = 24.dp, vertical = 16.dp)
     ) {
-        AsyncImage(
-            model = R.mipmap.ic_launcher,
-            contentDescription = null,
-            modifier = Modifier
+        LocalAppIcon.current(
+            Modifier
                 .size(88.dp)
                 .clip(MaterialTheme.shapes.extraLarge)
         )
@@ -80,7 +76,7 @@ fun AboutSection(state: SettingsUiState, viewModel: SettingsViewModel) {
             color = MaterialTheme.colorScheme.onSurface
         )
         Text(
-            text = stringResource(Res.string.about_version, BuildConfig.VERSION_NAME),
+            text = stringResource(Res.string.about_version, LocalAppVersion.current),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.primary
         )
@@ -133,7 +129,7 @@ fun AboutSection(state: SettingsUiState, viewModel: SettingsViewModel) {
                 title = stringResource(Res.string.about_source_code),
                 icon = Icons.Filled.Code,
                 subtitle = stringResource(Res.string.about_source_code_summary),
-                onClick = { openLink(context, AppLinks.REPOSITORY) }
+                onClick = { urlOpener.open(AppLinks.REPOSITORY) }
             )
         }
         add {
@@ -141,7 +137,7 @@ fun AboutSection(state: SettingsUiState, viewModel: SettingsViewModel) {
                 title = stringResource(Res.string.about_telegram),
                 icon = Icons.AutoMirrored.Filled.Send,
                 subtitle = stringResource(Res.string.about_telegram_summary),
-                onClick = { openLink(context, AppLinks.TELEGRAM) }
+                onClick = { urlOpener.open(AppLinks.TELEGRAM) }
             )
         }
         add {
@@ -149,20 +145,19 @@ fun AboutSection(state: SettingsUiState, viewModel: SettingsViewModel) {
                 title = stringResource(Res.string.about_donate),
                 icon = Icons.Filled.Coffee,
                 subtitle = stringResource(Res.string.about_donate_summary),
-                onClick = { openLink(context, AppLinks.DONATE) }
+                onClick = { urlOpener.open(AppLinks.DONATE) }
             )
         }
     }
 
     (updateState as? UpdateState.Available)?.let { available ->
-        val updateContext = LocalContext.current
         UpdateDialog(
-            currentVersion = BuildConfig.VERSION_NAME,
-            onOpenUrl = { url -> openLink(updateContext, url) },
+            currentVersion = LocalAppVersion.current,
+            onOpenUrl = urlOpener::open,
             release = available.release,
             onDownload = {
                 viewModel.dismissUpdate()
-                openLink(context, available.release.pageUrl)
+                urlOpener.open(available.release.pageUrl)
             },
             onDismiss = viewModel::dismissUpdate
         )

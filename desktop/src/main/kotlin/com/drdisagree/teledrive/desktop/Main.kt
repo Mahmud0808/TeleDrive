@@ -13,6 +13,7 @@ import com.drdisagree.teledrive.core.telegram.TelegramAuthState
 import com.drdisagree.teledrive.desktop.ui.AuthScreen
 import com.drdisagree.teledrive.desktop.ui.DesktopTheme
 import com.drdisagree.teledrive.desktop.ui.MainShell
+import com.drdisagree.teledrive.desktop.ui.ProvideDesktopPlatformActions
 import com.drdisagree.teledrive.domain.repository.TelegramAuthRepository
 import org.koin.core.context.startKoin
 import org.koin.java.KoinJavaComponent.getKoin
@@ -34,10 +35,12 @@ fun main() {
             }
             val authState by authRepository.authState.collectAsState()
             DesktopTheme {
-                if (authState == TelegramAuthState.Ready) {
-                    MainShell()
-                } else {
-                    AuthScreen()
+                ProvideDesktopPlatformActions {
+                    if (authState == TelegramAuthState.Ready) {
+                        MainShell()
+                    } else {
+                        AuthScreen()
+                    }
                 }
             }
         }

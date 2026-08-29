@@ -1,6 +1,5 @@
 package com.drdisagree.teledrive.core.update
 
-import com.drdisagree.teledrive.BuildConfig
 import com.drdisagree.teledrive.core.common.SafeLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -15,7 +14,9 @@ import java.net.URL
  * Nothing is sent along with the request: it is an anonymous read of a public
  * endpoint, so a check reveals no more than visiting the releases page.
  */
-class UpdateChecker {
+class UpdateChecker(
+    private val currentVersion: String
+) {
 
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -31,7 +32,7 @@ class UpdateChecker {
 
         if (release.draft || release.preRelease) return@withContext null
         val latest = release.tag.removePrefix("v").trim()
-        if (!isNewer(latest, BuildConfig.VERSION_NAME)) return@withContext null
+        if (!isNewer(latest, currentVersion)) return@withContext null
 
         AppRelease(
             version = latest,

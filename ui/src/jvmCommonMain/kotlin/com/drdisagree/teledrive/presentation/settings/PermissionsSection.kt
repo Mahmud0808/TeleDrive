@@ -1,10 +1,5 @@
 package com.drdisagree.teledrive.presentation.settings
 
-import android.content.Intent
-import android.net.Uri
-import android.provider.Settings
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,21 +22,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.drdisagree.teledrive.presentation.platform.LocalPermissionRequester
+import com.drdisagree.teledrive.presentation.platform.LocalSystemScreens
 import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.permission_not_allowed
 import com.drdisagree.teledrive.resources.permissions_allowed
 import com.drdisagree.teledrive.resources.permissions_not_allowed_optional
 import com.drdisagree.teledrive.resources.permissions_not_allowed
 import com.drdisagree.teledrive.core.permissions.AppPermission
-import com.drdisagree.teledrive.core.permissions.manifestPermission
 import com.drdisagree.teledrive.core.permissions.PermissionChecker
-import com.drdisagree.teledrive.core.permissions.openAllFilesAccess
 
 /**
  * Lists every permission with its current state. Tapping a denied entry asks
@@ -50,7 +44,6 @@ import com.drdisagree.teledrive.core.permissions.openAllFilesAccess
  */
 @Composable
 fun PermissionsSection(permissionChecker: PermissionChecker) {
-    val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var statuses by remember { mutableStateOf(permissionChecker.statuses()) }
 
@@ -64,23 +57,22 @@ fun PermissionsSection(permissionChecker: PermissionChecker) {
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    val requestLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { statuses = permissionChecker.statuses() }
+    val permissionRequester = LocalPermissionRequester.current
+    val systemScreens = LocalSystemScreens.current
 
     SettingsGroup {
         AppPermission.entries.forEach { permission ->
             val granted = statuses[permission] == true
-            add(visible = permission.manifestPermission != null || permission.isSpecialAccess) {
+            add(visible = permissionChecker.isRequestable(permission)) {
                 PermissionRow(
                     permission = permission,
                     granted = granted,
                     onClick = {
                         when {
-                            granted -> openAppSettings(context)
-                            permission.isSpecialAccess -> openAllFilesAccess(context)
-                            else -> permission.manifestPermission?.let {
-                                requestLauncher.launch(arrayOf(it))
+                            granted -> systemScreens.openAppSettings()
+                            permission.isSpecialAccess -> systemScreens.openAllFilesAccess()
+                            else -> permissionRequester.request(listOf(permission)) {
+                                statuses = permissionChecker.statuses()
                             }
                         }
                     }
@@ -136,17 +128,6 @@ private fun PermissionRow(
                 permission.critical -> MaterialTheme.colorScheme.error
                 else -> MaterialTheme.colorScheme.outline
             }
-        )
-    }
-}
-
-private fun openAppSettings(context: android.content.Context) {
-    runCatching {
-        context.startActivity(
-            Intent(
-                Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                Uri.fromParts("package", context.packageName, null)
-            )
         )
     }
 }

@@ -1,10 +1,5 @@
 package com.drdisagree.teledrive.presentation.settings
 
-import android.app.Activity
-import androidx.activity.compose.LocalActivity
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.IntentSenderRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -40,14 +35,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.StringArrayResource
 import org.jetbrains.compose.resources.stringArrayResource
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.FragmentActivity
 import org.koin.compose.viewmodel.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.drdisagree.teledrive.resources.Res
@@ -157,13 +150,15 @@ import com.drdisagree.teledrive.resources.theme_labels
 import com.drdisagree.teledrive.resources.theme_light
 import com.drdisagree.teledrive.resources.theme_system
 import com.drdisagree.teledrive.resources.trash_clear_labels
-import com.drdisagree.teledrive.core.files.DocumentTreePaths
-import com.drdisagree.teledrive.core.files.StandardBackupFolder
 import com.drdisagree.teledrive.core.telegram.TelegramConnectionState
 import com.drdisagree.teledrive.domain.model.AppTheme
 import com.drdisagree.teledrive.domain.model.LayoutDensity
 import com.drdisagree.teledrive.domain.model.ViewMode
-import com.drdisagree.teledrive.presentation.applock.requireDeviceOwner
+import com.drdisagree.teledrive.presentation.platform.LocalDeleteConsentLauncher
+import com.drdisagree.teledrive.presentation.platform.LocalStandardFolders
+import com.drdisagree.teledrive.presentation.platform.LocalDeviceOwnerGate
+import com.drdisagree.teledrive.presentation.platform.LocalFolderPicker
+import com.drdisagree.teledrive.presentation.platform.PickResult
 import com.drdisagree.teledrive.presentation.common.UiText
 import com.drdisagree.teledrive.presentation.common.CollectSnackbarMessages
 import com.drdisagree.teledrive.presentation.common.Formatters
@@ -189,16 +184,14 @@ fun SettingsSectionScreen(
     var confirmLogout by remember { mutableStateOf(false) }
     var confirmClearCache by remember { mutableStateOf(false) }
 
-    val deleteConsentLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartIntentSenderForResult()
-    ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) viewModel.freeUpSpace()
-    }
+    val deleteConsentLauncher = LocalDeleteConsentLauncher.current
 
     CollectSnackbarMessages(viewModel.messages, snackbarHostState)
     LaunchedEffect(Unit) {
         viewModel.deleteConsentRequests.collect { request ->
-            deleteConsentLauncher.launch(IntentSenderRequest.Builder(request).build())
+            deleteConsentLauncher.launch(request) { granted ->
+                if (granted) viewModel.freeUpSpace()
+            }
         }
     }
 
@@ -375,16 +368,15 @@ private fun BackupSection(
 ) {
     val prefs = state.preferences
     var folderToRemove by remember { mutableStateOf<String?>(null) }
-    val context = LocalContext.current
     val folderUnreadableMessage = UiText.Resource(Res.string.settings_folder_unreadable)
-    val folderPicker = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenDocumentTree()
-    ) { uri ->
-        val path = uri?.let { DocumentTreePaths.treeToFilePath(context, it) }
-        when {
-            uri == null -> Unit
-            path == null -> viewModel.notify(folderUnreadableMessage)
-            else -> viewModel.addBackupFolder(path)
+    val folderPicker = LocalFolderPicker.current
+    val onPickBackupFolder = {
+        folderPicker.pick { result ->
+            when (result) {
+                is PickResult.Canceled -> Unit
+                is PickResult.Unreadable -> viewModel.notify(folderUnreadableMessage)
+                is PickResult.Picked -> viewModel.addBackupFolder(result.path)
+            }
         }
     }
     var showIntervalDialog by remember { mutableStateOf(false) }
@@ -518,12 +510,14 @@ private fun BackupSection(
         Spacer(Modifier.height(8.dp))
     }
 
-    val customFolders = backupFolders.filterNot(StandardBackupFolder::isStandard)
+    val standardFolders = LocalStandardFolders.current
+    val standardPaths = standardFolders.map { it.path }.toSet()
+    val customFolders = backupFolders.filterNot { it in standardPaths }
     SettingsGroup {
-        StandardBackupFolder.entries.forEach { folder ->
+        standardFolders.forEach { folder ->
             add {
                 SettingsSwitchRow(
-                    title = stringResource(folder.labelRes),
+                    title = stringResource(folder.label),
                     subtitle = folder.path,
                     checked = folder.path in backupFolders,
                     onChange = { checked ->
@@ -549,7 +543,7 @@ private fun BackupSection(
             SettingsClickRow(
                 title = stringResource(Res.string.settings_add_another_folder),
                 subtitle = stringResource(Res.string.settings_choose_folder_device),
-                onClick = { folderPicker.launch(null) }
+                onClick = { onPickBackupFolder() }
             )
         }
     }
@@ -664,7 +658,7 @@ private fun StorageSection(
 private fun SecuritySection(state: SettingsUiState, viewModel: SettingsViewModel) {
     val encryptionOffMessage = UiText.Resource(Res.string.settings_encryption_stays_off)
     val prefs = state.preferences
-    val activity = LocalActivity.current as? FragmentActivity
+    val deviceOwnerGate = LocalDeviceOwnerGate.current
     val keyBackupWorking by viewModel.keyBackupWorking.collectAsStateWithLifecycle()
     val lockPromptTitle = stringResource(Res.string.settings_turn_off_app_lock)
     val lockPromptSubtitle = stringResource(Res.string.settings_confirm_removing_lock)
@@ -737,8 +731,7 @@ private fun SecuritySection(state: SettingsUiState, viewModel: SettingsViewModel
                     if (value) {
                         viewModel.update { it.copy(appLockEnabled = true) }
                     } else {
-                        requireDeviceOwner(
-                            activity = activity,
+                        deviceOwnerGate.require(
                             title = lockPromptTitle,
                             subtitle = lockPromptSubtitle,
                             onDenied = { error ->

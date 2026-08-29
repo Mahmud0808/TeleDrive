@@ -23,6 +23,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.drdisagree.teledrive.core.common.AppNotifications
 import com.drdisagree.teledrive.core.files.PendingShare
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
+import com.drdisagree.teledrive.presentation.platform.ProvidePlatformActions
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -130,11 +131,13 @@ class MainActivity : FragmentActivity() {
         observeScreenshotProtection()
         handleIntent(intent)
         setContent {
-            TeleDriveApp(
-                pendingShare = pendingShare,
-                notificationDestination = destination.collectAsStateWithLifecycle().value,
-                onDestinationHandled = { destination.value = null }
-            )
+            ProvidePlatformActions {
+                TeleDriveApp(
+                    pendingShare = pendingShare,
+                    notificationDestination = destination.collectAsStateWithLifecycle().value,
+                    onDestinationHandled = { destination.value = null }
+                )
+            }
         }
     }
 }

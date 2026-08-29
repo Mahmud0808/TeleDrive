@@ -1,6 +1,5 @@
 package com.drdisagree.teledrive.core.security
 
-import android.os.SystemClock
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -34,7 +33,7 @@ class AppLockManager(
             return
         }
         val elapsedMinutes = backgroundedAt?.let {
-            (SystemClock.elapsedRealtime() - it) / 60_000
+            (System.nanoTime() / 1_000_000 - it) / 60_000
         }
         if (elapsedMinutes != null && elapsedMinutes >= prefs.autoLockTimeoutMinutes) {
             _locked.value = true
@@ -42,7 +41,7 @@ class AppLockManager(
     }
 
     fun onAppStopped() {
-        backgroundedAt = SystemClock.elapsedRealtime()
+        backgroundedAt = System.nanoTime() / 1_000_000
     }
 
     fun unlock() {

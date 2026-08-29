@@ -6,6 +6,8 @@ import com.drdisagree.teledrive.presentation.gallery.GalleryViewModel
 import com.drdisagree.teledrive.presentation.note.NoteEditorViewModel
 import com.drdisagree.teledrive.presentation.proxy.ProxyViewModel
 import com.drdisagree.teledrive.presentation.search.SearchViewModel
+import com.drdisagree.teledrive.presentation.settings.ExclusionsViewModel
+import com.drdisagree.teledrive.presentation.settings.SettingsViewModel
 import com.drdisagree.teledrive.presentation.transfers.TransfersViewModel
 import com.drdisagree.teledrive.presentation.trash.TrashViewModel
 import org.koin.core.module.dsl.viewModelOf
@@ -18,6 +20,8 @@ val sharedUiModule = module {
     viewModelOf(::NoteEditorViewModel)
     viewModelOf(::ProxyViewModel)
     viewModelOf(::SearchViewModel)
+    viewModelOf(::SettingsViewModel)
+    viewModelOf(::ExclusionsViewModel)
     viewModelOf(::TransfersViewModel)
     viewModelOf(::TrashViewModel)
 }

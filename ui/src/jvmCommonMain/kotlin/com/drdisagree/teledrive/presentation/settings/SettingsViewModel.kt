@@ -1,6 +1,5 @@
 package com.drdisagree.teledrive.presentation.settings
 
-import android.content.IntentSender
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.drdisagree.teledrive.resources.files_removed_local_copies
@@ -15,6 +14,7 @@ import com.drdisagree.teledrive.resources.message_rebuild_done
 import com.drdisagree.teledrive.resources.message_thumbnails_cleared
 import com.drdisagree.teledrive.resources.message_wrong_passphrase
 import com.drdisagree.teledrive.resources.rebuild_locked_files
+import com.drdisagree.teledrive.core.files.DeleteConsentRequest
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.core.permissions.PermissionChecker
 import com.drdisagree.teledrive.core.security.AppLockManager
@@ -279,7 +279,7 @@ class SettingsViewModel(
     val reclaimableBytes: StateFlow<Long> = fileRepository.observeReclaimableBytes()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0L)
 
-    private val _deleteConsentRequests = MutableSharedFlow<IntentSender>(extraBufferCapacity = 1)
+    private val _deleteConsentRequests = MutableSharedFlow<DeleteConsentRequest>(extraBufferCapacity = 1)
     val deleteConsentRequests = _deleteConsentRequests.asSharedFlow()
 
     /** Files indexed so far, so a long rebuild shows movement. */
