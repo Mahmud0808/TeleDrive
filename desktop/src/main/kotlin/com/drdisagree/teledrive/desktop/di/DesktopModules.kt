@@ -49,6 +49,7 @@ import com.drdisagree.teledrive.desktop.data.DesktopLocalDataWiper
 import com.drdisagree.teledrive.desktop.crypto.LocalKeyCredentialCipher
 import com.drdisagree.teledrive.desktop.files.DesktopDownloadWriter
 import com.drdisagree.teledrive.desktop.files.DesktopLocalCopyDeleter
+import com.drdisagree.teledrive.desktop.files.DesktopStandardFolderPaths
 import com.drdisagree.teledrive.desktop.files.DesktopStoragePaths
 import com.drdisagree.teledrive.desktop.media.DesktopMediaMetadataExtractor
 import com.drdisagree.teledrive.desktop.media.DesktopThumbnailStore
@@ -61,6 +62,7 @@ import com.drdisagree.teledrive.desktop.transfer.DesktopMaintenanceScheduler
 import com.drdisagree.teledrive.desktop.transfer.DesktopTransferScheduler
 import com.drdisagree.teledrive.domain.usecase.useCaseModule
 import com.drdisagree.teledrive.presentation.di.sharedUiModule
+import com.drdisagree.teledrive.presentation.platform.StandardFolderPaths
 import java.io.File
 import kotlinx.coroutines.Dispatchers
 import okio.Path.Companion.toOkioPath
@@ -88,6 +90,7 @@ val desktopModule = module {
     singleOf(::AppLockManager)
     single { UpdateChecker(BuildInfo.VERSION) }
     singleOf(::DesktopPermissionChecker) bind PermissionChecker::class
+    singleOf(::DesktopStandardFolderPaths) bind StandardFolderPaths::class
     singleOf(::PublishOutboxDrainer)
     singleOf(::DesktopNetworkMonitor) bind NetworkMonitor::class
     singleOf(::DesktopTransferErrorMessages) bind TransferErrorMessages::class

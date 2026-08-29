@@ -1,7 +1,5 @@
 package com.drdisagree.teledrive.presentation.home
 
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -76,7 +74,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.drdisagree.teledrive.core.permissions.manifestPermission
 import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.app_backed_up
 import com.drdisagree.teledrive.resources.app_name
@@ -133,6 +130,7 @@ import com.drdisagree.teledrive.presentation.common.AgeBucket
 import com.drdisagree.teledrive.presentation.common.CollectSnackbarMessages
 import com.drdisagree.teledrive.presentation.common.Formatters
 import com.drdisagree.teledrive.presentation.common.add
+import com.drdisagree.teledrive.presentation.platform.LocalPermissionRequester
 import com.drdisagree.teledrive.presentation.components.BottomBarSnackbarHost
 import com.drdisagree.teledrive.presentation.components.ChannelAvatar
 import com.drdisagree.teledrive.presentation.components.ConfirmDialog
@@ -167,9 +165,7 @@ fun HomeScreen(
     val scanning by viewModel.scanning.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val lifecycleOwner = LocalLifecycleOwner.current
-    val permissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { viewModel.refreshPermissions() }
+    val permissionRequester = LocalPermissionRequester.current
 
     var confirmCancelBackup by remember { mutableStateOf<String?>(null) }
     confirmCancelBackup?.let { sessionId ->
@@ -271,12 +267,9 @@ fun HomeScreen(
                     PermissionWarningCard(
                         missing = state.missingPermissions,
                         onGrant = {
-                            permissionLauncher.launch(
-                                state.missingPermissions
-                                    .mapNotNull { it.manifestPermission }
-                                    .distinct()
-                                    .toTypedArray()
-                            )
+                            permissionRequester.request(state.missingPermissions) {
+                                viewModel.refreshPermissions()
+                            }
                         }
                     )
                 }

@@ -75,6 +75,7 @@ class SettingsRepositoryImpl(
                 ?: defaults.instantBackupEnabled,
             backupFolders = this[PreferenceKeys.BACKUP_FOLDERS] ?: defaults.backupFolders,
             backupWifiOnly = this[PreferenceKeys.BACKUP_WIFI_ONLY] ?: defaults.backupWifiOnly,
+            downloadDirectory = this[PreferenceKeys.DOWNLOAD_DIRECTORY],
             backupChargingOnly = this[PreferenceKeys.BACKUP_CHARGING_ONLY]
                 ?: defaults.backupChargingOnly,
             backupIntervalHours = this[PreferenceKeys.BACKUP_INTERVAL_HOURS]
@@ -151,6 +152,8 @@ class SettingsRepositoryImpl(
         this[PreferenceKeys.INSTANT_BACKUP_ENABLED] = prefs.instantBackupEnabled
         this[PreferenceKeys.BACKUP_FOLDERS] = prefs.backupFolders
         this[PreferenceKeys.BACKUP_WIFI_ONLY] = prefs.backupWifiOnly
+        prefs.downloadDirectory?.let { this[PreferenceKeys.DOWNLOAD_DIRECTORY] = it }
+            ?: remove(PreferenceKeys.DOWNLOAD_DIRECTORY)
         this[PreferenceKeys.BACKUP_CHARGING_ONLY] = prefs.backupChargingOnly
         this[PreferenceKeys.BACKUP_INTERVAL_HOURS] = prefs.backupIntervalHours
         this[PreferenceKeys.BACKUP_MAX_FILE_SIZE_MB] = prefs.backupMaxFileSizeMb

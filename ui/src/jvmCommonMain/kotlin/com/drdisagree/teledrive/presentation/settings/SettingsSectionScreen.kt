@@ -154,6 +154,12 @@ import com.drdisagree.teledrive.core.telegram.TelegramConnectionState
 import com.drdisagree.teledrive.domain.model.AppTheme
 import com.drdisagree.teledrive.domain.model.LayoutDensity
 import com.drdisagree.teledrive.domain.model.ViewMode
+import com.drdisagree.teledrive.presentation.platform.LocalDownloadLocationConfigurable
+import com.drdisagree.teledrive.resources.settings_download_location
+import com.drdisagree.teledrive.resources.settings_download_location_default
+import com.drdisagree.teledrive.resources.settings_download_location_reset
+import com.drdisagree.teledrive.resources.settings_free_up_none
+import com.drdisagree.teledrive.resources.settings_free_up_subtitle
 import com.drdisagree.teledrive.presentation.platform.LocalDeleteConsentLauncher
 import com.drdisagree.teledrive.presentation.platform.LocalStandardFolders
 import com.drdisagree.teledrive.presentation.platform.LocalDeviceOwnerGate
@@ -604,14 +610,40 @@ private fun StorageSection(
         )
     }
 
+    val downloadLocationConfigurable = LocalDownloadLocationConfigurable.current
+    val downloadFolderPicker = LocalFolderPicker.current
     SettingsGroup {
+        add(visible = downloadLocationConfigurable) {
+            SettingsClickRow(
+                title = stringResource(Res.string.settings_download_location),
+                subtitle = prefs.downloadDirectory
+                    ?: stringResource(Res.string.settings_download_location_default),
+                onClick = {
+                    downloadFolderPicker.pick { result ->
+                        if (result is PickResult.Picked) {
+                            viewModel.update { it.copy(downloadDirectory = result.path) }
+                        }
+                    }
+                }
+            )
+        }
+        add(visible = downloadLocationConfigurable && prefs.downloadDirectory != null) {
+            SettingsClickRow(
+                title = stringResource(Res.string.settings_download_location_reset),
+                subtitle = stringResource(Res.string.settings_download_location_default),
+                onClick = { viewModel.update { it.copy(downloadDirectory = null) } }
+            )
+        }
         add {
             SettingsClickRow(
                 title = stringResource(Res.string.common_free_space),
                 subtitle = if (reclaimable > 0) {
-                    "${Formatters.bytes(reclaimable)} of backed-up files stored locally"
+                    stringResource(
+                        Res.string.settings_free_up_subtitle,
+                        Formatters.bytes(reclaimable)
+                    )
                 } else {
-                    "No backed-up files are taking local space"
+                    stringResource(Res.string.settings_free_up_none)
                 },
                 onClick = { if (reclaimable > 0) confirmFreeUpSpace = true }
             )

@@ -1,13 +1,5 @@
 package com.drdisagree.teledrive.presentation.onboarding
 
-import android.Manifest
-import android.content.Context
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
-import android.os.Environment
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.CubicBezierEasing
@@ -95,9 +87,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.res.painterResource
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
@@ -106,14 +97,11 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
-import androidx.core.net.toUri
 import org.koin.compose.viewmodel.koinViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.drdisagree.teledrive.R
 import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.app_name
 import com.drdisagree.teledrive.resources.backup
@@ -204,7 +192,13 @@ import com.drdisagree.teledrive.resources.onboarding_toggle_wifi_only
 import com.drdisagree.teledrive.resources.onboarding_two_step_verification
 import com.drdisagree.teledrive.resources.onboarding_verify
 import com.drdisagree.teledrive.resources.onboarding_where_i_get_these
-import com.drdisagree.teledrive.core.permissions.openAllFilesAccess
+import com.drdisagree.teledrive.core.permissions.AppPermission
+import com.drdisagree.teledrive.core.permissions.PermissionChecker
+import com.drdisagree.teledrive.presentation.platform.LocalPermissionRequester
+import com.drdisagree.teledrive.presentation.platform.LocalSystemScreens
+import com.drdisagree.teledrive.presentation.platform.LocalTelegramLinkOpener
+import com.drdisagree.teledrive.resources.ic_launcher_monochrome
+import org.koin.compose.koinInject
 import com.drdisagree.teledrive.core.telegram.CodeDeliveryChannel
 import com.drdisagree.teledrive.domain.model.Country
 import com.drdisagree.teledrive.domain.model.DriveChannel
@@ -470,14 +464,6 @@ private fun ChannelSelectStep(
     }
 }
 
-/** True when every media permission this release asks for is already granted. */
-private fun hasMediaAccess(context: Context, permissions: List<String>): Boolean =
-    permissions.all { permission ->
-        ContextCompat.checkSelfPermission(context, permission) == PermissionGranted
-    }
-
-private const val PermissionGranted = PackageManager.PERMISSION_GRANTED
-
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun StepHeader(step: OnboardingStep, modifier: Modifier = Modifier) {
@@ -580,7 +566,7 @@ private fun StepTitle(title: String, description: String) {
 @Composable
 private fun WelcomeStep(onContinue: () -> Unit) {
     OnboardingPage(
-        iconPainter = painterResource(R.mipmap.ic_launcher_monochrome),
+        iconPainter = painterResource(Res.drawable.ic_launcher_monochrome),
         title = stringResource(Res.string.app_name),
         description = stringResource(Res.string.onboarding_files_live_own_private)
     ) {
@@ -798,20 +784,12 @@ private fun QrStep(
     link: String?,
     onCancel: () -> Unit
 ) {
-    val context = LocalContext.current
     var openFailed by remember { mutableStateOf(false) }
 
-    /* The QR payload is a tg: link, so a Telegram app on this same phone can
+    /* The QR payload is a tg: link, so a Telegram app on this same device can
        confirm the login directly. Scanning is only needed across devices. */
-    val telegramIntent = remember(link) {
-        link?.let { Intent(Intent.ACTION_VIEW, it.toUri()) }
-    }
-    /* Probed from the scheme alone, not from the login link, so the right mode
-       is known on the first frame instead of after TDLib answers. */
-    val canConfirmHere = remember {
-        Intent(Intent.ACTION_VIEW, TELEGRAM_PROBE_URI.toUri())
-            .resolveActivity(context.packageManager) != null
-    }
+    val telegramLinkOpener = LocalTelegramLinkOpener.current
+    val canConfirmHere = telegramLinkOpener.canOpenTelegram
     /* One route at a time: showing both at once reads like two required steps. */
     var scanning by rememberSaveable(canConfirmHere) { mutableStateOf(!canConfirmHere) }
 
@@ -853,10 +831,9 @@ private fun QrStep(
         } else {
             BigButton(
                 label = stringResource(Res.string.onboarding_qr_open_telegram),
-                enabled = !working && telegramIntent != null,
+                enabled = !working && link != null,
                 onClick = {
-                    openFailed = telegramIntent == null ||
-                            runCatching { context.startActivity(telegramIntent) }.isFailure
+                    openFailed = link == null || !telegramLinkOpener.open(link)
                 }
             )
             if (openFailed) {
@@ -1320,30 +1297,27 @@ private fun PasswordStep(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun PermissionsStep(working: Boolean, onResolved: () -> Unit) {
-    val context = LocalContext.current
     var mediaRequested by rememberSaveable { mutableStateOf(false) }
-    val permissions = buildList {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            add(Manifest.permission.READ_MEDIA_IMAGES)
-            add(Manifest.permission.READ_MEDIA_VIDEO)
-            add(Manifest.permission.POST_NOTIFICATIONS)
-        } else {
-            add(Manifest.permission.READ_EXTERNAL_STORAGE)
-        }
-    }
-    val launcher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { mediaRequested = true }
+    val mediaPermissions = listOf(
+        AppPermission.MEDIA_IMAGES,
+        AppPermission.MEDIA_VIDEO,
+        AppPermission.NOTIFICATIONS
+    )
+    val permissionChecker = koinInject<PermissionChecker>()
+    val permissionRequester = LocalPermissionRequester.current
+    val systemScreens = LocalSystemScreens.current
 
-    var mediaGranted by remember { mutableStateOf(hasMediaAccess(context, permissions)) }
+    fun mediaAccess(): Boolean = mediaPermissions.all { permissionChecker.isGranted(it) }
 
-    var allFilesGranted by remember { mutableStateOf(hasAllFilesAccess()) }
+    var mediaGranted by remember { mutableStateOf(mediaAccess()) }
+
+    var allFilesGranted by remember { mutableStateOf(permissionChecker.hasAllFilesAccess()) }
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
-                mediaGranted = hasMediaAccess(context, permissions)
-                allFilesGranted = hasAllFilesAccess()
+                mediaGranted = mediaAccess()
+                allFilesGranted = permissionChecker.hasAllFilesAccess()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -1366,8 +1340,8 @@ private fun PermissionsStep(working: Boolean, onResolved: () -> Unit) {
             loading = working,
             onClick = {
                 when {
-                    askForMedia -> launcher.launch(permissions.toTypedArray())
-                    !allFilesGranted -> openAllFilesAccess(context)
+                    askForMedia -> permissionRequester.request(mediaPermissions) { mediaRequested = true }
+                    !allFilesGranted -> systemScreens.openAllFilesAccess()
                     else -> onResolved()
                 }
             }
@@ -1570,9 +1544,6 @@ private const val STEP_SLIDE_MS = 420
 
 private val PAGE_PADDING = 28.dp
 private val PAGE_VERTICAL_PADDING = 24.dp
-
-private fun hasAllFilesAccess(): Boolean =
-    Build.VERSION.SDK_INT < Build.VERSION_CODES.R || Environment.isExternalStorageManager()
 
 private val PREFIX_GAP = 4.dp
 private val SPINNER_SIZE = 20.dp

@@ -580,6 +580,11 @@
     <string name="settings_cached_previews_thumbnails_temporary">Cached previews, thumbnails, and temporary files will be removed. Your files and backups are not affected.</string>
     <string name="settings_clear_cache_action">Clear cache</string>
     <string name="settings_clear_cache_title">Clear cache?</string>
+    <string name="settings_download_location">Download location</string>
+    <string name="settings_download_location_default">Downloads/TeleDrive</string>
+    <string name="settings_download_location_reset">Reset download location</string>
+    <string name="settings_free_up_subtitle">%1$s of backed-up files stored locally</string>
+    <string name="settings_free_up_none">No backed-up files are taking local space</string>
     <string name="settings_clear_thumbnails_action">Clear thumbnails</string>
     <string name="settings_clear_thumbnails_title">Clear thumbnails?</string>
     <string name="settings_free_up_space_title">Free up %1$s?</string>

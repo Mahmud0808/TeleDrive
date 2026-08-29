@@ -8,6 +8,7 @@ data class UserPreferences(
     val instantBackupEnabled: Boolean = true,
     val backupFolders: Set<String> = emptySet(),
     val backupWifiOnly: Boolean = false,
+    val downloadDirectory: String? = null,
     val backupChargingOnly: Boolean = false,
     val backupIntervalHours: Int = 24,
     val backupMaxFileSizeMb: Int = 0,

@@ -8,7 +8,6 @@ import com.drdisagree.teledrive.resources.onboarding_api_id_number
 import com.drdisagree.teledrive.resources.onboarding_enter_phone
 import com.drdisagree.teledrive.resources.onboarding_no_account
 import com.drdisagree.teledrive.core.common.AppResult
-import com.drdisagree.teledrive.core.files.StandardBackupFolder
 import com.drdisagree.teledrive.core.telegram.CodeDeliveryChannel
 import com.drdisagree.teledrive.core.telegram.TelegramAuthState
 import com.drdisagree.teledrive.core.telegram.TelegramCredentials
@@ -19,6 +18,7 @@ import com.drdisagree.teledrive.domain.repository.ChannelRepository
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.repository.SyncRepository
 import com.drdisagree.teledrive.domain.repository.TelegramAuthRepository
+import com.drdisagree.teledrive.presentation.platform.StandardFolderPaths
 import com.drdisagree.teledrive.presentation.common.UiText
 import com.drdisagree.teledrive.presentation.common.toUiText
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,7 +36,8 @@ class OnboardingViewModel(
     private val settingsRepository: SettingsRepository,
     private val syncRepository: SyncRepository,
     private val maintenanceScheduler: MaintenanceScheduler,
-    private val channelRepository: ChannelRepository
+    private val channelRepository: ChannelRepository,
+    private val standardFolderPaths: StandardFolderPaths
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(OnboardingUiState())
@@ -324,9 +325,9 @@ class OnboardingViewModel(
         _uiState.update { it.copy(finishing = true) }
         viewModelScope.launch {
             val folders = buildSet {
-                if (state.backupDcim) add(StandardBackupFolder.CAMERA.path)
-                if (state.backupPictures) add(StandardBackupFolder.PICTURES.path)
-                if (state.backupMovies) add(StandardBackupFolder.MOVIES.path)
+                if (state.backupDcim) standardFolderPaths.camera?.let(::add)
+                if (state.backupPictures) standardFolderPaths.pictures?.let(::add)
+                if (state.backupMovies) standardFolderPaths.movies?.let(::add)
             }
             settingsRepository.update {
                 it.copy(

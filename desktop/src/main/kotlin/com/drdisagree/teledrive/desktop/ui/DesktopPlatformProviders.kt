@@ -14,6 +14,7 @@ import com.drdisagree.teledrive.presentation.platform.LocalAppIcon
 import com.drdisagree.teledrive.presentation.platform.LocalAppVersion
 import com.drdisagree.teledrive.presentation.platform.LocalDeleteConsentLauncher
 import com.drdisagree.teledrive.presentation.platform.LocalDeviceOwnerGate
+import com.drdisagree.teledrive.presentation.platform.LocalDownloadLocationConfigurable
 import com.drdisagree.teledrive.presentation.platform.LocalFilePicker
 import com.drdisagree.teledrive.presentation.platform.LocalFolderPicker
 import com.drdisagree.teledrive.presentation.platform.LocalPermissionRequester
@@ -105,6 +106,7 @@ fun ProvideDesktopPlatformActions(content: @Composable () -> Unit) {
         LocalSystemScreens provides systemScreens,
         LocalDeviceOwnerGate provides deviceOwnerGate,
         LocalAppVersion provides BuildInfo.VERSION,
+        LocalDownloadLocationConfigurable provides true,
         content = content
     )
 }
