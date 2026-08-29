@@ -80,14 +80,50 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.koin.androidx.compose.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.common_actions
+import com.drdisagree.teledrive.resources.common_back
+import com.drdisagree.teledrive.resources.common_cancel
+import com.drdisagree.teledrive.resources.common_save
+import com.drdisagree.teledrive.resources.proxy_add
+import com.drdisagree.teledrive.resources.proxy_delete_action
+import com.drdisagree.teledrive.resources.proxy_delete_message
+import com.drdisagree.teledrive.resources.proxy_delete_title
+import com.drdisagree.teledrive.resources.proxy_edit
+import com.drdisagree.teledrive.resources.proxy_endpoint
+import com.drdisagree.teledrive.resources.proxy_host
+import com.drdisagree.teledrive.resources.proxy_import
+import com.drdisagree.teledrive.resources.proxy_link
+import com.drdisagree.teledrive.resources.proxy_name_optional
+import com.drdisagree.teledrive.resources.proxy_none_saved
+import com.drdisagree.teledrive.resources.proxy_none_saved_summary
+import com.drdisagree.teledrive.resources.proxy_password_optional
+import com.drdisagree.teledrive.resources.proxy_paste_link
+import com.drdisagree.teledrive.resources.proxy_paste_link_summary
+import com.drdisagree.teledrive.resources.proxy_port
+import com.drdisagree.teledrive.resources.proxy_reachable
+import com.drdisagree.teledrive.resources.proxy_route_needs_one
+import com.drdisagree.teledrive.resources.proxy_route_off_summary
+import com.drdisagree.teledrive.resources.proxy_route_on_summary
+import com.drdisagree.teledrive.resources.proxy_route_through
+import com.drdisagree.teledrive.resources.proxy_saved
+import com.drdisagree.teledrive.resources.proxy_secret
+import com.drdisagree.teledrive.resources.proxy_server_reachable
+import com.drdisagree.teledrive.resources.proxy_test
+import com.drdisagree.teledrive.resources.proxy_testing
+import com.drdisagree.teledrive.resources.proxy_title
+import com.drdisagree.teledrive.resources.proxy_type_http
+import com.drdisagree.teledrive.resources.proxy_type_mtproto
+import com.drdisagree.teledrive.resources.proxy_type_socks5
+import com.drdisagree.teledrive.resources.proxy_unreachable
+import com.drdisagree.teledrive.resources.proxy_username_optional
 import com.drdisagree.teledrive.core.telegram.ProxyLink
 import com.drdisagree.teledrive.core.telegram.TelegramProxyType
 import com.drdisagree.teledrive.domain.model.ProxyServer
@@ -122,12 +158,12 @@ fun ProxyScreen(
         topBar = {
             TopAppBar(
                 colors = liftedTopAppBarColors(lifted),
-                title = { Text(stringResource(R.string.proxy_title)) },
+                title = { Text(stringResource(Res.string.proxy_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.common_back)
+                            contentDescription = stringResource(Res.string.common_back)
                         )
                     }
                 },
@@ -135,7 +171,7 @@ fun ProxyScreen(
                     IconButton(onClick = { importOpen = true }) {
                         Icon(
                             Icons.Filled.ContentPaste,
-                            contentDescription = stringResource(R.string.proxy_paste_link)
+                            contentDescription = stringResource(Res.string.proxy_paste_link)
                         )
                     }
                 }
@@ -148,7 +184,7 @@ fun ProxyScreen(
                     editorOpen = true
                 }
             ) {
-                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.proxy_add))
+                Icon(Icons.Filled.Add, contentDescription = stringResource(Res.string.proxy_add))
             }
         }
     ) { padding ->
@@ -172,8 +208,8 @@ fun ProxyScreen(
                 item(key = EMPTY_STATE_KEY) {
                     EmptyState(
                         icon = Icons.Outlined.VpnKey,
-                        title = stringResource(R.string.proxy_none_saved),
-                        description = stringResource(R.string.proxy_none_saved_summary),
+                        title = stringResource(Res.string.proxy_none_saved),
+                        description = stringResource(Res.string.proxy_none_saved_summary),
                         modifier = Modifier
                             .animateItem()
                             .padding(top = 24.dp)
@@ -182,7 +218,7 @@ fun ProxyScreen(
             } else {
                 item(key = LIST_HEADER_KEY) {
                     Text(
-                        text = stringResource(R.string.proxy_saved),
+                        text = stringResource(Res.string.proxy_saved),
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier
@@ -232,9 +268,9 @@ fun ProxyScreen(
 
     pendingDelete?.let { proxy ->
         ConfirmDialog(
-            title = stringResource(R.string.proxy_delete_title),
-            message = stringResource(R.string.proxy_delete_message, proxy.label),
-            confirmLabel = stringResource(R.string.proxy_delete_action),
+            title = stringResource(Res.string.proxy_delete_title),
+            message = stringResource(Res.string.proxy_delete_message, proxy.label),
+            confirmLabel = stringResource(Res.string.proxy_delete_action),
             destructive = true,
             onConfirm = {
                 pendingDelete = null
@@ -299,15 +335,15 @@ private fun RoutingCard(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = stringResource(R.string.proxy_route_through),
+                    text = stringResource(Res.string.proxy_route_through),
                     style = MaterialTheme.typography.titleMedium,
                     color = onContainer
                 )
                 Spacer(Modifier.height(4.dp))
                 val summary = when {
-                    !hasProxies -> R.string.proxy_route_needs_one
-                    enabled -> R.string.proxy_route_on_summary
-                    else -> R.string.proxy_route_off_summary
+                    !hasProxies -> Res.string.proxy_route_needs_one
+                    enabled -> Res.string.proxy_route_on_summary
+                    else -> Res.string.proxy_route_off_summary
                 }
                 AnimatedContent(targetState = summary, label = SUMMARY_LABEL) { line ->
                     Text(
@@ -372,7 +408,7 @@ private fun ProxyCard(
                 )
                 Text(
                     text = stringResource(
-                        R.string.proxy_endpoint,
+                        Res.string.proxy_endpoint,
                         typeLabel(proxy.type),
                         proxy.host,
                         proxy.port
@@ -394,12 +430,12 @@ private fun ProxyCard(
                 IconButton(onClick = { menuOpen = true }) {
                     Icon(
                         Icons.Filled.MoreVert,
-                        contentDescription = stringResource(R.string.common_actions)
+                        contentDescription = stringResource(Res.string.common_actions)
                     )
                 }
                 DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                     DropdownMenuItem(
-                        text = { Text(stringResource(R.string.proxy_test)) },
+                        text = { Text(stringResource(Res.string.proxy_test)) },
                         leadingIcon = {
                             Icon(
                                 Icons.Filled.NetworkCheck,
@@ -412,7 +448,7 @@ private fun ProxyCard(
                         }
                     )
                     DropdownMenuItem(
-                        text = { Text(stringResource(R.string.proxy_edit)) },
+                        text = { Text(stringResource(Res.string.proxy_edit)) },
                         leadingIcon = { Icon(Icons.Filled.Edit, contentDescription = null) },
                         onClick = {
                             menuOpen = false
@@ -420,7 +456,7 @@ private fun ProxyCard(
                         }
                     )
                     DropdownMenuItem(
-                        text = { Text(stringResource(R.string.proxy_delete_action)) },
+                        text = { Text(stringResource(Res.string.proxy_delete_action)) },
                         leadingIcon = { Icon(Icons.Filled.Delete, contentDescription = null) },
                         onClick = {
                             menuOpen = false
@@ -473,10 +509,10 @@ private fun ReachabilityLine(reachability: ProxyReachability) {
         Text(
             text = stringResource(
                 when (reachability) {
-                    ProxyReachability.TESTING -> R.string.proxy_testing
-                    ProxyReachability.ANSWERED -> R.string.proxy_reachable
-                    ProxyReachability.REACHABLE -> R.string.proxy_server_reachable
-                    ProxyReachability.UNREACHABLE -> R.string.proxy_unreachable
+                    ProxyReachability.TESTING -> Res.string.proxy_testing
+                    ProxyReachability.ANSWERED -> Res.string.proxy_reachable
+                    ProxyReachability.REACHABLE -> Res.string.proxy_server_reachable
+                    ProxyReachability.UNREACHABLE -> Res.string.proxy_unreachable
                 }
             ),
             style = MaterialTheme.typography.labelMedium,
@@ -519,7 +555,7 @@ private fun ProxyEditorSheet(
         ) {
             Text(
                 text = stringResource(
-                    if (original == null) R.string.proxy_add else R.string.proxy_edit
+                    if (original == null) Res.string.proxy_add else Res.string.proxy_edit
                 ),
                 style = MaterialTheme.typography.headlineSmallEmphasized
             )
@@ -554,7 +590,7 @@ private fun ProxyEditorSheet(
             OutlinedTextField(
                 value = label,
                 onValueChange = { label = it },
-                label = { Text(stringResource(R.string.proxy_name_optional)) },
+                label = { Text(stringResource(Res.string.proxy_name_optional)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -563,7 +599,7 @@ private fun ProxyEditorSheet(
                 OutlinedTextField(
                     value = host,
                     onValueChange = { host = it.trim() },
-                    label = { Text(stringResource(R.string.proxy_host)) },
+                    label = { Text(stringResource(Res.string.proxy_host)) },
                     singleLine = true,
                     modifier = Modifier.weight(2f)
                 )
@@ -571,7 +607,7 @@ private fun ProxyEditorSheet(
                 OutlinedTextField(
                     value = port,
                     onValueChange = { value -> port = value.filter { it.isDigit() } },
-                    label = { Text(stringResource(R.string.proxy_port)) },
+                    label = { Text(stringResource(Res.string.proxy_port)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.weight(1f)
@@ -587,7 +623,7 @@ private fun ProxyEditorSheet(
                         OutlinedTextField(
                             value = secret,
                             onValueChange = { secret = it.trim() },
-                            label = { Text(stringResource(R.string.proxy_secret)) },
+                            label = { Text(stringResource(Res.string.proxy_secret)) },
                             singleLine = true,
                             modifier = Modifier.fillMaxWidth()
                         )
@@ -595,7 +631,7 @@ private fun ProxyEditorSheet(
                         OutlinedTextField(
                             value = username,
                             onValueChange = { username = it },
-                            label = { Text(stringResource(R.string.proxy_username_optional)) },
+                            label = { Text(stringResource(Res.string.proxy_username_optional)) },
                             singleLine = true,
                             modifier = Modifier.fillMaxWidth()
                         )
@@ -603,7 +639,7 @@ private fun ProxyEditorSheet(
                         OutlinedTextField(
                             value = password,
                             onValueChange = { password = it },
-                            label = { Text(stringResource(R.string.proxy_password_optional)) },
+                            label = { Text(stringResource(Res.string.proxy_password_optional)) },
                             singleLine = true,
                             modifier = Modifier.fillMaxWidth()
                         )
@@ -619,7 +655,7 @@ private fun ProxyEditorSheet(
                     onClick = onDismiss,
                     shapes = ButtonDefaults.shapes(),
                     modifier = Modifier.weight(1f)
-                ) { Text(stringResource(R.string.common_cancel)) }
+                ) { Text(stringResource(Res.string.common_cancel)) }
                 Button(
                     onClick = {
                         onSave(
@@ -645,7 +681,7 @@ private fun ProxyEditorSheet(
                     shapes = ButtonDefaults.shapes(),
                     enabled = valid,
                     modifier = Modifier.weight(1f)
-                ) { Text(stringResource(R.string.common_save)) }
+                ) { Text(stringResource(Res.string.common_save)) }
             }
         }
     }
@@ -668,12 +704,12 @@ private fun ImportLinkSheet(onImport: (String) -> Unit, onDismiss: () -> Unit) {
                 .padding(bottom = sheetBottomPadding() + 24.dp)
         ) {
             Text(
-                text = stringResource(R.string.proxy_paste_link),
+                text = stringResource(Res.string.proxy_paste_link),
                 style = MaterialTheme.typography.headlineSmallEmphasized
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                text = stringResource(R.string.proxy_paste_link_summary),
+                text = stringResource(Res.string.proxy_paste_link_summary),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -681,7 +717,7 @@ private fun ImportLinkSheet(onImport: (String) -> Unit, onDismiss: () -> Unit) {
             OutlinedTextField(
                 value = link,
                 onValueChange = { link = it },
-                label = { Text(stringResource(R.string.proxy_link)) },
+                label = { Text(stringResource(Res.string.proxy_link)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -694,13 +730,13 @@ private fun ImportLinkSheet(onImport: (String) -> Unit, onDismiss: () -> Unit) {
                     onClick = onDismiss,
                     shapes = ButtonDefaults.shapes(),
                     modifier = Modifier.weight(1f)
-                ) { Text(stringResource(R.string.common_cancel)) }
+                ) { Text(stringResource(Res.string.common_cancel)) }
                 Button(
                     onClick = { onImport(link) },
                     shapes = ButtonDefaults.shapes(),
                     enabled = link.isNotBlank(),
                     modifier = Modifier.weight(1f)
-                ) { Text(stringResource(R.string.proxy_import)) }
+                ) { Text(stringResource(Res.string.proxy_import)) }
             }
         }
     }
@@ -752,8 +788,8 @@ private fun formSheetState(): SheetState = rememberBottomSheetState(
 @Composable
 private fun typeLabel(type: TelegramProxyType): String = stringResource(
     when (type) {
-        TelegramProxyType.SOCKS5 -> R.string.proxy_type_socks5
-        TelegramProxyType.MTPROTO -> R.string.proxy_type_mtproto
-        TelegramProxyType.HTTP -> R.string.proxy_type_http
+        TelegramProxyType.SOCKS5 -> Res.string.proxy_type_socks5
+        TelegramProxyType.MTPROTO -> Res.string.proxy_type_mtproto
+        TelegramProxyType.HTTP -> Res.string.proxy_type_http
     }
 )

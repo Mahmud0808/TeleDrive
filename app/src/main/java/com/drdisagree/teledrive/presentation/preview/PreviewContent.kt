@@ -1,6 +1,6 @@
 package com.drdisagree.teledrive.presentation.preview
 
-import androidx.annotation.StringRes
+import org.jetbrains.compose.resources.StringResource
 import com.drdisagree.teledrive.core.media.MediaPart
 
 /** Resolved, displayable content for one file in the fullscreen viewer. */
@@ -40,7 +40,7 @@ sealed interface PreviewContent {
     /** Too large to fetch inline; user must download explicitly. */
     data class RequiresDownload(val sizeBytes: Long) : PreviewContent
 
-    data class Unsupported(@param:StringRes val reasonRes: Int) : PreviewContent
+    data class Unsupported(val reasonRes: StringResource) : PreviewContent
 
-    data class Failed(@param:StringRes val messageRes: Int) : PreviewContent
+    data class Failed(val messageRes: StringResource) : PreviewContent
 }

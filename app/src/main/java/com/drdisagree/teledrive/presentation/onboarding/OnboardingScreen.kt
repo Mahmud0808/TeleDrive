@@ -98,7 +98,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -114,6 +114,96 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.app_name
+import com.drdisagree.teledrive.resources.backup
+import com.drdisagree.teledrive.resources.common_try_again
+import com.drdisagree.teledrive.resources.onboarding_action_continue
+import com.drdisagree.teledrive.resources.onboarding_allow_all_files
+import com.drdisagree.teledrive.resources.onboarding_allow_media
+import com.drdisagree.teledrive.resources.onboarding_api_access
+import com.drdisagree.teledrive.resources.onboarding_api_hash
+import com.drdisagree.teledrive.resources.onboarding_api_id
+import com.drdisagree.teledrive.resources.onboarding_channel_files_in_channel
+import com.drdisagree.teledrive.resources.onboarding_choose_country
+import com.drdisagree.teledrive.resources.onboarding_choose_drive
+import com.drdisagree.teledrive.resources.onboarding_choose_what_back_change
+import com.drdisagree.teledrive.resources.onboarding_code
+import com.drdisagree.teledrive.resources.onboarding_code_sent
+import com.drdisagree.teledrive.resources.onboarding_code_via_call
+import com.drdisagree.teledrive.resources.onboarding_code_via_email
+import com.drdisagree.teledrive.resources.onboarding_code_via_flash_call
+import com.drdisagree.teledrive.resources.onboarding_code_via_fragment
+import com.drdisagree.teledrive.resources.onboarding_code_via_missed_call
+import com.drdisagree.teledrive.resources.onboarding_code_via_sms
+import com.drdisagree.teledrive.resources.onboarding_code_via_sms_phrase
+import com.drdisagree.teledrive.resources.onboarding_code_via_sms_word
+import com.drdisagree.teledrive.resources.onboarding_code_via_telegram
+import com.drdisagree.teledrive.resources.onboarding_continue
+import com.drdisagree.teledrive.resources.onboarding_continue_without
+import com.drdisagree.teledrive.resources.onboarding_country
+import com.drdisagree.teledrive.resources.onboarding_drive_created_desc
+import com.drdisagree.teledrive.resources.onboarding_drive_ready
+import com.drdisagree.teledrive.resources.onboarding_email_code_title
+import com.drdisagree.teledrive.resources.onboarding_email_continue
+import com.drdisagree.teledrive.resources.onboarding_email_description
+import com.drdisagree.teledrive.resources.onboarding_email_label
+import com.drdisagree.teledrive.resources.onboarding_email_title
+import com.drdisagree.teledrive.resources.onboarding_enter_code
+import com.drdisagree.teledrive.resources.onboarding_enter_password
+import com.drdisagree.teledrive.resources.onboarding_files_access_covers_documents
+import com.drdisagree.teledrive.resources.onboarding_files_live_own_private
+import com.drdisagree.teledrive.resources.onboarding_get_api_keys
+import com.drdisagree.teledrive.resources.onboarding_get_started
+import com.drdisagree.teledrive.resources.onboarding_got
+import com.drdisagree.teledrive.resources.onboarding_include_country_code_like
+import com.drdisagree.teledrive.resources.onboarding_looking_for_drives
+import com.drdisagree.teledrive.resources.onboarding_my_telegram_org
+import com.drdisagree.teledrive.resources.onboarding_no_country_match
+import com.drdisagree.teledrive.resources.onboarding_no_drive_yet
+import com.drdisagree.teledrive.resources.onboarding_number
+import com.drdisagree.teledrive.resources.onboarding_one_time_setup_keys
+import com.drdisagree.teledrive.resources.onboarding_open_dev_page
+import com.drdisagree.teledrive.resources.onboarding_opening
+import com.drdisagree.teledrive.resources.onboarding_password
+import com.drdisagree.teledrive.resources.onboarding_phone_number
+import com.drdisagree.teledrive.resources.onboarding_phone_number_telegram_account
+import com.drdisagree.teledrive.resources.onboarding_pick_drive_desc
+import com.drdisagree.teledrive.resources.onboarding_qr_code_description
+import com.drdisagree.teledrive.resources.onboarding_qr_confirm_instead
+import com.drdisagree.teledrive.resources.onboarding_qr_description
+import com.drdisagree.teledrive.resources.onboarding_qr_open_failed
+import com.drdisagree.teledrive.resources.onboarding_qr_open_telegram
+import com.drdisagree.teledrive.resources.onboarding_qr_same_device_description
+import com.drdisagree.teledrive.resources.onboarding_qr_scan_instead
+import com.drdisagree.teledrive.resources.onboarding_qr_sign_in
+import com.drdisagree.teledrive.resources.onboarding_qr_step_1
+import com.drdisagree.teledrive.resources.onboarding_qr_step_2
+import com.drdisagree.teledrive.resources.onboarding_qr_step_3
+import com.drdisagree.teledrive.resources.onboarding_qr_title
+import com.drdisagree.teledrive.resources.onboarding_qr_use_phone
+import com.drdisagree.teledrive.resources.onboarding_qr_waiting
+import com.drdisagree.teledrive.resources.onboarding_resend_code
+import com.drdisagree.teledrive.resources.onboarding_search_country
+import com.drdisagree.teledrive.resources.onboarding_section_behavior
+import com.drdisagree.teledrive.resources.onboarding_section_folders
+import com.drdisagree.teledrive.resources.onboarding_send_code
+import com.drdisagree.teledrive.resources.onboarding_set_up_proxy
+import com.drdisagree.teledrive.resources.onboarding_sign
+import com.drdisagree.teledrive.resources.onboarding_single_drive_desc
+import com.drdisagree.teledrive.resources.onboarding_step
+import com.drdisagree.teledrive.resources.onboarding_step_counter
+import com.drdisagree.teledrive.resources.onboarding_storage_access
+import com.drdisagree.teledrive.resources.onboarding_teledrive_needs_media_files
+import com.drdisagree.teledrive.resources.onboarding_telegram_blocked
+import com.drdisagree.teledrive.resources.onboarding_toggle_auto_backup
+import com.drdisagree.teledrive.resources.onboarding_toggle_camera
+import com.drdisagree.teledrive.resources.onboarding_toggle_movies
+import com.drdisagree.teledrive.resources.onboarding_toggle_pictures
+import com.drdisagree.teledrive.resources.onboarding_toggle_wifi_only
+import com.drdisagree.teledrive.resources.onboarding_two_step_verification
+import com.drdisagree.teledrive.resources.onboarding_verify
+import com.drdisagree.teledrive.resources.onboarding_where_i_get_these
 import com.drdisagree.teledrive.core.permissions.openAllFilesAccess
 import com.drdisagree.teledrive.core.telegram.CodeDeliveryChannel
 import com.drdisagree.teledrive.domain.model.Country
@@ -173,7 +263,7 @@ fun OnboardingScreen(
                                 }
                             ).using(SizeTransform(clip = true) { _, _ -> snap() })
                         },
-                        label = stringResource(R.string.onboarding_step)
+                        label = stringResource(Res.string.onboarding_step)
                     ) { step ->
                         when (step) {
                             OnboardingStep.WELCOME -> WelcomeStep(onContinue = viewModel::start)
@@ -292,19 +382,19 @@ private fun ChannelSelectStep(
         icon = Icons.Filled.CloudQueue,
         title = when {
             channels.isEmpty() && error != null ->
-                stringResource(R.string.onboarding_no_drive_yet)
+                stringResource(Res.string.onboarding_no_drive_yet)
 
-            justCreated -> stringResource(R.string.onboarding_drive_ready)
-            else -> stringResource(R.string.onboarding_choose_drive)
+            justCreated -> stringResource(Res.string.onboarding_drive_ready)
+            else -> stringResource(Res.string.onboarding_choose_drive)
         },
         description = when {
             channels.isEmpty() && error != null -> error
 
-            justCreated -> stringResource(R.string.onboarding_drive_created_desc)
+            justCreated -> stringResource(Res.string.onboarding_drive_created_desc)
 
-            channels.size > 1 -> stringResource(R.string.onboarding_pick_drive_desc)
+            channels.size > 1 -> stringResource(Res.string.onboarding_pick_drive_desc)
 
-            else -> stringResource(R.string.onboarding_single_drive_desc)
+            else -> stringResource(Res.string.onboarding_single_drive_desc)
         }
     ) {
         channels.forEach { channel ->
@@ -346,7 +436,7 @@ private fun ChannelSelectStep(
                     )
                     Text(
                         text = stringResource(
-                            R.string.onboarding_channel_files_in_channel,
+                            Res.string.onboarding_channel_files_in_channel,
                             channel.remoteFileCount
                         ),
                         style = MaterialTheme.typography.bodySmall,
@@ -359,8 +449,8 @@ private fun ChannelSelectStep(
         if (channels.isEmpty()) {
             BigButton(
                 label = stringResource(
-                    if (working) R.string.onboarding_looking_for_drives
-                    else R.string.common_try_again
+                    if (working) Res.string.onboarding_looking_for_drives
+                    else Res.string.common_try_again
                 ),
                 onClick = onRetry,
                 enabled = !working
@@ -369,7 +459,7 @@ private fun ChannelSelectStep(
         }
         BigButton(
             label = stringResource(
-                if (working) R.string.onboarding_opening else R.string.onboarding_continue
+                if (working) Res.string.onboarding_opening else Res.string.onboarding_continue
             ),
             onClick = onContinue,
             enabled = selectedChatId != null && !working,
@@ -397,7 +487,7 @@ private fun StepHeader(step: OnboardingStep, modifier: Modifier = Modifier) {
             color = MaterialTheme.colorScheme.secondaryContainer
         ) {
             Text(
-                text = stringResource(R.string.onboarding_step_counter, stepNumber, totalSteps),
+                text = stringResource(Res.string.onboarding_step_counter, stepNumber, totalSteps),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSecondaryContainer,
                 modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
@@ -489,10 +579,10 @@ private fun StepTitle(title: String, description: String) {
 private fun WelcomeStep(onContinue: () -> Unit) {
     OnboardingPage(
         iconPainter = painterResource(R.mipmap.ic_launcher_monochrome),
-        title = stringResource(R.string.app_name),
-        description = stringResource(R.string.onboarding_files_live_own_private)
+        title = stringResource(Res.string.app_name),
+        description = stringResource(Res.string.onboarding_files_live_own_private)
     ) {
-        BigButton(label = stringResource(R.string.onboarding_get_started), onClick = onContinue)
+        BigButton(label = stringResource(Res.string.onboarding_get_started), onClick = onContinue)
     }
 }
 
@@ -509,8 +599,8 @@ private fun CredentialsStep(
 
     OnboardingPage(
         icon = Icons.Filled.Key,
-        title = stringResource(R.string.onboarding_api_access),
-        description = stringResource(R.string.onboarding_one_time_setup_keys)
+        title = stringResource(Res.string.onboarding_api_access),
+        description = stringResource(Res.string.onboarding_one_time_setup_keys)
     ) {
         FilledTonalButton(
             onClick = { showGuide = true },
@@ -522,13 +612,13 @@ private fun CredentialsStep(
                 modifier = Modifier.size(18.dp)
             )
             Spacer(Modifier.size(8.dp))
-            Text(stringResource(R.string.onboarding_where_i_get_these))
+            Text(stringResource(Res.string.onboarding_where_i_get_these))
         }
         Spacer(Modifier.height(20.dp))
         OnboardingField(
             value = apiId,
             onChange = { apiId = it },
-            label = stringResource(R.string.onboarding_api_id),
+            label = stringResource(Res.string.onboarding_api_id),
             keyboardType = KeyboardType.Number,
             enabled = !working
         )
@@ -536,13 +626,13 @@ private fun CredentialsStep(
         OnboardingField(
             value = apiHash,
             onChange = { apiHash = it },
-            label = stringResource(R.string.onboarding_api_hash),
+            label = stringResource(Res.string.onboarding_api_hash),
             enabled = !working
         )
         ErrorAndAction(
             working = working,
             error = error,
-            actionLabel = stringResource(R.string.onboarding_action_continue),
+            actionLabel = stringResource(Res.string.onboarding_action_continue),
             enabled = apiId.isNotBlank() && apiHash.isNotBlank(),
             onAction = { onSubmit(apiId, apiHash) }
         )
@@ -591,12 +681,12 @@ private fun BlockedNetworkCard(onOpenProxy: () -> Unit) {
             Spacer(Modifier.width(14.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = stringResource(R.string.onboarding_telegram_blocked),
+                    text = stringResource(Res.string.onboarding_telegram_blocked),
                     style = MaterialTheme.typography.titleSmall
                 )
                 Spacer(Modifier.height(2.dp))
                 Text(
-                    text = stringResource(R.string.onboarding_set_up_proxy),
+                    text = stringResource(Res.string.onboarding_set_up_proxy),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -617,13 +707,13 @@ private fun ApiGuideDialog(onDismiss: () -> Unit) {
     val uriHandler = LocalUriHandler.current
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.onboarding_get_api_keys)) },
+        title = { Text(stringResource(Res.string.onboarding_get_api_keys)) },
         text = {
             Column {
                 InstructionCard(number = 1) {
                     Column {
                         Text(
-                            stringResource(R.string.onboarding_open_dev_page),
+                            stringResource(Res.string.onboarding_open_dev_page),
                             style = MaterialTheme.typography.bodyMedium
                         )
                         Spacer(Modifier.height(10.dp))
@@ -637,7 +727,7 @@ private fun ApiGuideDialog(onDismiss: () -> Unit) {
                                 modifier = Modifier.size(18.dp)
                             )
                             Spacer(Modifier.size(8.dp))
-                            Text(stringResource(R.string.onboarding_my_telegram_org))
+                            Text(stringResource(Res.string.onboarding_my_telegram_org))
                         }
                     }
                 }
@@ -659,7 +749,7 @@ private fun ApiGuideDialog(onDismiss: () -> Unit) {
             Button(
                 onClick = onDismiss,
                 shapes = ButtonDefaults.shapes()
-            ) { Text(stringResource(R.string.onboarding_got)) }
+            ) { Text(stringResource(Res.string.onboarding_got)) }
         }
     )
 }
@@ -725,11 +815,11 @@ private fun QrStep(
 
     OnboardingPage(
         icon = Icons.Filled.QrCode2,
-        title = stringResource(R.string.onboarding_qr_title),
+        title = stringResource(Res.string.onboarding_qr_title),
         description = if (scanning) {
-            stringResource(R.string.onboarding_qr_description)
+            stringResource(Res.string.onboarding_qr_description)
         } else {
-            stringResource(R.string.onboarding_qr_same_device_description)
+            stringResource(Res.string.onboarding_qr_same_device_description)
         }
     ) {
         if (scanning) {
@@ -747,7 +837,7 @@ private fun QrStep(
                         QrCode(
                             content = link,
                             contentDescription = stringResource(
-                                R.string.onboarding_qr_code_description
+                                Res.string.onboarding_qr_code_description
                             ),
                             modifier = Modifier.fillMaxWidth()
                         )
@@ -755,12 +845,12 @@ private fun QrStep(
                 }
             }
             Spacer(Modifier.height(20.dp))
-            QrInstruction(1, stringResource(R.string.onboarding_qr_step_1))
-            QrInstruction(2, stringResource(R.string.onboarding_qr_step_2))
-            QrInstruction(3, stringResource(R.string.onboarding_qr_step_3))
+            QrInstruction(1, stringResource(Res.string.onboarding_qr_step_1))
+            QrInstruction(2, stringResource(Res.string.onboarding_qr_step_2))
+            QrInstruction(3, stringResource(Res.string.onboarding_qr_step_3))
         } else {
             BigButton(
-                label = stringResource(R.string.onboarding_qr_open_telegram),
+                label = stringResource(Res.string.onboarding_qr_open_telegram),
                 enabled = !working && telegramIntent != null,
                 onClick = {
                     openFailed = telegramIntent == null ||
@@ -770,7 +860,7 @@ private fun QrStep(
             if (openFailed) {
                 Spacer(Modifier.height(12.dp))
                 Text(
-                    text = stringResource(R.string.onboarding_qr_open_failed),
+                    text = stringResource(Res.string.onboarding_qr_open_failed),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.error
                 )
@@ -796,7 +886,7 @@ private fun QrStep(
                 )
                 Spacer(Modifier.width(10.dp))
                 Text(
-                    text = stringResource(R.string.onboarding_qr_waiting),
+                    text = stringResource(Res.string.onboarding_qr_waiting),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -813,9 +903,9 @@ private fun QrStep(
                 Text(
                     stringResource(
                         if (scanning) {
-                            R.string.onboarding_qr_confirm_instead
+                            Res.string.onboarding_qr_confirm_instead
                         } else {
-                            R.string.onboarding_qr_scan_instead
+                            Res.string.onboarding_qr_scan_instead
                         }
                     )
                 )
@@ -825,7 +915,7 @@ private fun QrStep(
             onClick = onCancel,
             enabled = !working,
             modifier = Modifier.align(Alignment.CenterHorizontally)
-        ) { Text(stringResource(R.string.onboarding_qr_use_phone)) }
+        ) { Text(stringResource(Res.string.onboarding_qr_use_phone)) }
     }
 }
 
@@ -881,8 +971,8 @@ private fun PhoneStep(
 
     OnboardingPage(
         icon = Icons.Filled.PhoneAndroid,
-        title = stringResource(R.string.onboarding_number),
-        description = stringResource(R.string.onboarding_phone_number_telegram_account)
+        title = stringResource(Res.string.onboarding_number),
+        description = stringResource(Res.string.onboarding_phone_number_telegram_account)
     ) {
         if (!manual) {
             CountryField(
@@ -899,9 +989,9 @@ private fun PhoneStep(
                 if (countryLoadState == CountryLoadState.LOADING) typedBeforeCountries = true
                 national = entry.filter { it.isDigit() }
             },
-            label = stringResource(R.string.onboarding_phone_number),
+            label = stringResource(Res.string.onboarding_phone_number),
             supportingText = if (manual) {
-                stringResource(R.string.onboarding_include_country_code_like)
+                stringResource(Res.string.onboarding_include_country_code_like)
             } else {
                 null
             },
@@ -912,7 +1002,7 @@ private fun PhoneStep(
         ErrorAndAction(
             working = working,
             error = error,
-            actionLabel = stringResource(R.string.onboarding_send_code),
+            actionLabel = stringResource(Res.string.onboarding_send_code),
             enabled = national.isNotBlank() && !registrationRequired,
             onAction = { onSubmit("+$callingCode$national") }
         )
@@ -927,7 +1017,7 @@ private fun PhoneStep(
                 modifier = Modifier.size(QR_BUTTON_ICON)
             )
             Spacer(Modifier.width(8.dp))
-            Text(stringResource(R.string.onboarding_qr_sign_in))
+            Text(stringResource(Res.string.onboarding_qr_sign_in))
         }
         Spacer(Modifier.height(12.dp))
         BlockedNetworkCard(onOpenProxy = onOpenProxy)
@@ -958,7 +1048,7 @@ private fun CountryField(
             onValueChange = {},
             readOnly = true,
             enabled = enabled,
-            label = { Text(stringResource(R.string.onboarding_country)) },
+            label = { Text(stringResource(Res.string.onboarding_country)) },
             trailingIcon = {
                 if (loading) {
                     CircularProgressIndicator(
@@ -1005,19 +1095,19 @@ private fun CountryPickerSheet(
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(modifier = Modifier.padding(horizontal = 20.dp)) {
             Text(
-                text = stringResource(R.string.onboarding_choose_country),
+                text = stringResource(Res.string.onboarding_choose_country),
                 style = MaterialTheme.typography.titleLarge
             )
             Spacer(Modifier.height(12.dp))
             OnboardingField(
                 value = query,
                 onChange = { query = it },
-                label = stringResource(R.string.onboarding_search_country)
+                label = stringResource(Res.string.onboarding_search_country)
             )
             Spacer(Modifier.height(12.dp))
             if (matches.isEmpty()) {
                 Text(
-                    text = stringResource(R.string.onboarding_no_country_match),
+                    text = stringResource(Res.string.onboarding_no_country_match),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(vertical = 24.dp)
@@ -1060,31 +1150,31 @@ private fun CountryPickerSheet(
 @Composable
 private fun codeDeliveryText(channel: CodeDeliveryChannel, target: String): String =
     when (channel) {
-        CodeDeliveryChannel.TELEGRAM_APP -> stringResource(R.string.onboarding_code_via_telegram)
-        CodeDeliveryChannel.SMS -> stringResource(R.string.onboarding_code_via_sms, target)
+        CodeDeliveryChannel.TELEGRAM_APP -> stringResource(Res.string.onboarding_code_via_telegram)
+        CodeDeliveryChannel.SMS -> stringResource(Res.string.onboarding_code_via_sms, target)
         CodeDeliveryChannel.SMS_WORD -> stringResource(
-            R.string.onboarding_code_via_sms_word,
+            Res.string.onboarding_code_via_sms_word,
             target
         )
 
         CodeDeliveryChannel.SMS_PHRASE ->
-            stringResource(R.string.onboarding_code_via_sms_phrase, target)
+            stringResource(Res.string.onboarding_code_via_sms_phrase, target)
 
-        CodeDeliveryChannel.CALL -> stringResource(R.string.onboarding_code_via_call, target)
+        CodeDeliveryChannel.CALL -> stringResource(Res.string.onboarding_code_via_call, target)
         CodeDeliveryChannel.FLASH_CALL ->
-            stringResource(R.string.onboarding_code_via_flash_call, target)
+            stringResource(Res.string.onboarding_code_via_flash_call, target)
 
         CodeDeliveryChannel.MISSED_CALL ->
-            stringResource(R.string.onboarding_code_via_missed_call, target)
+            stringResource(Res.string.onboarding_code_via_missed_call, target)
 
         CodeDeliveryChannel.FRAGMENT -> stringResource(
-            R.string.onboarding_code_via_fragment,
+            Res.string.onboarding_code_via_fragment,
             target
         )
 
-        CodeDeliveryChannel.FIREBASE -> stringResource(R.string.onboarding_code_via_sms, target)
-        CodeDeliveryChannel.EMAIL -> stringResource(R.string.onboarding_code_via_email, target)
-        CodeDeliveryChannel.OTHER -> stringResource(R.string.onboarding_code_sent)
+        CodeDeliveryChannel.FIREBASE -> stringResource(Res.string.onboarding_code_via_sms, target)
+        CodeDeliveryChannel.EMAIL -> stringResource(Res.string.onboarding_code_via_email, target)
+        CodeDeliveryChannel.OTHER -> stringResource(Res.string.onboarding_code_sent)
     }
 
 @Composable
@@ -1096,20 +1186,20 @@ private fun EmailAddressStep(
     var email by rememberSaveable { mutableStateOf("") }
     OnboardingPage(
         icon = Icons.Filled.Email,
-        title = stringResource(R.string.onboarding_email_title),
-        description = stringResource(R.string.onboarding_email_description)
+        title = stringResource(Res.string.onboarding_email_title),
+        description = stringResource(Res.string.onboarding_email_description)
     ) {
         OnboardingField(
             value = email,
             onChange = { email = it },
-            label = stringResource(R.string.onboarding_email_label),
+            label = stringResource(Res.string.onboarding_email_label),
             keyboardType = KeyboardType.Email,
             enabled = !working
         )
         ErrorAndAction(
             working = working,
             error = error,
-            actionLabel = stringResource(R.string.onboarding_email_continue),
+            actionLabel = stringResource(Res.string.onboarding_email_continue),
             enabled = email.isNotBlank(),
             onAction = { onSubmit(email) }
         )
@@ -1127,7 +1217,7 @@ private fun EmailCodeStep(
     var code by rememberSaveable { mutableStateOf("") }
     OnboardingPage(
         icon = Icons.Filled.Email,
-        title = stringResource(R.string.onboarding_email_code_title),
+        title = stringResource(Res.string.onboarding_email_code_title),
         description = codeDeliveryText(CodeDeliveryChannel.EMAIL, emailPattern)
     ) {
         OnboardingField(
@@ -1137,14 +1227,14 @@ private fun EmailCodeStep(
                     if (codeLength != null) it.take(codeLength) else it
                 }
             },
-            label = stringResource(R.string.onboarding_code),
+            label = stringResource(Res.string.onboarding_code),
             keyboardType = KeyboardType.NumberPassword,
             enabled = !working
         )
         ErrorAndAction(
             working = working,
             error = error,
-            actionLabel = stringResource(R.string.onboarding_verify),
+            actionLabel = stringResource(Res.string.onboarding_verify),
             enabled = code.isNotBlank(),
             onAction = { onSubmit(code) }
         )
@@ -1164,7 +1254,7 @@ private fun CodeStep(
     var code by rememberSaveable { mutableStateOf("") }
     OnboardingPage(
         icon = Icons.Filled.Sms,
-        title = stringResource(R.string.onboarding_enter_code),
+        title = stringResource(Res.string.onboarding_enter_code),
         description = codeDeliveryText(channel, phoneNumber)
     ) {
         OnboardingField(
@@ -1174,14 +1264,14 @@ private fun CodeStep(
                     if (codeLength != null) it.take(codeLength) else it
                 }
             },
-            label = stringResource(R.string.onboarding_code),
+            label = stringResource(Res.string.onboarding_code),
             keyboardType = KeyboardType.NumberPassword,
             enabled = !working
         )
         ErrorAndAction(
             working = working,
             error = error,
-            actionLabel = stringResource(R.string.onboarding_verify),
+            actionLabel = stringResource(Res.string.onboarding_verify),
             enabled = code.isNotBlank(),
             onAction = { onSubmit(code) }
         )
@@ -1189,7 +1279,7 @@ private fun CodeStep(
             onClick = onResend,
             enabled = !working,
             modifier = Modifier.align(Alignment.CenterHorizontally)
-        ) { Text(stringResource(R.string.onboarding_resend_code)) }
+        ) { Text(stringResource(Res.string.onboarding_resend_code)) }
     }
 }
 
@@ -1203,14 +1293,14 @@ private fun PasswordStep(
     var password by rememberSaveable { mutableStateOf("") }
     OnboardingPage(
         icon = Icons.Filled.Lock,
-        title = stringResource(R.string.onboarding_two_step_verification),
+        title = stringResource(Res.string.onboarding_two_step_verification),
         description = hint?.let { "Enter your Telegram password. Hint: $it" }
-            ?: stringResource(R.string.onboarding_enter_password)
+            ?: stringResource(Res.string.onboarding_enter_password)
     ) {
         OnboardingField(
             value = password,
             onChange = { password = it },
-            label = stringResource(R.string.onboarding_password),
+            label = stringResource(Res.string.onboarding_password),
             keyboardType = KeyboardType.Password,
             password = true,
             enabled = !working
@@ -1218,7 +1308,7 @@ private fun PasswordStep(
         ErrorAndAction(
             working = working,
             error = error,
-            actionLabel = stringResource(R.string.onboarding_sign),
+            actionLabel = stringResource(Res.string.onboarding_sign),
             enabled = password.isNotEmpty(),
             onAction = { onSubmit(password) }
         )
@@ -1259,16 +1349,16 @@ private fun PermissionsStep(working: Boolean, onResolved: () -> Unit) {
     }
     OnboardingPage(
         icon = Icons.Filled.Photo,
-        title = stringResource(R.string.onboarding_storage_access),
-        description = stringResource(R.string.onboarding_teledrive_needs_media_files)
+        title = stringResource(Res.string.onboarding_storage_access),
+        description = stringResource(Res.string.onboarding_teledrive_needs_media_files)
     ) {
         val askForMedia = !mediaGranted && !mediaRequested
         BigButton(
             label = when {
-                working -> stringResource(R.string.onboarding_looking_for_drives)
-                askForMedia -> stringResource(R.string.onboarding_allow_media)
-                !allFilesGranted -> stringResource(R.string.onboarding_allow_all_files)
-                else -> stringResource(R.string.onboarding_continue)
+                working -> stringResource(Res.string.onboarding_looking_for_drives)
+                askForMedia -> stringResource(Res.string.onboarding_allow_media)
+                !allFilesGranted -> stringResource(Res.string.onboarding_allow_all_files)
+                else -> stringResource(Res.string.onboarding_continue)
             },
             enabled = !working,
             loading = working,
@@ -1283,7 +1373,7 @@ private fun PermissionsStep(working: Boolean, onResolved: () -> Unit) {
         if ((mediaRequested || mediaGranted) && !allFilesGranted) {
             Spacer(Modifier.height(12.dp))
             Text(
-                text = stringResource(R.string.onboarding_files_access_covers_documents),
+                text = stringResource(Res.string.onboarding_files_access_covers_documents),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -1293,7 +1383,7 @@ private fun PermissionsStep(working: Boolean, onResolved: () -> Unit) {
                 shapes = ButtonDefaults.shapes(),
                 enabled = !working,
                 modifier = Modifier.fillMaxWidth()
-            ) { Text(stringResource(R.string.onboarding_continue_without)) }
+            ) { Text(stringResource(Res.string.onboarding_continue_without)) }
         }
     }
 }
@@ -1312,25 +1402,25 @@ private fun BackupSetupStep(
 ) {
     OnboardingPage(
         icon = Icons.Filled.CloudDone,
-        title = stringResource(R.string.backup),
-        description = stringResource(R.string.onboarding_choose_what_back_change)
+        title = stringResource(Res.string.backup),
+        description = stringResource(Res.string.onboarding_choose_what_back_change)
     ) {
-        SectionLabel(stringResource(R.string.onboarding_section_folders))
-        ToggleCard(stringResource(R.string.onboarding_toggle_camera), state.backupDcim, onDcim)
+        SectionLabel(stringResource(Res.string.onboarding_section_folders))
+        ToggleCard(stringResource(Res.string.onboarding_toggle_camera), state.backupDcim, onDcim)
         ToggleCard(
-            stringResource(R.string.onboarding_toggle_pictures),
+            stringResource(Res.string.onboarding_toggle_pictures),
             state.backupPictures,
             onPictures
         )
-        ToggleCard(stringResource(R.string.onboarding_toggle_movies), state.backupMovies, onMovies)
+        ToggleCard(stringResource(Res.string.onboarding_toggle_movies), state.backupMovies, onMovies)
         Spacer(Modifier.height(16.dp))
-        SectionLabel(stringResource(R.string.onboarding_section_behavior))
+        SectionLabel(stringResource(Res.string.onboarding_section_behavior))
         ToggleCard(
-            stringResource(R.string.onboarding_toggle_auto_backup),
+            stringResource(Res.string.onboarding_toggle_auto_backup),
             state.autoBackupEnabled,
             onAutoBackup
         )
-        ToggleCard(stringResource(R.string.onboarding_toggle_wifi_only), state.wifiOnly, onWifiOnly)
+        ToggleCard(stringResource(Res.string.onboarding_toggle_wifi_only), state.wifiOnly, onWifiOnly)
         Spacer(Modifier.height(32.dp))
         BigButton(
             label = if (finishing) "Syncing your drive…" else "Finish setup",

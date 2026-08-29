@@ -29,9 +29,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.unit.dp
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.common_back
+import com.drdisagree.teledrive.resources.settings
 import com.drdisagree.teledrive.presentation.components.liftedTopAppBarColors
 import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
 import com.drdisagree.teledrive.presentation.navigation.LocalBottomBarInset
@@ -49,13 +51,13 @@ fun SettingsScreen(
         topBar = {
             TopAppBar(
                 colors = liftedTopAppBarColors(lifted),
-                title = { Text(stringResource(R.string.settings)) },
+                title = { Text(stringResource(Res.string.settings)) },
                 navigationIcon = {
                     onBack?.let {
                         IconButton(onClick = it) {
                             Icon(
                                 Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(R.string.common_back)
+                                contentDescription = stringResource(Res.string.common_back)
                             )
                         }
                     }

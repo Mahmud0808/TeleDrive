@@ -60,13 +60,34 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import org.koin.androidx.compose.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.channels_channel_container
+import com.drdisagree.teledrive.resources.channels_create_one_teledrive_store
+import com.drdisagree.teledrive.resources.channels_creates_private_channel_account
+import com.drdisagree.teledrive.resources.channels_delete_confirm_hint
+import com.drdisagree.teledrive.resources.channels_delete_message
+import com.drdisagree.teledrive.resources.channels_delete_telegram
+import com.drdisagree.teledrive.resources.channels_delete_title
+import com.drdisagree.teledrive.resources.channels_drive_actions
+import com.drdisagree.teledrive.resources.channels_drive_name
+import com.drdisagree.teledrive.resources.channels_look_drives
+import com.drdisagree.teledrive.resources.channels_new_drive
+import com.drdisagree.teledrive.resources.channels_no_drives_yet
+import com.drdisagree.teledrive.resources.channels_open_drive
+import com.drdisagree.teledrive.resources.channels_rename_drive
+import com.drdisagree.teledrive.resources.channels_renames_channel_telegram_well
+import com.drdisagree.teledrive.resources.common_back
+import com.drdisagree.teledrive.resources.common_cancel
+import com.drdisagree.teledrive.resources.common_create
+import com.drdisagree.teledrive.resources.common_delete_forever
+import com.drdisagree.teledrive.resources.common_rename
+import com.drdisagree.teledrive.resources.common_storage_channels
 import com.drdisagree.teledrive.domain.model.DriveChannel
 import com.drdisagree.teledrive.presentation.common.CollectSnackbarMessages
 import com.drdisagree.teledrive.presentation.common.Formatters
@@ -101,9 +122,9 @@ fun ChannelsScreen(
 
     if (showCreate) {
         ChannelNameDialog(
-            title = stringResource(R.string.channels_new_drive),
-            description = stringResource(R.string.channels_creates_private_channel_account),
-            confirmLabel = stringResource(R.string.common_create),
+            title = stringResource(Res.string.channels_new_drive),
+            description = stringResource(Res.string.channels_creates_private_channel_account),
+            confirmLabel = stringResource(Res.string.common_create),
             onConfirm = { label ->
                 showCreate = false
                 viewModel.create(label)
@@ -114,9 +135,9 @@ fun ChannelsScreen(
 
     renameTarget?.let { channel ->
         ChannelNameDialog(
-            title = stringResource(R.string.channels_rename_drive),
-            description = stringResource(R.string.channels_renames_channel_telegram_well),
-            confirmLabel = stringResource(R.string.common_rename),
+            title = stringResource(Res.string.channels_rename_drive),
+            description = stringResource(Res.string.channels_renames_channel_telegram_well),
+            confirmLabel = stringResource(Res.string.common_rename),
             initialValue = channel.label,
             onConfirm = { label ->
                 renameTarget = null
@@ -145,12 +166,12 @@ fun ChannelsScreen(
         topBar = {
             TopAppBar(
                 colors = liftedTopAppBarColors(lifted),
-                title = { Text(stringResource(R.string.common_storage_channels)) },
+                title = { Text(stringResource(Res.string.common_storage_channels)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.common_back)
+                            contentDescription = stringResource(Res.string.common_back)
                         )
                     }
                 },
@@ -158,7 +179,7 @@ fun ChannelsScreen(
                     IconButton(onClick = viewModel::refresh) {
                         Icon(
                             Icons.Filled.Refresh,
-                            contentDescription = stringResource(R.string.channels_look_drives)
+                            contentDescription = stringResource(Res.string.channels_look_drives)
                         )
                     }
                 }
@@ -168,15 +189,15 @@ fun ChannelsScreen(
             ExtendedFloatingActionButton(
                 onClick = { showCreate = true },
                 icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                text = { Text(stringResource(R.string.channels_new_drive)) }
+                text = { Text(stringResource(Res.string.channels_new_drive)) }
             )
         }
     ) { padding ->
         if (channels.isEmpty()) {
             EmptyState(
                 icon = Icons.Filled.CloudQueue,
-                title = stringResource(R.string.channels_no_drives_yet),
-                description = stringResource(R.string.channels_create_one_teledrive_store),
+                title = stringResource(Res.string.channels_no_drives_yet),
+                description = stringResource(Res.string.channels_create_one_teledrive_store),
                 modifier = Modifier.padding(padding)
             )
             return@Scaffold
@@ -226,7 +247,7 @@ private fun ChannelRow(
             MaterialTheme.colorScheme.surfaceContainerLow
         },
         animationSpec = tween(CONTAINER_FADE_MS),
-        label = stringResource(R.string.channels_channel_container)
+        label = stringResource(Res.string.channels_channel_container)
     )
 
     Row(
@@ -266,7 +287,7 @@ private fun ChannelRow(
         ) {
             Icon(
                 imageVector = Icons.Filled.Check,
-                contentDescription = stringResource(R.string.channels_open_drive),
+                contentDescription = stringResource(Res.string.channels_open_drive),
                 tint = MaterialTheme.colorScheme.onSecondaryContainer,
                 modifier = Modifier.padding(end = 4.dp)
             )
@@ -275,12 +296,12 @@ private fun ChannelRow(
             IconButton(onClick = { showMenu = true }) {
                 Icon(
                     Icons.Filled.MoreVert,
-                    contentDescription = stringResource(R.string.channels_drive_actions)
+                    contentDescription = stringResource(Res.string.channels_drive_actions)
                 )
             }
             DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
                 DropdownMenuItem(
-                    text = { Text(stringResource(R.string.common_rename)) },
+                    text = { Text(stringResource(Res.string.common_rename)) },
                     leadingIcon = {
                         Icon(Icons.Filled.DriveFileRenameOutline, contentDescription = null)
                     },
@@ -290,7 +311,7 @@ private fun ChannelRow(
                     }
                 )
                 DropdownMenuItem(
-                    text = { Text(stringResource(R.string.channels_delete_telegram)) },
+                    text = { Text(stringResource(Res.string.channels_delete_telegram)) },
                     leadingIcon = { Icon(Icons.Filled.Delete, contentDescription = null) },
                     enabled = canDelete,
                     onClick = {
@@ -340,12 +361,12 @@ private fun DeleteChannelDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.channels_delete_title, channel.displayName)) },
+        title = { Text(stringResource(Res.string.channels_delete_title, channel.displayName)) },
         text = {
             Column {
                 Text(
                     text = stringResource(
-                        R.string.channels_delete_message,
+                        Res.string.channels_delete_message,
                         channel.fileCount,
                         Formatters.bytes(channel.storedBytes)
                     ),
@@ -359,7 +380,7 @@ private fun DeleteChannelDialog(
                     label = {
                         Text(
                             stringResource(
-                                R.string.channels_delete_confirm_hint,
+                                Res.string.channels_delete_confirm_hint,
                                 channel.displayName
                             )
                         )
@@ -379,13 +400,13 @@ private fun DeleteChannelDialog(
                     containerColor = MaterialTheme.colorScheme.error,
                     contentColor = MaterialTheme.colorScheme.onError
                 )
-            ) { Text(stringResource(R.string.common_delete_forever)) }
+            ) { Text(stringResource(Res.string.common_delete_forever)) }
         },
         dismissButton = {
             OutlinedButton(
                 onClick = onDismiss,
                 shapes = ButtonDefaults.shapes()
-            ) { Text(stringResource(R.string.common_cancel)) }
+            ) { Text(stringResource(Res.string.common_cancel)) }
         }
     )
 }
@@ -416,7 +437,7 @@ private fun ChannelNameDialog(
                 OutlinedTextField(
                     value = label,
                     onValueChange = { label = it },
-                    label = { Text(stringResource(R.string.channels_drive_name)) },
+                    label = { Text(stringResource(Res.string.channels_drive_name)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(),
                     modifier = Modifier.fillMaxWidth()
@@ -434,7 +455,7 @@ private fun ChannelNameDialog(
             OutlinedButton(
                 onClick = onDismiss,
                 shapes = ButtonDefaults.shapes()
-            ) { Text(stringResource(R.string.common_cancel)) }
+            ) { Text(stringResource(Res.string.common_cancel)) }
         }
     )
 }

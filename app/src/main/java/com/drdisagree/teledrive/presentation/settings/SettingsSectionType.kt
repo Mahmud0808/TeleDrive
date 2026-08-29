@@ -1,6 +1,6 @@
 package com.drdisagree.teledrive.presentation.settings
 
-import androidx.annotation.StringRes
+import org.jetbrains.compose.resources.StringResource
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.CloudUpload
@@ -13,61 +13,81 @@ import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.settings_section_about_subtitle
+import com.drdisagree.teledrive.resources.settings_section_about_title
+import com.drdisagree.teledrive.resources.settings_section_account_subtitle
+import com.drdisagree.teledrive.resources.settings_section_account_title
+import com.drdisagree.teledrive.resources.settings_section_advanced_subtitle
+import com.drdisagree.teledrive.resources.settings_section_advanced_title
+import com.drdisagree.teledrive.resources.settings_section_appearance_subtitle
+import com.drdisagree.teledrive.resources.settings_section_appearance_title
+import com.drdisagree.teledrive.resources.settings_section_backup_subtitle
+import com.drdisagree.teledrive.resources.settings_section_backup_title
+import com.drdisagree.teledrive.resources.settings_section_notifications_subtitle
+import com.drdisagree.teledrive.resources.settings_section_notifications_title
+import com.drdisagree.teledrive.resources.settings_section_permissions_subtitle
+import com.drdisagree.teledrive.resources.settings_section_permissions_title
+import com.drdisagree.teledrive.resources.settings_section_playback_subtitle
+import com.drdisagree.teledrive.resources.settings_section_playback_title
+import com.drdisagree.teledrive.resources.settings_section_security_subtitle
+import com.drdisagree.teledrive.resources.settings_section_security_title
+import com.drdisagree.teledrive.resources.settings_section_storage_subtitle
+import com.drdisagree.teledrive.resources.settings_section_storage_title
 
 enum class SettingsSectionType(
-    @param:StringRes val titleRes: Int,
-    @param:StringRes val subtitleRes: Int,
+    val titleRes: StringResource,
+    val subtitleRes: StringResource,
     val icon: ImageVector
 ) {
     ACCOUNT(
-        R.string.settings_section_account_title,
-        R.string.settings_section_account_subtitle,
+        Res.string.settings_section_account_title,
+        Res.string.settings_section_account_subtitle,
         Icons.Filled.AccountCircle
     ),
     BACKUP(
-        R.string.settings_section_backup_title,
-        R.string.settings_section_backup_subtitle,
+        Res.string.settings_section_backup_title,
+        Res.string.settings_section_backup_subtitle,
         Icons.Filled.CloudUpload
     ),
     STORAGE(
-        R.string.settings_section_storage_title,
-        R.string.settings_section_storage_subtitle,
+        Res.string.settings_section_storage_title,
+        Res.string.settings_section_storage_subtitle,
         Icons.Filled.Storage
     ),
     PERMISSIONS(
-        R.string.settings_section_permissions_title,
-        R.string.settings_section_permissions_subtitle,
+        Res.string.settings_section_permissions_title,
+        Res.string.settings_section_permissions_subtitle,
         Icons.Filled.Shield
     ),
     SECURITY(
-        R.string.settings_section_security_title,
-        R.string.settings_section_security_subtitle,
+        Res.string.settings_section_security_title,
+        Res.string.settings_section_security_subtitle,
         Icons.Filled.Lock
     ),
     APPEARANCE(
-        R.string.settings_section_appearance_title,
-        R.string.settings_section_appearance_subtitle,
+        Res.string.settings_section_appearance_title,
+        Res.string.settings_section_appearance_subtitle,
         Icons.Filled.Palette
     ),
     PLAYBACK(
-        R.string.settings_section_playback_title,
-        R.string.settings_section_playback_subtitle,
+        Res.string.settings_section_playback_title,
+        Res.string.settings_section_playback_subtitle,
         Icons.Filled.PlayCircle
     ),
     NOTIFICATIONS(
-        R.string.settings_section_notifications_title,
-        R.string.settings_section_notifications_subtitle,
+        Res.string.settings_section_notifications_title,
+        Res.string.settings_section_notifications_subtitle,
         Icons.Filled.Notifications
     ),
     ADVANCED(
-        R.string.settings_section_advanced_title,
-        R.string.settings_section_advanced_subtitle,
+        Res.string.settings_section_advanced_title,
+        Res.string.settings_section_advanced_subtitle,
         Icons.Filled.Tune
     ),
     ABOUT(
-        R.string.settings_section_about_title,
-        R.string.settings_section_about_subtitle,
+        Res.string.settings_section_about_title,
+        Res.string.settings_section_about_subtitle,
         Icons.Filled.Info
     )
 }

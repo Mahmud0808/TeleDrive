@@ -20,9 +20,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.unit.dp
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.backup_paused
+import com.drdisagree.teledrive.resources.common_grant_permissions
+import com.drdisagree.teledrive.resources.permission_missing_message
+import com.drdisagree.teledrive.resources.permission_separator
 import com.drdisagree.teledrive.core.permissions.AppPermission
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -47,17 +51,17 @@ fun PermissionWarningCard(
                 )
                 Spacer(Modifier.width(12.dp))
                 Text(
-                    text = stringResource(R.string.backup_paused),
+                    text = stringResource(Res.string.backup_paused),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onErrorContainer
                 )
             }
             Spacer(Modifier.height(8.dp))
-            val separator = stringResource(R.string.permission_separator)
+            val separator = stringResource(Res.string.permission_separator)
             val missingNames = missing.map { stringResource(it.titleRes).lowercase() }
             Text(
                 text = stringResource(
-                    R.string.permission_missing_message,
+                    Res.string.permission_missing_message,
                     missingNames.joinToString(separator)
                 ),
                 style = MaterialTheme.typography.bodyMedium,
@@ -72,7 +76,7 @@ fun PermissionWarningCard(
                         containerColor = MaterialTheme.colorScheme.onErrorContainer,
                         contentColor = MaterialTheme.colorScheme.errorContainer
                     )
-                ) { Text(stringResource(R.string.common_grant_permissions)) }
+                ) { Text(stringResource(Res.string.common_grant_permissions)) }
             }
         }
     }

@@ -2,7 +2,6 @@ package com.drdisagree.teledrive.presentation.home
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -66,8 +65,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.res.pluralStringResource
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -76,7 +76,52 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.app_backed_up
+import com.drdisagree.teledrive.resources.app_name
+import com.drdisagree.teledrive.resources.backup_age_days
+import com.drdisagree.teledrive.resources.backup_age_hours
+import com.drdisagree.teledrive.resources.backup_age_minutes
+import com.drdisagree.teledrive.resources.common_cancel
+import com.drdisagree.teledrive.resources.common_pause
+import com.drdisagree.teledrive.resources.common_resume
+import com.drdisagree.teledrive.resources.file_count
+import com.drdisagree.teledrive.resources.home_active_transfers
+import com.drdisagree.teledrive.resources.home_back_up_pending
+import com.drdisagree.teledrive.resources.home_backing_up
+import com.drdisagree.teledrive.resources.home_backup_all_in_telegram
+import com.drdisagree.teledrive.resources.home_backup_at
+import com.drdisagree.teledrive.resources.home_backup_auto_off
+import com.drdisagree.teledrive.resources.home_backup_just_now
+import com.drdisagree.teledrive.resources.home_backup_never
+import com.drdisagree.teledrive.resources.home_backup_nothing_to_back_up
+import com.drdisagree.teledrive.resources.home_backup_paused
+import com.drdisagree.teledrive.resources.home_cancel_backup_action
+import com.drdisagree.teledrive.resources.home_cancel_backup_title
+import com.drdisagree.teledrive.resources.home_choose_folders
+import com.drdisagree.teledrive.resources.home_deleted_files_kept_removal
+import com.drdisagree.teledrive.resources.home_failed_count
+import com.drdisagree.teledrive.resources.home_lock_app
+import com.drdisagree.teledrive.resources.home_not_backed_up_count
+import com.drdisagree.teledrive.resources.home_open_drives
+import com.drdisagree.teledrive.resources.home_queued_uploads_discarded_files
+import com.drdisagree.teledrive.resources.home_scan_now
+import com.drdisagree.teledrive.resources.home_scanning
+import com.drdisagree.teledrive.resources.home_section_favorites
+import com.drdisagree.teledrive.resources.home_section_recent
+import com.drdisagree.teledrive.resources.home_section_storage
+import com.drdisagree.teledrive.resources.home_session_progress
+import com.drdisagree.teledrive.resources.home_status_connected
+import com.drdisagree.teledrive.resources.home_status_connecting
+import com.drdisagree.teledrive.resources.home_status_offline
+import com.drdisagree.teledrive.resources.home_status_rebuilding
+import com.drdisagree.teledrive.resources.home_status_syncing
+import com.drdisagree.teledrive.resources.home_storage_percent
+import com.drdisagree.teledrive.resources.home_storage_percent_min
+import com.drdisagree.teledrive.resources.home_transfer_history
+import com.drdisagree.teledrive.resources.home_transfer_history_subtitle
+import com.drdisagree.teledrive.resources.home_waiting_count
+import com.drdisagree.teledrive.resources.trash
 import com.drdisagree.teledrive.core.telegram.TelegramConnectionState
 import com.drdisagree.teledrive.domain.model.BackupSessionStatus
 import com.drdisagree.teledrive.domain.model.FileSortField
@@ -128,9 +173,9 @@ fun HomeScreen(
     var confirmCancelBackup by remember { mutableStateOf<String?>(null) }
     confirmCancelBackup?.let { sessionId ->
         ConfirmDialog(
-            title = stringResource(R.string.home_cancel_backup_title),
-            message = stringResource(R.string.home_queued_uploads_discarded_files),
-            confirmLabel = stringResource(R.string.home_cancel_backup_action),
+            title = stringResource(Res.string.home_cancel_backup_title),
+            message = stringResource(Res.string.home_queued_uploads_discarded_files),
+            confirmLabel = stringResource(Res.string.home_cancel_backup_action),
             destructive = true,
             onConfirm = {
                 confirmCancelBackup = null
@@ -156,7 +201,7 @@ fun HomeScreen(
         snackbarHost = { BottomBarSnackbarHost(snackbarHostState) },
         topBar = {
             LargeFlexibleTopAppBar(
-                title = { Text(stringResource(R.string.app_name)) },
+                title = { Text(stringResource(Res.string.app_name)) },
                 subtitle = {
                     val status = rememberConnectionStatus(
                         offline = state.offline,
@@ -184,7 +229,7 @@ fun HomeScreen(
                         IconButton(onClick = viewModel::lockNow) {
                             Icon(
                                 Icons.Filled.Lock,
-                                contentDescription = stringResource(R.string.home_lock_app)
+                                contentDescription = stringResource(Res.string.home_lock_app)
                             )
                         }
                     }
@@ -197,7 +242,7 @@ fun HomeScreen(
                                 channel = channel,
                                 size = AVATAR_SIZE,
                                 contentDescription = stringResource(
-                                    R.string.home_open_drives
+                                    Res.string.home_open_drives
                                 )
                             )
                         }
@@ -249,7 +294,7 @@ fun HomeScreen(
             }
             if (state.favoriteFolders.isNotEmpty()) {
                 item {
-                    SectionHeader(stringResource(R.string.home_section_favorites))
+                    SectionHeader(stringResource(Res.string.home_section_favorites))
                     Spacer(Modifier.height(8.dp))
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         state.favoriteFolders.take(5).forEach { folder ->
@@ -280,7 +325,7 @@ fun HomeScreen(
             }
             if (state.showRecentSection && state.recentFiles.isNotEmpty()) {
                 item {
-                    SectionHeader(stringResource(R.string.home_section_recent))
+                    SectionHeader(stringResource(Res.string.home_section_recent))
                     Spacer(Modifier.height(8.dp))
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         items(state.recentFiles, key = { it.id }) { file ->
@@ -321,7 +366,7 @@ fun HomeScreen(
             }
             if (state.storage.isNotEmpty()) {
                 item {
-                    SectionHeader(stringResource(R.string.home_section_storage))
+                    SectionHeader(stringResource(Res.string.home_section_storage))
                     Spacer(Modifier.height(8.dp))
                     StorageCard(slices = state.storage)
                 }
@@ -368,11 +413,11 @@ private fun CollectionLinks(
         add {
             CollectionRow(
                 icon = Icons.Filled.SwapVert,
-                title = stringResource(R.string.home_transfer_history),
+                title = stringResource(Res.string.home_transfer_history),
                 subtitle = if (activeTransferCount > 0) {
-                    stringResource(R.string.home_active_transfers, activeTransferCount)
+                    stringResource(Res.string.home_active_transfers, activeTransferCount)
                 } else {
-                    stringResource(R.string.home_transfer_history_subtitle)
+                    stringResource(Res.string.home_transfer_history_subtitle)
                 },
                 onClick = onOpenTransfers
             )
@@ -380,8 +425,8 @@ private fun CollectionLinks(
         add {
             CollectionRow(
                 icon = Icons.Filled.Delete,
-                title = stringResource(R.string.trash),
-                subtitle = stringResource(R.string.home_deleted_files_kept_removal),
+                title = stringResource(Res.string.trash),
+                subtitle = stringResource(Res.string.home_deleted_files_kept_removal),
                 onClick = onOpenTrash
             )
         }
@@ -468,27 +513,27 @@ private fun BackupCard(
                     Text(
                         text = when {
                             state.activeBackup?.status == BackupSessionStatus.RUNNING ->
-                                stringResource(R.string.home_backing_up)
+                                stringResource(Res.string.home_backing_up)
 
                             state.activeBackup?.status == BackupSessionStatus.PAUSED ->
-                                stringResource(R.string.home_backup_paused)
+                                stringResource(Res.string.home_backup_paused)
 
-                            state.rebuilding -> stringResource(R.string.home_status_rebuilding)
+                            state.rebuilding -> stringResource(Res.string.home_status_rebuilding)
                             state.totalFiles == 0 ->
-                                stringResource(R.string.home_backup_nothing_to_back_up)
+                                stringResource(Res.string.home_backup_nothing_to_back_up)
 
                             state.failedCount > 0 ->
-                                stringResource(R.string.home_failed_count, state.failedCount)
+                                stringResource(Res.string.home_failed_count, state.failedCount)
 
                             state.pendingCount > 0 ->
-                                stringResource(R.string.home_waiting_count, state.pendingCount)
+                                stringResource(Res.string.home_waiting_count, state.pendingCount)
 
                             state.backedUpCount < state.totalFiles -> stringResource(
-                                R.string.home_not_backed_up_count,
+                                Res.string.home_not_backed_up_count,
                                 state.totalFiles - state.backedUpCount
                             )
 
-                            else -> stringResource(R.string.app_backed_up)
+                            else -> stringResource(Res.string.app_backed_up)
                         },
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -520,13 +565,13 @@ private fun BackupCard(
                             onClick = { onResume(session.id) },
                             shapes = ButtonDefaults.shapes(),
                             colors = sessionButtonColors
-                        ) { Text(stringResource(R.string.common_resume)) }
+                        ) { Text(stringResource(Res.string.common_resume)) }
                     } else {
                         Button(
                             onClick = { onPause(session.id) },
                             shapes = ButtonDefaults.shapes(),
                             colors = sessionButtonColors
-                        ) { Text(stringResource(R.string.common_pause)) }
+                        ) { Text(stringResource(Res.string.common_pause)) }
                     }
                     OutlinedButton(
                         onClick = { onCancel(session.id) },
@@ -539,7 +584,7 @@ private fun BackupCard(
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                                 .copy(alpha = 0.5f)
                         )
-                    ) { Text(stringResource(R.string.common_cancel)) }
+                    ) { Text(stringResource(Res.string.common_cancel)) }
                 }
                 Spacer(Modifier.height(12.dp))
                 LinearWavyProgressIndicator(
@@ -552,7 +597,7 @@ private fun BackupCard(
                 Spacer(Modifier.height(6.dp))
                 Text(
                     text = stringResource(
-                        R.string.home_session_progress,
+                        Res.string.home_session_progress,
                         session.completedFiles,
                         session.totalFiles
                     ),
@@ -583,15 +628,15 @@ private fun BackupCard(
                 ) {
                     Text(
                         when {
-                            scanning -> stringResource(R.string.home_scanning)
+                            scanning -> stringResource(Res.string.home_scanning)
                             pending > 0 -> pluralStringResource(
-                                R.plurals.home_back_up_pending,
+                                Res.plurals.home_back_up_pending,
                                 pending,
                                 pending
                             )
 
-                            foldersSelected -> stringResource(R.string.home_scan_now)
-                            else -> stringResource(R.string.home_choose_folders)
+                            foldersSelected -> stringResource(Res.string.home_scan_now)
+                            else -> stringResource(Res.string.home_choose_folders)
                         }
                     )
                 }
@@ -603,7 +648,7 @@ private fun BackupCard(
 /** Connection state worth showing, or null while everything is normal. */
 private data class ConnectionStatus(
     val indicator: ConnectionIndicator,
-    @StringRes val labelRes: Int
+    val labelRes: StringResource
 )
 
 /**
@@ -633,22 +678,22 @@ private fun rememberConnectionStatus(
     return when {
         offline -> ConnectionStatus(
             ConnectionIndicator.OFFLINE,
-            R.string.home_status_offline
+            Res.string.home_status_offline
         )
 
         connection == TelegramConnectionState.UPDATING -> ConnectionStatus(
             ConnectionIndicator.WORKING,
-            R.string.home_status_syncing
+            Res.string.home_status_syncing
         )
 
         connection != TelegramConnectionState.READY -> ConnectionStatus(
             ConnectionIndicator.WORKING,
-            R.string.home_status_connecting
+            Res.string.home_status_connecting
         )
 
         showRecovered -> ConnectionStatus(
             ConnectionIndicator.CONNECTED,
-            R.string.home_status_connected
+            Res.string.home_status_connected
         )
 
         else -> null
@@ -676,7 +721,7 @@ private fun StorageCard(slices: List<StorageSlice>, modifier: Modifier = Modifie
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                text = pluralStringResource(R.plurals.file_count, totalFiles, totalFiles),
+                text = pluralStringResource(Res.plurals.file_count, totalFiles, totalFiles),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -745,9 +790,9 @@ private fun StorageLegend(slices: List<StorageSlice>, totalBytes: Long) {
                 val percent = slice.totalBytes * 100f / totalBytes
                 Text(
                     text = if (percent < 1f) {
-                        stringResource(R.string.home_storage_percent_min)
+                        stringResource(Res.string.home_storage_percent_min)
                     } else {
-                        stringResource(R.string.home_storage_percent, percent.roundToInt())
+                        stringResource(Res.string.home_storage_percent, percent.roundToInt())
                     },
                     style = LegendTextStyle,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -784,32 +829,32 @@ private fun backupFreshnessLabel(
     totalFiles: Int,
     backedUpCount: Int
 ): String = when {
-    !autoBackupEnabled -> stringResource(R.string.home_backup_auto_off)
+    !autoBackupEnabled -> stringResource(Res.string.home_backup_auto_off)
     /* Files indexed from an existing channel are already safe even though this
        device never ran a session, so claiming "no backup yet" would be wrong. */
     lastBackupAt == null && totalFiles > 0 && backedUpCount >= totalFiles ->
-        stringResource(R.string.home_backup_all_in_telegram)
+        stringResource(Res.string.home_backup_all_in_telegram)
 
-    lastBackupAt == null -> stringResource(R.string.home_backup_never)
+    lastBackupAt == null -> stringResource(Res.string.home_backup_never)
     else -> when (val age = Formatters.relativeAge(lastBackupAt)) {
-        AgeBucket.JustNow -> stringResource(R.string.home_backup_just_now)
+        AgeBucket.JustNow -> stringResource(Res.string.home_backup_just_now)
         is AgeBucket.Minutes -> stringResource(
-            R.string.home_backup_at,
-            pluralStringResource(R.plurals.backup_age_minutes, age.value, age.value)
+            Res.string.home_backup_at,
+            pluralStringResource(Res.plurals.backup_age_minutes, age.value, age.value)
         )
 
         is AgeBucket.Hours -> stringResource(
-            R.string.home_backup_at,
-            pluralStringResource(R.plurals.backup_age_hours, age.value, age.value)
+            Res.string.home_backup_at,
+            pluralStringResource(Res.plurals.backup_age_hours, age.value, age.value)
         )
 
         is AgeBucket.Days -> stringResource(
-            R.string.home_backup_at,
-            pluralStringResource(R.plurals.backup_age_days, age.value, age.value)
+            Res.string.home_backup_at,
+            pluralStringResource(Res.plurals.backup_age_days, age.value, age.value)
         )
 
         is AgeBucket.Longer -> stringResource(
-            R.string.home_backup_at,
+            Res.string.home_backup_at,
             Formatters.date(age.epochMillis)
         )
     }

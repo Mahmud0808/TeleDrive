@@ -54,7 +54,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -62,7 +62,29 @@ import org.koin.androidx.compose.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.common_actions
+import com.drdisagree.teledrive.resources.common_add_favorites
+import com.drdisagree.teledrive.resources.common_back
+import com.drdisagree.teledrive.resources.common_clear_selection
+import com.drdisagree.teledrive.resources.common_confirm_trash_count_title
+import com.drdisagree.teledrive.resources.common_deselect_all
+import com.drdisagree.teledrive.resources.common_download
+import com.drdisagree.teledrive.resources.common_move_trash
+import com.drdisagree.teledrive.resources.common_rename
+import com.drdisagree.teledrive.resources.common_rename_file
+import com.drdisagree.teledrive.resources.common_restore_trash_emptied
+import com.drdisagree.teledrive.resources.common_select_all
+import com.drdisagree.teledrive.resources.common_selection_count
+import com.drdisagree.teledrive.resources.common_upload
+import com.drdisagree.teledrive.resources.date_days_ago
+import com.drdisagree.teledrive.resources.date_today
+import com.drdisagree.teledrive.resources.date_yesterday
+import com.drdisagree.teledrive.resources.gallery_albums_appear_organise_media
+import com.drdisagree.teledrive.resources.gallery_no_albums
+import com.drdisagree.teledrive.resources.gallery_no_media
+import com.drdisagree.teledrive.resources.gallery_photos_videos_appear_here
+import com.drdisagree.teledrive.resources.gallery_title
 import com.drdisagree.teledrive.domain.model.MediaAlbum
 import com.drdisagree.teledrive.domain.model.ViewMode
 import com.drdisagree.teledrive.presentation.common.DayBucket
@@ -86,9 +108,9 @@ import com.drdisagree.teledrive.presentation.common.rememberPosition
 private fun DayHeaderRow(dayStartMillis: Long, modifier: Modifier = Modifier) {
     Text(
         text = when (val bucket = Formatters.dayBucket(dayStartMillis)) {
-            DayBucket.Today -> stringResource(R.string.date_today)
-            DayBucket.Yesterday -> stringResource(R.string.date_yesterday)
-            is DayBucket.DaysAgo -> stringResource(R.string.date_days_ago, bucket.days)
+            DayBucket.Today -> stringResource(Res.string.date_today)
+            DayBucket.Yesterday -> stringResource(Res.string.date_yesterday)
+            is DayBucket.DaysAgo -> stringResource(Res.string.date_days_ago, bucket.days)
             is DayBucket.Absolute -> bucket.text
         },
         style = MaterialTheme.typography.titleSmall,
@@ -146,8 +168,8 @@ private fun AlbumGrid(
     if (albums.isEmpty()) {
         EmptyState(
             icon = Icons.Outlined.PhotoLibrary,
-            title = stringResource(R.string.gallery_no_albums),
-            description = stringResource(R.string.gallery_albums_appear_organise_media)
+            title = stringResource(Res.string.gallery_no_albums),
+            description = stringResource(Res.string.gallery_albums_appear_organise_media)
         )
         return
     }
@@ -195,11 +217,11 @@ fun GalleryScreen(
     if (confirmTrash) {
         ConfirmDialog(
             title = stringResource(
-                R.string.common_confirm_trash_count_title,
+                Res.string.common_confirm_trash_count_title,
                 state.selection.size
             ),
-            message = stringResource(R.string.common_restore_trash_emptied),
-            confirmLabel = stringResource(R.string.common_move_trash),
+            message = stringResource(Res.string.common_restore_trash_emptied),
+            confirmLabel = stringResource(Res.string.common_move_trash),
             destructive = true,
             onConfirm = {
                 confirmTrash = false
@@ -211,9 +233,9 @@ fun GalleryScreen(
 
     renameTarget?.let { file ->
         RenameDialog(
-            title = stringResource(R.string.common_rename_file),
+            title = stringResource(Res.string.common_rename_file),
             initialValue = file.name,
-            confirmLabel = stringResource(R.string.common_rename),
+            confirmLabel = stringResource(Res.string.common_rename),
             onConfirm = viewModel::confirmRename,
             onDismiss = viewModel::dismissRename
         )
@@ -241,7 +263,7 @@ fun GalleryScreen(
                     title = {
                         Text(
                             text = stringResource(
-                                R.string.common_selection_count,
+                                Res.string.common_selection_count,
                                 state.selection.size
                             ),
                             maxLines = 1,
@@ -252,7 +274,7 @@ fun GalleryScreen(
                         IconButton(onClick = viewModel::clearSelection) {
                             Icon(
                                 Icons.Filled.Close,
-                                contentDescription = stringResource(R.string.common_clear_selection)
+                                contentDescription = stringResource(Res.string.common_clear_selection)
                             )
                         }
                     },
@@ -269,9 +291,9 @@ fun GalleryScreen(
                                     Icons.Filled.SelectAll
                                 },
                                 contentDescription = if (allSelected) {
-                                    stringResource(R.string.common_deselect_all)
+                                    stringResource(Res.string.common_deselect_all)
                                 } else {
-                                    stringResource(R.string.common_select_all)
+                                    stringResource(Res.string.common_select_all)
                                 }
                             )
                         }
@@ -279,7 +301,7 @@ fun GalleryScreen(
                             IconButton(onClick = { showSelectionOverflow = true }) {
                                 Icon(
                                     Icons.Filled.MoreVert,
-                                    contentDescription = stringResource(R.string.common_actions)
+                                    contentDescription = stringResource(Res.string.common_actions)
                                 )
                             }
                             DropdownMenu(
@@ -287,7 +309,7 @@ fun GalleryScreen(
                                 onDismissRequest = { showSelectionOverflow = false }
                             ) {
                                 DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.common_download)) },
+                                    text = { Text(stringResource(Res.string.common_download)) },
                                     enabled = state.capabilities.canDownload,
                                     onClick = {
                                         showSelectionOverflow = false
@@ -295,7 +317,7 @@ fun GalleryScreen(
                                     }
                                 )
                                 DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.common_upload)) },
+                                    text = { Text(stringResource(Res.string.common_upload)) },
                                     enabled = state.capabilities.canUpload,
                                     onClick = {
                                         showSelectionOverflow = false
@@ -303,7 +325,7 @@ fun GalleryScreen(
                                     }
                                 )
                                 DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.common_rename)) },
+                                    text = { Text(stringResource(Res.string.common_rename)) },
                                     enabled = state.selection.size == 1,
                                     onClick = {
                                         showSelectionOverflow = false
@@ -311,14 +333,14 @@ fun GalleryScreen(
                                     }
                                 )
                                 DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.common_add_favorites)) },
+                                    text = { Text(stringResource(Res.string.common_add_favorites)) },
                                     onClick = {
                                         showSelectionOverflow = false
                                         viewModel.favoriteSelected()
                                     }
                                 )
                                 DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.common_move_trash)) },
+                                    text = { Text(stringResource(Res.string.common_move_trash)) },
                                     onClick = {
                                         showSelectionOverflow = false
                                         confirmTrash = true
@@ -331,13 +353,13 @@ fun GalleryScreen(
             } else {
                 TopAppBar(
                     colors = liftedTopAppBarColors(lifted),
-                    title = { Text(state.albumTitle ?: stringResource(R.string.gallery_title)) },
+                    title = { Text(state.albumTitle ?: stringResource(Res.string.gallery_title)) },
                     navigationIcon = {
                         onBack?.let {
                             IconButton(onClick = it) {
                                 Icon(
                                     Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = stringResource(R.string.common_back)
+                                    contentDescription = stringResource(Res.string.common_back)
                                 )
                             }
                         }
@@ -432,8 +454,8 @@ fun GalleryScreen(
 
                     media.itemCount == 0 -> EmptyState(
                         icon = Icons.Outlined.Photo,
-                        title = stringResource(R.string.gallery_no_media),
-                        description = stringResource(R.string.gallery_photos_videos_appear_here)
+                        title = stringResource(Res.string.gallery_no_media),
+                        description = stringResource(Res.string.gallery_photos_videos_appear_here)
                     )
 
                     state.viewMode == ViewMode.LIST -> LazyColumn(

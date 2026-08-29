@@ -29,12 +29,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.preview_open_link
 import com.drdisagree.teledrive.domain.model.LinkMetadata
 import com.drdisagree.teledrive.presentation.common.scaledBy
 
@@ -124,7 +125,7 @@ private fun BareLink(
                 modifier = Modifier.size(BUTTON_ICON_SIZE)
             )
             Spacer(Modifier.width(8.dp))
-            Text(stringResource(R.string.preview_open_link))
+            Text(stringResource(Res.string.preview_open_link))
         }
     }
 }
@@ -193,7 +194,7 @@ private fun ArticleCard(
                     modifier = Modifier.size(BUTTON_ICON_SIZE)
                 )
                 Spacer(Modifier.width(8.dp))
-                Text(stringResource(R.string.preview_open_link))
+                Text(stringResource(Res.string.preview_open_link))
             }
         }
     }

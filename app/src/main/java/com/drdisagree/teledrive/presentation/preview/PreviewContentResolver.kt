@@ -1,7 +1,13 @@
 package com.drdisagree.teledrive.presentation.preview
 
 import android.content.Context
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.preview_archive_failed
+import com.drdisagree.teledrive.resources.preview_fetch_failed
+import com.drdisagree.teledrive.resources.preview_no_copy_available
+import com.drdisagree.teledrive.resources.preview_no_preview_for_type
+import com.drdisagree.teledrive.resources.preview_only_zip
+import com.drdisagree.teledrive.resources.preview_read_failed
 import com.drdisagree.teledrive.core.crypto.CryptoKeys
 import com.drdisagree.teledrive.core.crypto.StreamCrypto
 import com.drdisagree.teledrive.core.crypto.WrappedKeyRepository
@@ -50,7 +56,7 @@ class PreviewContentResolver(
 
         val remoteFileId = file.remoteFileId
         if (!file.hasRemoteCopy || remoteFileId == null) {
-            emit(PreviewContent.Failed(R.string.preview_no_copy_available))
+            emit(PreviewContent.Failed(Res.string.preview_no_copy_available))
             return@flow
         }
 
@@ -114,7 +120,7 @@ class PreviewContentResolver(
             emit(PreviewContent.DownloadProgress(transferred, total))
         }
         if (cached == null) {
-            emit(PreviewContent.Failed(R.string.preview_fetch_failed))
+            emit(PreviewContent.Failed(Res.string.preview_fetch_failed))
         } else {
             emit(fromLocal(file, cached.absolutePath))
         }
@@ -127,7 +133,7 @@ class PreviewContentResolver(
         MimeTypes.isPdf(file.mimeType) -> PreviewContent.Pdf(path)
         MimeTypes.isText(file.mimeType) -> readText(path)
         MimeTypes.isArchive(file.mimeType) -> readArchive(file, path)
-        else -> PreviewContent.Unsupported(R.string.preview_no_preview_for_type)
+        else -> PreviewContent.Unsupported(Res.string.preview_no_preview_for_type)
     }
 
     private fun readText(path: String): PreviewContent = runCatching {
@@ -144,11 +150,11 @@ class PreviewContentResolver(
             buffer.copyOf(read)
         }
         PreviewContent.PlainText(String(bytes, Charsets.UTF_8), truncated)
-    }.getOrElse { PreviewContent.Failed(R.string.preview_read_failed) }
+    }.getOrElse { PreviewContent.Failed(Res.string.preview_read_failed) }
 
     private fun readArchive(file: DriveFile, path: String): PreviewContent {
         if (file.mimeType != "application/zip") {
-            return PreviewContent.Unsupported(R.string.preview_only_zip)
+            return PreviewContent.Unsupported(Res.string.preview_only_zip)
         }
         return runCatching {
             val entries = ZipFile(path).fileHeaders.map { header ->
@@ -160,7 +166,7 @@ class PreviewContentResolver(
                 )
             }
             PreviewContent.Archive(entries, "ZIP")
-        }.getOrElse { PreviewContent.Failed(R.string.preview_archive_failed) }
+        }.getOrElse { PreviewContent.Failed(Res.string.preview_archive_failed) }
     }
 
     private suspend fun fetchToCache(

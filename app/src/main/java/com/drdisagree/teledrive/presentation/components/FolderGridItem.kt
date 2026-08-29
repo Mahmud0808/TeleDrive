@@ -22,10 +22,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.common_content_description_favorite
 import com.drdisagree.teledrive.domain.model.DriveFolder
 
 /** Folder tile matching [FileGridItem] so grid view stays visually uniform. */
@@ -73,7 +74,7 @@ fun FolderGridItem(
                     Spacer(Modifier.width(6.dp))
                     Icon(
                         imageVector = Icons.Filled.Star,
-                        contentDescription = stringResource(R.string.common_content_description_favorite),
+                        contentDescription = stringResource(Res.string.common_content_description_favorite),
                         modifier = Modifier.size(14.dp),
                         tint = MaterialTheme.colorScheme.tertiary
                     )

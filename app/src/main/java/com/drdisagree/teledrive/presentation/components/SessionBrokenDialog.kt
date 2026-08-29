@@ -5,9 +5,12 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.window.DialogProperties
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.session_broken_action
+import com.drdisagree.teledrive.resources.session_broken_message
+import com.drdisagree.teledrive.resources.session_broken_title
 
 /**
  * Shown when the stored session cannot be read, which leaves the app unable to
@@ -22,11 +25,11 @@ fun SessionBrokenDialog(onSignInAgain: () -> Unit) {
             dismissOnBackPress = false,
             dismissOnClickOutside = false
         ),
-        title = { Text(stringResource(R.string.session_broken_title)) },
-        text = { Text(stringResource(R.string.session_broken_message)) },
+        title = { Text(stringResource(Res.string.session_broken_title)) },
+        text = { Text(stringResource(Res.string.session_broken_message)) },
         confirmButton = {
             Button(onClick = onSignInAgain, shapes = ButtonDefaults.shapes()) {
-                Text(stringResource(R.string.session_broken_action))
+                Text(stringResource(Res.string.session_broken_action))
             }
         }
     )

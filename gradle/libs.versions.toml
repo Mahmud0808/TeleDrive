@@ -104,6 +104,7 @@ zip4j = { group = "net.lingala.zip4j", name = "zip4j", version.ref = "zip4j" }
 tdlib = { group = "com.github.tdlibx", name = "td", version.ref = "tdlib" }
 tdlight-java = { group = "it.tdlight", name = "tdlight-java", version.ref = "tdlight" }
 cmp-material3 = { group = "org.jetbrains.compose.material3", name = "material3", version.ref = "cmpMaterial3" }
+cmp-components-resources = { group = "org.jetbrains.compose.components", name = "components-resources", version.ref = "composeMultiplatform" }
 jna-platform = { group = "net.java.dev.jna", name = "jna-platform", version.ref = "jna" }
 
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -114,6 +115,7 @@ turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }

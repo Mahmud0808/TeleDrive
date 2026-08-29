@@ -18,10 +18,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.common_retry
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -107,7 +108,7 @@ fun ErrorState(
             Button(
                 onClick = it,
                 shapes = ButtonDefaults.shapes()
-            ) { Text(stringResource(R.string.common_retry)) }
+            ) { Text(stringResource(Res.string.common_retry)) }
         }
     }
 }

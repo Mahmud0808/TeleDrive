@@ -19,12 +19,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.pluralStringResource
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.album_not_in_folder
+import com.drdisagree.teledrive.resources.item_count
 import com.drdisagree.teledrive.core.media.ThumbnailModel
 import com.drdisagree.teledrive.domain.model.MediaAlbum
 
@@ -34,7 +36,7 @@ fun AlbumCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val albumName = album.name ?: stringResource(R.string.album_not_in_folder)
+    val albumName = album.name ?: stringResource(Res.string.album_not_in_folder)
     Column(
         modifier = modifier
             .clip(MaterialTheme.shapes.large)
@@ -75,7 +77,7 @@ fun AlbumCard(
                 overflow = TextOverflow.Ellipsis
             )
             Text(
-                text = pluralStringResource(R.plurals.item_count, album.itemCount, album.itemCount),
+                text = pluralStringResource(Res.plurals.item_count, album.itemCount, album.itemCount),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

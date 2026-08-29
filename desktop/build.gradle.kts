@@ -43,7 +43,7 @@ compose.resources {
 dependencies {
     implementation(project(":shared"))
     implementation(compose.desktop.currentOs)
-    implementation(compose.components.resources)
+    implementation(libs.cmp.components.resources)
     implementation(libs.cmp.material3)
     implementation(libs.kotlinx.coroutines.swing)
     implementation(platform(libs.koin.bom))

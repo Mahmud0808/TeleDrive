@@ -1,6 +1,6 @@
 package com.drdisagree.teledrive.presentation.gallery
 
-import androidx.annotation.StringRes
+import org.jetbrains.compose.resources.StringResource
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -9,7 +9,11 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.insertSeparators
 import androidx.paging.map
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.gallery_tab_albums
+import com.drdisagree.teledrive.resources.gallery_tab_all
+import com.drdisagree.teledrive.resources.gallery_tab_photos
+import com.drdisagree.teledrive.resources.gallery_tab_videos
 import com.drdisagree.teledrive.domain.model.DriveFile
 import com.drdisagree.teledrive.domain.model.FileCategory
 import com.drdisagree.teledrive.domain.model.FileQuerySpec
@@ -50,11 +54,11 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 
-enum class GalleryTab(@param:StringRes val labelRes: Int) {
-    ALL(R.string.gallery_tab_all),
-    PHOTOS(R.string.gallery_tab_photos),
-    VIDEOS(R.string.gallery_tab_videos),
-    ALBUMS(R.string.gallery_tab_albums)
+enum class GalleryTab(val labelRes: StringResource) {
+    ALL(Res.string.gallery_tab_all),
+    PHOTOS(Res.string.gallery_tab_photos),
+    VIDEOS(Res.string.gallery_tab_videos),
+    ALBUMS(Res.string.gallery_tab_albums)
 }
 
 data class GalleryUiState(

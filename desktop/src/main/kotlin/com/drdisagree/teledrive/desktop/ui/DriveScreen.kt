@@ -283,11 +283,11 @@ private fun FileRow(file: DriveFile, onDownload: (DriveFile) -> Unit) {
                 )
             }
             when {
-                file.hasLocalCopy -> Text(
-                    text = stringResource(Res.string.drive_downloaded),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary
-                )
+                file.hasLocalCopy -> OutlinedButton(
+                    onClick = { file.localPath?.let(::revealInFileManager) }
+                ) {
+                    Text(stringResource(Res.string.drive_downloaded))
+                }
 
                 file.hasRemoteCopy -> OutlinedButton(onClick = { onDownload(file) }) {
                     Text(stringResource(Res.string.drive_download))
@@ -310,6 +310,23 @@ private fun pickFile(): String? {
     dialog.isVisible = true
     val file = dialog.file ?: return null
     return File(dialog.directory, file).absolutePath
+}
+
+private fun revealInFileManager(path: String) {
+    val file = File(path)
+    val os = System.getProperty("os.name").orEmpty().lowercase()
+    runCatching {
+        when {
+            os.contains("win") ->
+                ProcessBuilder("explorer.exe", "/select,", file.absolutePath).start()
+
+            os.contains("mac") ->
+                ProcessBuilder("open", "-R", file.absolutePath).start()
+
+            else ->
+                ProcessBuilder("xdg-open", file.parentFile.absolutePath).start()
+        }
+    }
 }
 
 private fun formatSize(bytes: Long): String = when {

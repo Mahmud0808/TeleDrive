@@ -2,36 +2,44 @@ package com.drdisagree.teledrive.core.permissions
 
 import android.Manifest
 import android.os.Build
-import androidx.annotation.StringRes
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.permission_all_files_rationale
+import com.drdisagree.teledrive.resources.permission_all_files_title
+import com.drdisagree.teledrive.resources.permission_notifications_rationale
+import com.drdisagree.teledrive.resources.permission_notifications_title
+import com.drdisagree.teledrive.resources.permission_photos_rationale
+import com.drdisagree.teledrive.resources.permission_photos_title
+import com.drdisagree.teledrive.resources.permission_videos_rationale
+import com.drdisagree.teledrive.resources.permission_videos_title
+import org.jetbrains.compose.resources.StringResource
 
 /**
  * Permissions the app can ask for, with the reason shown to the user.
  * [critical] marks the ones without which automatic backup cannot work.
  */
 enum class AppPermission(
-    @param:StringRes val titleRes: Int,
-    @param:StringRes val rationaleRes: Int,
+    val titleRes: StringResource,
+    val rationaleRes: StringResource,
     val critical: Boolean
 ) {
     MEDIA_IMAGES(
-        titleRes = R.string.permission_photos_title,
-        rationaleRes = R.string.permission_photos_rationale,
+        titleRes = Res.string.permission_photos_title,
+        rationaleRes = Res.string.permission_photos_rationale,
         critical = true
     ),
     MEDIA_VIDEO(
-        titleRes = R.string.permission_videos_title,
-        rationaleRes = R.string.permission_videos_rationale,
+        titleRes = Res.string.permission_videos_title,
+        rationaleRes = Res.string.permission_videos_rationale,
         critical = true
     ),
     NOTIFICATIONS(
-        titleRes = R.string.permission_notifications_title,
-        rationaleRes = R.string.permission_notifications_rationale,
+        titleRes = Res.string.permission_notifications_title,
+        rationaleRes = Res.string.permission_notifications_rationale,
         critical = false
     ),
     ALL_FILES(
-        titleRes = R.string.permission_all_files_title,
-        rationaleRes = R.string.permission_all_files_rationale,
+        titleRes = Res.string.permission_all_files_title,
+        rationaleRes = Res.string.permission_all_files_rationale,
         critical = true
     );
 

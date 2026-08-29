@@ -43,12 +43,29 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import org.koin.androidx.compose.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.common_back
+import com.drdisagree.teledrive.resources.note_body_hint
+import com.drdisagree.teledrive.resources.note_bold
+import com.drdisagree.teledrive.resources.note_bullet
+import com.drdisagree.teledrive.resources.note_code
+import com.drdisagree.teledrive.resources.note_edit
+import com.drdisagree.teledrive.resources.note_heading
+import com.drdisagree.teledrive.resources.note_italic
+import com.drdisagree.teledrive.resources.note_link
+import com.drdisagree.teledrive.resources.note_link_text
+import com.drdisagree.teledrive.resources.note_link_url
+import com.drdisagree.teledrive.resources.note_new
+import com.drdisagree.teledrive.resources.note_quote
+import com.drdisagree.teledrive.resources.note_save
+import com.drdisagree.teledrive.resources.note_strikethrough
+import com.drdisagree.teledrive.resources.note_title_hint
 import com.drdisagree.teledrive.presentation.common.CollectSnackbarMessages
 import com.drdisagree.teledrive.presentation.components.BottomBarSnackbarHost
 import com.drdisagree.teledrive.presentation.components.LoadingState
@@ -63,8 +80,8 @@ fun NoteEditorScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     var body by remember(state.loading) { mutableStateOf(TextFieldValue(state.body)) }
 
-    val linkText = stringResource(R.string.note_link_text)
-    val linkUrl = stringResource(R.string.note_link_url)
+    val linkText = stringResource(Res.string.note_link_text)
+    val linkUrl = stringResource(Res.string.note_link_url)
 
     CollectSnackbarMessages(viewModel.messages, snackbarHostState)
     LaunchedEffect(Unit) { viewModel.saved.collect { onBack() } }
@@ -77,7 +94,7 @@ fun NoteEditorScreen(
                 title = {
                     Text(
                         stringResource(
-                            if (state.isNew) R.string.note_new else R.string.note_edit
+                            if (state.isNew) Res.string.note_new else Res.string.note_edit
                         )
                     )
                 },
@@ -85,7 +102,7 @@ fun NoteEditorScreen(
                     IconButton(onClick = onBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.common_back)
+                            contentDescription = stringResource(Res.string.common_back)
                         )
                     }
                 }
@@ -109,7 +126,7 @@ fun NoteEditorScreen(
                 ) {
                     Icon(
                         Icons.Filled.Check,
-                        contentDescription = stringResource(R.string.note_save)
+                        contentDescription = stringResource(Res.string.note_save)
                     )
                 }
             }
@@ -129,7 +146,7 @@ fun NoteEditorScreen(
                 onValueChange = viewModel::setTitle,
                 placeholder = {
                     Text(
-                        text = stringResource(R.string.note_title_hint),
+                        text = stringResource(Res.string.note_title_hint),
                         style = MaterialTheme.typography.headlineSmall
                     )
                 },
@@ -154,7 +171,7 @@ fun NoteEditorScreen(
                     body = it
                     viewModel.setBody(it.text)
                 },
-                placeholder = { Text(stringResource(R.string.note_body_hint)) },
+                placeholder = { Text(stringResource(Res.string.note_body_hint)) },
                 enabled = !state.saving,
                 colors = borderlessColors(),
                 modifier = Modifier
@@ -176,32 +193,32 @@ private fun MarkdownToolbar(enabled: Boolean, onAction: (MarkdownAction) -> Unit
             .horizontalScroll(rememberScrollState())
             .padding(horizontal = 12.dp, vertical = 8.dp)
     ) {
-        ToolbarButton(Icons.Filled.FormatBold, R.string.note_bold, enabled) {
+        ToolbarButton(Icons.Filled.FormatBold, Res.string.note_bold, enabled) {
             onAction(MarkdownAction.Wrap("**"))
         }
-        ToolbarButton(Icons.Filled.FormatItalic, R.string.note_italic, enabled) {
+        ToolbarButton(Icons.Filled.FormatItalic, Res.string.note_italic, enabled) {
             onAction(MarkdownAction.Wrap("_"))
         }
-        ToolbarButton(Icons.Filled.StrikethroughS, R.string.note_strikethrough, enabled) {
+        ToolbarButton(Icons.Filled.StrikethroughS, Res.string.note_strikethrough, enabled) {
             onAction(MarkdownAction.Wrap("~~"))
         }
-        ToolbarButton(Icons.Filled.Code, R.string.note_code, enabled) {
+        ToolbarButton(Icons.Filled.Code, Res.string.note_code, enabled) {
             onAction(MarkdownAction.Wrap("`"))
         }
-        ToolbarButton(Icons.Filled.Link, R.string.note_link, enabled) {
+        ToolbarButton(Icons.Filled.Link, Res.string.note_link, enabled) {
             onAction(MarkdownAction.Link)
         }
-        ToolbarButton(Icons.Filled.Title, R.string.note_heading, enabled) {
+        ToolbarButton(Icons.Filled.Title, Res.string.note_heading, enabled) {
             onAction(MarkdownAction.LinePrefix("## "))
         }
         ToolbarButton(
             Icons.AutoMirrored.Filled.FormatListBulleted,
-            R.string.note_bullet,
+            Res.string.note_bullet,
             enabled
         ) {
             onAction(MarkdownAction.LinePrefix("- "))
         }
-        ToolbarButton(Icons.Filled.FormatQuote, R.string.note_quote, enabled) {
+        ToolbarButton(Icons.Filled.FormatQuote, Res.string.note_quote, enabled) {
             onAction(MarkdownAction.LinePrefix("> "))
         }
     }
@@ -210,7 +227,7 @@ private fun MarkdownToolbar(enabled: Boolean, onAction: (MarkdownAction) -> Unit
 @Composable
 private fun ToolbarButton(
     icon: ImageVector,
-    labelRes: Int,
+    labelRes: StringResource,
     enabled: Boolean,
     onClick: () -> Unit
 ) {

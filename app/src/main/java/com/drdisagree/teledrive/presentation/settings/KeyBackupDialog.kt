@@ -21,11 +21,27 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.common_cancel
+import com.drdisagree.teledrive.resources.common_restore
+import com.drdisagree.teledrive.resources.settings_back_encryption_key
+import com.drdisagree.teledrive.resources.settings_enter_passphrase_used_backing
+import com.drdisagree.teledrive.resources.settings_forgot_show_hint
+import com.drdisagree.teledrive.resources.settings_hint_optional
+import com.drdisagree.teledrive.resources.settings_no_key_backup_found
+import com.drdisagree.teledrive.resources.settings_passphrase
+import com.drdisagree.teledrive.resources.settings_passphrase_min_length
+import com.drdisagree.teledrive.resources.settings_passphrases_do_not_match
+import com.drdisagree.teledrive.resources.settings_reading_hint
+import com.drdisagree.teledrive.resources.settings_repeat_passphrase
+import com.drdisagree.teledrive.resources.settings_required_encryption_key_wrapped
+import com.drdisagree.teledrive.resources.settings_restore_encryption_key
+import com.drdisagree.teledrive.resources.settings_save_backup
+import com.drdisagree.teledrive.resources.settings_stored_unencrypted_never_put
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -42,11 +58,11 @@ fun KeyBackupDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.settings_back_encryption_key)) },
+        title = { Text(stringResource(Res.string.settings_back_encryption_key)) },
         text = {
             Column {
                 Text(
-                    text = stringResource(R.string.settings_required_encryption_key_wrapped),
+                    text = stringResource(Res.string.settings_required_encryption_key_wrapped),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -54,14 +70,14 @@ fun KeyBackupDialog(
                 OutlinedTextField(
                     value = passphrase,
                     onValueChange = { passphrase = it },
-                    label = { Text(stringResource(R.string.settings_passphrase)) },
+                    label = { Text(stringResource(Res.string.settings_passphrase)) },
                     singleLine = true,
                     isError = tooShort,
                     supportingText = if (tooShort) {
                         {
                             Text(
                                 stringResource(
-                                    R.string.settings_passphrase_min_length,
+                                    Res.string.settings_passphrase_min_length,
                                     MIN_LENGTH
                                 )
                             )
@@ -75,11 +91,11 @@ fun KeyBackupDialog(
                 OutlinedTextField(
                     value = repeated,
                     onValueChange = { repeated = it },
-                    label = { Text(stringResource(R.string.settings_repeat_passphrase)) },
+                    label = { Text(stringResource(Res.string.settings_repeat_passphrase)) },
                     singleLine = true,
                     isError = mismatch,
                     supportingText = if (mismatch) {
-                        { Text(stringResource(R.string.settings_passphrases_do_not_match)) }
+                        { Text(stringResource(Res.string.settings_passphrases_do_not_match)) }
                     } else null,
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -89,9 +105,9 @@ fun KeyBackupDialog(
                 OutlinedTextField(
                     value = hint,
                     onValueChange = { hint = it },
-                    label = { Text(stringResource(R.string.settings_hint_optional)) },
+                    label = { Text(stringResource(Res.string.settings_hint_optional)) },
                     singleLine = true,
-                    supportingText = { Text(stringResource(R.string.settings_stored_unencrypted_never_put)) },
+                    supportingText = { Text(stringResource(Res.string.settings_stored_unencrypted_never_put)) },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -101,13 +117,13 @@ fun KeyBackupDialog(
                 onClick = { onConfirm(passphrase, hint.trim()) },
                 shapes = ButtonDefaults.shapes(),
                 enabled = !working && passphrase.length >= MIN_LENGTH && passphrase == repeated
-            ) { Text(stringResource(R.string.settings_save_backup)) }
+            ) { Text(stringResource(Res.string.settings_save_backup)) }
         },
         dismissButton = {
             OutlinedButton(
                 onClick = onDismiss,
                 shapes = ButtonDefaults.shapes()
-            ) { Text(stringResource(R.string.common_cancel)) }
+            ) { Text(stringResource(Res.string.common_cancel)) }
         }
     )
 }
@@ -124,11 +140,11 @@ fun KeyRestoreDialog(
     var passphrase by remember { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.settings_restore_encryption_key)) },
+        title = { Text(stringResource(Res.string.settings_restore_encryption_key)) },
         text = {
             Column {
                 Text(
-                    text = stringResource(R.string.settings_enter_passphrase_used_backing),
+                    text = stringResource(Res.string.settings_enter_passphrase_used_backing),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -137,16 +153,16 @@ fun KeyRestoreDialog(
                     is KeyHint.Unknown -> TextButton(
                         onClick = onShowHint,
                         contentPadding = PaddingValues(0.dp)
-                    ) { Text(stringResource(R.string.settings_forgot_show_hint)) }
+                    ) { Text(stringResource(Res.string.settings_forgot_show_hint)) }
 
                     is KeyHint.Loading -> Text(
-                        text = stringResource(R.string.settings_reading_hint),
+                        text = stringResource(Res.string.settings_reading_hint),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
                     is KeyHint.Missing -> Text(
-                        text = stringResource(R.string.settings_no_key_backup_found),
+                        text = stringResource(Res.string.settings_no_key_backup_found),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.error
                     )
@@ -162,7 +178,7 @@ fun KeyRestoreDialog(
                 OutlinedTextField(
                     value = passphrase,
                     onValueChange = { passphrase = it },
-                    label = { Text(stringResource(R.string.settings_passphrase)) },
+                    label = { Text(stringResource(Res.string.settings_passphrase)) },
                     singleLine = true,
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -175,13 +191,13 @@ fun KeyRestoreDialog(
                 onClick = { onConfirm(passphrase) },
                 shapes = ButtonDefaults.shapes(),
                 enabled = passphrase.isNotEmpty() && !working
-            ) { Text(stringResource(R.string.common_restore)) }
+            ) { Text(stringResource(Res.string.common_restore)) }
         },
         dismissButton = {
             OutlinedButton(
                 onClick = onDismiss,
                 shapes = ButtonDefaults.shapes()
-            ) { Text(stringResource(R.string.common_cancel)) }
+            ) { Text(stringResource(Res.string.common_cancel)) }
         }
     )
 }

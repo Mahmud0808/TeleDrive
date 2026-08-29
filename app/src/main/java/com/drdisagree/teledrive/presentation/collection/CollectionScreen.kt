@@ -25,14 +25,24 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.koin.androidx.compose.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.collection_empty_title
+import com.drdisagree.teledrive.resources.collection_remove_from
+import com.drdisagree.teledrive.resources.common_back
+import com.drdisagree.teledrive.resources.common_clear_selection
+import com.drdisagree.teledrive.resources.common_confirm_trash_count_title
+import com.drdisagree.teledrive.resources.common_deselect_all
+import com.drdisagree.teledrive.resources.common_move_trash
+import com.drdisagree.teledrive.resources.common_restore_trash_emptied
+import com.drdisagree.teledrive.resources.common_select_all
+import com.drdisagree.teledrive.resources.common_selection_count
 import com.drdisagree.teledrive.presentation.common.isInitialLoad
 import com.drdisagree.teledrive.presentation.components.ConfirmDialog
 import com.drdisagree.teledrive.presentation.components.EmptyState
@@ -60,9 +70,9 @@ fun CollectionScreen(
 
     if (confirmTrash) {
         ConfirmDialog(
-            title = stringResource(R.string.common_confirm_trash_count_title, selection.size),
-            message = stringResource(R.string.common_restore_trash_emptied),
-            confirmLabel = stringResource(R.string.common_move_trash),
+            title = stringResource(Res.string.common_confirm_trash_count_title, selection.size),
+            message = stringResource(Res.string.common_restore_trash_emptied),
+            confirmLabel = stringResource(Res.string.common_move_trash),
             destructive = true,
             onConfirm = {
                 confirmTrash = false
@@ -82,7 +92,7 @@ fun CollectionScreen(
                 title = {
                     Text(
                         text = if (selectionMode) {
-                            stringResource(R.string.common_selection_count, selection.size)
+                            stringResource(Res.string.common_selection_count, selection.size)
                         } else {
                             stringResource(viewModel.type.titleRes)
                         },
@@ -100,8 +110,8 @@ fun CollectionScreen(
                             } else {
                                 Icons.AutoMirrored.Filled.ArrowBack
                             },
-                            contentDescription = if (selectionMode) stringResource(R.string.common_clear_selection) else stringResource(
-                                R.string.common_back
+                            contentDescription = if (selectionMode) stringResource(Res.string.common_clear_selection) else stringResource(
+                                Res.string.common_back
                             )
                         )
                     }
@@ -120,9 +130,9 @@ fun CollectionScreen(
                                     Icons.Filled.SelectAll
                                 },
                                 contentDescription = if (allSelected) {
-                                    stringResource(R.string.common_deselect_all)
+                                    stringResource(Res.string.common_deselect_all)
                                 } else {
-                                    stringResource(R.string.common_select_all)
+                                    stringResource(Res.string.common_select_all)
                                 }
                             )
                         }
@@ -130,7 +140,7 @@ fun CollectionScreen(
                             Icon(
                                 Icons.Filled.RemoveCircleOutline,
                                 contentDescription = stringResource(
-                                    R.string.collection_remove_from,
+                                    Res.string.collection_remove_from,
                                     stringResource(viewModel.type.titleRes)
                                 )
                             )
@@ -138,7 +148,7 @@ fun CollectionScreen(
                         IconButton(onClick = { confirmTrash = true }) {
                             Icon(
                                 Icons.Filled.Delete,
-                                contentDescription = stringResource(R.string.common_move_trash)
+                                contentDescription = stringResource(Res.string.common_move_trash)
                             )
                         }
                     }
@@ -154,7 +164,7 @@ fun CollectionScreen(
             EmptyState(
                 icon = viewModel.type.icon,
                 title = stringResource(
-                    R.string.collection_empty_title,
+                    Res.string.collection_empty_title,
                     stringResource(viewModel.type.titleRes).lowercase()
                 ),
                 description = stringResource(viewModel.type.emptyMessageRes),

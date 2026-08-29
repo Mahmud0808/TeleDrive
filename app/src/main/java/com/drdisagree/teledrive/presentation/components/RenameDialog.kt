@@ -12,8 +12,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.res.stringResource
-import com.drdisagree.teledrive.R
+import org.jetbrains.compose.resources.stringResource
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.common_cancel
+import com.drdisagree.teledrive.resources.common_name
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -33,7 +35,7 @@ fun RenameDialog(
                 value = value,
                 onValueChange = { value = it },
                 singleLine = true,
-                label = { Text(stringResource(R.string.common_name)) }
+                label = { Text(stringResource(Res.string.common_name)) }
             )
         },
         confirmButton = {
@@ -47,7 +49,7 @@ fun RenameDialog(
             OutlinedButton(
                 onClick = onDismiss,
                 shapes = ButtonDefaults.shapes()
-            ) { Text(stringResource(R.string.common_cancel)) }
+            ) { Text(stringResource(Res.string.common_cancel)) }
         }
     )
 }

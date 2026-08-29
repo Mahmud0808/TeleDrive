@@ -13,10 +13,14 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.unit.dp
 import com.drdisagree.teledrive.BuildConfig
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.about_update_download
+import com.drdisagree.teledrive.resources.about_update_from
+import com.drdisagree.teledrive.resources.about_update_later
+import com.drdisagree.teledrive.resources.about_update_title
 import com.drdisagree.teledrive.core.update.AppRelease
 import androidx.compose.ui.platform.LocalContext
 import com.drdisagree.teledrive.presentation.common.MarkdownText
@@ -31,12 +35,12 @@ fun UpdateDialog(
     val context = LocalContext.current
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.about_update_title, release.version)) },
+        title = { Text(stringResource(Res.string.about_update_title, release.version)) },
         text = {
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 Text(
                     text = stringResource(
-                        R.string.about_update_from,
+                        Res.string.about_update_from,
                         BuildConfig.VERSION_NAME,
                         release.version
                     ),
@@ -54,12 +58,12 @@ fun UpdateDialog(
         },
         confirmButton = {
             Button(onClick = onDownload, shapes = ButtonDefaults.shapes()) {
-                Text(stringResource(R.string.about_update_download))
+                Text(stringResource(Res.string.about_update_download))
             }
         },
         dismissButton = {
             OutlinedButton(onClick = onDismiss, shapes = ButtonDefaults.shapes()) {
-                Text(stringResource(R.string.about_update_later))
+                Text(stringResource(Res.string.about_update_later))
             }
         }
     )

@@ -81,8 +81,8 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.res.pluralStringResource
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -96,7 +96,41 @@ import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.util.UnstableApi
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.file_count
+import com.drdisagree.teledrive.resources.folder_count
+import com.drdisagree.teledrive.resources.item_count
+import com.drdisagree.teledrive.resources.preview_share_chooser_title
+import com.drdisagree.teledrive.resources.common_actions
+import com.drdisagree.teledrive.resources.common_back
+import com.drdisagree.teledrive.resources.common_collapse
+import com.drdisagree.teledrive.resources.common_download
+import com.drdisagree.teledrive.resources.common_expand
+import com.drdisagree.teledrive.resources.common_free_space
+import com.drdisagree.teledrive.resources.common_move_trash
+import com.drdisagree.teledrive.resources.common_rename
+import com.drdisagree.teledrive.resources.common_rename_file
+import com.drdisagree.teledrive.resources.common_upload
+import com.drdisagree.teledrive.resources.note_edit_action
+import com.drdisagree.teledrive.resources.preview_add_favorites
+import com.drdisagree.teledrive.resources.preview_archive
+import com.drdisagree.teledrive.resources.preview_archive_format_title
+import com.drdisagree.teledrive.resources.preview_archive_packed_summary
+import com.drdisagree.teledrive.resources.preview_archive_packed_summary_saved
+import com.drdisagree.teledrive.resources.preview_chevron
+import com.drdisagree.teledrive.resources.preview_confirm_trash_file_message
+import com.drdisagree.teledrive.resources.preview_download_view
+import com.drdisagree.teledrive.resources.preview_extraction_supported_yet_download
+import com.drdisagree.teledrive.resources.preview_file_info
+import com.drdisagree.teledrive.resources.preview_move_to_trash
+import com.drdisagree.teledrive.resources.preview_no_preview
+import com.drdisagree.teledrive.resources.preview_preparing
+import com.drdisagree.teledrive.resources.preview_progress_bytes
+import com.drdisagree.teledrive.resources.preview_remove_favorites
+import com.drdisagree.teledrive.resources.preview_requires_download
+import com.drdisagree.teledrive.resources.preview_share_copy
+import com.drdisagree.teledrive.resources.preview_truncated_download_view
+import com.drdisagree.teledrive.resources.preview_unarchive
 import com.drdisagree.teledrive.core.files.MimeTypes
 import com.drdisagree.teledrive.core.media.TelegramDataSourceFactory
 import com.drdisagree.teledrive.domain.model.DriveFile
@@ -136,6 +170,7 @@ fun PreviewScreen(
     val storedTextScale by viewModel.textScale.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+    val shareChooserTitle = stringResource(Res.string.preview_share_chooser_title)
     val dataSourceFactory = koinInject<TelegramDataSourceFactory>()
 
     var renameTarget by remember { mutableStateOf<DriveFile?>(null) }
@@ -253,7 +288,7 @@ fun PreviewScreen(
                         IconButton(onClick = onBack) {
                             Icon(
                                 Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(R.string.common_back)
+                                contentDescription = stringResource(Res.string.common_back)
                             )
                         }
                     },
@@ -270,21 +305,21 @@ fun PreviewScreen(
                             ) {
                                 Icon(
                                     Icons.Filled.Edit,
-                                    contentDescription = stringResource(R.string.note_edit_action)
+                                    contentDescription = stringResource(Res.string.note_edit_action)
                                 )
                             }
                         }
                         IconButton(onClick = { viewModel.showInfo(currentFile) }) {
                             Icon(
                                 Icons.Filled.Info,
-                                contentDescription = stringResource(R.string.preview_file_info)
+                                contentDescription = stringResource(Res.string.preview_file_info)
                             )
                         }
                         Box {
                             IconButton(onClick = { showOverflow = true }) {
                                 Icon(
                                     Icons.Filled.MoreVert,
-                                    contentDescription = stringResource(R.string.common_actions)
+                                    contentDescription = stringResource(Res.string.common_actions)
                                 )
                             }
                             DropdownMenu(
@@ -294,8 +329,8 @@ fun PreviewScreen(
                                 DropdownMenuItem(
                                     text = {
                                         Text(
-                                            if (currentFile.isFavorite) stringResource(R.string.preview_remove_favorites)
-                                            else stringResource(R.string.preview_add_favorites)
+                                            if (currentFile.isFavorite) stringResource(Res.string.preview_remove_favorites)
+                                            else stringResource(Res.string.preview_add_favorites)
                                         )
                                     },
                                     onClick = {
@@ -308,16 +343,16 @@ fun PreviewScreen(
                                 )
                                 if (currentFile.hasLocalCopy) {
                                     DropdownMenuItem(
-                                        text = { Text(stringResource(R.string.preview_share_copy)) },
+                                        text = { Text(stringResource(Res.string.preview_share_copy)) },
                                         onClick = {
                                             showOverflow = false
-                                            shareFile(context, currentFile)
+                                            shareFile(context, currentFile, shareChooserTitle)
                                         }
                                     )
                                 }
                                 if (currentFile.hasRemoteCopy && !currentFile.hasLocalCopy) {
                                     DropdownMenuItem(
-                                        text = { Text(stringResource(R.string.common_download)) },
+                                        text = { Text(stringResource(Res.string.common_download)) },
                                         onClick = {
                                             showOverflow = false
                                             viewModel.download(currentFile)
@@ -326,7 +361,7 @@ fun PreviewScreen(
                                 }
                                 if (!currentFile.hasRemoteCopy) {
                                     DropdownMenuItem(
-                                        text = { Text(stringResource(R.string.common_upload)) },
+                                        text = { Text(stringResource(Res.string.common_upload)) },
                                         onClick = {
                                             showOverflow = false
                                             viewModel.upload(currentFile)
@@ -335,7 +370,7 @@ fun PreviewScreen(
                                 }
                                 if (currentFile.hasRemoteCopy && currentFile.hasLocalCopy) {
                                     DropdownMenuItem(
-                                        text = { Text(stringResource(R.string.common_free_space)) },
+                                        text = { Text(stringResource(Res.string.common_free_space)) },
                                         onClick = {
                                             showOverflow = false
                                             viewModel.freeUpSpace(currentFile)
@@ -354,8 +389,8 @@ fun PreviewScreen(
                                 DropdownMenuItem(
                                     text = {
                                         Text(
-                                            if (currentFile.isArchived) stringResource(R.string.preview_unarchive)
-                                            else stringResource(R.string.preview_archive)
+                                            if (currentFile.isArchived) stringResource(Res.string.preview_unarchive)
+                                            else stringResource(Res.string.preview_archive)
                                         )
                                     },
                                     onClick = {
@@ -367,14 +402,14 @@ fun PreviewScreen(
                                     }
                                 )
                                 DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.common_rename)) },
+                                    text = { Text(stringResource(Res.string.common_rename)) },
                                     onClick = {
                                         showOverflow = false
                                         renameTarget = currentFile
                                     }
                                 )
                                 DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.common_move_trash)) },
+                                    text = { Text(stringResource(Res.string.common_move_trash)) },
                                     onClick = {
                                         showOverflow = false
                                         deleteTarget = currentFile
@@ -393,9 +428,9 @@ fun PreviewScreen(
 
     renameTarget?.let { file ->
         RenameDialog(
-            title = stringResource(R.string.common_rename_file),
+            title = stringResource(Res.string.common_rename_file),
             initialValue = file.name,
-            confirmLabel = stringResource(R.string.common_rename),
+            confirmLabel = stringResource(Res.string.common_rename),
             onConfirm = {
                 viewModel.rename(file, it)
                 renameTarget = null
@@ -405,9 +440,9 @@ fun PreviewScreen(
     }
     deleteTarget?.let { file ->
         ConfirmDialog(
-            title = stringResource(R.string.preview_move_to_trash),
-            message = stringResource(R.string.preview_confirm_trash_file_message, file.name),
-            confirmLabel = stringResource(R.string.common_move_trash),
+            title = stringResource(Res.string.preview_move_to_trash),
+            message = stringResource(Res.string.preview_confirm_trash_file_message, file.name),
+            confirmLabel = stringResource(Res.string.common_move_trash),
             destructive = true,
             onConfirm = {
                 viewModel.moveToTrash(file)
@@ -466,7 +501,7 @@ private fun PreviewPage(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = stringResource(R.string.preview_preparing, file.name),
+                text = stringResource(Res.string.preview_preparing, file.name),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center,
@@ -486,7 +521,7 @@ private fun PreviewPage(
             }
             Text(
                 text = stringResource(
-                    R.string.preview_progress_bytes,
+                    Res.string.preview_progress_bytes,
                     Formatters.bytes(content.transferred),
                     Formatters.bytes(content.total)
                 ),
@@ -561,7 +596,7 @@ private fun PreviewPage(
             }
             if (content.truncated) {
                 Text(
-                    text = stringResource(R.string.preview_truncated_download_view),
+                    text = stringResource(Res.string.preview_truncated_download_view),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -571,20 +606,20 @@ private fun PreviewPage(
         is PreviewContent.Archive -> ArchiveList(content)
         is PreviewContent.RequiresDownload -> EmptyState(
             icon = Icons.Filled.Download,
-            title = stringResource(R.string.preview_download_view),
+            title = stringResource(Res.string.preview_download_view),
             description = stringResource(
-                R.string.preview_requires_download,
+                Res.string.preview_requires_download,
                 Formatters.bytes(content.sizeBytes)
             ),
-            actionLabel = stringResource(R.string.common_download),
+            actionLabel = stringResource(Res.string.common_download),
             onAction = onDownload
         )
 
         is PreviewContent.Unsupported -> EmptyState(
             icon = Icons.Outlined.Description,
-            title = stringResource(R.string.preview_no_preview),
+            title = stringResource(Res.string.preview_no_preview),
             description = stringResource(content.reasonRes),
-            actionLabel = if (file.hasLocalCopy) null else stringResource(R.string.common_download),
+            actionLabel = if (file.hasLocalCopy) null else stringResource(Res.string.common_download),
             onAction = if (file.hasLocalCopy) null else onDownload
         )
 
@@ -632,7 +667,7 @@ private fun ArchiveList(archive: PreviewContent.Archive) {
                 Column(modifier = Modifier.padding(20.dp)) {
                     Text(
                         text = stringResource(
-                            R.string.preview_archive_format_title,
+                            Res.string.preview_archive_format_title,
                             archive.format
                         ),
                         style = MaterialTheme.typography.labelLarge,
@@ -642,7 +677,7 @@ private fun ArchiveList(archive: PreviewContent.Archive) {
                         text = buildString {
                             append(
                                 pluralStringResource(
-                                    R.plurals.file_count,
+                                    Res.plurals.file_count,
                                     files.size,
                                     files.size
                                 )
@@ -651,7 +686,7 @@ private fun ArchiveList(archive: PreviewContent.Archive) {
                                 append(", ")
                                 append(
                                     pluralStringResource(
-                                        R.plurals.folder_count,
+                                        Res.plurals.folder_count,
                                         folderCount,
                                         folderCount
                                     )
@@ -665,14 +700,14 @@ private fun ArchiveList(archive: PreviewContent.Archive) {
                     Text(
                         text = if (saved > 0) {
                             stringResource(
-                                R.string.preview_archive_packed_summary_saved,
+                                Res.string.preview_archive_packed_summary_saved,
                                 Formatters.bytes(storedBytes),
                                 Formatters.bytes(originalBytes),
                                 saved
                             )
                         } else {
                             stringResource(
-                                R.string.preview_archive_packed_summary,
+                                Res.string.preview_archive_packed_summary,
                                 Formatters.bytes(storedBytes),
                                 Formatters.bytes(originalBytes)
                             )
@@ -706,7 +741,7 @@ private fun ArchiveList(archive: PreviewContent.Archive) {
         }
         item {
             Text(
-                text = stringResource(R.string.preview_extraction_supported_yet_download),
+                text = stringResource(Res.string.preview_extraction_supported_yet_download),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 16.dp)
@@ -730,7 +765,7 @@ private fun ArchiveRow(
     val chevronRotation by animateFloatAsState(
         targetValue = if (row.expanded) 180f else 0f,
         animationSpec = tween(CHEVRON_ROTATE_MS),
-        label = stringResource(R.string.preview_chevron)
+        label = stringResource(Res.string.preview_chevron)
     )
 
     Row(
@@ -782,7 +817,7 @@ private fun ArchiveRow(
             Text(
                 text = if (node.isDirectory) {
                     val items = node.children.size
-                    val label = pluralStringResource(R.plurals.item_count, items, items)
+                    val label = pluralStringResource(Res.plurals.item_count, items, items)
                     "$label · ${Formatters.bytes(node.sizeBytes)}"
                 } else {
                     Formatters.bytes(node.sizeBytes)
@@ -795,8 +830,8 @@ private fun ArchiveRow(
         if (node.isDirectory) {
             Icon(
                 imageVector = Icons.Filled.ExpandMore,
-                contentDescription = if (row.expanded) stringResource(R.string.common_collapse) else stringResource(
-                    R.string.common_expand
+                contentDescription = if (row.expanded) stringResource(Res.string.common_collapse) else stringResource(
+                    Res.string.common_expand
                 ),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.rotate(chevronRotation)
@@ -895,7 +930,7 @@ private const val ROW_FADE_MS = 180
 private const val CHEVRON_ROTATE_MS = 220
 private val INDENT_STEP = 16.dp
 
-private fun shareFile(context: Context, file: DriveFile) {
+private fun shareFile(context: Context, file: DriveFile, chooserTitle: String) {
     val localPath = file.localPath ?: return
     val uri = FileProvider.getUriForFile(
         context,
@@ -910,7 +945,7 @@ private fun shareFile(context: Context, file: DriveFile) {
     context.startActivity(
         Intent.createChooser(
             intent,
-            context.getString(R.string.preview_share_chooser_title)
+            chooserTitle
         )
     )
 }

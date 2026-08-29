@@ -75,7 +75,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -83,7 +83,22 @@ import androidx.media3.common.C
 import androidx.media3.common.Player
 import androidx.media3.common.TrackSelectionOverride
 import androidx.media3.common.Tracks
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.player_fewer_controls
+import com.drdisagree.teledrive.resources.player_hide_subtitles
+import com.drdisagree.teledrive.resources.player_more_controls
+import com.drdisagree.teledrive.resources.player_mute
+import com.drdisagree.teledrive.resources.player_pause
+import com.drdisagree.teledrive.resources.player_play
+import com.drdisagree.teledrive.resources.player_repeat_off
+import com.drdisagree.teledrive.resources.player_repeat_one
+import com.drdisagree.teledrive.resources.player_replay
+import com.drdisagree.teledrive.resources.player_show_subtitles
+import com.drdisagree.teledrive.resources.player_unmute
+import com.drdisagree.teledrive.resources.preview_back_10_seconds
+import com.drdisagree.teledrive.resources.preview_forward_10_seconds
+import com.drdisagree.teledrive.resources.preview_next_audio_track
+import com.drdisagree.teledrive.resources.preview_playback_speed
 import com.drdisagree.teledrive.presentation.common.Formatters
 import kotlinx.coroutines.delay
 import kotlin.math.abs
@@ -227,8 +242,8 @@ fun PlayerControls(
                                 } else {
                                     Icons.AutoMirrored.Filled.VolumeUp
                                 },
-                                description = if (muted) stringResource(R.string.player_unmute) else stringResource(
-                                    R.string.player_mute
+                                description = if (muted) stringResource(Res.string.player_unmute) else stringResource(
+                                    Res.string.player_mute
                                 ),
                                 active = muted,
                                 onClick = {
@@ -260,7 +275,7 @@ fun PlayerControls(
                             ExtraControl(expanded) {
                                 ControlButton(
                                     icon = Icons.Filled.SlowMotionVideo,
-                                    description = stringResource(R.string.preview_playback_speed),
+                                    description = stringResource(Res.string.preview_playback_speed),
                                     active = speed != 1f,
                                     onClick = {
                                         onInteraction()
@@ -275,8 +290,8 @@ fun PlayerControls(
                                     } else {
                                         Icons.Filled.Repeat
                                     },
-                                    description = if (repeatOne) stringResource(R.string.player_repeat_off) else stringResource(
-                                        R.string.player_repeat_one
+                                    description = if (repeatOne) stringResource(Res.string.player_repeat_off) else stringResource(
+                                        Res.string.player_repeat_one
                                     ),
                                     active = repeatOne,
                                     onClick = {
@@ -299,9 +314,9 @@ fun PlayerControls(
                                             Icons.Filled.SubtitlesOff
                                         },
                                         description = if (subtitlesOn) {
-                                            stringResource(R.string.player_hide_subtitles)
+                                            stringResource(Res.string.player_hide_subtitles)
                                         } else {
-                                            stringResource(R.string.player_show_subtitles)
+                                            stringResource(Res.string.player_show_subtitles)
                                         },
                                         active = subtitlesOn,
                                         enabled = textGroups.isNotEmpty(),
@@ -323,7 +338,7 @@ fun PlayerControls(
                             ExtraControl(expanded) {
                                 ControlButton(
                                     icon = Icons.Filled.Audiotrack,
-                                    description = stringResource(R.string.preview_next_audio_track),
+                                    description = stringResource(Res.string.preview_next_audio_track),
                                     enabled = audioGroups.size > 1,
                                     onClick = {
                                         onInteraction()
@@ -344,8 +359,8 @@ fun PlayerControls(
                 }
                 ControlButton(
                     icon = if (expanded) Icons.Filled.ChevronRight else Icons.Filled.ChevronLeft,
-                    description = if (expanded) stringResource(R.string.player_fewer_controls) else stringResource(
-                        R.string.player_more_controls
+                    description = if (expanded) stringResource(Res.string.player_fewer_controls) else stringResource(
+                        Res.string.player_more_controls
                     ),
                     onClick = {
                         onInteraction()
@@ -447,7 +462,7 @@ fun PlayerControls(
     if (showSpeeds) {
         ModalBottomSheet(onDismissRequest = { showSpeeds = false }) {
             Text(
-                text = stringResource(R.string.preview_playback_speed),
+                text = stringResource(Res.string.preview_playback_speed),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 8.dp)
             )
@@ -513,7 +528,7 @@ private fun TransportRow(
         ) {
             Icon(
                 Icons.Filled.Replay10,
-                contentDescription = stringResource(R.string.preview_back_10_seconds)
+                contentDescription = stringResource(Res.string.preview_back_10_seconds)
             )
         }
         FilledIconButton(
@@ -549,9 +564,9 @@ private fun TransportRow(
                         else -> Icons.Filled.PlayArrow
                     },
                     contentDescription = when {
-                        ended -> stringResource(R.string.player_replay)
-                        playing -> stringResource(R.string.player_pause)
-                        else -> stringResource(R.string.player_play)
+                        ended -> stringResource(Res.string.player_replay)
+                        playing -> stringResource(Res.string.player_pause)
+                        else -> stringResource(Res.string.player_play)
                     },
                     modifier = Modifier.size(PLAY_ICON_SIZE)
                 )
@@ -571,7 +586,7 @@ private fun TransportRow(
         ) {
             Icon(
                 Icons.Filled.Forward10,
-                contentDescription = stringResource(R.string.preview_forward_10_seconds)
+                contentDescription = stringResource(Res.string.preview_forward_10_seconds)
             )
         }
     }

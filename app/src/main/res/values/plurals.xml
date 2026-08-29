@@ -1,58 +1,22 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <plurals name="file_count">
         <item quantity="one">%1$d file</item>
         <item quantity="other">%1$d files</item>
     </plurals>
-
     <plurals name="folder_count">
         <item quantity="one">%1$d folder</item>
         <item quantity="other">%1$d folders</item>
     </plurals>
-
-    <plurals name="backup_age_minutes">
-        <item quantity="one">%1$d minute ago</item>
-        <item quantity="other">%1$d minutes ago</item>
-    </plurals>
-
-    <plurals name="backup_age_hours">
-        <item quantity="one">%1$d hour ago</item>
-        <item quantity="other">%1$d hours ago</item>
-    </plurals>
-
-    <plurals name="backup_age_days">
-        <item quantity="one">%1$d day ago</item>
-        <item quantity="other">%1$d days ago</item>
-    </plurals>
-
     <plurals name="item_count">
         <item quantity="one">%1$d item</item>
         <item quantity="other">%1$d items</item>
     </plurals>
-
-    <plurals name="rebuild_indexed_files">
-        <item quantity="one">Indexed %d file</item>
-        <item quantity="other">Indexed %d files</item>
-    </plurals>
-
     <plurals name="rebuild_locked_files">
         <item quantity="one">%d encrypted file skipped. Restore your key backup to index it.</item>
         <item quantity="other">%d encrypted files skipped. Restore your key backup to index them.</item>
     </plurals>
-
-    <plurals name="home_back_up_pending">
-        <item quantity="one">Back up %d file</item>
-        <item quantity="other">Back up %d files</item>
-    </plurals>
-
     <plurals name="home_queued_files">
         <item quantity="one">%d file queued</item>
         <item quantity="other">%d files queued</item>
-    </plurals>
-
-    <plurals name="transfers_more_queued">
-        <item quantity="one">%d more not shown</item>
-        <item quantity="other">%d more not shown</item>
     </plurals>
 </resources>

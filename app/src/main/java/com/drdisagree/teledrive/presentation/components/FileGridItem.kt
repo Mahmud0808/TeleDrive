@@ -20,10 +20,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.common_content_description_selected
 import com.drdisagree.teledrive.domain.model.BackupState
 import com.drdisagree.teledrive.domain.model.DriveFile
 import com.drdisagree.teledrive.presentation.common.Formatters
@@ -57,7 +58,7 @@ fun FileGridItem(
             if (selected) {
                 Icon(
                     imageVector = Icons.Filled.CheckCircle,
-                    contentDescription = stringResource(R.string.common_content_description_selected),
+                    contentDescription = stringResource(Res.string.common_content_description_selected),
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(6.dp)

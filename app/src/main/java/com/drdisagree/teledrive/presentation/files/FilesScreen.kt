@@ -75,7 +75,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.koin.androidx.compose.koinViewModel
@@ -83,7 +83,58 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.preview_share_chooser_title
+import com.drdisagree.teledrive.resources.common_actions
+import com.drdisagree.teledrive.resources.common_add
+import com.drdisagree.teledrive.resources.common_add_favorites
+import com.drdisagree.teledrive.resources.common_back
+import com.drdisagree.teledrive.resources.common_clear_selection
+import com.drdisagree.teledrive.resources.common_confirm_trash_count_title
+import com.drdisagree.teledrive.resources.common_create
+import com.drdisagree.teledrive.resources.common_deselect_all
+import com.drdisagree.teledrive.resources.common_download
+import com.drdisagree.teledrive.resources.common_free_space
+import com.drdisagree.teledrive.resources.common_move_trash
+import com.drdisagree.teledrive.resources.common_rename
+import com.drdisagree.teledrive.resources.common_restore_trash_emptied
+import com.drdisagree.teledrive.resources.common_select_all
+import com.drdisagree.teledrive.resources.common_selection_count
+import com.drdisagree.teledrive.resources.common_share
+import com.drdisagree.teledrive.resources.common_upload
+import com.drdisagree.teledrive.resources.files
+import com.drdisagree.teledrive.resources.files_add_files
+import com.drdisagree.teledrive.resources.files_archive
+import com.drdisagree.teledrive.resources.files_back_import_appear
+import com.drdisagree.teledrive.resources.files_copy
+import com.drdisagree.teledrive.resources.files_copy_here
+import com.drdisagree.teledrive.resources.files_copy_to
+import com.drdisagree.teledrive.resources.files_delete_local
+import com.drdisagree.teledrive.resources.files_delete_local_copies
+import com.drdisagree.teledrive.resources.files_hide
+import com.drdisagree.teledrive.resources.files_move
+import com.drdisagree.teledrive.resources.files_move_here
+import com.drdisagree.teledrive.resources.files_move_to
+import com.drdisagree.teledrive.resources.files_new_folder
+import com.drdisagree.teledrive.resources.files_nothing_here_yet
+import com.drdisagree.teledrive.resources.files_only_files_verified_telegram
+import com.drdisagree.teledrive.resources.files_rename_file
+import com.drdisagree.teledrive.resources.files_rename_folder
+import com.drdisagree.teledrive.resources.files_search
+import com.drdisagree.teledrive.resources.files_share_destination_confirm
+import com.drdisagree.teledrive.resources.files_share_destination_title
+import com.drdisagree.teledrive.resources.files_sort
+import com.drdisagree.teledrive.resources.files_sort_ascending
+import com.drdisagree.teledrive.resources.files_sort_backup_status
+import com.drdisagree.teledrive.resources.files_sort_date_added
+import com.drdisagree.teledrive.resources.files_sort_date_modified
+import com.drdisagree.teledrive.resources.files_sort_descending
+import com.drdisagree.teledrive.resources.files_sort_name
+import com.drdisagree.teledrive.resources.files_sort_size
+import com.drdisagree.teledrive.resources.files_sort_type
+import com.drdisagree.teledrive.resources.info_details
+import com.drdisagree.teledrive.resources.note_edit_action
+import com.drdisagree.teledrive.resources.note_new
 import com.drdisagree.teledrive.domain.model.DriveFile
 import com.drdisagree.teledrive.domain.model.DriveFolder
 import com.drdisagree.teledrive.domain.model.FileSortField
@@ -201,7 +252,7 @@ fun FilesScreen(
                     title = {
                         Text(
                             text = stringResource(
-                                R.string.common_selection_count,
+                                Res.string.common_selection_count,
                                 state.selectionCount
                             ),
                             maxLines = 1,
@@ -212,7 +263,7 @@ fun FilesScreen(
                         IconButton(onClick = viewModel::clearSelection) {
                             Icon(
                                 Icons.Filled.Close,
-                                contentDescription = stringResource(R.string.common_clear_selection)
+                                contentDescription = stringResource(Res.string.common_clear_selection)
                             )
                         }
                     },
@@ -229,23 +280,23 @@ fun FilesScreen(
                                     Icons.Filled.SelectAll
                                 },
                                 contentDescription = if (allSelected) {
-                                    stringResource(R.string.common_deselect_all)
+                                    stringResource(Res.string.common_deselect_all)
                                 } else {
-                                    stringResource(R.string.common_select_all)
+                                    stringResource(Res.string.common_select_all)
                                 }
                             )
                         }
                         IconButton(onClick = { showMovePicker = true }) {
                             Icon(
                                 Icons.AutoMirrored.Filled.DriveFileMove,
-                                contentDescription = stringResource(R.string.files_move)
+                                contentDescription = stringResource(Res.string.files_move)
                             )
                         }
                         Box {
                             IconButton(onClick = { showSelectionOverflow = true }) {
                                 Icon(
                                     Icons.Filled.MoreVert,
-                                    contentDescription = stringResource(R.string.common_actions)
+                                    contentDescription = stringResource(Res.string.common_actions)
                                 )
                             }
                             DropdownMenu(
@@ -253,7 +304,7 @@ fun FilesScreen(
                                 onDismissRequest = { showSelectionOverflow = false }
                             ) {
                                 DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.common_download)) },
+                                    text = { Text(stringResource(Res.string.common_download)) },
                                     enabled = state.folderInSelection ||
                                             state.capabilities.canDownload,
                                     onClick = {
@@ -262,7 +313,7 @@ fun FilesScreen(
                                     }
                                 )
                                 DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.common_upload)) },
+                                    text = { Text(stringResource(Res.string.common_upload)) },
                                     enabled = !state.folderInSelection &&
                                             state.capabilities.canUpload,
                                     onClick = {
@@ -271,7 +322,7 @@ fun FilesScreen(
                                     }
                                 )
                                 DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.note_edit_action)) },
+                                    text = { Text(stringResource(Res.string.note_edit_action)) },
                                     enabled = state.selectionCount == 1 &&
                                             state.folderSelection.isEmpty(),
                                     onClick = {
@@ -280,7 +331,7 @@ fun FilesScreen(
                                     }
                                 )
                                 DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.common_share)) },
+                                    text = { Text(stringResource(Res.string.common_share)) },
                                     /* A folder is not a stream Android can hand
                                        to another app, so any folder in the
                                        selection rules sharing out. */
@@ -292,7 +343,7 @@ fun FilesScreen(
                                     }
                                 )
                                 DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.info_details)) },
+                                    text = { Text(stringResource(Res.string.info_details)) },
                                     enabled = state.selectionCount +
                                             state.folderSelection.size == 1,
                                     onClick = {
@@ -301,7 +352,7 @@ fun FilesScreen(
                                     }
                                 )
                                 DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.common_rename)) },
+                                    text = { Text(stringResource(Res.string.common_rename)) },
                                     enabled = state.selectionCount == 1,
                                     onClick = {
                                         showSelectionOverflow = false
@@ -309,7 +360,7 @@ fun FilesScreen(
                                     }
                                 )
                                 DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.files_copy)) },
+                                    text = { Text(stringResource(Res.string.files_copy)) },
                                     enabled = !state.folderInSelection,
                                     onClick = {
                                         showSelectionOverflow = false
@@ -317,14 +368,14 @@ fun FilesScreen(
                                     }
                                 )
                                 DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.common_add_favorites)) },
+                                    text = { Text(stringResource(Res.string.common_add_favorites)) },
                                     onClick = {
                                         showSelectionOverflow = false
                                         viewModel.favoriteSelected(true)
                                     }
                                 )
                                 DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.common_free_space)) },
+                                    text = { Text(stringResource(Res.string.common_free_space)) },
                                     enabled = !state.folderInSelection &&
                                             state.capabilities.canFreeUpSpace,
                                     onClick = {
@@ -333,7 +384,7 @@ fun FilesScreen(
                                     }
                                 )
                                 DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.files_hide)) },
+                                    text = { Text(stringResource(Res.string.files_hide)) },
                                     enabled = !state.folderInSelection,
                                     onClick = {
                                         showSelectionOverflow = false
@@ -341,7 +392,7 @@ fun FilesScreen(
                                     }
                                 )
                                 DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.files_archive)) },
+                                    text = { Text(stringResource(Res.string.files_archive)) },
                                     enabled = !state.folderInSelection,
                                     onClick = {
                                         showSelectionOverflow = false
@@ -349,7 +400,7 @@ fun FilesScreen(
                                     }
                                 )
                                 DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.common_move_trash)) },
+                                    text = { Text(stringResource(Res.string.common_move_trash)) },
                                     onClick = {
                                         showSelectionOverflow = false
                                         confirmTrash = true
@@ -362,13 +413,13 @@ fun FilesScreen(
             } else {
                 TopAppBar(
                     colors = liftedTopAppBarColors(lifted),
-                    title = { Text(stringResource(R.string.files)) },
+                    title = { Text(stringResource(Res.string.files)) },
                     navigationIcon = {
                         onBack?.let {
                             IconButton(onClick = it) {
                                 Icon(
                                     Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = stringResource(R.string.common_back)
+                                    contentDescription = stringResource(Res.string.common_back)
                                 )
                             }
                         }
@@ -377,19 +428,19 @@ fun FilesScreen(
                         IconButton(onClick = onOpenSearch) {
                             Icon(
                                 Icons.Filled.Search,
-                                contentDescription = stringResource(R.string.files_search)
+                                contentDescription = stringResource(Res.string.files_search)
                             )
                         }
                         IconButton(onClick = { showCreateFolder = true }) {
                             Icon(
                                 Icons.Filled.CreateNewFolder,
-                                contentDescription = stringResource(R.string.files_new_folder)
+                                contentDescription = stringResource(Res.string.files_new_folder)
                             )
                         }
                         IconButton(onClick = { showSortMenu = true }) {
                             Icon(
                                 Icons.AutoMirrored.Filled.Sort,
-                                contentDescription = stringResource(R.string.files_sort)
+                                contentDescription = stringResource(Res.string.files_sort)
                             )
                         }
                         SortMenu(
@@ -432,7 +483,7 @@ fun FilesScreen(
                                 } else {
                                     Icons.Filled.Add
                                 },
-                                contentDescription = stringResource(R.string.common_add),
+                                contentDescription = stringResource(Res.string.common_add),
                                 // The container animates to primary when checked.
                                 tint = if (showAddMenu) {
                                     MaterialTheme.colorScheme.onPrimary
@@ -449,7 +500,7 @@ fun FilesScreen(
                             uploadPicker.launch(arrayOf("*/*"))
                         },
                         icon = { Icon(Icons.Filled.Upload, contentDescription = null) },
-                        text = { Text(stringResource(R.string.files_add_files)) }
+                        text = { Text(stringResource(Res.string.files_add_files)) }
                     )
                     FloatingActionButtonMenuItem(
                         onClick = {
@@ -457,7 +508,7 @@ fun FilesScreen(
                             onNewNote(state.folderId)
                         },
                         icon = { Icon(Icons.Filled.EditNote, contentDescription = null) },
-                        text = { Text(stringResource(R.string.note_new)) }
+                        text = { Text(stringResource(Res.string.note_new)) }
                     )
                 }
             }
@@ -493,8 +544,8 @@ fun FilesScreen(
                 } else if (isEmpty) {
                     EmptyState(
                         icon = Icons.Outlined.FolderOff,
-                        title = stringResource(R.string.files_nothing_here_yet),
-                        description = stringResource(R.string.files_back_import_appear)
+                        title = stringResource(Res.string.files_nothing_here_yet),
+                        description = stringResource(Res.string.files_back_import_appear)
                     )
                 } else {
                     FilesContent(
@@ -518,10 +569,10 @@ fun FilesScreen(
         val moving = showMovePicker
         FolderPickerHost(
             title = stringResource(
-                if (moving) R.string.files_move_to else R.string.files_copy_to
+                if (moving) Res.string.files_move_to else Res.string.files_copy_to
             ),
             confirmLabel = stringResource(
-                if (moving) R.string.files_move_here else R.string.files_copy_here
+                if (moving) Res.string.files_move_here else Res.string.files_copy_here
             ),
             viewModel = viewModel,
             excludedFolderIds = state.folderSelection,
@@ -538,9 +589,9 @@ fun FilesScreen(
     }
     if (showCreateFolder) {
         RenameDialog(
-            title = stringResource(R.string.files_new_folder),
+            title = stringResource(Res.string.files_new_folder),
             initialValue = "",
-            confirmLabel = stringResource(R.string.common_create),
+            confirmLabel = stringResource(Res.string.common_create),
             onConfirm = {
                 showCreateFolder = false
                 viewModel.createFolder(it)
@@ -550,11 +601,11 @@ fun FilesScreen(
     }
     renameTarget?.let { target ->
         RenameDialog(
-            title = if (target.isFolder) stringResource(R.string.files_rename_folder) else stringResource(
-                R.string.files_rename_file
+            title = if (target.isFolder) stringResource(Res.string.files_rename_folder) else stringResource(
+                Res.string.files_rename_file
             ),
             initialValue = target.name,
-            confirmLabel = stringResource(R.string.common_rename),
+            confirmLabel = stringResource(Res.string.common_rename),
             onConfirm = viewModel::confirmRename,
             onDismiss = viewModel::dismissRename
         )
@@ -562,11 +613,11 @@ fun FilesScreen(
     if (confirmTrash) {
         ConfirmDialog(
             title = stringResource(
-                R.string.common_confirm_trash_count_title,
+                Res.string.common_confirm_trash_count_title,
                 state.selectionCount
             ),
-            message = stringResource(R.string.common_restore_trash_emptied),
-            confirmLabel = stringResource(R.string.common_move_trash),
+            message = stringResource(Res.string.common_restore_trash_emptied),
+            confirmLabel = stringResource(Res.string.common_move_trash),
             destructive = true,
             onConfirm = {
                 confirmTrash = false
@@ -577,9 +628,9 @@ fun FilesScreen(
     }
     if (confirmDeleteLocal) {
         ConfirmDialog(
-            title = stringResource(R.string.files_delete_local_copies),
-            message = stringResource(R.string.files_only_files_verified_telegram),
-            confirmLabel = stringResource(R.string.files_delete_local),
+            title = stringResource(Res.string.files_delete_local_copies),
+            message = stringResource(Res.string.files_only_files_verified_telegram),
+            confirmLabel = stringResource(Res.string.files_delete_local),
             destructive = true,
             onConfirm = {
                 confirmDeleteLocal = false
@@ -595,17 +646,18 @@ fun FilesScreen(
     }
 
     val shareContext = LocalContext.current
+    val shareChooserTitle = stringResource(Res.string.preview_share_chooser_title)
     LaunchedEffect(Unit) {
         viewModel.shareRequests.collect { request ->
-            shareLocalFiles(shareContext, request.paths, request.mimeType)
+            shareLocalFiles(shareContext, request.paths, request.mimeType, shareChooserTitle)
         }
     }
 
     val sharedUris by viewModel.sharedUris.collectAsStateWithLifecycle()
     if (sharedUris.isNotEmpty()) {
         FolderPickerHost(
-            title = stringResource(R.string.files_share_destination_title),
-            confirmLabel = stringResource(R.string.files_share_destination_confirm),
+            title = stringResource(Res.string.files_share_destination_title),
+            confirmLabel = stringResource(Res.string.files_share_destination_confirm),
             viewModel = viewModel,
             onConfirm = { target -> viewModel.acceptShare(sharedUris, target) },
             onDismiss = viewModel::dismissShare
@@ -857,12 +909,12 @@ private fun SortMenu(
                     Text(
                         stringResource(
                             when (field) {
-                                FileSortField.NAME -> R.string.files_sort_name
-                                FileSortField.SIZE -> R.string.files_sort_size
-                                FileSortField.DATE_MODIFIED -> R.string.files_sort_date_modified
-                                FileSortField.DATE_ADDED -> R.string.files_sort_date_added
-                                FileSortField.TYPE -> R.string.files_sort_type
-                                FileSortField.BACKUP_STATUS -> R.string.files_sort_backup_status
+                                FileSortField.NAME -> Res.string.files_sort_name
+                                FileSortField.SIZE -> Res.string.files_sort_size
+                                FileSortField.DATE_MODIFIED -> Res.string.files_sort_date_modified
+                                FileSortField.DATE_ADDED -> Res.string.files_sort_date_added
+                                FileSortField.TYPE -> Res.string.files_sort_type
+                                FileSortField.BACKUP_STATUS -> Res.string.files_sort_backup_status
                             }
                         )
                     )
@@ -877,9 +929,9 @@ private fun SortMenu(
                             },
                             contentDescription = stringResource(
                                 if (ascending) {
-                                    R.string.files_sort_ascending
+                                    Res.string.files_sort_ascending
                                 } else {
-                                    R.string.files_sort_descending
+                                    Res.string.files_sort_descending
                                 }
                             ),
                             modifier = Modifier.size(SORT_ICON_SIZE)

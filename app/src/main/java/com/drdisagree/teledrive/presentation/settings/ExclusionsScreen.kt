@@ -48,12 +48,37 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.koin.androidx.compose.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.common_back
+import com.drdisagree.teledrive.resources.common_cancel
+import com.drdisagree.teledrive.resources.exclusions_change_file
+import com.drdisagree.teledrive.resources.exclusions_change_folder
+import com.drdisagree.teledrive.resources.exclusions_choose_file
+import com.drdisagree.teledrive.resources.exclusions_choose_folder
+import com.drdisagree.teledrive.resources.exclusions_dot_names
+import com.drdisagree.teledrive.resources.exclusions_size_in_bytes
+import com.drdisagree.teledrive.resources.exclusions_type_extension
+import com.drdisagree.teledrive.resources.exclusions_type_file
+import com.drdisagree.teledrive.resources.exclusions_type_folder
+import com.drdisagree.teledrive.resources.exclusions_type_hidden
+import com.drdisagree.teledrive.resources.exclusions_type_max_size
+import com.drdisagree.teledrive.resources.exclusions_type_mime
+import com.drdisagree.teledrive.resources.exclusions_type_pattern
+import com.drdisagree.teledrive.resources.settings_add
+import com.drdisagree.teledrive.resources.settings_add_exclusion
+import com.drdisagree.teledrive.resources.settings_excluded_files_folders_skipped
+import com.drdisagree.teledrive.resources.settings_exclusion_remove_message
+import com.drdisagree.teledrive.resources.settings_exclusions
+import com.drdisagree.teledrive.resources.settings_item_lives_app_cloud
+import com.drdisagree.teledrive.resources.settings_no_exclusions
+import com.drdisagree.teledrive.resources.settings_remove
+import com.drdisagree.teledrive.resources.settings_remove_exclusion
+import com.drdisagree.teledrive.resources.settings_skips_every_file_folder
 import com.drdisagree.teledrive.core.files.DocumentTreePaths
 import com.drdisagree.teledrive.domain.model.Exclusion
 import com.drdisagree.teledrive.domain.model.ExclusionType
@@ -75,9 +100,9 @@ fun ExclusionsScreen(
 
     exclusionToRemove?.let { exclusion ->
         ConfirmDialog(
-            title = stringResource(R.string.settings_remove_exclusion),
-            message = stringResource(R.string.settings_exclusion_remove_message, exclusion.value),
-            confirmLabel = stringResource(R.string.settings_remove),
+            title = stringResource(Res.string.settings_remove_exclusion),
+            message = stringResource(Res.string.settings_exclusion_remove_message, exclusion.value),
+            confirmLabel = stringResource(Res.string.settings_remove),
             destructive = true,
             onConfirm = {
                 exclusionToRemove = null
@@ -94,12 +119,12 @@ fun ExclusionsScreen(
         topBar = {
             TopAppBar(
                 colors = liftedTopAppBarColors(lifted),
-                title = { Text(stringResource(R.string.settings_exclusions)) },
+                title = { Text(stringResource(Res.string.settings_exclusions)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.common_back)
+                            contentDescription = stringResource(Res.string.common_back)
                         )
                     }
                 }
@@ -109,7 +134,7 @@ fun ExclusionsScreen(
             FloatingActionButton(onClick = { showAddDialog = true }) {
                 Icon(
                     Icons.Filled.Add,
-                    contentDescription = stringResource(R.string.settings_add_exclusion)
+                    contentDescription = stringResource(Res.string.settings_add_exclusion)
                 )
             }
         }
@@ -117,8 +142,8 @@ fun ExclusionsScreen(
         if (exclusions.isEmpty()) {
             EmptyState(
                 icon = Icons.Outlined.Block,
-                title = stringResource(R.string.settings_no_exclusions),
-                description = stringResource(R.string.settings_excluded_files_folders_skipped),
+                title = stringResource(Res.string.settings_no_exclusions),
+                description = stringResource(Res.string.settings_excluded_files_folders_skipped),
                 modifier = Modifier.padding(padding)
             )
             return@Scaffold
@@ -156,7 +181,7 @@ fun ExclusionsScreen(
                     IconButton(onClick = { exclusionToRemove = exclusion }) {
                         Icon(
                             Icons.Filled.Delete,
-                            contentDescription = stringResource(R.string.settings_remove)
+                            contentDescription = stringResource(Res.string.settings_remove)
                         )
                     }
                 }
@@ -202,7 +227,7 @@ private fun AddExclusionDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.settings_add_exclusion)) },
+        title = { Text(stringResource(Res.string.settings_add_exclusion)) },
         text = {
             Column {
                 Row(
@@ -233,7 +258,7 @@ private fun AddExclusionDialog(
                 }
                 if (type == ExclusionType.HIDDEN) {
                     Text(
-                        text = stringResource(R.string.settings_skips_every_file_folder),
+                        text = stringResource(Res.string.settings_skips_every_file_folder),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(top = 12.dp)
@@ -260,10 +285,10 @@ private fun AddExclusionDialog(
                         Spacer(Modifier.width(8.dp))
                         Text(
                             when {
-                                value.isNotEmpty() && isFile -> stringResource(R.string.exclusions_change_file)
-                                value.isNotEmpty() -> stringResource(R.string.exclusions_change_folder)
-                                isFile -> stringResource(R.string.exclusions_choose_file)
-                                else -> stringResource(R.string.exclusions_choose_folder)
+                                value.isNotEmpty() && isFile -> stringResource(Res.string.exclusions_change_file)
+                                value.isNotEmpty() -> stringResource(Res.string.exclusions_change_folder)
+                                isFile -> stringResource(Res.string.exclusions_choose_file)
+                                else -> stringResource(Res.string.exclusions_choose_folder)
                             }
                         )
                     }
@@ -277,7 +302,7 @@ private fun AddExclusionDialog(
                     }
                     if (pickerError) {
                         Text(
-                            text = stringResource(R.string.settings_item_lives_app_cloud),
+                            text = stringResource(Res.string.settings_item_lives_app_cloud),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.error,
                             modifier = Modifier.padding(top = 8.dp)
@@ -303,32 +328,32 @@ private fun AddExclusionDialog(
                 },
                 shapes = ButtonDefaults.shapes(),
                 enabled = type == ExclusionType.HIDDEN || value.isNotBlank()
-            ) { Text(stringResource(R.string.settings_add)) }
+            ) { Text(stringResource(Res.string.settings_add)) }
         },
         dismissButton = {
             OutlinedButton(
                 onClick = onDismiss,
                 shapes = ButtonDefaults.shapes()
-            ) { Text(stringResource(R.string.common_cancel)) }
+            ) { Text(stringResource(Res.string.common_cancel)) }
         }
     )
 }
 
 @Composable
 private fun displayValue(exclusion: Exclusion): String = when (exclusion.type) {
-    ExclusionType.HIDDEN -> stringResource(R.string.exclusions_dot_names)
+    ExclusionType.HIDDEN -> stringResource(Res.string.exclusions_dot_names)
     else -> exclusion.value
 }
 
 @Composable
 private fun labelFor(type: ExclusionType): String = when (type) {
-    ExclusionType.FILE_PATH -> stringResource(R.string.exclusions_type_file)
-    ExclusionType.FOLDER_PATH -> stringResource(R.string.exclusions_type_folder)
-    ExclusionType.EXTENSION -> stringResource(R.string.exclusions_type_extension)
-    ExclusionType.MIME_TYPE -> stringResource(R.string.exclusions_type_mime)
-    ExclusionType.PATH_PATTERN -> stringResource(R.string.exclusions_type_pattern)
-    ExclusionType.MAX_SIZE -> stringResource(R.string.exclusions_type_max_size)
-    ExclusionType.HIDDEN -> stringResource(R.string.exclusions_type_hidden)
+    ExclusionType.FILE_PATH -> stringResource(Res.string.exclusions_type_file)
+    ExclusionType.FOLDER_PATH -> stringResource(Res.string.exclusions_type_folder)
+    ExclusionType.EXTENSION -> stringResource(Res.string.exclusions_type_extension)
+    ExclusionType.MIME_TYPE -> stringResource(Res.string.exclusions_type_mime)
+    ExclusionType.PATH_PATTERN -> stringResource(Res.string.exclusions_type_pattern)
+    ExclusionType.MAX_SIZE -> stringResource(Res.string.exclusions_type_max_size)
+    ExclusionType.HIDDEN -> stringResource(Res.string.exclusions_type_hidden)
 }
 
 @Composable
@@ -338,6 +363,6 @@ private fun hintFor(type: ExclusionType): String = when (type) {
     ExclusionType.EXTENSION -> "tmp"
     ExclusionType.MIME_TYPE -> "video/"
     ExclusionType.PATH_PATTERN -> "**/Screenshots/**"
-    ExclusionType.MAX_SIZE -> stringResource(R.string.exclusions_size_in_bytes)
+    ExclusionType.MAX_SIZE -> stringResource(Res.string.exclusions_size_in_bytes)
     ExclusionType.HIDDEN -> ""
 }

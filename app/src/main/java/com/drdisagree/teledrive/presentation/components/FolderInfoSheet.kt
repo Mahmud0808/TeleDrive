@@ -13,9 +13,15 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.unit.dp
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.info_contents
+import com.drdisagree.teledrive.resources.info_created
+import com.drdisagree.teledrive.resources.info_favorite
+import com.drdisagree.teledrive.resources.info_modified
+import com.drdisagree.teledrive.resources.info_no
+import com.drdisagree.teledrive.resources.info_yes
 import com.drdisagree.teledrive.domain.model.DriveFolder
 import com.drdisagree.teledrive.presentation.common.Formatters
 
@@ -33,24 +39,24 @@ fun FolderInfoSheet(folder: DriveFolder, onDismiss: () -> Unit) {
             Spacer(Modifier.height(16.dp))
 
             FolderInfoRow(
-                label = stringResource(R.string.info_contents),
+                label = stringResource(Res.string.info_contents),
                 value = folder.contentsLabel()
             )
 
             HorizontalDivider(Modifier.padding(vertical = 12.dp))
 
             FolderInfoRow(
-                label = stringResource(R.string.info_created),
+                label = stringResource(Res.string.info_created),
                 value = Formatters.dateTime(folder.createdAt)
             )
             FolderInfoRow(
-                label = stringResource(R.string.info_modified),
+                label = stringResource(Res.string.info_modified),
                 value = Formatters.dateTime(folder.modifiedAt)
             )
             FolderInfoRow(
-                label = stringResource(R.string.info_favorite),
+                label = stringResource(Res.string.info_favorite),
                 value = stringResource(
-                    if (folder.isFavorite) R.string.info_yes else R.string.info_no
+                    if (folder.isFavorite) Res.string.info_yes else Res.string.info_no
                 )
             )
 

@@ -41,11 +41,13 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.createBitmap
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.preview_page_number
+import com.drdisagree.teledrive.resources.preview_pdf_open_failed
 import com.drdisagree.teledrive.presentation.common.add
 import com.drdisagree.teledrive.presentation.components.ErrorState
 import com.drdisagree.teledrive.presentation.components.LoadingState
@@ -73,7 +75,7 @@ fun PdfPreview(path: String, modifier: Modifier = Modifier) {
     val renderMutex = remember(path) { Mutex() }
     val error = remember(path) { mutableStateOf<String?>(null) }
 
-    val openFailedMessage = stringResource(R.string.preview_pdf_open_failed)
+    val openFailedMessage = stringResource(Res.string.preview_pdf_open_failed)
     DisposableEffect(path) {
         try {
             val descriptor = ParcelFileDescriptor.open(
@@ -216,7 +218,7 @@ private fun PdfPage(
     ) {
         Image(
             bitmap = page.bitmap.asImageBitmap(),
-            contentDescription = stringResource(R.string.preview_page_number, pageIndex + 1),
+            contentDescription = stringResource(Res.string.preview_page_number, pageIndex + 1),
             modifier = Modifier.fillMaxSize()
         )
         page.links.forEach { link ->

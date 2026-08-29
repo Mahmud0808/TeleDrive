@@ -13,10 +13,30 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.info_added
+import com.drdisagree.teledrive.resources.info_backup
+import com.drdisagree.teledrive.resources.info_backup_done
+import com.drdisagree.teledrive.resources.info_backup_failed
+import com.drdisagree.teledrive.resources.info_backup_none
+import com.drdisagree.teledrive.resources.info_backup_queued
+import com.drdisagree.teledrive.resources.info_backup_uploading
+import com.drdisagree.teledrive.resources.info_created
+import com.drdisagree.teledrive.resources.info_duration
+import com.drdisagree.teledrive.resources.info_encrypted
+import com.drdisagree.teledrive.resources.info_extension
+import com.drdisagree.teledrive.resources.info_local_copy
+import com.drdisagree.teledrive.resources.info_modified
+import com.drdisagree.teledrive.resources.info_no
+import com.drdisagree.teledrive.resources.info_path
+import com.drdisagree.teledrive.resources.info_resolution
+import com.drdisagree.teledrive.resources.info_sha256
+import com.drdisagree.teledrive.resources.info_size
+import com.drdisagree.teledrive.resources.info_type
+import com.drdisagree.teledrive.resources.info_yes
 import com.drdisagree.teledrive.domain.model.BackupState
 import com.drdisagree.teledrive.domain.model.DriveFile
 import com.drdisagree.teledrive.presentation.common.Formatters
@@ -41,57 +61,57 @@ fun FileInfoSheet(
             )
             Spacer(Modifier.height(16.dp))
 
-            InfoRow(stringResource(R.string.info_size), Formatters.bytes(file.sizeBytes))
-            InfoRow(stringResource(R.string.info_type), file.mimeType)
+            InfoRow(stringResource(Res.string.info_size), Formatters.bytes(file.sizeBytes))
+            InfoRow(stringResource(Res.string.info_type), file.mimeType)
             file.extension.takeIf { it.isNotEmpty() }?.let {
-                InfoRow(stringResource(R.string.info_extension), it.uppercase(Locale.ROOT))
+                InfoRow(stringResource(Res.string.info_extension), it.uppercase(Locale.ROOT))
             }
             if (file.width != null && file.height != null) {
-                InfoRow(stringResource(R.string.info_resolution), "${file.width} × ${file.height}")
+                InfoRow(stringResource(Res.string.info_resolution), "${file.width} × ${file.height}")
             }
             file.durationMs?.let {
                 InfoRow(
-                    stringResource(R.string.info_duration),
+                    stringResource(Res.string.info_duration),
                     Formatters.duration(it)
                 )
             }
 
             HorizontalDivider(Modifier.padding(vertical = 12.dp))
 
-            InfoRow(stringResource(R.string.info_created), Formatters.dateTime(file.createdAt))
-            InfoRow(stringResource(R.string.info_modified), Formatters.dateTime(file.modifiedAt))
-            InfoRow(stringResource(R.string.info_added), Formatters.dateTime(file.addedAt))
+            InfoRow(stringResource(Res.string.info_created), Formatters.dateTime(file.createdAt))
+            InfoRow(stringResource(Res.string.info_modified), Formatters.dateTime(file.modifiedAt))
+            InfoRow(stringResource(Res.string.info_added), Formatters.dateTime(file.addedAt))
 
             HorizontalDivider(Modifier.padding(vertical = 12.dp))
 
             InfoRow(
-                stringResource(R.string.info_backup),
+                stringResource(Res.string.info_backup),
                 when (file.backupState) {
-                    BackupState.BACKED_UP -> stringResource(R.string.info_backup_done)
-                    BackupState.UPLOADING -> stringResource(R.string.info_backup_uploading)
-                    BackupState.QUEUED -> stringResource(R.string.info_backup_queued)
-                    BackupState.FAILED -> stringResource(R.string.info_backup_failed)
-                    BackupState.NONE -> stringResource(R.string.info_backup_none)
+                    BackupState.BACKED_UP -> stringResource(Res.string.info_backup_done)
+                    BackupState.UPLOADING -> stringResource(Res.string.info_backup_uploading)
+                    BackupState.QUEUED -> stringResource(Res.string.info_backup_queued)
+                    BackupState.FAILED -> stringResource(Res.string.info_backup_failed)
+                    BackupState.NONE -> stringResource(Res.string.info_backup_none)
                 }
             )
             InfoRow(
-                stringResource(R.string.info_local_copy),
-                stringResource(if (file.hasLocalCopy) R.string.info_yes else R.string.info_no)
+                stringResource(Res.string.info_local_copy),
+                stringResource(if (file.hasLocalCopy) Res.string.info_yes else Res.string.info_no)
             )
             InfoRow(
-                stringResource(R.string.info_encrypted),
-                stringResource(if (file.isEncrypted) R.string.info_yes else R.string.info_no)
+                stringResource(Res.string.info_encrypted),
+                stringResource(if (file.isEncrypted) Res.string.info_yes else Res.string.info_no)
             )
             file.localPath?.let {
                 InfoRow(
-                    stringResource(R.string.info_path),
+                    stringResource(Res.string.info_path),
                     it,
                     monospace = true
                 )
             }
             file.contentHash?.let {
                 InfoRow(
-                    stringResource(R.string.info_sha256),
+                    stringResource(Res.string.info_sha256),
                     it,
                     monospace = true
                 )

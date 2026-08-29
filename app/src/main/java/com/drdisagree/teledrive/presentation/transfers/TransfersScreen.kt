@@ -40,14 +40,47 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.pluralStringResource
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.koin.androidx.compose.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.common_actions
+import com.drdisagree.teledrive.resources.common_back
+import com.drdisagree.teledrive.resources.common_cancel
+import com.drdisagree.teledrive.resources.common_clear
+import com.drdisagree.teledrive.resources.common_dismiss
+import com.drdisagree.teledrive.resources.common_pause
+import com.drdisagree.teledrive.resources.common_resume
+import com.drdisagree.teledrive.resources.common_retry
+import com.drdisagree.teledrive.resources.transfer_stage_joining
+import com.drdisagree.teledrive.resources.transfer_stage_sealing
+import com.drdisagree.teledrive.resources.transfer_type_backup
+import com.drdisagree.teledrive.resources.transfer_type_download
+import com.drdisagree.teledrive.resources.transfer_type_restore
+import com.drdisagree.teledrive.resources.transfer_type_upload
+import com.drdisagree.teledrive.resources.transfers
+import com.drdisagree.teledrive.resources.transfers_cancel
+import com.drdisagree.teledrive.resources.transfers_cancel_transfers
+import com.drdisagree.teledrive.resources.transfers_clear_finished
+import com.drdisagree.teledrive.resources.transfers_clear_finished_transfers
+import com.drdisagree.teledrive.resources.transfers_completed_canceled_entries_removed
+import com.drdisagree.teledrive.resources.transfers_failed
+import com.drdisagree.teledrive.resources.transfers_failed_downloads
+import com.drdisagree.teledrive.resources.transfers_failed_transfers
+import com.drdisagree.teledrive.resources.transfers_failed_uploads
+import com.drdisagree.teledrive.resources.transfers_more_queued
+import com.drdisagree.teledrive.resources.transfers_no_transfers
+import com.drdisagree.teledrive.resources.transfers_pause
+import com.drdisagree.teledrive.resources.transfers_queued_running_paused_failed
+import com.drdisagree.teledrive.resources.transfers_resume
+import com.drdisagree.teledrive.resources.transfers_section_active
+import com.drdisagree.teledrive.resources.transfers_section_finished
+import com.drdisagree.teledrive.resources.transfers_section_paused
+import com.drdisagree.teledrive.resources.transfers_uploads_downloads_appear_here
 import com.drdisagree.teledrive.domain.model.TransferStage
 import com.drdisagree.teledrive.domain.model.TransferState
 import com.drdisagree.teledrive.domain.model.TransferTask
@@ -72,9 +105,9 @@ fun TransfersScreen(
 
     if (confirmClearFinished) {
         ConfirmDialog(
-            title = stringResource(R.string.transfers_clear_finished_transfers),
-            message = stringResource(R.string.transfers_completed_canceled_entries_removed),
-            confirmLabel = stringResource(R.string.common_clear),
+            title = stringResource(Res.string.transfers_clear_finished_transfers),
+            message = stringResource(Res.string.transfers_completed_canceled_entries_removed),
+            confirmLabel = stringResource(Res.string.common_clear),
             onConfirm = {
                 confirmClearFinished = false
                 viewModel.clearFinished()
@@ -85,9 +118,9 @@ fun TransfersScreen(
 
     if (confirmCancelAll) {
         ConfirmDialog(
-            title = stringResource(R.string.transfers_cancel_transfers),
-            message = stringResource(R.string.transfers_queued_running_paused_failed),
-            confirmLabel = stringResource(R.string.transfers_cancel),
+            title = stringResource(Res.string.transfers_cancel_transfers),
+            message = stringResource(Res.string.transfers_queued_running_paused_failed),
+            confirmLabel = stringResource(Res.string.transfers_cancel),
             destructive = true,
             onConfirm = {
                 confirmCancelAll = false
@@ -104,12 +137,12 @@ fun TransfersScreen(
         topBar = {
             TopAppBar(
                 colors = liftedTopAppBarColors(lifted),
-                title = { Text(stringResource(R.string.transfers)) },
+                title = { Text(stringResource(Res.string.transfers)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.common_back)
+                            contentDescription = stringResource(Res.string.common_back)
                         )
                     }
                 },
@@ -118,21 +151,21 @@ fun TransfersScreen(
                         IconButton(onClick = viewModel::pauseAll) {
                             Icon(
                                 Icons.Filled.Pause,
-                                contentDescription = stringResource(R.string.transfers_pause)
+                                contentDescription = stringResource(Res.string.transfers_pause)
                             )
                         }
                     } else if (state.paused.isNotEmpty()) {
                         IconButton(onClick = viewModel::resumeAll) {
                             Icon(
                                 Icons.Filled.PlayArrow,
-                                contentDescription = stringResource(R.string.transfers_resume)
+                                contentDescription = stringResource(Res.string.transfers_resume)
                             )
                         }
                     }
                     IconButton(onClick = { showMenu = true }) {
                         Icon(
                             Icons.Filled.MoreVert,
-                            contentDescription = stringResource(R.string.common_actions)
+                            contentDescription = stringResource(Res.string.common_actions)
                         )
                     }
                     DropdownMenu(
@@ -140,7 +173,7 @@ fun TransfersScreen(
                         onDismissRequest = { showMenu = false }
                     ) {
                         DropdownMenuItem(
-                            text = { Text(stringResource(R.string.transfers_cancel)) },
+                            text = { Text(stringResource(Res.string.transfers_cancel)) },
                             enabled = state.active.isNotEmpty() ||
                                     state.paused.isNotEmpty() ||
                                     state.failed.isNotEmpty(),
@@ -150,7 +183,7 @@ fun TransfersScreen(
                             }
                         )
                         DropdownMenuItem(
-                            text = { Text(stringResource(R.string.transfers_clear_finished)) },
+                            text = { Text(stringResource(Res.string.transfers_clear_finished)) },
                             enabled = state.completed.isNotEmpty(),
                             onClick = {
                                 showMenu = false
@@ -167,15 +200,15 @@ fun TransfersScreen(
         if (isEmpty && !state.loading) {
             EmptyState(
                 icon = Icons.Outlined.SwapVert,
-                title = stringResource(R.string.transfers_no_transfers),
-                description = stringResource(R.string.transfers_uploads_downloads_appear_here),
+                title = stringResource(Res.string.transfers_no_transfers),
+                description = stringResource(Res.string.transfers_uploads_downloads_appear_here),
                 modifier = Modifier.padding(padding)
             )
             return@Scaffold
         }
-        val activeTitle = stringResource(R.string.transfers_section_active)
-        val pausedTitle = stringResource(R.string.transfers_section_paused)
-        val finishedTitle = stringResource(R.string.transfers_section_finished)
+        val activeTitle = stringResource(Res.string.transfers_section_active)
+        val pausedTitle = stringResource(Res.string.transfers_section_paused)
+        val finishedTitle = stringResource(Res.string.transfers_section_finished)
         val failedTitle = failedSectionTitle(state.failed)
         LazyColumn(
             state = listState,
@@ -187,7 +220,7 @@ fun TransfersScreen(
                 TransferRow(
                     transfer = transfer,
                     primaryIcon = Icons.Filled.Pause,
-                    primaryLabel = stringResource(R.string.common_pause),
+                    primaryLabel = stringResource(Res.string.common_pause),
                     onPrimary = { viewModel.pause(transfer.id) },
                     onCancel = { viewModel.cancel(transfer.id) }
                 )
@@ -196,7 +229,7 @@ fun TransfersScreen(
                 TransferRow(
                     transfer = transfer,
                     primaryIcon = Icons.Filled.PlayArrow,
-                    primaryLabel = stringResource(R.string.common_resume),
+                    primaryLabel = stringResource(Res.string.common_resume),
                     onPrimary = { viewModel.resume(transfer.id) },
                     onCancel = { viewModel.cancel(transfer.id) }
                 )
@@ -205,7 +238,7 @@ fun TransfersScreen(
                 TransferRow(
                     transfer = transfer,
                     primaryIcon = Icons.Filled.Refresh,
-                    primaryLabel = stringResource(R.string.common_retry),
+                    primaryLabel = stringResource(Res.string.common_retry),
                     onPrimary = { viewModel.retry(transfer.id) },
                     onCancel = { viewModel.cancel(transfer.id) }
                 )
@@ -238,7 +271,7 @@ private fun LazyListScope.section(
     if (hidden > 0) {
         item(key = "more-$title") {
             Text(
-                text = pluralStringResource(R.plurals.transfers_more_queued, hidden, hidden),
+                text = pluralStringResource(Res.plurals.transfers_more_queued, hidden, hidden),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
@@ -257,10 +290,10 @@ private fun failedSectionTitle(failed: List<TransferTask>): String {
         it.type == TransferType.UPLOAD || it.type == TransferType.BACKUP
     }
     return when {
-        failed.isEmpty() -> stringResource(R.string.transfers_failed)
-        uploads == failed.size -> stringResource(R.string.transfers_failed_uploads)
-        uploads == 0 -> stringResource(R.string.transfers_failed_downloads)
-        else -> stringResource(R.string.transfers_failed_transfers)
+        failed.isEmpty() -> stringResource(Res.string.transfers_failed)
+        uploads == failed.size -> stringResource(Res.string.transfers_failed_uploads)
+        uploads == 0 -> stringResource(Res.string.transfers_failed_downloads)
+        else -> stringResource(Res.string.transfers_failed_transfers)
     }
 }
 
@@ -270,8 +303,8 @@ private fun transferRate(transfer: TransferTask): String {
     if (stage != null) {
         return stringResource(
             when (stage) {
-                TransferStage.SEALING -> R.string.transfer_stage_sealing
-                TransferStage.JOINING -> R.string.transfer_stage_joining
+                TransferStage.SEALING -> Res.string.transfer_stage_sealing
+                TransferStage.JOINING -> Res.string.transfer_stage_joining
             }
         )
     }
@@ -305,10 +338,10 @@ private fun TransferRow(
                         text = buildString {
                             append(
                                 when (transfer.type) {
-                                    TransferType.UPLOAD -> stringResource(R.string.transfer_type_upload)
-                                    TransferType.DOWNLOAD -> stringResource(R.string.transfer_type_download)
-                                    TransferType.BACKUP -> stringResource(R.string.transfer_type_backup)
-                                    TransferType.RESTORE -> stringResource(R.string.transfer_type_restore)
+                                    TransferType.UPLOAD -> stringResource(Res.string.transfer_type_upload)
+                                    TransferType.DOWNLOAD -> stringResource(Res.string.transfer_type_download)
+                                    TransferType.BACKUP -> stringResource(Res.string.transfer_type_backup)
+                                    TransferType.RESTORE -> stringResource(Res.string.transfer_type_restore)
                                 }
                             )
                             append(" · ")
@@ -338,9 +371,9 @@ private fun TransferRow(
                         Icon(
                             imageVector = Icons.Filled.Cancel,
                             contentDescription = if (transfer.state.isTerminal) {
-                                stringResource(R.string.common_dismiss)
+                                stringResource(Res.string.common_dismiss)
                             } else {
-                                stringResource(R.string.common_cancel)
+                                stringResource(Res.string.common_cancel)
                             }
                         )
                     }

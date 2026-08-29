@@ -10,9 +10,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.unit.dp
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.common_backup_failed
+import com.drdisagree.teledrive.resources.common_backup_not_backed_up
+import com.drdisagree.teledrive.resources.common_backup_queued
+import com.drdisagree.teledrive.resources.common_backup_uploading
 import com.drdisagree.teledrive.domain.model.BackupState
 import com.drdisagree.teledrive.domain.model.DriveFile
 
@@ -29,25 +33,25 @@ fun BackupStateBadge(file: DriveFile, modifier: Modifier = Modifier) {
         BackupState.UPLOADING -> Triple(
             Icons.Filled.CloudUpload,
             MaterialTheme.colorScheme.tertiary,
-            stringResource(R.string.common_backup_uploading)
+            stringResource(Res.string.common_backup_uploading)
         )
 
         BackupState.QUEUED -> Triple(
             Icons.Filled.CloudQueue,
             MaterialTheme.colorScheme.onSurfaceVariant,
-            stringResource(R.string.common_backup_queued)
+            stringResource(Res.string.common_backup_queued)
         )
 
         BackupState.FAILED -> Triple(
             Icons.Filled.ErrorOutline,
             MaterialTheme.colorScheme.error,
-            stringResource(R.string.common_backup_failed)
+            stringResource(Res.string.common_backup_failed)
         )
 
         else -> Triple(
             Icons.Filled.CloudOff,
             MaterialTheme.colorScheme.outline,
-            stringResource(R.string.common_backup_not_backed_up)
+            stringResource(Res.string.common_backup_not_backed_up)
         )
     }
     Icon(

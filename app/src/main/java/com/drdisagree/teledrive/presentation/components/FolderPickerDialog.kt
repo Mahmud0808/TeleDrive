@@ -33,10 +33,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.common_cancel
+import com.drdisagree.teledrive.resources.common_create
+import com.drdisagree.teledrive.resources.common_drive_root
+import com.drdisagree.teledrive.resources.common_folder_name
+import com.drdisagree.teledrive.resources.common_no_subfolders
+import com.drdisagree.teledrive.resources.common_one_level
+import com.drdisagree.teledrive.resources.files_new_folder
 import com.drdisagree.teledrive.domain.model.DriveFolder
 
 /**
@@ -68,7 +75,7 @@ fun FolderPickerDialog(
                     IconButton(onClick = { currentId = parentOf(currentId!!) }) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.common_one_level)
+                            contentDescription = stringResource(Res.string.common_one_level)
                         )
                     }
                     Spacer(Modifier.width(4.dp))
@@ -78,7 +85,7 @@ fun FolderPickerDialog(
                     IconButton(onClick = { naming = true }) {
                         Icon(
                             Icons.Filled.CreateNewFolder,
-                            contentDescription = stringResource(R.string.files_new_folder)
+                            contentDescription = stringResource(Res.string.files_new_folder)
                         )
                     }
                 }
@@ -98,7 +105,7 @@ fun FolderPickerDialog(
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        text = currentId?.let(nameOf) ?: stringResource(R.string.common_drive_root),
+                        text = currentId?.let(nameOf) ?: stringResource(Res.string.common_drive_root),
                         style = MaterialTheme.typography.titleSmall,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -106,7 +113,7 @@ fun FolderPickerDialog(
                 }
                 if (children.isEmpty()) {
                     Text(
-                        text = stringResource(R.string.common_no_subfolders),
+                        text = stringResource(Res.string.common_no_subfolders),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -148,7 +155,7 @@ fun FolderPickerDialog(
             OutlinedButton(
                 onClick = onDismiss,
                 shapes = ButtonDefaults.shapes()
-            ) { Text(stringResource(R.string.common_cancel)) }
+            ) { Text(stringResource(Res.string.common_cancel)) }
         }
     )
 
@@ -156,12 +163,12 @@ fun FolderPickerDialog(
         var name by remember { mutableStateOf("") }
         AlertDialog(
             onDismissRequest = { naming = false },
-            title = { Text(stringResource(R.string.files_new_folder)) },
+            title = { Text(stringResource(Res.string.files_new_folder)) },
             text = {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text(stringResource(R.string.common_folder_name)) },
+                    label = { Text(stringResource(Res.string.common_folder_name)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -174,13 +181,13 @@ fun FolderPickerDialog(
                     },
                     enabled = name.isNotBlank(),
                     shapes = ButtonDefaults.shapes()
-                ) { Text(stringResource(R.string.common_create)) }
+                ) { Text(stringResource(Res.string.common_create)) }
             },
             dismissButton = {
                 OutlinedButton(
                     onClick = { naming = false },
                     shapes = ButtonDefaults.shapes()
-                ) { Text(stringResource(R.string.common_cancel)) }
+                ) { Text(stringResource(Res.string.common_cancel)) }
             }
         )
     }

@@ -3,14 +3,18 @@ package com.drdisagree.teledrive.presentation.common
 import android.content.Context
 import android.content.Intent
 import androidx.core.content.FileProvider
-import com.drdisagree.teledrive.R
 import java.io.File
 
 /**
  * Hands local copies to another app. Files still only in Telegram cannot be
  * shared, so callers filter first and tell the user what is missing.
  */
-fun shareLocalFiles(context: Context, paths: List<String>, mimeType: String) {
+fun shareLocalFiles(
+    context: Context,
+    paths: List<String>,
+    mimeType: String,
+    chooserTitle: String
+) {
     if (paths.isEmpty()) return
     val uris = ArrayList(
         paths.map { path ->
@@ -34,6 +38,6 @@ fun shareLocalFiles(context: Context, paths: List<String>, mimeType: String) {
     }
     intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
     context.startActivity(
-        Intent.createChooser(intent, context.getString(R.string.preview_share_chooser_title))
+        Intent.createChooser(intent, chooserTitle)
     )
 }

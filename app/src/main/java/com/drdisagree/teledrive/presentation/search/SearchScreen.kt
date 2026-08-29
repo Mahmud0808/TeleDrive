@@ -28,11 +28,22 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.unit.dp
 import org.koin.androidx.compose.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.app_backed_up
+import com.drdisagree.teledrive.resources.app_no_results
+import com.drdisagree.teledrive.resources.app_not_backed_up
+import com.drdisagree.teledrive.resources.app_nothing_matches_search
+import com.drdisagree.teledrive.resources.app_search_drive
+import com.drdisagree.teledrive.resources.app_search_files
+import com.drdisagree.teledrive.resources.app_search_name_filter_type
+import com.drdisagree.teledrive.resources.common_back
+import com.drdisagree.teledrive.resources.common_clear
+import com.drdisagree.teledrive.resources.search_section_files
+import com.drdisagree.teledrive.resources.search_section_folders
 import com.drdisagree.teledrive.domain.model.FileCategory
 import com.drdisagree.teledrive.presentation.components.EmptyState
 import com.drdisagree.teledrive.presentation.components.FileListItem
@@ -64,7 +75,7 @@ fun SearchScreen(
                     OutlinedTextField(
                         value = state.query,
                         onValueChange = viewModel::setQuery,
-                        placeholder = { Text(stringResource(R.string.app_search_files)) },
+                        placeholder = { Text(stringResource(Res.string.app_search_files)) },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
                         trailingIcon = {
@@ -72,7 +83,7 @@ fun SearchScreen(
                                 IconButton(onClick = { viewModel.setQuery("") }) {
                                     Icon(
                                         Icons.Filled.Close,
-                                        contentDescription = stringResource(R.string.common_clear)
+                                        contentDescription = stringResource(Res.string.common_clear)
                                     )
                                 }
                             }
@@ -83,7 +94,7 @@ fun SearchScreen(
                     IconButton(onClick = onBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.common_back)
+                            contentDescription = stringResource(Res.string.common_back)
                         )
                     }
                 }
@@ -105,12 +116,12 @@ fun SearchScreen(
                 FilterChip(
                     selected = state.filters.backedUpOnly,
                     onClick = { viewModel.setBackedUpOnly(!state.filters.backedUpOnly) },
-                    label = { Text(stringResource(R.string.app_backed_up)) }
+                    label = { Text(stringResource(Res.string.app_backed_up)) }
                 )
                 FilterChip(
                     selected = state.filters.notBackedUpOnly,
                     onClick = { viewModel.setNotBackedUpOnly(!state.filters.notBackedUpOnly) },
-                    label = { Text(stringResource(R.string.app_not_backed_up)) }
+                    label = { Text(stringResource(Res.string.app_not_backed_up)) }
                 )
                 FileCategory.entries.filter { it != FileCategory.OTHER }.forEach { category ->
                     FilterChip(
@@ -129,14 +140,14 @@ fun SearchScreen(
                 state.searching -> LoadingState()
                 !state.searched -> EmptyState(
                     icon = Icons.Outlined.Search,
-                    title = stringResource(R.string.app_search_drive),
-                    description = stringResource(R.string.app_search_name_filter_type)
+                    title = stringResource(Res.string.app_search_drive),
+                    description = stringResource(Res.string.app_search_name_filter_type)
                 )
 
                 state.results.isEmpty() && state.folders.isEmpty() -> EmptyState(
                     icon = Icons.Outlined.Search,
-                    title = stringResource(R.string.app_no_results),
-                    description = stringResource(R.string.app_nothing_matches_search)
+                    title = stringResource(Res.string.app_no_results),
+                    description = stringResource(Res.string.app_nothing_matches_search)
                 )
 
                 else -> LazyColumn(
@@ -152,7 +163,7 @@ fun SearchScreen(
                     if (state.folders.isNotEmpty()) {
                         item(key = "folders_header") {
                             SearchSectionHeader(
-                                title = stringResource(R.string.search_section_folders),
+                                title = stringResource(Res.string.search_section_folders),
                                 modifier = Modifier.animateItem()
                             )
                         }
@@ -166,7 +177,7 @@ fun SearchScreen(
                         if (state.results.isNotEmpty()) {
                             item(key = "files_header") {
                                 SearchSectionHeader(
-                                    title = stringResource(R.string.search_section_files),
+                                    title = stringResource(Res.string.search_section_files),
                                     modifier = Modifier.animateItem()
                                 )
                             }

@@ -29,11 +29,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.lock_no_screen_lock
+import com.drdisagree.teledrive.resources.lock_prompt_title
+import com.drdisagree.teledrive.resources.lock_screen_title
+import com.drdisagree.teledrive.resources.lock_too_many_attempts
+import com.drdisagree.teledrive.resources.lock_unlock
 
 /**
  * Fullscreen gate shown while the app is locked. Launches the biometric
@@ -47,9 +52,9 @@ fun LockScreen(onUnlocked: () -> Unit) {
     val activity = context as? FragmentActivity
     var statusText by remember { mutableStateOf<String?>(null) }
     var promptTrigger by remember { mutableStateOf(0) }
-    val noScreenLockMessage = stringResource(R.string.lock_no_screen_lock)
-    val tooManyAttemptsMessage = stringResource(R.string.lock_too_many_attempts)
-    val promptTitle = stringResource(R.string.lock_prompt_title)
+    val noScreenLockMessage = stringResource(Res.string.lock_no_screen_lock)
+    val tooManyAttemptsMessage = stringResource(Res.string.lock_too_many_attempts)
+    val promptTitle = stringResource(Res.string.lock_prompt_title)
 
     LaunchedEffect(promptTrigger) {
         val host = activity ?: return@LaunchedEffect
@@ -111,7 +116,7 @@ fun LockScreen(onUnlocked: () -> Unit) {
             )
             Spacer(Modifier.height(16.dp))
             Text(
-                text = stringResource(R.string.lock_screen_title),
+                text = stringResource(Res.string.lock_screen_title),
                 style = MaterialTheme.typography.headlineSmall
             )
             statusText?.let {
@@ -128,7 +133,7 @@ fun LockScreen(onUnlocked: () -> Unit) {
                 shapes = ButtonDefaults.shapes()
             ) {
                 Icon(Icons.Filled.Fingerprint, contentDescription = null)
-                Text("  " + stringResource(R.string.lock_unlock))
+                Text("  " + stringResource(Res.string.lock_unlock))
             }
         }
     }

@@ -41,14 +41,122 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringArrayResource
-import androidx.compose.ui.res.pluralStringResource
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.StringArrayResource
+import org.jetbrains.compose.resources.stringArrayResource
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import org.koin.androidx.compose.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.drdisagree.teledrive.R
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.backup_folder_remove_message
+import com.drdisagree.teledrive.resources.backup_folder_subtitle
+import com.drdisagree.teledrive.resources.backup_interval_labels
+import com.drdisagree.teledrive.resources.backup_interval_with_sweep
+import com.drdisagree.teledrive.resources.backup_size_limit_labels
+import com.drdisagree.teledrive.resources.common_back
+import com.drdisagree.teledrive.resources.common_clear
+import com.drdisagree.teledrive.resources.common_free_space
+import com.drdisagree.teledrive.resources.common_storage_channels
+import com.drdisagree.teledrive.resources.lock_timeout_labels
+import com.drdisagree.teledrive.resources.rebuild_indexed_files
+import com.drdisagree.teledrive.resources.settings_add_another_folder
+import com.drdisagree.teledrive.resources.settings_app_lock
+import com.drdisagree.teledrive.resources.settings_archived_shortcut
+import com.drdisagree.teledrive.resources.settings_auto_clear_trash
+import com.drdisagree.teledrive.resources.settings_auto_lock
+import com.drdisagree.teledrive.resources.settings_automatic_backup
+import com.drdisagree.teledrive.resources.settings_back_new_media_instantly
+import com.drdisagree.teledrive.resources.settings_background_playback
+import com.drdisagree.teledrive.resources.settings_backup_folders_title
+import com.drdisagree.teledrive.resources.settings_backup_interval
+import com.drdisagree.teledrive.resources.settings_backup_results
+import com.drdisagree.teledrive.resources.settings_block_screenshots
+import com.drdisagree.teledrive.resources.settings_cache_current_size
+import com.drdisagree.teledrive.resources.settings_cache_limit
+import com.drdisagree.teledrive.resources.settings_cached_previews_thumbnails_temporary
+import com.drdisagree.teledrive.resources.settings_change_passphrase
+import com.drdisagree.teledrive.resources.settings_choose_folder_device
+import com.drdisagree.teledrive.resources.settings_clear_cache_action
+import com.drdisagree.teledrive.resources.settings_clear_cache_title
+import com.drdisagree.teledrive.resources.settings_clear_thumbnails_action
+import com.drdisagree.teledrive.resources.settings_clear_thumbnails_title
+import com.drdisagree.teledrive.resources.settings_compact_layout
+import com.drdisagree.teledrive.resources.settings_confirm_removing_lock
+import com.drdisagree.teledrive.resources.settings_debug_logging
+import com.drdisagree.teledrive.resources.settings_dynamic_color
+import com.drdisagree.teledrive.resources.settings_encrypt_thumbnails
+import com.drdisagree.teledrive.resources.settings_encrypt_uploads
+import com.drdisagree.teledrive.resources.settings_encryption_stays_off
+import com.drdisagree.teledrive.resources.settings_exclusions
+import com.drdisagree.teledrive.resources.settings_failures
+import com.drdisagree.teledrive.resources.settings_files_folders_skipped_backup
+import com.drdisagree.teledrive.resources.settings_files_sealed_leaving_device
+import com.drdisagree.teledrive.resources.settings_files_stay_telegram_channel
+import com.drdisagree.teledrive.resources.settings_folder_unreadable
+import com.drdisagree.teledrive.resources.settings_free_up_space_title
+import com.drdisagree.teledrive.resources.settings_gallery_previews_regenerated_browse
+import com.drdisagree.teledrive.resources.settings_grid_columns
+import com.drdisagree.teledrive.resources.settings_grid_view
+import com.drdisagree.teledrive.resources.settings_hidden_shortcut
+import com.drdisagree.teledrive.resources.settings_hides_app_screenshots_screen
+import com.drdisagree.teledrive.resources.settings_key_backup_stored
+import com.drdisagree.teledrive.resources.settings_link_previews
+import com.drdisagree.teledrive.resources.settings_link_previews_subtitle
+import com.drdisagree.teledrive.resources.settings_local_copies_files_already
+import com.drdisagree.teledrive.resources.settings_log
+import com.drdisagree.teledrive.resources.settings_log_telegram
+import com.drdisagree.teledrive.resources.settings_no_folders_selected
+import com.drdisagree.teledrive.resources.settings_no_recovery_passphrase
+import com.drdisagree.teledrive.resources.settings_only_charging
+import com.drdisagree.teledrive.resources.settings_parallel_transfers
+import com.drdisagree.teledrive.resources.settings_play_videos_load_instead
+import com.drdisagree.teledrive.resources.settings_protects_cached_previews_device
+import com.drdisagree.teledrive.resources.settings_proxy
+import com.drdisagree.teledrive.resources.settings_proxy_subtitle
+import com.drdisagree.teledrive.resources.settings_reading_channel
+import com.drdisagree.teledrive.resources.settings_rebuild_index_telegram
+import com.drdisagree.teledrive.resources.settings_recent_files
+import com.drdisagree.teledrive.resources.settings_recent_files_subtitle
+import com.drdisagree.teledrive.resources.settings_remove
+import com.drdisagree.teledrive.resources.settings_remove_backup_folder
+import com.drdisagree.teledrive.resources.settings_removes_session_stored_api
+import com.drdisagree.teledrive.resources.settings_require_fingerprint_screen_lock
+import com.drdisagree.teledrive.resources.settings_required_before_encrypt
+import com.drdisagree.teledrive.resources.settings_restore_encryption_key
+import com.drdisagree.teledrive.resources.settings_restores_file_list
+import com.drdisagree.teledrive.resources.settings_retry_attempts
+import com.drdisagree.teledrive.resources.settings_set
+import com.drdisagree.teledrive.resources.settings_set_passphrase
+import com.drdisagree.teledrive.resources.settings_shown_channels_private_owned
+import com.drdisagree.teledrive.resources.settings_shows_archived_collection_home
+import com.drdisagree.teledrive.resources.settings_shows_hidden_collection_home
+import com.drdisagree.teledrive.resources.settings_skip_files_larger_than
+import com.drdisagree.teledrive.resources.settings_state_connected
+import com.drdisagree.teledrive.resources.settings_state_connecting
+import com.drdisagree.teledrive.resources.settings_state_syncing
+import com.drdisagree.teledrive.resources.settings_state_waiting_network
+import com.drdisagree.teledrive.resources.settings_stream_downloading
+import com.drdisagree.teledrive.resources.settings_switch_drives_create_another
+import com.drdisagree.teledrive.resources.settings_telegram_account
+import com.drdisagree.teledrive.resources.settings_theme
+import com.drdisagree.teledrive.resources.settings_tighter_list_rows_without
+import com.drdisagree.teledrive.resources.settings_transfers_wi_fi_only
+import com.drdisagree.teledrive.resources.settings_transfers_wi_fi_only_summary
+import com.drdisagree.teledrive.resources.settings_turn_off_app_lock
+import com.drdisagree.teledrive.resources.settings_unlock_files_encrypted_earlier
+import com.drdisagree.teledrive.resources.settings_uploads_photos_videos_soon
+import com.drdisagree.teledrive.resources.settings_uploads_stay_unencrypted_set
+import com.drdisagree.teledrive.resources.settings_use_wallpaper_colors_available
+import com.drdisagree.teledrive.resources.settings_wi_fi_only
+import com.drdisagree.teledrive.resources.settings_wi_fi_only_summary
+import com.drdisagree.teledrive.resources.theme_dark
+import com.drdisagree.teledrive.resources.theme_labels
+import com.drdisagree.teledrive.resources.theme_light
+import com.drdisagree.teledrive.resources.theme_system
+import com.drdisagree.teledrive.resources.trash_clear_labels
 import com.drdisagree.teledrive.core.files.DocumentTreePaths
 import com.drdisagree.teledrive.core.files.StandardBackupFolder
 import com.drdisagree.teledrive.core.telegram.TelegramConnectionState
@@ -106,7 +214,7 @@ fun SettingsSectionScreen(
                     IconButton(onClick = onBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.common_back)
+                            contentDescription = stringResource(Res.string.common_back)
                         )
                     }
                 }
@@ -164,9 +272,9 @@ fun SettingsSectionScreen(
 
     if (confirmLogout) {
         ConfirmDialog(
-            title = stringResource(R.string.settings_log_telegram),
-            message = stringResource(R.string.settings_files_stay_telegram_channel),
-            confirmLabel = stringResource(R.string.settings_log),
+            title = stringResource(Res.string.settings_log_telegram),
+            message = stringResource(Res.string.settings_files_stay_telegram_channel),
+            confirmLabel = stringResource(Res.string.settings_log),
             destructive = true,
             onConfirm = {
                 confirmLogout = false
@@ -177,9 +285,9 @@ fun SettingsSectionScreen(
     }
     if (confirmClearCache) {
         ConfirmDialog(
-            title = stringResource(R.string.settings_clear_cache_title),
-            message = stringResource(R.string.settings_cached_previews_thumbnails_temporary),
-            confirmLabel = stringResource(R.string.settings_clear_cache_action),
+            title = stringResource(Res.string.settings_clear_cache_title),
+            message = stringResource(Res.string.settings_cached_previews_thumbnails_temporary),
+            confirmLabel = stringResource(Res.string.settings_clear_cache_action),
             onConfirm = {
                 confirmClearCache = false
                 viewModel.clearCache()
@@ -205,16 +313,16 @@ private fun AccountSection(
                 title = state.user?.let {
                     listOf(it.firstName, it.lastName).filter(String::isNotBlank)
                         .joinToString(" ")
-                } ?: stringResource(R.string.settings_telegram_account),
+                } ?: stringResource(Res.string.settings_telegram_account),
                 subtitle = buildString {
                     state.user?.phoneNumber?.let { append("+$it · ") }
                     append(
                         when (state.connection) {
-                            TelegramConnectionState.READY -> stringResource(R.string.settings_state_connected)
-                            TelegramConnectionState.UPDATING -> stringResource(R.string.settings_state_syncing)
-                            TelegramConnectionState.CONNECTING -> stringResource(R.string.settings_state_connecting)
+                            TelegramConnectionState.READY -> stringResource(Res.string.settings_state_connected)
+                            TelegramConnectionState.UPDATING -> stringResource(Res.string.settings_state_syncing)
+                            TelegramConnectionState.CONNECTING -> stringResource(Res.string.settings_state_connecting)
                             TelegramConnectionState.WAITING_FOR_NETWORK ->
-                                stringResource(R.string.settings_state_waiting_network)
+                                stringResource(Res.string.settings_state_waiting_network)
                         }
                     )
                     if (state.user?.isPremium == true) append(" · Premium (4 GB uploads)")
@@ -224,15 +332,15 @@ private fun AccountSection(
         }
         add {
             SettingsClickRow(
-                title = stringResource(R.string.settings_rebuild_index_telegram),
+                title = stringResource(Res.string.settings_rebuild_index_telegram),
                 subtitle = when {
                     state.syncing && indexedSoFar > 0 -> pluralStringResource(
-                        R.plurals.rebuild_indexed_files,
+                        Res.plurals.rebuild_indexed_files,
                         indexedSoFar,
                         indexedSoFar
                     )
-                    state.syncing -> stringResource(R.string.settings_reading_channel)
-                    else -> stringResource(R.string.settings_restores_file_list)
+                    state.syncing -> stringResource(Res.string.settings_reading_channel)
+                    else -> stringResource(Res.string.settings_restores_file_list)
                 },
                 onClick = { if (!state.syncing) viewModel.resync() },
                 trailing = if (state.syncing) {
@@ -242,15 +350,15 @@ private fun AccountSection(
         }
         add {
             SettingsClickRow(
-                title = stringResource(R.string.common_storage_channels),
-                subtitle = stringResource(R.string.settings_switch_drives_create_another),
+                title = stringResource(Res.string.common_storage_channels),
+                subtitle = stringResource(Res.string.settings_switch_drives_create_another),
                 onClick = onPickChannel
             )
         }
         add {
             SettingsClickRow(
-                title = stringResource(R.string.settings_log),
-                subtitle = stringResource(R.string.settings_removes_session_stored_api),
+                title = stringResource(Res.string.settings_log),
+                subtitle = stringResource(Res.string.settings_removes_session_stored_api),
                 titleColor = MaterialTheme.colorScheme.error,
                 onClick = onLogout
             )
@@ -267,7 +375,7 @@ private fun BackupSection(
     val prefs = state.preferences
     var folderToRemove by remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
-    val folderUnreadableMessage = stringResource(R.string.settings_folder_unreadable)
+    val folderUnreadableMessage = stringResource(Res.string.settings_folder_unreadable)
     val folderPicker = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocumentTree()
     ) { uri ->
@@ -283,7 +391,7 @@ private fun BackupSection(
 
     if (showIntervalDialog) {
         ChoiceDialog(
-            title = stringResource(R.string.settings_backup_interval),
+            title = stringResource(Res.string.settings_backup_interval),
             options = intervalOptions.map { it to intervalLabel(it) },
             selected = prefs.backupIntervalHours,
             onSelect = { hours ->
@@ -295,7 +403,7 @@ private fun BackupSection(
     }
     if (showSizeLimitDialog) {
         ChoiceDialog(
-            title = stringResource(R.string.settings_skip_files_larger_than),
+            title = stringResource(Res.string.settings_skip_files_larger_than),
             options = sizeLimitOptions.map { it to sizeLimitLabel(it) },
             selected = prefs.backupMaxFileSizeMb,
             onSelect = { limit ->
@@ -308,9 +416,9 @@ private fun BackupSection(
 
     folderToRemove?.let { folder ->
         ConfirmDialog(
-            title = stringResource(R.string.settings_remove_backup_folder),
-            message = stringResource(R.string.backup_folder_remove_message, folder),
-            confirmLabel = stringResource(R.string.settings_remove),
+            title = stringResource(Res.string.settings_remove_backup_folder),
+            message = stringResource(Res.string.backup_folder_remove_message, folder),
+            confirmLabel = stringResource(Res.string.settings_remove),
             destructive = true,
             onConfirm = {
                 folderToRemove = null
@@ -323,7 +431,7 @@ private fun BackupSection(
     SettingsGroup {
         add {
             SettingsSwitchRow(
-                title = stringResource(R.string.settings_automatic_backup),
+                title = stringResource(Res.string.settings_automatic_backup),
                 checked = prefs.autoBackupEnabled,
                 onChange = { value ->
                     viewModel.update { it.copy(autoBackupEnabled = value) }
@@ -332,8 +440,8 @@ private fun BackupSection(
         }
         add(visible = prefs.autoBackupEnabled) {
             SettingsSwitchRow(
-                title = stringResource(R.string.settings_back_new_media_instantly),
-                subtitle = stringResource(R.string.settings_uploads_photos_videos_soon),
+                title = stringResource(Res.string.settings_back_new_media_instantly),
+                subtitle = stringResource(Res.string.settings_uploads_photos_videos_soon),
                 checked = prefs.instantBackupEnabled,
                 onChange = { value ->
                     viewModel.update { it.copy(instantBackupEnabled = value) }
@@ -342,10 +450,10 @@ private fun BackupSection(
         }
         add {
             SettingsClickRow(
-                title = stringResource(R.string.settings_backup_interval),
+                title = stringResource(Res.string.settings_backup_interval),
                 subtitle = if (prefs.instantBackupEnabled && prefs.autoBackupEnabled) {
                     stringResource(
-                        R.string.backup_interval_with_sweep,
+                        Res.string.backup_interval_with_sweep,
                         intervalLabel(prefs.backupIntervalHours)
                     )
                 } else {
@@ -356,15 +464,15 @@ private fun BackupSection(
         }
         add {
             SettingsSwitchRow(
-                title = stringResource(R.string.settings_wi_fi_only),
-                subtitle = stringResource(R.string.settings_wi_fi_only_summary),
+                title = stringResource(Res.string.settings_wi_fi_only),
+                subtitle = stringResource(Res.string.settings_wi_fi_only_summary),
                 checked = prefs.backupWifiOnly,
                 onChange = { value -> viewModel.update { it.copy(backupWifiOnly = value) } }
             )
         }
         add {
             SettingsSwitchRow(
-                title = stringResource(R.string.settings_only_charging),
+                title = stringResource(Res.string.settings_only_charging),
                 checked = prefs.backupChargingOnly,
                 onChange = { value ->
                     viewModel.update { it.copy(backupChargingOnly = value) }
@@ -373,21 +481,21 @@ private fun BackupSection(
         }
         add {
             SettingsClickRow(
-                title = stringResource(R.string.settings_skip_files_larger_than),
+                title = stringResource(Res.string.settings_skip_files_larger_than),
                 subtitle = sizeLimitLabel(prefs.backupMaxFileSizeMb),
                 onClick = { showSizeLimitDialog = true }
             )
         }
         add {
             SettingsClickRow(
-                title = stringResource(R.string.settings_exclusions),
-                subtitle = stringResource(R.string.settings_files_folders_skipped_backup),
+                title = stringResource(Res.string.settings_exclusions),
+                subtitle = stringResource(Res.string.settings_files_folders_skipped_backup),
                 onClick = onOpenExclusions
             )
         }
     }
     Spacer(Modifier.height(16.dp))
-    SettingsSectionTitle(stringResource(R.string.settings_backup_folders_title))
+    SettingsSectionTitle(stringResource(Res.string.settings_backup_folders_title))
 
     val backupFolders by viewModel.backupFolders.collectAsStateWithLifecycle()
 
@@ -400,7 +508,7 @@ private fun BackupSection(
                 .padding(horizontal = 16.dp, vertical = 4.dp)
         ) {
             Text(
-                text = stringResource(R.string.settings_no_folders_selected),
+                text = stringResource(Res.string.settings_no_folders_selected),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onErrorContainer,
                 modifier = Modifier.padding(16.dp)
@@ -431,15 +539,15 @@ private fun BackupSection(
             add {
                 SettingsClickRow(
                     title = folder.substringAfterLast('/'),
-                    subtitle = stringResource(R.string.backup_folder_subtitle, folder),
+                    subtitle = stringResource(Res.string.backup_folder_subtitle, folder),
                     onClick = { folderToRemove = folder }
                 )
             }
         }
         add {
             SettingsClickRow(
-                title = stringResource(R.string.settings_add_another_folder),
-                subtitle = stringResource(R.string.settings_choose_folder_device),
+                title = stringResource(Res.string.settings_add_another_folder),
+                subtitle = stringResource(Res.string.settings_choose_folder_device),
                 onClick = { folderPicker.launch(null) }
             )
         }
@@ -460,9 +568,9 @@ private fun StorageSection(
 
     if (confirmClearThumbnails) {
         ConfirmDialog(
-            title = stringResource(R.string.settings_clear_thumbnails_title),
-            message = stringResource(R.string.settings_gallery_previews_regenerated_browse),
-            confirmLabel = stringResource(R.string.common_clear),
+            title = stringResource(Res.string.settings_clear_thumbnails_title),
+            message = stringResource(Res.string.settings_gallery_previews_regenerated_browse),
+            confirmLabel = stringResource(Res.string.common_clear),
             onConfirm = {
                 confirmClearThumbnails = false
                 viewModel.clearThumbnails()
@@ -474,11 +582,11 @@ private fun StorageSection(
     if (confirmFreeUpSpace) {
         ConfirmDialog(
             title = stringResource(
-                R.string.settings_free_up_space_title,
+                Res.string.settings_free_up_space_title,
                 Formatters.bytes(reclaimable)
             ),
-            message = stringResource(R.string.settings_local_copies_files_already),
-            confirmLabel = stringResource(R.string.common_free_space),
+            message = stringResource(Res.string.settings_local_copies_files_already),
+            confirmLabel = stringResource(Res.string.common_free_space),
             destructive = true,
             onConfirm = {
                 confirmFreeUpSpace = false
@@ -490,7 +598,7 @@ private fun StorageSection(
 
     if (showTrashDialog) {
         ChoiceDialog(
-            title = stringResource(R.string.settings_auto_clear_trash),
+            title = stringResource(Res.string.settings_auto_clear_trash),
             options = trashDayOptions.map { it to trashDaysLabel(it) },
             selected = prefs.trashAutoClearDays,
             onSelect = { days ->
@@ -504,7 +612,7 @@ private fun StorageSection(
     SettingsGroup {
         add {
             SettingsClickRow(
-                title = stringResource(R.string.common_free_space),
+                title = stringResource(Res.string.common_free_space),
                 subtitle = if (reclaimable > 0) {
                     "${Formatters.bytes(reclaimable)} of backed-up files stored locally"
                 } else {
@@ -515,9 +623,9 @@ private fun StorageSection(
         }
         add {
             SettingsClickRow(
-                title = stringResource(R.string.settings_clear_cache_action),
+                title = stringResource(Res.string.settings_clear_cache_action),
                 subtitle = stringResource(
-                    R.string.settings_cache_current_size,
+                    Res.string.settings_cache_current_size,
                     Formatters.bytes(state.cacheStats.totalBytes)
                 ),
                 onClick = onClearCache
@@ -525,14 +633,14 @@ private fun StorageSection(
         }
         add {
             SettingsClickRow(
-                title = stringResource(R.string.settings_clear_thumbnails_action),
+                title = stringResource(Res.string.settings_clear_thumbnails_action),
                 subtitle = Formatters.bytes(state.cacheStats.thumbnailBytes),
                 onClick = { confirmClearThumbnails = true }
             )
         }
         add {
             SettingsSliderRow(
-                title = stringResource(R.string.settings_cache_limit),
+                title = stringResource(Res.string.settings_cache_limit),
                 value = prefs.maxCacheSizeMb / 256,
                 range = 1..16,
                 onChange = { value ->
@@ -543,7 +651,7 @@ private fun StorageSection(
         }
         add {
             SettingsClickRow(
-                title = stringResource(R.string.settings_auto_clear_trash),
+                title = stringResource(Res.string.settings_auto_clear_trash),
                 subtitle = trashDaysLabel(prefs.trashAutoClearDays),
                 onClick = { showTrashDialog = true }
             )
@@ -553,12 +661,12 @@ private fun StorageSection(
 
 @Composable
 private fun SecuritySection(state: SettingsUiState, viewModel: SettingsViewModel) {
-    val encryptionOffMessage = stringResource(R.string.settings_encryption_stays_off)
+    val encryptionOffMessage = stringResource(Res.string.settings_encryption_stays_off)
     val prefs = state.preferences
     val activity = LocalActivity.current as? FragmentActivity
     val keyBackupWorking by viewModel.keyBackupWorking.collectAsStateWithLifecycle()
-    val lockPromptTitle = stringResource(R.string.settings_turn_off_app_lock)
-    val lockPromptSubtitle = stringResource(R.string.settings_confirm_removing_lock)
+    val lockPromptTitle = stringResource(Res.string.settings_turn_off_app_lock)
+    val lockPromptSubtitle = stringResource(Res.string.settings_confirm_removing_lock)
     var showLockTimeoutDialog by remember { mutableStateOf(false) }
     var showKeyBackupDialog by remember { mutableStateOf(false) }
     var showKeyRestoreDialog by remember { mutableStateOf(false) }
@@ -607,7 +715,7 @@ private fun SecuritySection(state: SettingsUiState, viewModel: SettingsViewModel
 
     if (showLockTimeoutDialog) {
         ChoiceDialog(
-            title = stringResource(R.string.settings_auto_lock),
+            title = stringResource(Res.string.settings_auto_lock),
             options = lockTimeoutOptions.map { it to lockTimeoutLabel(it) },
             selected = prefs.autoLockTimeoutMinutes,
             onSelect = { minutes ->
@@ -621,8 +729,8 @@ private fun SecuritySection(state: SettingsUiState, viewModel: SettingsViewModel
     SettingsGroup {
         add {
             SettingsSwitchRow(
-                title = stringResource(R.string.settings_app_lock),
-                subtitle = stringResource(R.string.settings_require_fingerprint_screen_lock),
+                title = stringResource(Res.string.settings_app_lock),
+                subtitle = stringResource(Res.string.settings_require_fingerprint_screen_lock),
                 checked = prefs.appLockEnabled,
                 onChange = { value ->
                     if (value) {
@@ -644,15 +752,15 @@ private fun SecuritySection(state: SettingsUiState, viewModel: SettingsViewModel
         }
         add(visible = prefs.appLockEnabled) {
             SettingsClickRow(
-                title = stringResource(R.string.settings_auto_lock),
+                title = stringResource(Res.string.settings_auto_lock),
                 subtitle = lockTimeoutLabel(prefs.autoLockTimeoutMinutes),
                 onClick = { showLockTimeoutDialog = true }
             )
         }
         add {
             SettingsSwitchRow(
-                title = stringResource(R.string.settings_block_screenshots),
-                subtitle = stringResource(R.string.settings_hides_app_screenshots_screen),
+                title = stringResource(Res.string.settings_block_screenshots),
+                subtitle = stringResource(Res.string.settings_hides_app_screenshots_screen),
                 checked = prefs.blockScreenCapture,
                 onChange = { value ->
                     viewModel.update { it.copy(blockScreenCapture = value) }
@@ -661,8 +769,8 @@ private fun SecuritySection(state: SettingsUiState, viewModel: SettingsViewModel
         }
         add {
             SettingsSwitchRow(
-                title = stringResource(R.string.settings_encrypt_uploads),
-                subtitle = stringResource(R.string.settings_files_sealed_leaving_device),
+                title = stringResource(Res.string.settings_encrypt_uploads),
+                subtitle = stringResource(Res.string.settings_files_sealed_leaving_device),
                 checked = prefs.encryptFiles,
                 onChange = { value ->
                     if (value) {
@@ -681,14 +789,14 @@ private fun SecuritySection(state: SettingsUiState, viewModel: SettingsViewModel
         add(visible = prefs.encryptFiles) {
             SettingsClickRow(
                 title = if (prefs.keyBackupCreated) {
-                    stringResource(R.string.settings_change_passphrase)
+                    stringResource(Res.string.settings_change_passphrase)
                 } else {
-                    stringResource(R.string.settings_set_passphrase)
+                    stringResource(Res.string.settings_set_passphrase)
                 },
                 subtitle = if (prefs.keyBackupCreated) {
-                    stringResource(R.string.settings_key_backup_stored)
+                    stringResource(Res.string.settings_key_backup_stored)
                 } else {
-                    stringResource(R.string.settings_required_before_encrypt)
+                    stringResource(Res.string.settings_required_before_encrypt)
                 },
                 onClick = {
                     enablingEncryption = false
@@ -698,15 +806,15 @@ private fun SecuritySection(state: SettingsUiState, viewModel: SettingsViewModel
         }
         add {
             SettingsClickRow(
-                title = stringResource(R.string.settings_restore_encryption_key),
-                subtitle = stringResource(R.string.settings_unlock_files_encrypted_earlier),
+                title = stringResource(Res.string.settings_restore_encryption_key),
+                subtitle = stringResource(Res.string.settings_unlock_files_encrypted_earlier),
                 onClick = { showKeyRestoreDialog = true }
             )
         }
         add {
             SettingsSwitchRow(
-                title = stringResource(R.string.settings_encrypt_thumbnails),
-                subtitle = stringResource(R.string.settings_protects_cached_previews_device),
+                title = stringResource(Res.string.settings_encrypt_thumbnails),
+                subtitle = stringResource(Res.string.settings_protects_cached_previews_device),
                 checked = prefs.encryptThumbnails,
                 onChange = { value ->
                     viewModel.update { it.copy(encryptThumbnails = value) }
@@ -737,12 +845,12 @@ private fun KeyBackupWarning(onSetPassphrase: () -> Unit) {
             Spacer(Modifier.width(14.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = stringResource(R.string.settings_no_recovery_passphrase),
+                    text = stringResource(Res.string.settings_no_recovery_passphrase),
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onErrorContainer
                 )
                 Text(
-                    text = stringResource(R.string.settings_uploads_stay_unencrypted_set),
+                    text = stringResource(Res.string.settings_uploads_stay_unencrypted_set),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onErrorContainer
                 )
@@ -750,7 +858,7 @@ private fun KeyBackupWarning(onSetPassphrase: () -> Unit) {
             Spacer(Modifier.width(12.dp))
             TextButton(onClick = onSetPassphrase) {
                 Text(
-                    text = stringResource(R.string.settings_set),
+                    text = stringResource(Res.string.settings_set),
                     color = MaterialTheme.colorScheme.onErrorContainer
                 )
             }
@@ -765,8 +873,8 @@ private fun AppearanceSection(state: SettingsUiState, viewModel: SettingsViewMod
 
     if (showThemeDialog) {
         ChoiceDialog(
-            title = stringResource(R.string.settings_theme),
-            options = AppTheme.entries.zip(stringArrayResource(R.array.theme_labels)),
+            title = stringResource(Res.string.settings_theme),
+            options = AppTheme.entries.zip(stringArrayResource(Res.array.theme_labels)),
             selected = prefs.theme,
             onSelect = { choice ->
                 showThemeDialog = false
@@ -779,26 +887,26 @@ private fun AppearanceSection(state: SettingsUiState, viewModel: SettingsViewMod
     SettingsGroup {
         add {
             SettingsClickRow(
-                title = stringResource(R.string.settings_theme),
+                title = stringResource(Res.string.settings_theme),
                 subtitle = when (prefs.theme) {
-                    AppTheme.LIGHT -> stringResource(R.string.theme_light)
-                    AppTheme.DARK -> stringResource(R.string.theme_dark)
-                    AppTheme.SYSTEM -> stringResource(R.string.theme_system)
+                    AppTheme.LIGHT -> stringResource(Res.string.theme_light)
+                    AppTheme.DARK -> stringResource(Res.string.theme_dark)
+                    AppTheme.SYSTEM -> stringResource(Res.string.theme_system)
                 },
                 onClick = { showThemeDialog = true }
             )
         }
         add {
             SettingsSwitchRow(
-                title = stringResource(R.string.settings_dynamic_color),
-                subtitle = stringResource(R.string.settings_use_wallpaper_colors_available),
+                title = stringResource(Res.string.settings_dynamic_color),
+                subtitle = stringResource(Res.string.settings_use_wallpaper_colors_available),
                 checked = prefs.dynamicColor,
                 onChange = { value -> viewModel.update { it.copy(dynamicColor = value) } }
             )
         }
         add {
             SettingsSwitchRow(
-                title = stringResource(R.string.settings_grid_view),
+                title = stringResource(Res.string.settings_grid_view),
                 checked = prefs.viewMode == ViewMode.GRID,
                 onChange = { value ->
                     viewModel.update {
@@ -809,7 +917,7 @@ private fun AppearanceSection(state: SettingsUiState, viewModel: SettingsViewMod
         }
         add(visible = prefs.viewMode == ViewMode.GRID) {
             SettingsSliderRow(
-                title = stringResource(R.string.settings_grid_columns),
+                title = stringResource(Res.string.settings_grid_columns),
                 value = prefs.gridSize,
                 range = 2..6,
                 onChange = { value -> viewModel.update { it.copy(gridSize = value) } }
@@ -817,8 +925,8 @@ private fun AppearanceSection(state: SettingsUiState, viewModel: SettingsViewMod
         }
         add(visible = prefs.viewMode == ViewMode.LIST) {
             SettingsSwitchRow(
-                title = stringResource(R.string.settings_compact_layout),
-                subtitle = stringResource(R.string.settings_tighter_list_rows_without),
+                title = stringResource(Res.string.settings_compact_layout),
+                subtitle = stringResource(Res.string.settings_tighter_list_rows_without),
                 checked = prefs.layoutDensity == LayoutDensity.COMPACT,
                 onChange = { value ->
                     viewModel.update {
@@ -832,32 +940,32 @@ private fun AppearanceSection(state: SettingsUiState, viewModel: SettingsViewMod
         }
         add {
             SettingsSwitchRow(
-                title = stringResource(R.string.settings_link_previews),
-                subtitle = stringResource(R.string.settings_link_previews_subtitle),
+                title = stringResource(Res.string.settings_link_previews),
+                subtitle = stringResource(Res.string.settings_link_previews_subtitle),
                 checked = prefs.linkPreviews,
                 onChange = { value -> viewModel.update { it.copy(linkPreviews = value) } }
             )
         }
         add {
             SettingsSwitchRow(
-                title = stringResource(R.string.settings_recent_files),
-                subtitle = stringResource(R.string.settings_recent_files_subtitle),
+                title = stringResource(Res.string.settings_recent_files),
+                subtitle = stringResource(Res.string.settings_recent_files_subtitle),
                 checked = prefs.showRecentFiles,
                 onChange = { value -> viewModel.update { it.copy(showRecentFiles = value) } }
             )
         }
         add {
             SettingsSwitchRow(
-                title = stringResource(R.string.settings_hidden_shortcut),
-                subtitle = stringResource(R.string.settings_shows_hidden_collection_home),
+                title = stringResource(Res.string.settings_hidden_shortcut),
+                subtitle = stringResource(Res.string.settings_shows_hidden_collection_home),
                 checked = prefs.showHiddenFiles,
                 onChange = { value -> viewModel.update { it.copy(showHiddenFiles = value) } }
             )
         }
         add {
             SettingsSwitchRow(
-                title = stringResource(R.string.settings_archived_shortcut),
-                subtitle = stringResource(R.string.settings_shows_archived_collection_home),
+                title = stringResource(Res.string.settings_archived_shortcut),
+                subtitle = stringResource(Res.string.settings_shows_archived_collection_home),
                 checked = prefs.showArchivedFiles,
                 onChange = { value ->
                     viewModel.update { it.copy(showArchivedFiles = value) }
@@ -873,8 +981,8 @@ private fun PlaybackSection(state: SettingsUiState, viewModel: SettingsViewModel
     SettingsGroup {
         add {
             SettingsSwitchRow(
-                title = stringResource(R.string.settings_stream_downloading),
-                subtitle = stringResource(R.string.settings_play_videos_load_instead),
+                title = stringResource(Res.string.settings_stream_downloading),
+                subtitle = stringResource(Res.string.settings_play_videos_load_instead),
                 checked = prefs.streamBeforeDownload,
                 onChange = { value ->
                     viewModel.update { it.copy(streamBeforeDownload = value) }
@@ -883,7 +991,7 @@ private fun PlaybackSection(state: SettingsUiState, viewModel: SettingsViewModel
         }
         add {
             SettingsSwitchRow(
-                title = stringResource(R.string.settings_background_playback),
+                title = stringResource(Res.string.settings_background_playback),
                 checked = prefs.backgroundPlayback,
                 onChange = { value ->
                     viewModel.update { it.copy(backgroundPlayback = value) }
@@ -899,7 +1007,7 @@ private fun NotificationsSection(state: SettingsUiState, viewModel: SettingsView
     SettingsGroup {
         add {
             SettingsSwitchRow(
-                title = stringResource(R.string.settings_backup_results),
+                title = stringResource(Res.string.settings_backup_results),
                 checked = prefs.backupNotifications,
                 onChange = { value ->
                     viewModel.update { it.copy(backupNotifications = value) }
@@ -908,7 +1016,7 @@ private fun NotificationsSection(state: SettingsUiState, viewModel: SettingsView
         }
         add {
             SettingsSwitchRow(
-                title = stringResource(R.string.settings_failures),
+                title = stringResource(Res.string.settings_failures),
                 checked = prefs.failureNotifications,
                 onChange = { value ->
                     viewModel.update { it.copy(failureNotifications = value) }
@@ -928,14 +1036,14 @@ private fun AdvancedSection(
     SettingsGroup {
         add {
             SettingsClickRow(
-                title = stringResource(R.string.settings_proxy),
-                subtitle = stringResource(R.string.settings_proxy_subtitle),
+                title = stringResource(Res.string.settings_proxy),
+                subtitle = stringResource(Res.string.settings_proxy_subtitle),
                 onClick = onOpenProxy
             )
         }
         add {
             SettingsSliderRow(
-                title = stringResource(R.string.settings_parallel_transfers),
+                title = stringResource(Res.string.settings_parallel_transfers),
                 value = prefs.transferConcurrency,
                 range = 1..6,
                 onChange = { value ->
@@ -945,7 +1053,7 @@ private fun AdvancedSection(
         }
         add {
             SettingsSliderRow(
-                title = stringResource(R.string.settings_retry_attempts),
+                title = stringResource(Res.string.settings_retry_attempts),
                 value = prefs.transferRetryCount,
                 range = 0..10,
                 onChange = { value ->
@@ -955,8 +1063,8 @@ private fun AdvancedSection(
         }
         add {
             SettingsSwitchRow(
-                title = stringResource(R.string.settings_transfers_wi_fi_only),
-                subtitle = stringResource(R.string.settings_transfers_wi_fi_only_summary),
+                title = stringResource(Res.string.settings_transfers_wi_fi_only),
+                subtitle = stringResource(Res.string.settings_transfers_wi_fi_only_summary),
                 checked = !prefs.allowMeteredTransfers,
                 onChange = { value ->
                     viewModel.update { it.copy(allowMeteredTransfers = !value) }
@@ -965,7 +1073,7 @@ private fun AdvancedSection(
         }
         add {
             SettingsSwitchRow(
-                title = stringResource(R.string.settings_debug_logging),
+                title = stringResource(Res.string.settings_debug_logging),
                 checked = prefs.debugLogging,
                 onChange = { value -> viewModel.update { it.copy(debugLogging = value) } }
             )
@@ -977,25 +1085,25 @@ private val intervalOptions = listOf(1, 2, 4, 6, 12, 24, 48)
 
 @Composable
 private fun intervalLabel(hours: Int): String =
-    labelFor(R.array.backup_interval_labels, intervalOptions, hours) { "$it h" }
+    labelFor(Res.array.backup_interval_labels, intervalOptions, hours) { "$it h" }
 
 private val sizeLimitOptions = listOf(0, 100, 500, 1000, 2000, 4000)
 
 @Composable
 private fun sizeLimitLabel(mb: Int): String =
-    labelFor(R.array.backup_size_limit_labels, sizeLimitOptions, mb) { "$it MB" }
+    labelFor(Res.array.backup_size_limit_labels, sizeLimitOptions, mb) { "$it MB" }
 
 private val lockTimeoutOptions = listOf(0, 1, 5, 10, 15, 30)
 
 @Composable
 private fun lockTimeoutLabel(minutes: Int): String =
-    labelFor(R.array.lock_timeout_labels, lockTimeoutOptions, minutes) { "$it min" }
+    labelFor(Res.array.lock_timeout_labels, lockTimeoutOptions, minutes) { "$it min" }
 
 private val trashDayOptions = listOf(0, 1, 7, 30, 90, 365)
 
 @Composable
 private fun trashDaysLabel(days: Int): String =
-    labelFor(R.array.trash_clear_labels, trashDayOptions, days) { "$it d" }
+    labelFor(Res.array.trash_clear_labels, trashDayOptions, days) { "$it d" }
 
 /**
  * Choice labels live in arrays.xml so a translation can reword them freely.
@@ -1003,7 +1111,7 @@ private fun trashDaysLabel(days: Int): String =
  */
 @Composable
 private fun labelFor(
-    arrayId: Int,
+    arrayId: StringArrayResource,
     values: List<Int>,
     value: Int,
     fallback: (Int) -> String
@@ -1016,7 +1124,7 @@ private fun labelFor(
 @Composable
 private fun ChannelCriteria() {
     Text(
-        text = stringResource(R.string.settings_shown_channels_private_owned),
+        text = stringResource(Res.string.settings_shown_channels_private_owned),
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant
     )
