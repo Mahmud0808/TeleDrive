@@ -404,6 +404,7 @@
     <string name="preview_hidden">Hidden</string>
     <string name="preview_local_copy_removed">Local copy removed</string>
     <string name="preview_move_to_trash">Move to trash?</string>
+    <string name="preview_next">Next file</string>
     <string name="preview_next_audio_track">Next audio track</string>
     <string name="preview_no_copy_available">No local or remote copy available</string>
     <string name="preview_no_preview">No preview</string>
@@ -415,6 +416,7 @@
     <string name="preview_pdf_open_failed">Could not open PDF</string>
     <string name="preview_playback_speed">Playback speed</string>
     <string name="preview_preparing">Preparing %1$s</string>
+    <string name="preview_previous">Previous file</string>
     <string name="preview_progress_bytes">%1$s of %2$s</string>
     <string name="preview_read_failed">Could not read file</string>
     <string name="preview_remove_favorites">Remove from favorites</string>

@@ -53,7 +53,7 @@
 
     <!-- Preview -->
     <string name="preview_open_externally">Open with the system app</string>
-    <string name="preview_download_first">This file has no local copy yet. Download it to open it here.</string>
+    <string name="preview_open_failed">Could not open the file with a system app</string>
 
     <!-- Transfer errors -->
     <string name="transfer_error_key_missing">Encryption key missing. Restore it in Settings.</string>
