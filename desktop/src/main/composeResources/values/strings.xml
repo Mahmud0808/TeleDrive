@@ -1,5 +1,16 @@
 <resources>
+    <!-- App-wide -->
     <string name="app_name">TeleDrive</string>
+
+    <!-- Navigation -->
+    <string name="nav_files">Files</string>
+    <string name="nav_gallery">Gallery</string>
+    <string name="nav_transfers">Transfers</string>
+    <string name="nav_trash">Trash</string>
+    <string name="nav_channels">Drives</string>
+    <string name="nav_proxy">Proxy</string>
+
+    <!-- Sign in -->
     <string name="auth_credentials_prompt">Enter your Telegram API credentials from my.telegram.org</string>
     <string name="auth_api_id">API ID</string>
     <string name="auth_api_hash">API hash</string>
@@ -23,19 +34,8 @@
     <string name="auth_failed">Sign in failed: %1$s</string>
     <string name="auth_your_account">your account</string>
     <string name="auth_sign_out">Sign out</string>
-    <string name="transfer_error_key_missing">Encryption key missing. Restore it in Settings.</string>
-    <string name="transfer_error_no_file_reference">Transfer has no file reference</string>
-    <string name="transfer_error_file_record_missing">File record missing</string>
-    <string name="transfer_error_no_local_copy">No local copy to upload</string>
-    <string name="transfer_error_local_file_gone">Local file is gone</string>
-    <string name="transfer_error_upload_ended">Upload ended unexpectedly</string>
-    <string name="transfer_error_upload_stalled">Upload stopped responding</string>
-    <string name="transfer_error_download_ended">Download ended unexpectedly</string>
-    <string name="transfer_error_download_stalled">Download stopped responding</string>
-    <string name="transfer_error_downloaded_missing">Downloaded file missing</string>
-    <string name="transfer_error_no_remote_copy">File has no remote copy</string>
-    <string name="transfer_error_decryption_failed">Decryption failed</string>
-    <string name="transfer_error_save_failed">Could not save the download</string>
+
+    <!-- Drive -->
     <string name="drive_loading">Loading your drives</string>
     <string name="drive_pick_title">Choose a drive</string>
     <string name="drive_pick_subtitle">Files are stored in a private Telegram channel</string>
@@ -50,4 +50,19 @@
     <string name="drive_downloaded">Downloaded</string>
     <string name="drive_queued">Queued</string>
     <string name="drive_upload_chooser_title">Choose a file to upload</string>
+
+    <!-- Transfer errors -->
+    <string name="transfer_error_key_missing">Encryption key missing. Restore it in Settings.</string>
+    <string name="transfer_error_no_file_reference">Transfer has no file reference</string>
+    <string name="transfer_error_file_record_missing">File record missing</string>
+    <string name="transfer_error_no_local_copy">No local copy to upload</string>
+    <string name="transfer_error_local_file_gone">Local file is gone</string>
+    <string name="transfer_error_upload_ended">Upload ended unexpectedly</string>
+    <string name="transfer_error_upload_stalled">Upload stopped responding</string>
+    <string name="transfer_error_download_ended">Download ended unexpectedly</string>
+    <string name="transfer_error_download_stalled">Download stopped responding</string>
+    <string name="transfer_error_downloaded_missing">Downloaded file missing</string>
+    <string name="transfer_error_no_remote_copy">File has no remote copy</string>
+    <string name="transfer_error_decryption_failed">Decryption failed</string>
+    <string name="transfer_error_save_failed">Could not save the download</string>
 </resources>

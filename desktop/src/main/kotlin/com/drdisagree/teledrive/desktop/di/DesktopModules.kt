@@ -52,6 +52,7 @@ import com.drdisagree.teledrive.desktop.publish.DesktopPublishScheduler
 import com.drdisagree.teledrive.desktop.transfer.DesktopTransferErrorMessages
 import com.drdisagree.teledrive.desktop.transfer.DesktopTransferScheduler
 import com.drdisagree.teledrive.domain.usecase.useCaseModule
+import com.drdisagree.teledrive.presentation.di.sharedUiModule
 import java.io.File
 import kotlinx.coroutines.Dispatchers
 import okio.Path.Companion.toOkioPath
@@ -60,7 +61,7 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val desktopModule = module {
-    includes(daosModule, repositoryModule, useCaseModule, sharedFilesModule, transferEngineModule)
+    includes(daosModule, repositoryModule, useCaseModule, sharedFilesModule, transferEngineModule, sharedUiModule)
 
     singleOf(::DesktopStoragePaths) bind AppStoragePaths::class
     single<CredentialCipher> {

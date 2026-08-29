@@ -42,6 +42,7 @@ compose.resources {
 
 dependencies {
     implementation(project(":shared"))
+    implementation(project(":ui"))
     implementation(compose.desktop.currentOs)
     implementation(libs.cmp.components.resources)
     implementation(libs.cmp.material3)
