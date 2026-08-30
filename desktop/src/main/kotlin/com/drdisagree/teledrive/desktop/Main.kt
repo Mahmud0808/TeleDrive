@@ -16,6 +16,7 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.drdisagree.teledrive.core.common.SafeLog
+import com.drdisagree.teledrive.core.files.AppStoragePaths
 import com.drdisagree.teledrive.desktop.window.WindowsTitleBar
 import com.drdisagree.teledrive.domain.model.AppTheme
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
@@ -26,14 +27,20 @@ import com.drdisagree.teledrive.core.media.ThumbnailStore
 import com.drdisagree.teledrive.core.media.thumbnailCacheKey
 import com.drdisagree.teledrive.desktop.di.desktopModule
 import com.drdisagree.teledrive.desktop.resources.Res
+import com.drdisagree.teledrive.desktop.resources.Res as DesktopRes
+import com.drdisagree.teledrive.desktop.resources.app_already_running
 import com.drdisagree.teledrive.desktop.resources.app_icon
 import com.drdisagree.teledrive.desktop.ui.ProvideDesktopPlatformActions
 import com.drdisagree.teledrive.presentation.TeleDriveApp
 import com.drdisagree.teledrive.resources.Res as SharedRes
 import com.drdisagree.teledrive.resources.app_name
+import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import javax.swing.JOptionPane
+import kotlin.system.exitProcess
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.flow.map
 import org.koin.core.context.startKoin
 import org.koin.java.KoinJavaComponent.getKoin
@@ -42,6 +49,16 @@ fun main() {
     SafeLog.verbose = true
     startKoin {
         modules(desktopModule)
+    }
+    val storagePaths = getKoin().get<AppStoragePaths>()
+    if (!SingleInstanceLock(storagePaths.filesDir).acquire()) {
+        JOptionPane.showMessageDialog(
+            null,
+            runBlocking { getString(DesktopRes.string.app_already_running) },
+            runBlocking { getString(SharedRes.string.app_name) },
+            JOptionPane.INFORMATION_MESSAGE
+        )
+        exitProcess(0)
     }
     application {
         Window(

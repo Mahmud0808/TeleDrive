@@ -67,6 +67,14 @@ compose.desktop {
             packageName = "TeleDrive"
             packageVersion = libs.versions.appVersion.get()
             description = "Private cloud storage on your own Telegram channel"
+            modules(
+                "java.instrument",
+                "java.naming",
+                "java.sql",
+                "jdk.crypto.ec",
+                "jdk.httpserver",
+                "jdk.unsupported"
+            )
             vendor = "DrDisagree"
             licenseFile.set(rootProject.file("LICENSE"))
 

@@ -1,6 +1,7 @@
 <resources>
     <!-- App-wide -->
     <string name="app_name">TeleDrive</string>
+    <string name="app_already_running">TeleDrive is already running.</string>
 
     <!-- Navigation -->
     <string name="nav_files">Files</string>
