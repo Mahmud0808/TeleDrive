@@ -107,6 +107,7 @@ class FolderStateSynchronizer(
 
     /** Restores folder rows from Telegram. Local rows win only when newer. */
     suspend fun pull(): Int {
+        if (folderDao.pendingPublishCount() > 0) return 0
         val chatId = storageChatId()
         val document = findStateDocument(chatId) ?: return 0
         var localPath: String? = null

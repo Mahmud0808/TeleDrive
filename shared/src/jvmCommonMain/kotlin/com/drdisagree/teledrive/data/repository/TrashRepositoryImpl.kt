@@ -211,6 +211,7 @@ class TrashRepositoryImpl(
         val result = deleteFilesPermanently(fileIds)
         if (result is AppResult.Failure) return result
         folderIds.reversed().forEach { folderDao.delete(it) }
+        markFolderStateDirty()
         return AppResult.Success(Unit)
     }
 
@@ -234,7 +235,9 @@ class TrashRepositoryImpl(
             if (result is AppResult.Failure) failure = result
         }
         if (failure != null) return failure
-        folderDao.trashOlderThan(Long.MAX_VALUE).forEach { folderDao.delete(it.id) }
+        val folders = folderDao.trashOlderThan(Long.MAX_VALUE)
+        folders.forEach { folderDao.delete(it.id) }
+        if (folders.isNotEmpty()) markFolderStateDirty()
         return AppResult.Success(Unit)
     }
 
@@ -246,6 +249,7 @@ class TrashRepositoryImpl(
         if (result is AppResult.Failure) return result
         val folders = folderDao.trashOlderThan(threshold)
         folders.forEach { folderDao.delete(it.id) }
+        if (folders.isNotEmpty()) markFolderStateDirty()
         return AppResult.Success(files.size + folders.size)
     }
 
