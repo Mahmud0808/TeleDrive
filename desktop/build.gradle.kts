@@ -80,6 +80,7 @@ compose.desktop {
 
             windows {
                 iconFile.set(project.file("icons/TeleDrive.ico"))
+                perUserInstall = true
                 menuGroup = "TeleDrive"
                 shortcut = true
                 dirChooser = true
