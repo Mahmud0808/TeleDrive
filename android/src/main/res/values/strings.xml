@@ -1,0 +1,50 @@
+<resources>
+    <!-- App-wide -->
+    <string name="app_name">TeleDrive</string>
+
+    <!-- Shared labels and dialogs -->
+    <string name="common_actions">More actions</string>
+    <string name="common_back">Back</string>
+    <string name="common_download">Download</string>
+    <string name="common_free_space">Free up space</string>
+    <string name="common_move_trash">Move to trash</string>
+    <string name="common_rename">Rename</string>
+    <string name="common_rename_file">Rename file</string>
+    <string name="common_upload">Upload</string>
+
+    <!-- Notes -->
+    <string name="note_edit_action">Edit text</string>
+
+    <!-- Transfers -->
+    <string name="transfer_error_decryption_failed">Decryption failed</string>
+    <string name="transfer_error_download_ended">Download ended unexpectedly</string>
+    <string name="transfer_error_download_stalled">Download stopped responding</string>
+    <string name="transfer_error_downloaded_missing">Downloaded file missing</string>
+    <string name="transfer_error_file_record_missing">File record missing</string>
+    <string name="transfer_error_key_missing">Encryption key missing. Restore it in Settings.</string>
+    <string name="transfer_error_local_file_gone">Local file is gone</string>
+    <string name="transfer_error_no_file_reference">Transfer has no file reference</string>
+    <string name="transfer_error_no_local_copy">No local copy to upload</string>
+    <string name="transfer_error_no_remote_copy">File has no remote copy</string>
+    <string name="transfer_error_save_failed">Could not save the download</string>
+    <string name="transfer_error_upload_ended">Upload ended unexpectedly</string>
+    <string name="transfer_error_upload_stalled">Upload stopped responding</string>
+
+    <!-- Notifications -->
+    <string name="notification_backup_complete">Backup complete</string>
+    <string name="notification_backup_summary">%1$d of %2$d files backed up</string>
+    <string name="notification_channel_backup">Backup</string>
+    <string name="notification_channel_backup_desc">Backup progress and results</string>
+    <string name="notification_channel_failures">Failures</string>
+    <string name="notification_channel_failures_desc">Failed transfers and backups</string>
+    <string name="notification_channel_transfers">Transfers</string>
+    <string name="notification_channel_transfers_desc">Upload and download progress</string>
+    <string name="notification_channel_updates">App updates</string>
+    <string name="notification_channel_updates_desc">Tells you when a new release is out</string>
+    <string name="notification_download_failed">Download failed</string>
+    <string name="notification_transfers_active">Transfers running</string>
+    <string name="notification_update_message">%1$s %2$s is ready to download</string>
+    <string name="notification_update_skip">Skip this version</string>
+    <string name="notification_update_title">Update available</string>
+    <string name="notification_upload_failed">Upload failed</string>
+</resources>

@@ -1,14 +1,14 @@
 <div align="center">
 
-<img src="app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" width="120" alt="TeleDrive icon">
+<img src="android/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" width="120" alt="TeleDrive icon">
 
 # TeleDrive
 
 Back up and browse your files using a private Telegram channel as storage.
 
-[![Platform](https://img.shields.io/badge/platform-Android%208.0%2B-3DDC84?style=for-the-badge&logo=android&logoColor=white)](#requirements)
+[![Platform](https://img.shields.io/badge/platform-Android%208.0%2B%20%7C%20Windows-3DDC84?style=for-the-badge&logo=android&logoColor=white)](#requirements)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.4-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)](https://kotlinlang.org)
-[![Compose](https://img.shields.io/badge/Compose-Material%203-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white)](https://developer.android.com/compose)
+[![Compose](https://img.shields.io/badge/Compose%20Multiplatform-Material%203-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white)](https://www.jetbrains.com/compose-multiplatform/)
 [![Release](https://img.shields.io/github/v/release/Mahmud0808/TeleDrive?style=for-the-badge&logo=github&logoColor=white&color=1F883D)](https://github.com/Mahmud0808/TeleDrive/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/Mahmud0808/TeleDrive/total?style=for-the-badge&logo=github&logoColor=white&color=D97706)](https://github.com/Mahmud0808/TeleDrive/releases)
 [![License](https://img.shields.io/badge/license-Apache%202.0-6750A4?style=for-the-badge&logo=apache&logoColor=white)](LICENSE)
@@ -20,88 +20,27 @@ Back up and browse your files using a private Telegram channel as storage.
 
 ## About
 
-TeleDrive is an Android app that stores your files in a private Telegram channel
-on your own account. There is no TeleDrive server and no account to create with
-us. The app keeps a local index so browsing and search stay fast and work
-offline.
+TeleDrive stores your files in a private Telegram channel on your own account.
+There is no TeleDrive server and no account to create with us. The app keeps a
+local index so browsing and search stay fast and work offline.
 
-With **Encrypt uploads** enabled, Telegram holds only sealed bytes, random file
-names, encrypted captions and an encrypted folder tree.
+One Compose Multiplatform codebase ships the Android app and the Windows
+desktop app. They share the storage engine, encryption, transfers and the
+entire UI layer, and both browse the same drive.
 
 ## Features
 
-**Storage on your own account.** Sign in by phone number or by scanning a QR
-code from a Telegram app you are already signed in to. The app creates a private
-storage channel and finds it again after a reinstall.
-
-**Several drives, one account.** Keep more than one storage channel and switch
-between them: personal and work, or photos and documents. Each drive has its own
-file index, backup folders and settings, and nothing crosses between them. New
-drives are created from Settings, and existing TeleDrive channels on the account
-are found automatically. This is separate storage, not separate Telegram
-accounts, since the app holds one session at a time.
-
-**Backup that runs on its own.** Take a photo and it uploads, the way a cloud
-gallery app behaves. The app does not have to be open or in recents: the system
-wakes it when new media lands, and an hourly sweep catches anything a missed
-wake-up would have skipped. It resumes after a reboot.
-
-**Backup control.** DCIM, Pictures, Movies or any folder you choose, backed up
-manually, on a schedule, or as files appear. Incremental by size, modified time
-and SHA-256, so unchanged files are never uploaded twice. Wi-Fi-only and
-charging-only constraints. Exclusion rules by file, folder, extension, MIME
-type, glob pattern, size or hidden status.
-
-**Recovery after a wipe.** Every upload carries a JSON manifest in its message
-caption, and the folder tree is mirrored in its own state document. Reinstall,
-sign in, and a rebuild restores folders, favorites, hidden and archived flags,
-and trash state.
-
-**Transfers.** A persistent Room-backed queue driven by WorkManager and a
-foreground service. Parallel transfers, pause, resume, cancel, retry,
-priorities, live speed and ETA. Survives process death and reboots.
-
-**No file size limit.** Upload a 20 GB video, and it is one file in the app,
-past whatever cap Telegram puts on a single message. A long upload picks up
-where it stopped instead of starting over.
-
-**File management.** Nested folders, rename, move, copy, favorites, hidden and
-archived items, bulk actions, trash with restore, grid and list layouts, pinch
-to resize the grid, long-press-and-drag range selection, and sorting by name,
-size, date, type or backup state.
-
-**Sharing in and out.** TeleDrive appears in the Android share sheet, so files
-arrive from any app and you pick the destination folder. Identical bytes are
-never uploaded twice: a file already in the target folder is skipped, and one
-that exists elsewhere in the drive is duplicated inside Telegram instead of
-re-uploaded. Selected files can be shared back out to other apps.
-
-**Storage insight.** The home screen breaks the drive down by photos, videos,
-audio, documents, archives and anything else, with sizes and shares of the
-total. Only the categories you actually have are listed.
-
-**Gallery and playback.** Paged media grid with date grouping and a pinch-zoom
-image viewer that swipes between shots in the order the grid shows them. Video
-and audio play in a Compose player with playback speed, repeat, subtitle and
-audio-track selection, aspect controls and rotation. Playback starts straight
-away rather than after a download, and seeking anywhere in a file is immediate,
-encrypted or not.
-
-**Previews without leaving the app.** PDFs render page by page with zoom, pan
-and working links. Text files open inline. ZIP archives list their contents with
-sizes and compression. Images, video and audio all preview in place, and
-anything without a viewer offers a download instead.
-
-**Encryption.** Optional chunked AES-256-GCM for file bodies, encrypted caption
-manifests, obfuscated remote file names, sealed thumbnails and an encrypted
-folder tree. Keys are random and wrapped by an Android Keystore master key.
-Encryption cannot be enabled without a passphrase-protected key backup (PBKDF2,
-310k iterations) stored in your channel, so files stay recoverable on a new
-device.
-
-**Device security.** Biometric app lock with auto-lock timeout, optional
-screenshot and screen-recording blocking, encrypted local database and
-thumbnail cache.
+- **Automatic backup**: photos and chosen folders upload on their own on Android, with schedules, Wi-Fi and charging rules, and exclusion patterns
+- **No file size limit**: a 20 GB video is one file in the app, whatever Telegram caps a message at
+- **Encryption**: optional AES-256-GCM for file bodies, names, captions and the folder tree
+- **File management**: folders, favorites, hidden and archived items, trash and bulk actions
+- **Streaming**: video and audio play straight from Telegram with seeking, encrypted files included
+- **Previews**: images, PDFs, text and ZIP contents open inline
+- **Multiple drives**: separate channels for personal, work or photos on one account
+- **Sharing**: files arrive from the Android share sheet, and identical bytes are never uploaded twice
+- **Transfers**: parallel queue with pause and resume that survives reboots
+- **Recovery**: reinstall, sign in, enter your passphrase, and the whole drive is back
+- **Device security**: biometric app lock, screenshot blocking and an encrypted local cache
 
 ## Screenshots
 
@@ -110,6 +49,15 @@ thumbnail cache.
 </div>
 
 ## Install
+
+### Windows
+
+Download `TeleDrive-<version>.msi` from the [releases page](../../releases) and
+run it. It installs per user with no admin prompt, adds Start menu and desktop
+shortcuts, and uninstalls from Windows Settings. Your session and settings live
+in `%APPDATA%\TeleDrive` and survive reinstalls.
+
+### Android
 
 Grab an APK from the [releases page](../../releases). Builds are split per CPU
 architecture, so pick the one that matches your device:
@@ -128,7 +76,7 @@ library the app is built on.
 
 ## Requirements
 
-- Android 8.0 (API 26) or newer
+- Android 8.0 (API 26) or newer, or 64-bit Windows 10+
 - A Telegram account
 - Your own Telegram API credentials, free from
   [my.telegram.org](https://my.telegram.org) under *API development tools*
@@ -149,7 +97,8 @@ pooled with anyone else's, and a rate limit on someone else cannot affect you.
 ```bash
 git clone https://github.com/Mahmud0808/TeleDrive.git
 cd TeleDrive
-./gradlew :app:installDebug
+./gradlew :android:installDebug  # Android
+./gradlew :desktop:run           # Windows desktop
 ```
 
 Then in the app:
@@ -161,9 +110,21 @@ Then in the app:
 3. Choose the folders to back up.
 4. Optionally enable **Encrypt uploads** and set a recovery passphrase.
 
-TDLib native libraries come from the prebuilt
-[`tdlibx/td`](https://github.com/tdlibx/td) AAR via JitPack, so no NDK
-build is needed.
+TDLib native libraries come prebuilt on both platforms: the
+[`tdlibx/td`](https://github.com/tdlibx/td) AAR via JitPack on Android and
+[tdlight](https://github.com/tdlight-team/tdlight-java) on desktop, so no
+native toolchain is needed.
+
+### Packaging the desktop app
+
+jpackage does the packaging, and the Android Studio runtime does not ship it.
+Point the build at a full JDK with a `desktopJavaHome` property in your global
+`~/.gradle/gradle.properties`, then:
+
+```bash
+./gradlew :desktop:packageMsi           # installer
+./gradlew :desktop:createDistributable  # portable folder with TeleDrive.exe
+```
 
 ## Bringing existing files in
 
@@ -191,45 +152,36 @@ What to expect for forwarded files:
 
 ## Architecture
 
-Clean Architecture with MVVM and one package per screen. The dependency rule is
+Kotlin Multiplatform with Clean Architecture and MVVM. The dependency rule is
 `presentation -> domain <- data`, with `core` shared by both sides. No TDLib
-type leaves `core/telegram`.
+type leaves `core/telegram`. Almost everything lives in common code; each
+platform contributes only what the other cannot share, like workers, the
+Keystore, DPAPI and the app shells.
 
 ```text
-app/src/main/java/com/drdisagree/teledrive/
-├── core/             # infrastructure
-│   ├── common/           # typed errors, results, logging, notifications
-│   ├── crypto/           # Keystore, streaming AEAD, key backup, KDF
-│   ├── dispatchers/      # coroutine dispatcher provider
-│   ├── files/            # mime, hashing, naming, storage stats
-│   ├── media/            # thumbnails, Coil fetcher, Media3 Telegram source
-│   ├── network/          # connectivity monitor
-│   ├── permissions/      # runtime permission model and checks
-│   ├── security/         # app lock state
-│   ├── telegram/         # TelegramClient abstraction + TDLib implementation
-│   └── transfer/         # transfer executor, workers, schedulers
-├── data/
-│   ├── local/            # Room entities, DAOs, queries, DataStore
-│   ├── remote/           # caption manifest protocol, folder state
-│   ├── mapper/           # entity to domain
-│   └── repository/       # repositories, sync engine
-├── domain/
-│   ├── model/            # models and enums
-│   ├── repository/       # interfaces
-│   └── usecase/          # backup decisions, exclusions, validation
-└── presentation/         # Compose UI, MVVM
+shared/               # KMP: storage engine, crypto, sync, transfers
+├── commonMain/           # core, data, domain
+├── jvmCommonMain/        # JVM pieces both apps use
+├── androidMain/          # Keystore, MediaStore, WorkManager glue
+└── desktopMain/          # tdlight client, DPAPI, desktop schedulers
+ui/                   # KMP: every screen, theme and string resource
+├── commonMain/           # compose resources
+└── jvmCommonMain/        # the entire presentation layer
+android/              # Android shell: workers, notifications, media3 player
+desktop/              # Windows shell: window, packaging, streaming bridge
 ```
 
-Stack: Kotlin, Coroutines, Jetpack Compose, Material 3 Expressive, Hilt, Room,
-DataStore, WorkManager, Paging 3, Media3, Coil, TDLib.
+Stack: Kotlin Multiplatform, Coroutines, Compose Multiplatform, Material 3
+Expressive, Koin, Room KMP, DataStore, WorkManager, Paging 3, Media3, Coil,
+TDLib and tdlight.
 
 ## Security model
 
 | Layer | What is protected |
 | --- | --- |
-| On device | Room and TDLib databases sealed with a random, Keystore-wrapped key. Thumbnails and caches AES-GCM encrypted by default. |
+| On device | Room and TDLib databases sealed with a random, platform-wrapped key (Android Keystore, Windows DPAPI). Thumbnails and caches AES-GCM encrypted by default. |
 | In Telegram | With encryption on, the channel holds only sealed bytes, random file names, encrypted captions and an encrypted folder tree. |
-| Key custody | Content keys are random, wrapped by an Android Keystore master key, and never leave the device unwrapped. |
+| Key custody | Content keys are random, wrapped by the platform master key, and never leave the device unwrapped. |
 | Recovery | The content key is backed up to your channel, sealed with your passphrase (PBKDF2, 310k iterations). Restoring it on a new device unlocks everything. |
 
 Someone who reads the channel without your key learns only the file count,
@@ -255,13 +207,14 @@ set a hint when you create it and keep the passphrase out of the hint.
 ./gradlew testDebugUnitTest          # Unit tests covering crypto, key backup,
                                      # query building, backup decisions, naming
 ./gradlew connectedDebugAndroidTest  # Room DAO behaviour on a device
+./gradlew :desktop:test              # Desktop DI graph and platform seams
 ```
 
 ## Contributing
 
 Issues and pull requests are welcome. Keep the dependency rule intact, match the
-surrounding code style, and add tests for changes in `domain/` or
-`core/crypto/`.
+surrounding code style, and add tests for changes in the domain or crypto
+packages of `shared/`.
 
 ## License
 
