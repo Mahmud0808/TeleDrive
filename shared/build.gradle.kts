@@ -8,6 +8,9 @@ plugins {
 
 kotlin {
     jvmToolchain(17)
+    compilerOptions {
+        freeCompilerArgs.add("-Xexpect-actual-classes")
+    }
 
     android {
         namespace = "com.drdisagree.teledrive.shared"

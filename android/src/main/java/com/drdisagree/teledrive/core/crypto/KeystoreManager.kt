@@ -44,12 +44,12 @@ class KeystoreManager : CredentialCipher {
         return cipher.iv + ciphertext
     }
 
-    override fun decrypt(blob: ByteArray): ByteArray {
-        require(blob.size > IV_LENGTH) { "Encrypted blob too short" }
+    override fun decrypt(ciphertext: ByteArray): ByteArray {
+        require(ciphertext.size > IV_LENGTH) { "Encrypted blob too short" }
         val cipher = Cipher.getInstance(TRANSFORMATION)
-        val spec = GCMParameterSpec(TAG_BITS, blob, 0, IV_LENGTH)
+        val spec = GCMParameterSpec(TAG_BITS, ciphertext, 0, IV_LENGTH)
         cipher.init(Cipher.DECRYPT_MODE, masterKey(), spec)
-        return cipher.doFinal(blob, IV_LENGTH, blob.size - IV_LENGTH)
+        return cipher.doFinal(ciphertext, IV_LENGTH, ciphertext.size - IV_LENGTH)
     }
 
     companion object {
