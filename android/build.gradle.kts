@@ -128,7 +128,6 @@ dependencies {
 
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.datastore.preferences)
-    implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.paging.runtime)
 
     implementation(libs.androidx.media3.exoplayer)
