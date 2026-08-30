@@ -117,6 +117,9 @@ compose.desktop {
             appResourcesRootDir.set(layout.buildDirectory.dir("appResources"))
             packageName = "TeleDrive"
             packageVersion = libs.versions.appVersion.get()
+                .split(".")
+                .let { parts -> (parts + List(3) { "0" }).take(3) }
+                .joinToString(".")
             description = "Private cloud storage on your own Telegram channel"
             modules(
                 "java.instrument",
