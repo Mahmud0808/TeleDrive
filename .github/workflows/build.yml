@@ -51,8 +51,32 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: android-apks
-          path: android/build/outputs/apk/debug/*.apk
+          name: TeleDrive-arm64-v8a
+          path: android/build/outputs/apk/debug/*-arm64-v8a-debug.apk
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TeleDrive-armeabi-v7a
+          path: android/build/outputs/apk/debug/*-armeabi-v7a-debug.apk
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TeleDrive-x86_64
+          path: android/build/outputs/apk/debug/*-x86_64-debug.apk
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TeleDrive-x86
+          path: android/build/outputs/apk/debug/*-x86-debug.apk
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TeleDrive-universal
+          path: android/build/outputs/apk/debug/*-universal-debug.apk
           if-no-files-found: error
 
   windows:
@@ -76,6 +100,6 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: windows-msi
+          name: TeleDrive-windows
           path: desktop/build/compose/binaries/main/msi/*.msi
           if-no-files-found: error
