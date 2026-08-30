@@ -1,6 +1,7 @@
 package com.drdisagree.teledrive.desktop.ui
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -48,6 +49,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -80,6 +82,8 @@ import com.drdisagree.teledrive.core.media.TelegramMediaByteSource
 import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.desktop.media.ExternalMediaPlayer
 import com.drdisagree.teledrive.desktop.media.MediaStreamServer
+import com.drdisagree.teledrive.desktop.media.player.DesktopMediaPlayer
+import com.drdisagree.teledrive.desktop.media.player.VlcPlayback
 import com.drdisagree.teledrive.desktop.resources.Res as DesktopRes
 import com.drdisagree.teledrive.desktop.resources.preview_open_externally
 import com.drdisagree.teledrive.desktop.resources.preview_open_failed
@@ -153,6 +157,8 @@ fun DesktopPreviewScreen(
     var showOverflow by remember { mutableStateOf(false) }
     var renameTarget by remember { mutableStateOf<DriveFile?>(null) }
     var trashTarget by remember { mutableStateOf<DriveFile?>(null) }
+    var playerChromeVisible by remember { mutableStateOf(true) }
+    LaunchedEffect(file?.id) { playerChromeVisible = true }
 
     val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect(Unit) {
@@ -160,7 +166,12 @@ fun DesktopPreviewScreen(
     }
 
     Scaffold(
-        topBar = {
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { padding ->
+        val focusRequester = remember { FocusRequester() }
+        LaunchedEffect(state.ready) { if (state.ready) focusRequester.requestFocus() }
+        @Composable
+        fun PreviewTopBar() {
             TopAppBar(
                 title = {
                     Text(
@@ -202,13 +213,12 @@ fun DesktopPreviewScreen(
                             )
                         }
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f)
+                )
             )
-        },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
-    ) { padding ->
-        val focusRequester = remember { FocusRequester() }
-        LaunchedEffect(state.ready) { if (state.ready) focusRequester.requestFocus() }
+        }
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -236,6 +246,7 @@ fun DesktopPreviewScreen(
                 !state.ready || file == null -> LoadingState()
                 else -> AnimatedContent(
                     targetState = index to file,
+                    modifier = Modifier.fillMaxSize(),
                     transitionSpec = {
                         val forward = targetState.first >= initialState.first
                         val enter = slideInHorizontally { width ->
@@ -251,11 +262,20 @@ fun DesktopPreviewScreen(
                     PreviewPane(
                         viewModel = viewModel,
                         file = pageFile,
-                        snackbarHostState = snackbarHostState
+                        snackbarHostState = snackbarHostState,
+                        onPlayerControlsVisibilityChange = { playerChromeVisible = it }
                     )
                 }
             }
-            if (state.files.size > 1) {
+            AnimatedVisibility(
+                visible = playerChromeVisible,
+                enter = fadeIn(),
+                exit = fadeOut(),
+                modifier = Modifier.align(Alignment.TopCenter)
+            ) {
+                PreviewTopBar()
+            }
+            if (state.files.size > 1 && playerChromeVisible) {
                 PreviewPagerButton(
                     icon = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                     contentDescription = stringResource(Res.string.preview_previous),
@@ -433,11 +453,24 @@ private fun PreviewPagerButton(
 private fun PreviewPane(
     viewModel: PreviewViewModel,
     file: DriveFile,
-    snackbarHostState: SnackbarHostState
+    snackbarHostState: SnackbarHostState,
+    onPlayerControlsVisibilityChange: (Boolean) -> Unit
 ) {
     val content by viewModel.contentFor(file).collectAsState()
     val urlOpener = LocalUrlOpener.current
 
+    val edgeToEdge = when (content) {
+        is PreviewContent.Image,
+        is PreviewContent.LocalMedia,
+        is PreviewContent.StreamedMedia -> true
+
+        else -> false
+    }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = if (edgeToEdge) 0.dp else TOP_BAR_INSET)
+    ) {
     when (val current = content) {
         is PreviewContent.Loading -> LoadingState()
 
@@ -487,12 +520,20 @@ private fun PreviewPane(
             contentScale = ContentScale.Fit
         )
 
-        is PreviewContent.LocalMedia -> OpenExternallyState(
-            icon = if (current.isAudio) Icons.Filled.Audiotrack else Icons.Filled.Movie,
-            file = file,
-            path = current.path,
-            snackbarHostState = snackbarHostState
-        )
+        is PreviewContent.LocalMedia -> if (VlcPlayback.available) {
+            DesktopMediaPlayer(
+                mrl = current.path,
+                isAudio = current.isAudio,
+                onControlsVisibilityChange = onPlayerControlsVisibilityChange
+            )
+        } else {
+            OpenExternallyState(
+                icon = if (current.isAudio) Icons.Filled.Audiotrack else Icons.Filled.Movie,
+                file = file,
+                path = current.path,
+                snackbarHostState = snackbarHostState
+            )
+        }
 
         is PreviewContent.Pdf -> OpenExternallyState(
             icon = Icons.Filled.PictureAsPdf,
@@ -501,12 +542,20 @@ private fun PreviewPane(
             snackbarHostState = snackbarHostState
         )
 
-        is PreviewContent.StreamedMedia -> StreamState(
-            file = file,
-            content = current,
-            onDownload = { viewModel.download(file) },
-            snackbarHostState = snackbarHostState
-        )
+        is PreviewContent.StreamedMedia -> if (VlcPlayback.available) {
+            InlineStreamPlayer(
+                file = file,
+                content = current,
+                onControlsVisibilityChange = onPlayerControlsVisibilityChange
+            )
+        } else {
+            StreamState(
+                file = file,
+                content = current,
+                onDownload = { viewModel.download(file) },
+                snackbarHostState = snackbarHostState
+            )
+        }
 
         is PreviewContent.PlainText -> Column(
             modifier = Modifier
@@ -592,7 +641,10 @@ private fun PreviewPane(
 
         is PreviewContent.Failed -> ErrorState(message = stringResource(current.messageRes))
     }
+    }
 }
+
+private val TOP_BAR_INSET = 72.dp
 
 @Composable
 private fun OpenExternallyState(
@@ -628,6 +680,42 @@ private fun OpenExternallyState(
             Text(stringResource(DesktopRes.string.preview_open_externally))
         }
     }
+}
+
+@Composable
+private fun InlineStreamPlayer(
+    file: DriveFile,
+    content: PreviewContent.StreamedMedia,
+    onControlsVisibilityChange: (Boolean) -> Unit
+) {
+    val streamServer = koinInject<MediaStreamServer>()
+    val telegramClient = koinInject<TelegramClient>()
+    val streamCrypto = koinInject<StreamCrypto>()
+    val wrappedKeyRepository = koinInject<WrappedKeyRepository>()
+    val url = remember(file.id) {
+        streamServer.serve(file.name, file.mimeType) {
+            if (content.parts.isEmpty()) {
+                TelegramMediaByteSource(telegramClient, content.remoteFileId)
+            } else {
+                PartedMediaByteSource(
+                    telegramClient = telegramClient,
+                    streamCrypto = streamCrypto,
+                    parts = content.parts,
+                    encrypted = content.encrypted,
+                    contentKey = if (content.encrypted) {
+                        wrappedKeyRepository.get(CryptoKeys.CONTENT)
+                    } else {
+                        null
+                    }
+                )
+            }
+        }
+    }
+    DesktopMediaPlayer(
+        mrl = url,
+        isAudio = content.isAudio,
+        onControlsVisibilityChange = onControlsVisibilityChange
+    )
 }
 
 @Composable

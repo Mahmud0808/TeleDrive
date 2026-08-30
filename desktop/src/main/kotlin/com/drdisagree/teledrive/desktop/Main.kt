@@ -14,6 +14,8 @@ import coil3.request.Options
 import coil3.request.crossfade
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.rememberWindowState
 import com.drdisagree.teledrive.core.common.SafeLog
 import com.drdisagree.teledrive.core.files.AppStoragePaths
@@ -30,6 +32,8 @@ import com.drdisagree.teledrive.desktop.resources.Res
 import com.drdisagree.teledrive.desktop.resources.Res as DesktopRes
 import com.drdisagree.teledrive.desktop.resources.app_already_running
 import com.drdisagree.teledrive.desktop.resources.app_icon
+import com.drdisagree.teledrive.desktop.ui.FullscreenController
+import com.drdisagree.teledrive.desktop.ui.LocalFullscreenController
 import com.drdisagree.teledrive.desktop.ui.ProvideDesktopPlatformActions
 import com.drdisagree.teledrive.presentation.TeleDriveApp
 import com.drdisagree.teledrive.resources.Res as SharedRes
@@ -61,11 +65,25 @@ fun main() {
         exitProcess(0)
     }
     application {
+        val windowState = rememberWindowState(width = 1200.dp, height = 800.dp)
+        val fullscreenController = remember {
+            FullscreenController(
+                isFullscreen = { windowState.placement == WindowPlacement.Fullscreen },
+                toggle = {
+                    windowState.placement =
+                        if (windowState.placement == WindowPlacement.Fullscreen) {
+                            WindowPlacement.Floating
+                        } else {
+                            WindowPlacement.Fullscreen
+                        }
+                }
+            )
+        }
         Window(
             onCloseRequest = ::exitApplication,
             title = stringResource(SharedRes.string.app_name),
             icon = painterResource(Res.drawable.app_icon),
-            state = rememberWindowState(width = 1200.dp, height = 800.dp)
+            state = windowState
         ) {
             window.minimumSize = Dimension(MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT)
             setSingletonImageLoaderFactory { context ->
@@ -90,12 +108,14 @@ fun main() {
                 AppTheme.SYSTEM -> systemDark
             }
             LaunchedEffect(darkTitleBar) { WindowsTitleBar.setDark(window, darkTitleBar) }
-            ProvideDesktopPlatformActions {
-                TeleDriveApp(
-                    pendingShare = getKoin().get<PendingShare>(),
-                    notificationDestination = null,
-                    onDestinationHandled = {}
-                )
+            CompositionLocalProvider(LocalFullscreenController provides fullscreenController) {
+                ProvideDesktopPlatformActions {
+                    TeleDriveApp(
+                        pendingShare = getKoin().get<PendingShare>(),
+                        notificationDestination = null,
+                        onDestinationHandled = {}
+                    )
+                }
             }
         }
     }

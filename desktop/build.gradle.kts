@@ -1,3 +1,4 @@
+import java.net.URI
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
@@ -53,9 +54,58 @@ dependencies {
     implementation(libs.koin.core)
     implementation(libs.koin.compose)
     implementation(libs.jna.platform)
+    implementation(libs.vlcj)
     testImplementation(libs.junit)
     testImplementation(libs.koin.test)
 }
+
+val vlcVersion = "3.0.21"
+val vlcZip = layout.buildDirectory.file("vlc/vlc-$vlcVersion-win64.zip")
+
+val downloadVlc = tasks.register("downloadVlc") {
+    description = "Downloads the VLC natives archive for bundling"
+    group = "build"
+    val zipFile = vlcZip
+    val archiveUrl = "https://download.videolan.org/pub/videolan/vlc/" +
+            "$vlcVersion/win64/vlc-$vlcVersion-win64.zip"
+    outputs.file(zipFile)
+    doLast {
+        val target = zipFile.get().asFile
+        if (target.length() > 0) return@doLast
+        target.parentFile.mkdirs()
+        URI(archiveUrl).toURL().openStream().use { input ->
+            target.outputStream().use { output -> input.copyTo(output) }
+        }
+    }
+}
+
+val prepareVlcNatives = tasks.register<Copy>("prepareVlcNatives") {
+    description = "Unpacks the VLC libraries the inline player loads"
+    group = "build"
+    dependsOn(downloadVlc)
+    from(zipTree(vlcZip)) {
+        include("vlc-$vlcVersion/libvlc.dll")
+        include("vlc-$vlcVersion/libvlccore.dll")
+        include("vlc-$vlcVersion/plugins/**")
+        exclude("vlc-$vlcVersion/plugins/gui/**")
+        exclude("vlc-$vlcVersion/plugins/lua/**")
+        eachFile { relativePath = RelativePath(true, *relativePath.segments.drop(1).toTypedArray()) }
+        includeEmptyDirs = false
+    }
+    into(layout.buildDirectory.dir("appResources/windows-x64/vlc"))
+}
+
+tasks.matching {
+    it.name in setOf(
+        "run",
+        "hotRun",
+        "packageMsi",
+        "packageDeb",
+        "packageDmg",
+        "createDistributable",
+        "packageDistributionForCurrentOS"
+    ) || it.name.startsWith("prepareAppResources")
+}.configureEach { dependsOn(prepareVlcNatives) }
 
 compose.desktop {
     application {
@@ -64,6 +114,7 @@ compose.desktop {
 
         nativeDistributions {
             targetFormats(TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Dmg)
+            appResourcesRootDir.set(layout.buildDirectory.dir("appResources"))
             packageName = "TeleDrive"
             packageVersion = libs.versions.appVersion.get()
             description = "Private cloud storage on your own Telegram channel"

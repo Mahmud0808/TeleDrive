@@ -433,7 +433,10 @@
     <string name="preview_unhidden">Unhidden</string>
 
     <!-- Player -->
+    <string name="player_audio_track">Audio track</string>
+    <string name="player_exit_full_screen">Exit full screen</string>
     <string name="player_fewer_controls">Fewer controls</string>
+    <string name="player_full_screen">Full screen</string>
     <string name="player_hide_subtitles">Hide subtitles</string>
     <string name="player_more_controls">More controls</string>
     <string name="player_mute">Mute</string>
@@ -442,6 +445,9 @@
     <string name="player_repeat_off">Repeat off</string>
     <string name="player_repeat_one">Repeat one</string>
     <string name="player_replay">Replay</string>
+    <string name="player_scaling">Scaling</string>
+    <string name="player_skip_back">Back 10 seconds</string>
+    <string name="player_skip_forward">Forward 10 seconds</string>
     <string name="player_show_subtitles">Show subtitles</string>
     <string name="player_unmute">Unmute</string>
 
