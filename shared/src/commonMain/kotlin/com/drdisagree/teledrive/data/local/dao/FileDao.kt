@@ -156,6 +156,9 @@ interface FileDao {
     @Query("UPDATE files SET backupState = :state WHERE id = :id")
     suspend fun setBackupState(id: String, state: BackupState)
 
+    @Query("UPDATE files SET backupState = :state WHERE id IN (:ids)")
+    suspend fun setBackupStates(ids: List<String>, state: BackupState)
+
     /**
      * Transfer bookkeeping must never claim a file is unsaved while its copy
      * still sits in the channel, so downgrades only apply to local-only rows.
@@ -305,6 +308,19 @@ interface FileDao {
              AND chatId IS :chatId"""
     )
     suspend fun localOnlyFileIds(chatId: Long?): List<String>
+
+    @Query(
+        """SELECT id FROM files
+           WHERE trashedAt IS NULL
+             AND messageId IS NULL
+             AND backupState = 'QUEUED'
+             AND chatId IS :chatId
+             AND id NOT IN (
+               SELECT fileId FROM transfers
+               WHERE state IN ('QUEUED', 'RUNNING', 'PAUSED')
+             )"""
+    )
+    suspend fun queuedWithoutTransferFileIds(chatId: Long?): List<String>
 
     @Query(
         """SELECT COUNT(*) FROM files

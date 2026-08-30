@@ -2,6 +2,7 @@ package com.drdisagree.teledrive.data.repository
 
 import com.drdisagree.teledrive.core.common.AppError
 import com.drdisagree.teledrive.core.common.AppResult
+import com.drdisagree.teledrive.core.common.SafeLog
 import com.drdisagree.teledrive.core.files.StorageInspector
 import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.core.telegram.TelegramException
@@ -14,8 +15,8 @@ import com.drdisagree.teledrive.data.local.dao.TransferDao
 import com.drdisagree.teledrive.data.local.entity.TransferEntity
 import com.drdisagree.teledrive.data.mapper.toDomain
 import com.drdisagree.teledrive.domain.model.BackupState
-import com.drdisagree.teledrive.domain.model.TransferState
 import com.drdisagree.teledrive.domain.model.TransferSection
+import com.drdisagree.teledrive.domain.model.TransferState
 import com.drdisagree.teledrive.domain.model.TransferTask
 import com.drdisagree.teledrive.domain.model.TransferType
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
@@ -24,6 +25,7 @@ import com.drdisagree.teledrive.domain.usecase.ValidateUploadUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import java.io.File
 import java.util.UUID
 
 class TransferRepositoryImpl(
@@ -62,10 +64,39 @@ class TransferRepositoryImpl(
     override suspend fun enqueueUpload(fileId: String, priority: Int): AppResult<String> =
         enqueue(fileId, TransferType.UPLOAD, priority)
 
+    /**
+     * A file can be left marked queued with no transfer behind it when the
+     * process dies between the two writes, or when its staged copy is deleted
+     * before the upload starts. Orphans whose bytes still exist are queued
+     * again; ones with nothing left on disk and nothing in Telegram are
+     * phantoms no upload can ever satisfy, so their records are dropped.
+     */
     override suspend fun enqueuePendingUploads(): AppResult<Int> {
         val chatId = settingsRepository.preferences.first().storageChatId
         val pending = fileDao.localOnlyFileIds(chatId)
-        return AppResult.Success(enqueueBatch(pending, TransferType.UPLOAD, sessionId = null))
+        val orphaned = fileDao.queuedWithoutTransferFileIds(chatId)
+        val requeue = mutableListOf<String>()
+        if (orphaned.isNotEmpty()) {
+            val phantoms = mutableListOf<String>()
+            fileDao.byIds(orphaned).forEach { entity ->
+                val exists = entity.localPath?.let { File(it).exists() } == true
+                when {
+                    exists -> requeue.add(entity.id)
+                    entity.remoteFileId == null -> phantoms.add(entity.id)
+                    else -> fileDao.setBackupState(entity.id, BackupState.NONE)
+                }
+            }
+            if (requeue.isNotEmpty()) {
+                fileDao.setBackupStates(requeue, BackupState.NONE)
+            }
+            if (phantoms.isNotEmpty()) {
+                SafeLog.w(TAG, "Dropping ${phantoms.size} queued records with no bytes left")
+                fileDao.deleteByIds(phantoms)
+            }
+        }
+        return AppResult.Success(
+            enqueueBatch(pending + requeue, TransferType.UPLOAD, sessionId = null)
+        )
     }
 
     override suspend fun enqueueDownload(fileId: String, priority: Int): AppResult<String> {
@@ -330,6 +361,7 @@ class TransferRepositoryImpl(
     }
 
     companion object {
+        private const val TAG = "TransferRepository"
         private const val STORAGE_MARGIN = 100L * 1024 * 1024
         private const val SQL_BATCH = 500
     }
