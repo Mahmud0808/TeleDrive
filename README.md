@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" width="120" alt="TeleDrive icon">
+<img src="android/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" width="120" alt="TeleDrive icon">
 
 # TeleDrive
 
@@ -168,7 +168,7 @@ pooled with anyone else's, and a rate limit on someone else cannot affect you.
 ```bash
 git clone https://github.com/Mahmud0808/TeleDrive.git
 cd TeleDrive
-./gradlew :app:installDebug      # Android
+./gradlew :android:installDebug      # Android
 ./gradlew :desktop:run           # Windows desktop
 ```
 
@@ -236,7 +236,7 @@ shared/               # KMP: storage engine, crypto, sync, transfers
 ui/                   # KMP: every screen, theme and string resource
 ├── commonMain/           # compose resources
 └── jvmCommonMain/        # the entire presentation layer
-app/                  # Android shell: workers, notifications, media3 player
+android/              # Android shell: workers, notifications, media3 player
 desktop/              # Windows shell: window, packaging, streaming bridge
 ```
 

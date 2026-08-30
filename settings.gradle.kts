@@ -34,7 +34,7 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "TeleDrive"
-include(":app")
+include(":android")
 include(":shared")
 include(":desktop")
 include(":ui")
