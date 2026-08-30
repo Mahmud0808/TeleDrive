@@ -99,6 +99,7 @@ import com.drdisagree.teledrive.presentation.components.FolderInfoSheet
 import com.drdisagree.teledrive.presentation.components.FolderPickerDialog
 import com.drdisagree.teledrive.presentation.components.FolderRow
 import com.drdisagree.teledrive.presentation.components.LoadingState
+import com.drdisagree.teledrive.presentation.components.RefreshAction
 import com.drdisagree.teledrive.presentation.components.RenameDialog
 import com.drdisagree.teledrive.presentation.components.liftedTopAppBarColors
 import com.drdisagree.teledrive.presentation.components.pinchZoom
@@ -450,6 +451,7 @@ fun FilesScreen(
                             }
                         },
                         actions = {
+                            RefreshAction(refreshing = refreshing, onRefresh = viewModel::refresh)
                             IconButton(onClick = onOpenSearch) {
                                 Icon(
                                     Icons.Filled.Search,

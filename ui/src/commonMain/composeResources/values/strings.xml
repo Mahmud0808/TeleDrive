@@ -99,6 +99,7 @@
     <string name="common_no_subfolders">No subfolders here</string>
     <string name="common_one_level">Up one level</string>
     <string name="common_pause">Pause</string>
+    <string name="common_refresh">Refresh</string>
     <string name="common_rename">Rename</string>
     <string name="common_rename_file">Rename file</string>
     <string name="common_restore">Restore</string>

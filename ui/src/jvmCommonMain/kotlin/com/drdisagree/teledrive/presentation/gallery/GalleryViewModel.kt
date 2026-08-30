@@ -224,7 +224,7 @@ class GalleryViewModel(
         _refreshing.update { true }
         viewModelScope.launch {
             val startedAt = System.currentTimeMillis()
-            syncRepository.incrementalSync()
+            syncRepository.fullResync()
             val elapsed = System.currentTimeMillis() - startedAt
             if (elapsed < MIN_REFRESH_VISIBLE_MS) delay((MIN_REFRESH_VISIBLE_MS - elapsed).milliseconds)
             _refreshing.update { false }

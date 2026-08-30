@@ -90,6 +90,7 @@ import com.drdisagree.teledrive.domain.model.ViewMode
 import com.drdisagree.teledrive.presentation.common.DayBucket
 import com.drdisagree.teledrive.presentation.common.Formatters
 import com.drdisagree.teledrive.presentation.common.isInitialLoad
+import com.drdisagree.teledrive.presentation.components.RefreshAction
 import com.drdisagree.teledrive.presentation.components.RefreshableContent
 import com.drdisagree.teledrive.presentation.components.ConfirmDialog
 import com.drdisagree.teledrive.presentation.components.EmptyState
@@ -368,6 +369,9 @@ fun GalleryScreen(
                                 )
                             }
                         }
+                    },
+                    actions = {
+                        RefreshAction(refreshing = refreshing, onRefresh = viewModel::refresh)
                     }
                 )
             }

@@ -152,13 +152,13 @@ class FilesViewModel(
     private val _refreshing = MutableStateFlow(false)
     val refreshing: StateFlow<Boolean> = _refreshing.asStateFlow()
 
-    /** Pulls newly added remote files into the local index. */
+    /** Reconciles the local index with the channel, edits and deletions included. */
     fun refresh() {
         if (_refreshing.value) return
         _refreshing.update { true }
         viewModelScope.launch {
             val startedAt = System.currentTimeMillis()
-            when (val result = syncRepository.incrementalSync()) {
+            when (val result = syncRepository.fullResync()) {
                 is AppResult.Success -> {
                     val stats = result.value
                     if (stats.inserted > 0 || stats.updated > 0) {
