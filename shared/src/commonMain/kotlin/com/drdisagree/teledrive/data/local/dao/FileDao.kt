@@ -10,6 +10,7 @@ import androidx.room.RoomRawQuery
 import androidx.room.Update
 import com.drdisagree.teledrive.data.local.entity.AlbumSummary
 import com.drdisagree.teledrive.data.local.entity.FileEntity
+import com.drdisagree.teledrive.data.local.entity.HomeAggregates
 import com.drdisagree.teledrive.domain.model.BackupState
 import kotlinx.coroutines.flow.Flow
 
@@ -102,9 +103,6 @@ interface FileDao {
     suspend fun claimUnownedRows(chatId: Long)
 
     @Query("SELECT COUNT(*) FROM files WHERE trashedAt IS NULL AND chatId IS :chatId")
-    fun observeFileCount(chatId: Long?): Flow<Int>
-
-    @Query("SELECT COUNT(*) FROM files WHERE trashedAt IS NULL AND chatId IS :chatId")
     suspend fun fileCount(chatId: Long?): Int
 
     @Query("DELETE FROM files WHERE chatId = :chatId AND localPath IS NULL")
@@ -126,17 +124,27 @@ interface FileDao {
     @Query("SELECT * FROM files WHERE remoteUniqueId IN (:uniqueIds)")
     suspend fun byRemoteUniqueIds(uniqueIds: List<String>): List<FileEntity>
 
+    /**
+     * The home screen needs every headline number at once, and separate
+     * observed queries each rescan the table on any write. One pass keeps a
+     * large library from saturating the query executors during a backup.
+     */
     @Query(
-        """SELECT COALESCE(SUM(sizeBytes), 0) FROM files
-           WHERE trashedAt IS NULL AND messageId IS NOT NULL AND chatId IS :chatId"""
+        """SELECT COUNT(*) AS total,
+                  COALESCE(SUM(CASE WHEN messageId IS NOT NULL THEN sizeBytes END), 0)
+                      AS remoteBytes,
+                  COALESCE(SUM(CASE WHEN backupState = 'BACKED_UP' THEN 1 END), 0)
+                      AS backedUp,
+                  COALESCE(SUM(CASE WHEN backupState = 'QUEUED' THEN 1 END), 0) AS queued,
+                  COALESCE(SUM(CASE WHEN backupState = 'FAILED' THEN 1 END), 0) AS failed,
+                  COALESCE(SUM(
+                      CASE WHEN localPath IS NOT NULL AND messageId IS NULL
+                                AND backupState IN ('NONE', 'FAILED') THEN 1 END
+                  ), 0) AS localOnly
+           FROM files
+           WHERE trashedAt IS NULL AND chatId IS :chatId"""
     )
-    fun observeRemoteBytes(chatId: Long?): Flow<Long>
-
-    @Query(
-        """SELECT COUNT(*) FROM files
-           WHERE trashedAt IS NULL AND backupState = :state AND chatId IS :chatId"""
-    )
-    fun observeCountByBackupState(state: BackupState, chatId: Long?): Flow<Int>
+    fun observeHomeAggregates(chatId: Long?): Flow<HomeAggregates>
 
     @Query("UPDATE files SET name = :name, modifiedAt = :modifiedAt WHERE id = :id")
     suspend fun rename(id: String, name: String, modifiedAt: Long)
@@ -321,16 +329,6 @@ interface FileDao {
              )"""
     )
     suspend fun queuedWithoutTransferFileIds(chatId: Long?): List<String>
-
-    @Query(
-        """SELECT COUNT(*) FROM files
-           WHERE trashedAt IS NULL
-             AND localPath IS NOT NULL
-             AND messageId IS NULL
-             AND backupState IN ('NONE', 'FAILED')
-             AND chatId IS :chatId"""
-    )
-    fun observeLocalOnlyCount(chatId: Long?): Flow<Int>
 
     @Query(
         """SELECT f.folderId AS folderId,

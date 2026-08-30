@@ -2,10 +2,6 @@ package com.drdisagree.teledrive.presentation.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.drdisagree.teledrive.resources.Res
-import com.drdisagree.teledrive.resources.home_backing_up_new_files
-import com.drdisagree.teledrive.resources.home_nothing_new_to_back_up
-import com.drdisagree.teledrive.resources.home_queued_files
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.core.network.NetworkMonitor
 import com.drdisagree.teledrive.core.network.NetworkStatus
@@ -16,7 +12,6 @@ import com.drdisagree.teledrive.core.telegram.TelegramConnectionState
 import com.drdisagree.teledrive.data.local.dao.FileDao
 import com.drdisagree.teledrive.data.repository.ActiveChannel
 import com.drdisagree.teledrive.domain.model.BackupSession
-import com.drdisagree.teledrive.domain.model.BackupState
 import com.drdisagree.teledrive.domain.model.BackupTrigger
 import com.drdisagree.teledrive.domain.model.DriveChannel
 import com.drdisagree.teledrive.domain.model.DriveFile
@@ -31,7 +26,12 @@ import com.drdisagree.teledrive.domain.repository.TelegramAuthRepository
 import com.drdisagree.teledrive.domain.repository.TransferRepository
 import com.drdisagree.teledrive.presentation.common.UiText
 import com.drdisagree.teledrive.presentation.common.toUiText
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.home_backing_up_new_files
+import com.drdisagree.teledrive.resources.home_nothing_new_to_back_up
+import com.drdisagree.teledrive.resources.home_queued_files
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,10 +41,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 data class HomeUiState(
     val loading: Boolean = true,
@@ -104,28 +107,21 @@ class HomeViewModel(
             }
         }
 
+    @OptIn(FlowPreview::class)
     private val counts: Flow<HomeCounts> = activeChannel.observe().flatMapLatest { chatId ->
-        combine(
-            combine(
-                fileDao.observeCountByBackupState(BackupState.BACKED_UP, chatId),
-                fileDao.observeCountByBackupState(BackupState.QUEUED, chatId),
-                fileDao.observeCountByBackupState(BackupState.FAILED, chatId),
-                fileDao.observeLocalOnlyCount(chatId)
-            ) { backed, pending, failed, localOnly ->
-                listOf(backed, pending, failed, localOnly)
-            },
-            fileDao.observeFileCount(chatId),
-            fileDao.observeRemoteBytes(chatId)
-        ) { states, total, bytes ->
-            HomeCounts(
-                total = total,
-                remoteBytes = bytes,
-                backedUp = states[0],
-                pending = states[1],
-                failed = states[2],
-                localOnly = states[3]
-            )
-        }
+        fileDao.observeHomeAggregates(chatId)
+            .debounce(COUNTS_DEBOUNCE_MS.milliseconds)
+            .distinctUntilChanged()
+            .map { aggregates ->
+                HomeCounts(
+                    total = aggregates.total,
+                    remoteBytes = aggregates.remoteBytes,
+                    backedUp = aggregates.backedUp,
+                    pending = aggregates.queued,
+                    failed = aggregates.failed,
+                    localOnly = aggregates.localOnly
+                )
+            }
     }
 
     private val countsAndStorage: Flow<Triple<HomeCounts, List<StorageSlice>, Long?>> = combine(
@@ -211,7 +207,8 @@ class HomeViewModel(
                 is AppResult.Success -> if (result.value == 0) {
                     UiText.Resource(Res.string.home_nothing_new_to_back_up)
                 } else {
-                    UiText.PluralResource(Res.plurals.home_queued_files, result.value,
+                    UiText.PluralResource(
+                        Res.plurals.home_queued_files, result.value,
                         result.value
                     )
                 }
@@ -282,4 +279,8 @@ class HomeViewModel(
         val failed: Int,
         val localOnly: Int = 0
     )
+
+    private companion object {
+        const val COUNTS_DEBOUNCE_MS = 300L
+    }
 }
