@@ -34,24 +34,24 @@
         <item quantity="other">%1$d items</item>
     </plurals>
     <plurals name="rebuild_indexed_files">
-        <item quantity="one">Indexed %d file</item>
-        <item quantity="other">Indexed %d files</item>
+        <item quantity="one">Indexed %1$d file</item>
+        <item quantity="other">Indexed %1$d files</item>
     </plurals>
     <plurals name="rebuild_locked_files">
-        <item quantity="one">%d encrypted file skipped. Restore your key backup to index it.</item>
-        <item quantity="other">%d encrypted files skipped. Restore your key backup to index them.</item>
+        <item quantity="one">%1$d encrypted file skipped. Restore your key backup to index it.</item>
+        <item quantity="other">%1$d encrypted files skipped. Restore your key backup to index them.</item>
     </plurals>
     <plurals name="home_back_up_pending">
-        <item quantity="one">Back up %d file</item>
-        <item quantity="other">Back up %d files</item>
+        <item quantity="one">Back up %1$d file</item>
+        <item quantity="other">Back up %1$d files</item>
     </plurals>
     <plurals name="home_queued_files">
-        <item quantity="one">%d file queued</item>
-        <item quantity="other">%d files queued</item>
+        <item quantity="one">%1$d file queued</item>
+        <item quantity="other">%1$d files queued</item>
     </plurals>
     <plurals name="transfers_more_queued">
-        <item quantity="one">%d more not shown</item>
-        <item quantity="other">%d more not shown</item>
+        <item quantity="one">%1$d more not shown</item>
+        <item quantity="other">%1$d more not shown</item>
     </plurals>
 
     <!-- Bottom navigation -->
