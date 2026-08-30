@@ -6,9 +6,9 @@
 
 Back up and browse your files using a private Telegram channel as storage.
 
-[![Platform](https://img.shields.io/badge/platform-Android%208.0%2B-3DDC84?style=for-the-badge&logo=android&logoColor=white)](#requirements)
+[![Platform](https://img.shields.io/badge/platform-Android%208.0%2B%20%7C%20Windows-3DDC84?style=for-the-badge&logo=android&logoColor=white)](#requirements)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.4-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)](https://kotlinlang.org)
-[![Compose](https://img.shields.io/badge/Compose-Material%203-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white)](https://developer.android.com/compose)
+[![Compose](https://img.shields.io/badge/Compose%20Multiplatform-Material%203-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white)](https://www.jetbrains.com/compose-multiplatform/)
 [![Release](https://img.shields.io/github/v/release/Mahmud0808/TeleDrive?style=for-the-badge&logo=github&logoColor=white&color=1F883D)](https://github.com/Mahmud0808/TeleDrive/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/Mahmud0808/TeleDrive/total?style=for-the-badge&logo=github&logoColor=white&color=D97706)](https://github.com/Mahmud0808/TeleDrive/releases)
 [![License](https://img.shields.io/badge/license-Apache%202.0-6750A4?style=for-the-badge&logo=apache&logoColor=white)](LICENSE)
@@ -20,10 +20,13 @@ Back up and browse your files using a private Telegram channel as storage.
 
 ## About
 
-TeleDrive is an Android app that stores your files in a private Telegram channel
-on your own account. There is no TeleDrive server and no account to create with
-us. The app keeps a local index so browsing and search stay fast and work
-offline.
+TeleDrive stores your files in a private Telegram channel on your own account.
+There is no TeleDrive server and no account to create with us. The app keeps a
+local index so browsing and search stay fast and work offline.
+
+One Compose Multiplatform codebase ships two apps: the Android app and a
+Windows desktop app that share the storage engine, encryption, transfers and
+the entire UI layer. Sign in on both and they browse the same drive.
 
 With **Encrypt uploads** enabled, Telegram holds only sealed bytes, random file
 names, encrypted captions and an encrypted folder tree.
@@ -41,10 +44,10 @@ drives are created from Settings, and existing TeleDrive channels on the account
 are found automatically. This is separate storage, not separate Telegram
 accounts, since the app holds one session at a time.
 
-**Backup that runs on its own.** Take a photo and it uploads, the way a cloud
-gallery app behaves. The app does not have to be open or in recents: the system
-wakes it when new media lands, and an hourly sweep catches anything a missed
-wake-up would have skipped. It resumes after a reboot.
+**Backup that runs on its own** (Android). Take a photo and it uploads, the way
+a cloud gallery app behaves. The app does not have to be open or in recents: the
+system wakes it when new media lands, and an hourly sweep catches anything a
+missed wake-up would have skipped. It resumes after a reboot.
 
 **Backup control.** DCIM, Pictures, Movies or any folder you choose, backed up
 manually, on a schedule, or as files appear. Incremental by size, modified time
@@ -94,14 +97,21 @@ anything without a viewer offers a download instead.
 
 **Encryption.** Optional chunked AES-256-GCM for file bodies, encrypted caption
 manifests, obfuscated remote file names, sealed thumbnails and an encrypted
-folder tree. Keys are random and wrapped by an Android Keystore master key.
+folder tree. Keys are random and wrapped by a platform master key, the Android
+Keystore on phones and Windows DPAPI on desktop.
 Encryption cannot be enabled without a passphrase-protected key backup (PBKDF2,
 310k iterations) stored in your channel, so files stay recoverable on a new
 device.
 
-**Device security.** Biometric app lock with auto-lock timeout, optional
-screenshot and screen-recording blocking, encrypted local database and
-thumbnail cache.
+**Device security.** Biometric app lock with auto-lock timeout and optional
+screenshot and screen-recording blocking on Android, plus an encrypted local
+database and thumbnail cache on every platform.
+
+**Desktop at home on a desk.** The Windows app is the same UI in its large
+screen layout, with drag and drop uploads, Ctrl+scroll grid zoom, arrow-key
+navigation in the viewer, a configurable download folder, a dark-aware title
+bar, and playback that streams straight from Telegram into your media player
+without saving a file first.
 
 ## Screenshots
 
@@ -110,6 +120,15 @@ thumbnail cache.
 </div>
 
 ## Install
+
+### Windows
+
+Grab `TeleDrive-<version>.msi` from the [releases page](../../releases) and run
+it. It installs per user with no admin prompt, adds Start menu and desktop
+shortcuts, and uninstalls from Windows Settings like anything else. Your session
+and settings live in `%APPDATA%\TeleDrive` and survive reinstalls.
+
+### Android
 
 Grab an APK from the [releases page](../../releases). Builds are split per CPU
 architecture, so pick the one that matches your device:
@@ -128,7 +147,7 @@ library the app is built on.
 
 ## Requirements
 
-- Android 8.0 (API 26) or newer
+- Android 8.0 (API 26) or newer, or 64-bit Windows 10+
 - A Telegram account
 - Your own Telegram API credentials, free from
   [my.telegram.org](https://my.telegram.org) under *API development tools*
@@ -149,7 +168,17 @@ pooled with anyone else's, and a rate limit on someone else cannot affect you.
 ```bash
 git clone https://github.com/Mahmud0808/TeleDrive.git
 cd TeleDrive
-./gradlew :app:installDebug
+./gradlew :app:installDebug      # Android
+./gradlew :desktop:run           # Windows desktop
+```
+
+Packaging the desktop app needs a JDK that ships jpackage (the Android Studio
+runtime does not). Point the build at one with a `desktopJavaHome` property in
+your global `~/.gradle/gradle.properties`, then:
+
+```bash
+./gradlew :desktop:packageMsi           # installer
+./gradlew :desktop:createDistributable  # portable folder with TeleDrive.exe
 ```
 
 Then in the app:
@@ -161,9 +190,10 @@ Then in the app:
 3. Choose the folders to back up.
 4. Optionally enable **Encrypt uploads** and set a recovery passphrase.
 
-TDLib native libraries come from the prebuilt
-[`tdlibx/td`](https://github.com/tdlibx/td) AAR via JitPack, so no NDK
-build is needed.
+TDLib native libraries come prebuilt on both platforms: the
+[`tdlibx/td`](https://github.com/tdlibx/td) AAR via JitPack on Android and
+[tdlight](https://github.com/tdlight-team/tdlight-java) on desktop, so no
+native toolchain is needed.
 
 ## Bringing existing files in
 
@@ -191,45 +221,36 @@ What to expect for forwarded files:
 
 ## Architecture
 
-Clean Architecture with MVVM and one package per screen. The dependency rule is
+Kotlin Multiplatform with Clean Architecture and MVVM. The dependency rule is
 `presentation -> domain <- data`, with `core` shared by both sides. No TDLib
-type leaves `core/telegram`.
+type leaves `core/telegram`. Almost everything lives in common code; each
+platform contributes only what the other cannot share, like workers, the
+Keystore, DPAPI and the app shells.
 
 ```text
-app/src/main/java/com/drdisagree/teledrive/
-├── core/             # infrastructure
-│   ├── common/           # typed errors, results, logging, notifications
-│   ├── crypto/           # Keystore, streaming AEAD, key backup, KDF
-│   ├── dispatchers/      # coroutine dispatcher provider
-│   ├── files/            # mime, hashing, naming, storage stats
-│   ├── media/            # thumbnails, Coil fetcher, Media3 Telegram source
-│   ├── network/          # connectivity monitor
-│   ├── permissions/      # runtime permission model and checks
-│   ├── security/         # app lock state
-│   ├── telegram/         # TelegramClient abstraction + TDLib implementation
-│   └── transfer/         # transfer executor, workers, schedulers
-├── data/
-│   ├── local/            # Room entities, DAOs, queries, DataStore
-│   ├── remote/           # caption manifest protocol, folder state
-│   ├── mapper/           # entity to domain
-│   └── repository/       # repositories, sync engine
-├── domain/
-│   ├── model/            # models and enums
-│   ├── repository/       # interfaces
-│   └── usecase/          # backup decisions, exclusions, validation
-└── presentation/         # Compose UI, MVVM
+shared/               # KMP: storage engine, crypto, sync, transfers
+├── commonMain/           # core, data, domain
+├── jvmCommonMain/        # JVM pieces both apps use
+├── androidMain/          # Keystore, MediaStore, WorkManager glue
+└── desktopMain/          # tdlight client, DPAPI, desktop schedulers
+ui/                   # KMP: every screen, theme and string resource
+├── commonMain/           # compose resources
+└── jvmCommonMain/        # the entire presentation layer
+app/                  # Android shell: workers, notifications, media3 player
+desktop/              # Windows shell: window, packaging, streaming bridge
 ```
 
-Stack: Kotlin, Coroutines, Jetpack Compose, Material 3 Expressive, Hilt, Room,
-DataStore, WorkManager, Paging 3, Media3, Coil, TDLib.
+Stack: Kotlin Multiplatform, Coroutines, Compose Multiplatform, Material 3
+Expressive, Koin, Room KMP, DataStore, WorkManager, Paging 3, Media3, Coil,
+TDLib and tdlight.
 
 ## Security model
 
 | Layer | What is protected |
 | --- | --- |
-| On device | Room and TDLib databases sealed with a random, Keystore-wrapped key. Thumbnails and caches AES-GCM encrypted by default. |
+| On device | Room and TDLib databases sealed with a random, platform-wrapped key (Android Keystore, Windows DPAPI). Thumbnails and caches AES-GCM encrypted by default. |
 | In Telegram | With encryption on, the channel holds only sealed bytes, random file names, encrypted captions and an encrypted folder tree. |
-| Key custody | Content keys are random, wrapped by an Android Keystore master key, and never leave the device unwrapped. |
+| Key custody | Content keys are random, wrapped by the platform master key, and never leave the device unwrapped. |
 | Recovery | The content key is backed up to your channel, sealed with your passphrase (PBKDF2, 310k iterations). Restoring it on a new device unlocks everything. |
 
 Someone who reads the channel without your key learns only the file count,
@@ -255,6 +276,7 @@ set a hint when you create it and keep the passphrase out of the hint.
 ./gradlew testDebugUnitTest          # Unit tests covering crypto, key backup,
                                      # query building, backup decisions, naming
 ./gradlew connectedDebugAndroidTest  # Room DAO behaviour on a device
+./gradlew :desktop:test              # Desktop DI graph and platform seams
 ```
 
 ## Contributing
