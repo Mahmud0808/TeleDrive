@@ -13,6 +13,7 @@ import com.drdisagree.teledrive.core.crypto.StreamCrypto
 import com.drdisagree.teledrive.core.crypto.WrappedKeyRepository
 import com.drdisagree.teledrive.core.dispatchers.DispatcherProvider
 import com.drdisagree.teledrive.core.files.MimeTypes
+import com.drdisagree.teledrive.core.media.ApkIconExtractor
 import com.drdisagree.teledrive.core.media.MediaPart
 import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.core.telegram.TelegramDownloadEvent
@@ -110,7 +111,7 @@ class PreviewContentResolver(
            open, so browsing stays instant while a large transfer never starts
            without the user asking. */
         val autoFetchable = file.sizeBytes <= AUTO_PREVIEW_LIMIT &&
-                (MimeTypes.isImage(file.mimeType) || MimeTypes.isText(file.mimeType))
+                (MimeTypes.isImage(file.mimeType) || MimeTypes.isText(file.mimeType) || MimeTypes.isApk(file.mimeType, file.name))
         if (!autoFetchable) {
             emit(PreviewContent.RequiresDownload(file.sizeBytes))
             return@flow
@@ -133,8 +134,19 @@ class PreviewContentResolver(
         MimeTypes.isPdf(file.mimeType) -> PreviewContent.Pdf(path)
         MimeTypes.isText(file.mimeType) -> readText(path)
         MimeTypes.isArchive(file.mimeType) -> readArchive(file, path)
+        MimeTypes.isApk(file.mimeType, file.name) -> readApk(path)
         else -> PreviewContent.Unsupported(Res.string.preview_no_preview_for_type)
     }
+
+    private fun readApk(path: String): PreviewContent = runCatching {
+        val file = File(path)
+        val iconBytes = ApkIconExtractor.extractIconBytes(file)
+        if (iconBytes != null) {
+            PreviewContent.Image(iconBytes)
+        } else {
+            PreviewContent.Unsupported(Res.string.preview_no_preview_for_type)
+        }
+    }.getOrElse { PreviewContent.Unsupported(Res.string.preview_no_preview_for_type) }
 
     private fun readText(path: String): PreviewContent = runCatching {
         val target = File(path)

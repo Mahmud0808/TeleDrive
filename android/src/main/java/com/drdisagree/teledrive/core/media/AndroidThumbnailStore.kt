@@ -3,6 +3,9 @@ package com.drdisagree.teledrive.core.media
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.media.MediaMetadataRetriever
 import android.media.ThumbnailUtils
 import android.os.Build
@@ -146,9 +149,45 @@ class AndroidThumbnailStore(
         when {
             MimeTypes.isImage(mimeType) -> decodeImageThumbnail(file)
             MimeTypes.isVideo(mimeType) -> decodeVideoThumbnail(file)
+            MimeTypes.isApk(mimeType, file.name) -> decodeApkIcon(file)
             else -> null
         }
     }.getOrNull()
+
+    private fun decodeApkIcon(file: File): Bitmap? {
+        val bitmapFromPm = runCatching {
+            val pm = context.packageManager
+            val info = pm.getPackageArchiveInfo(file.absolutePath, 0)
+            val appInfo = info?.applicationInfo
+            if (appInfo != null) {
+                appInfo.sourceDir = file.absolutePath
+                appInfo.publicSourceDir = file.absolutePath
+                val drawable = appInfo.loadIcon(pm)
+                if (drawable != null) {
+                    return@runCatching drawableToBitmap(drawable)
+                }
+            }
+            null
+        }.getOrNull()
+
+        if (bitmapFromPm != null) return bitmapFromPm
+
+        val bytes = ApkIconExtractor.extractIconBytes(file) ?: return null
+        return BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+    }
+
+    private fun drawableToBitmap(drawable: Drawable): Bitmap {
+        if (drawable is BitmapDrawable && drawable.bitmap != null) {
+            return drawable.bitmap
+        }
+        val width = if (drawable.intrinsicWidth > 0) drawable.intrinsicWidth else MAX_DIMENSION
+        val height = if (drawable.intrinsicHeight > 0) drawable.intrinsicHeight else MAX_DIMENSION
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        drawable.setBounds(0, 0, canvas.width, canvas.height)
+        drawable.draw(canvas)
+        return bitmap
+    }
 
     private fun decodeImageThumbnail(file: File): Bitmap? =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

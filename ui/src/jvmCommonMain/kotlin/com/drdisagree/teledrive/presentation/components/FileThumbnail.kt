@@ -45,7 +45,8 @@ fun FileThumbnail(
     // Text can carry one too: a note holding a link previews as that link.
     val supportsThumbnail = file.category == FileCategory.IMAGE ||
             file.category == FileCategory.VIDEO ||
-            MimeTypes.isText(file.mimeType)
+            MimeTypes.isText(file.mimeType) ||
+            MimeTypes.isApk(file.mimeType, file.name)
     var failed by remember(file.id) { mutableStateOf(false) }
 
     BoxWithConstraints(

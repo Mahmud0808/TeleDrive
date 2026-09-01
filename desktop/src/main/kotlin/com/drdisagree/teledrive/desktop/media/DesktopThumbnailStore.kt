@@ -15,9 +15,11 @@ import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import java.awt.Color
 import java.awt.Image
 import java.awt.image.BufferedImage
+import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
 import javax.imageio.ImageIO
+import com.drdisagree.teledrive.core.media.ApkIconExtractor
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
@@ -82,6 +84,7 @@ class DesktopThumbnailStore(
                 !file.exists() -> null
                 MimeTypes.isText(entity.mimeType) -> linkThumbnail(file)
                 MimeTypes.isImage(entity.mimeType) -> decodeImageThumbnail(file)
+                MimeTypes.isApk(entity.mimeType, file.name) -> decodeApkIcon(file)
                 else -> null
             }
         }
@@ -134,6 +137,11 @@ class DesktopThumbnailStore(
             ?.imagePath
             ?: return null
         return File(imagePath).takeIf { it.exists() }?.let(::decodeImageThumbnail)
+    }
+
+    private fun decodeApkIcon(file: File): BufferedImage? {
+        val bytes = ApkIconExtractor.extractIconBytes(file) ?: return null
+        return runCatching { ImageIO.read(ByteArrayInputStream(bytes)) }.getOrNull()
     }
 
     private fun decodeImageThumbnail(file: File): BufferedImage? = runCatching {
