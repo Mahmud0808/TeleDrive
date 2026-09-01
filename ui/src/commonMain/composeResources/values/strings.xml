@@ -434,6 +434,7 @@
 
     <!-- Player -->
     <string name="player_audio_track">Audio track</string>
+    <string name="player_codec_unsupported">This device cannot decode this video. Download it and play it in another app.</string>
     <string name="player_exit_full_screen">Exit full screen</string>
     <string name="player_fewer_controls">Fewer controls</string>
     <string name="player_full_screen">Full screen</string>
@@ -442,6 +443,7 @@
     <string name="player_mute">Mute</string>
     <string name="player_pause">Pause</string>
     <string name="player_play">Play</string>
+    <string name="player_playback_failed">Playback failed</string>
     <string name="player_repeat_off">Repeat off</string>
     <string name="player_repeat_one">Repeat one</string>
     <string name="player_replay">Replay</string>

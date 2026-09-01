@@ -6,6 +6,7 @@ import androidx.annotation.OptIn
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -41,6 +43,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
+import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.VideoSize
 import androidx.media3.common.util.UnstableApi
@@ -51,7 +54,11 @@ import androidx.media3.ui.PlayerView
 import coil3.compose.AsyncImage
 import com.drdisagree.teledrive.core.media.TelegramDataSourceFactory
 import com.drdisagree.teledrive.core.media.ThumbnailModel
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.player_codec_unsupported
+import com.drdisagree.teledrive.resources.player_playback_failed
 import kotlinx.coroutines.delay
+import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
@@ -141,6 +148,8 @@ fun MediaPlayer(
     var resizeMode by remember { mutableStateOf(PlayerResizeMode.FIT) }
     var playing by remember(player) { mutableStateOf(player?.isPlaying == true) }
     var sized by remember(player) { mutableStateOf((player?.videoSize?.width ?: 0) > 0) }
+    var decoderFailed by remember(player) { mutableStateOf(false) }
+    var playbackFailed by remember(player) { mutableStateOf(false) }
 
     DisposableEffect(player) {
         if (player == null) return@DisposableEffect onDispose { }
@@ -151,6 +160,18 @@ fun MediaPlayer(
 
             override fun onVideoSizeChanged(videoSize: VideoSize) {
                 sized = videoSize.width > 0 && videoSize.height > 0
+            }
+
+            override fun onPlayerError(error: PlaybackException) {
+                when (error.errorCode) {
+                    PlaybackException.ERROR_CODE_DECODER_INIT_FAILED,
+                    PlaybackException.ERROR_CODE_DECODING_FAILED,
+                    PlaybackException.ERROR_CODE_DECODING_FORMAT_UNSUPPORTED,
+                    PlaybackException.ERROR_CODE_DECODER_QUERY_FAILED ->
+                        decoderFailed = true
+
+                    else -> playbackFailed = true
+                }
             }
         }
         player.addListener(listener)
@@ -203,6 +224,36 @@ fun MediaPlayer(
                     contentDescription = null,
                     contentScale = ContentScale.Fit,
                     modifier = Modifier.fillMaxSize()
+                )
+            }
+        }
+        if (decoderFailed || playbackFailed) {
+            Column(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.6f))
+                    .padding(horizontal = 32.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.ErrorOutline,
+                    contentDescription = null,
+                    modifier = Modifier.size(48.dp),
+                    tint = MaterialTheme.colorScheme.error
+                )
+                Text(
+                    text = stringResource(
+                        if (decoderFailed) {
+                            Res.string.player_codec_unsupported
+                        } else {
+                            Res.string.player_playback_failed
+                        }
+                    ),
+                    modifier = Modifier.padding(top = 16.dp),
+                    style = MaterialTheme.typography.bodyLarge,
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
         }
