@@ -111,7 +111,7 @@ class PreviewContentResolver(
            open, so browsing stays instant while a large transfer never starts
            without the user asking. */
         val autoFetchable = file.sizeBytes <= AUTO_PREVIEW_LIMIT &&
-                (MimeTypes.isImage(file.mimeType) || MimeTypes.isText(file.mimeType) || MimeTypes.isApk(file.mimeType))
+                (MimeTypes.isImage(file.mimeType) || MimeTypes.isText(file.mimeType) || MimeTypes.isApk(file.mimeType, file.name))
         if (!autoFetchable) {
             emit(PreviewContent.RequiresDownload(file.sizeBytes))
             return@flow
@@ -134,7 +134,7 @@ class PreviewContentResolver(
         MimeTypes.isPdf(file.mimeType) -> PreviewContent.Pdf(path)
         MimeTypes.isText(file.mimeType) -> readText(path)
         MimeTypes.isArchive(file.mimeType) -> readArchive(file, path)
-        MimeTypes.isApk(file.mimeType) -> readApk(path)
+        MimeTypes.isApk(file.mimeType, file.name) -> readApk(path)
         else -> PreviewContent.Unsupported(Res.string.preview_no_preview_for_type)
     }
 

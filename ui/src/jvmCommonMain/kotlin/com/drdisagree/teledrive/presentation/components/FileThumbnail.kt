@@ -46,7 +46,7 @@ fun FileThumbnail(
     val supportsThumbnail = file.category == FileCategory.IMAGE ||
             file.category == FileCategory.VIDEO ||
             MimeTypes.isText(file.mimeType) ||
-            MimeTypes.isApk(file.mimeType)
+            MimeTypes.isApk(file.mimeType, file.name)
     var failed by remember(file.id) { mutableStateOf(false) }
 
     BoxWithConstraints(

@@ -84,7 +84,7 @@ class DesktopThumbnailStore(
                 !file.exists() -> null
                 MimeTypes.isText(entity.mimeType) -> linkThumbnail(file)
                 MimeTypes.isImage(entity.mimeType) -> decodeImageThumbnail(file)
-                MimeTypes.isApk(entity.mimeType) -> decodeApkIcon(file)
+                MimeTypes.isApk(entity.mimeType, file.name) -> decodeApkIcon(file)
                 else -> null
             }
         }

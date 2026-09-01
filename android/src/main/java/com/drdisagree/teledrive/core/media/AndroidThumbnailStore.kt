@@ -149,7 +149,7 @@ class AndroidThumbnailStore(
         when {
             MimeTypes.isImage(mimeType) -> decodeImageThumbnail(file)
             MimeTypes.isVideo(mimeType) -> decodeVideoThumbnail(file)
-            MimeTypes.isApk(mimeType) -> decodeApkIcon(file)
+            MimeTypes.isApk(mimeType, file.name) -> decodeApkIcon(file)
             else -> null
         }
     }.getOrNull()
