@@ -76,6 +76,13 @@ class ChannelRepositoryImpl(
         if (activeId != null && channelDao.byId(activeId)?.lastOpenedAt == 0L) {
             channelDao.touch(activeId, now)
         }
+        val remoteIds = remote.map { it.chatId }.toSet()
+        channelDao.all()
+            .filter { it.chatId !in remoteIds && it.chatId != activeId }
+            .forEach { stale ->
+                SafeLog.w(TAG, "Dropping a drive no longer on the account #${stale.chatId}")
+                forget(stale.chatId)
+            }
         AppResult.Success(channelDao.all().map { it.toDomain(activeId) })
     }
 
