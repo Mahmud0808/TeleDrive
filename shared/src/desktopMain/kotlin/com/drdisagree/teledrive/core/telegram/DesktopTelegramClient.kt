@@ -640,33 +640,23 @@ class DesktopTelegramClient(
         awaitAuthorized()
 
         val known = validateCandidates(knownChatIds.toSet())
-        if (known.size == knownChatIds.size && known.isNotEmpty()) {
-            SafeLog.d(TAG, "Confirmed ${known.size} known drives")
-            return known.sortedByDescending { it.documentCount }
-        }
+        val knownIds = known.map { it.chatId }.toSet()
 
         val candidates = LinkedHashSet<Long>()
         runCatching { send(TdApi.SearchChatsOnServer(STORAGE_CHAT_TITLE, null, CHAT_SEARCH_LIMIT)) }
             .getOrNull()?.chatIds?.forEach { candidates.add(it) }
-
-        val fromSearch = validateCandidates(candidates)
-        if (fromSearch.size >= knownChatIds.size && fromSearch.isNotEmpty()) {
-            SafeLog.d(TAG, "Discovered ${fromSearch.size} drives by name")
-            return fromSearch.sortedByDescending { it.documentCount }
-        }
-
         for (chatList in listOf(TdApi.ChatListMain(), TdApi.ChatListArchive())) {
             loadEveryChat(chatList)
             runCatching { send(TdApi.GetChats(chatList, CHAT_LIST_LIMIT)) }
                 .getOrNull()?.chatIds?.forEach { candidates.add(it) }
         }
-        return validateCandidates(candidates)
+        val discovered = validateCandidates(
+            candidates.filterNot { it in knownIds }.toSet()
+        )
+        return (known + discovered)
             .sortedByDescending { it.documentCount }
             .also { found ->
-                SafeLog.d(
-                    TAG,
-                    "Discovered ${found.size} drives from ${candidates.size} chats"
-                )
+                SafeLog.d(TAG, "Discovered ${found.size} drives, ${known.size} already known")
             }
     }
 
