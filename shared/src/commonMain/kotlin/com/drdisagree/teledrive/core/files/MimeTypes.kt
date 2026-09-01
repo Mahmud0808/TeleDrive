@@ -18,6 +18,7 @@ object MimeTypes {
             "yml", "yaml" -> "application/yaml"
             "heic" -> "image/heic"
             "heif" -> "image/heif"
+            "apk" -> "application/vnd.android.package-archive"
             else -> GENERIC
         }
     }
@@ -31,6 +32,8 @@ object MimeTypes {
     fun isPdf(mimeType: String): Boolean = mimeType == "application/pdf"
 
     fun isMarkdown(mimeType: String): Boolean = mimeType == "text/markdown"
+
+    fun isApk(mimeType: String): Boolean = mimeType == "application/vnd.android.package-archive"
 
     fun isText(mimeType: String): Boolean =
         mimeType.startsWith("text/") ||
