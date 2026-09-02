@@ -157,7 +157,13 @@ class TrashRepositoryImpl(
                     .map { it.chatId!! to it.messageId!! } +
                         parts
                             .filter { it.chatId != null && it.messageId != null }
-                            .map { it.chatId!! to it.messageId!! }
+                            .map { it.chatId!! to it.messageId!! } +
+                        entities
+                            .filter { it.chatId != null && it.iconFileId != null }
+                            .mapNotNull { entity ->
+                                val iconMsgId = entity.iconFileId?.substringAfter(":", "")?.toLongOrNull()
+                                if (iconMsgId != null) entity.chatId!! to iconMsgId else null
+                            }
                 )
             .distinct()
             .groupBy({ it.first }, { it.second })

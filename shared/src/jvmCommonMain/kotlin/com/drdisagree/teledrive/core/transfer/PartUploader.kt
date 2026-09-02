@@ -39,7 +39,8 @@ class PartUploader(
     private val streamCrypto: StreamCrypto,
     private val wrappedKeyRepository: WrappedKeyRepository,
     private val thumbnailStore: ThumbnailStore,
-    private val dispatchers: DispatcherProvider
+    private val dispatchers: DispatcherProvider,
+    private val apkIconUploader: ApkIconUploader
 ) {
 
     sealed interface Event {
@@ -80,55 +81,9 @@ class PartUploader(
                 }
                 if (encrypt) emit(Event.PartDone(index, partCount))
 
-                val rawIconPath = if (index == 0) {
-                    thumbnailStore.uploadThumbnailFile(entity.id)?.absolutePath
+                val iconFileId = if (index == 0) {
+                    apkIconUploader.uploadIconIfApk(entity, chatId, encrypt)
                 } else null
-
-                var iconFileId: String? = null
-                if (index == 0 && MimeTypes.isApk(entity.mimeType, entity.name) && rawIconPath != null) {
-                    val iconUploadPath: String
-                    val iconFileName: String
-                    val iconMimeType: String
-                    var stagingIconFile: File? = null
-
-                    if (encrypt) {
-                        val rawIconBytes = runCatching { File(rawIconPath).readBytes() }.getOrNull()
-                        val key = runCatching { wrappedKeyRepository.getOrCreate(CryptoKeys.THUMBNAIL) }.getOrNull()
-                        if (rawIconBytes != null && key != null) {
-                            val encryptedBytes = streamCrypto.encryptBytes(key, rawIconBytes)
-                            val staging = File(scratchDir(), "icon-${entity.id}.tde")
-                            staging.writeBytes(encryptedBytes)
-                            stagingIconFile = staging
-                            iconUploadPath = staging.absolutePath
-                            iconFileName = "icon-${entity.id}.tde"
-                            iconMimeType = "application/octet-stream"
-                        } else {
-                            iconUploadPath = rawIconPath
-                            iconFileName = "icon-${entity.id}.jpg"
-                            iconMimeType = "image/jpeg"
-                        }
-                    } else {
-                        iconUploadPath = rawIconPath
-                        iconFileName = "icon-${entity.id}.jpg"
-                        iconMimeType = "image/jpeg"
-                    }
-
-                    runCatching {
-                        telegramClient.uploadDocument(
-                            chatId = chatId,
-                            localPath = iconUploadPath,
-                            fileName = iconFileName,
-                            mimeType = iconMimeType,
-                            caption = "#teledrive-icon-${entity.id}",
-                            thumbnailPath = null
-                        ).first { it is TelegramUploadEvent.Completed } as? TelegramUploadEvent.Completed
-                    }.getOrNull()?.let { completed ->
-                        iconFileId = completed.document.remoteFileId
-                    }
-                    stagingIconFile?.delete()
-                }
-
-                val previewPath = if (index == 0 && !encrypt) rawIconPath else null
 
                 val partManifest = manifest.copy(
                     version = RemoteFileManifest.PART_VERSION,
@@ -152,7 +107,7 @@ class PartUploader(
                     fileName = partName,
                     mimeType = if (encrypt) OCTET_STREAM else entity.mimeType,
                     caption = manifestCodec.encode(partManifest, encrypt),
-                    thumbnailPath = previewPath
+                    thumbnailPath = null
                 ).collect { event ->
                     when (event) {
                         is TelegramUploadEvent.Started -> Unit

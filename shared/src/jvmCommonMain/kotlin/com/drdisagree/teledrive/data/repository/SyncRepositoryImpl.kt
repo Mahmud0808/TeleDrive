@@ -195,14 +195,7 @@ class SyncRepositoryImpl(
                     }
                     localOnly.forEach { entity -> fileDao.detachRemote(entity.id) }
                 }
-            }
-        }
-        val internalIconEntries = fileDao.filesWithRemote().filter { entity ->
-            entity.name.startsWith("icon-") && entity.mimeType == "image/jpeg"
-        }
-        if (internalIconEntries.isNotEmpty()) {
-            database.inImmediateTransaction {
-                fileDao.deleteByIds(internalIconEntries.map { it.id })
+                detached = stale.size
             }
         }
         SafeLog.d(TAG, "Sync done: +$inserted ~$updated -$detached, $locked locked")

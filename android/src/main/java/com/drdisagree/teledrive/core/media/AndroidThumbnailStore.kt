@@ -218,8 +218,9 @@ class AndroidThumbnailStore(
 
     private suspend fun fetchIconBytes(entity: FileEntity, iconFileId: String): ByteArray? {
         var readyPath: String? = null
+        val rawRemoteFileId = iconFileId.substringBefore(":")
         runCatching {
-            telegramClient.downloadDocument(iconFileId).collect { event ->
+            telegramClient.downloadDocument(rawRemoteFileId).collect { event ->
                 if (event is TelegramDownloadEvent.Completed) {
                     readyPath = event.localPath
                 }
@@ -228,7 +229,7 @@ class AndroidThumbnailStore(
         val path = readyPath ?: return null
         val rawBytes = runCatching { File(path).readBytes() }.getOrNull() ?: return null
         return if (entity.isEncrypted) {
-            val key = runCatching { thumbnailKey() }.getOrNull() ?: return null
+            val key = wrappedKeyRepository.get(CryptoKeys.CONTENT) ?: return null
             runCatching { streamCrypto.decryptBytes(key, rawBytes) }.getOrNull()
         } else {
             rawBytes
