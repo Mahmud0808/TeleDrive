@@ -37,7 +37,7 @@ fun TransferThumbnail(
         FileCategory.fromMimeType(MimeTypes.fromFileName(transfer.displayName))
     }
     val canHaveThumbnail = transfer.fileId != null &&
-            (category == FileCategory.IMAGE || category == FileCategory.VIDEO)
+            (category == FileCategory.IMAGE || category == FileCategory.VIDEO || MimeTypes.isApk(MimeTypes.fromFileName(transfer.displayName), transfer.displayName))
     var failed by remember(transfer.fileId) { mutableStateOf(false) }
 
     Box(

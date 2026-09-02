@@ -35,6 +35,7 @@ class PartUploader(
     private val manifestCodec: ManifestCodec,
     private val streamCrypto: StreamCrypto,
     private val wrappedKeyRepository: WrappedKeyRepository,
+    private val thumbnailStore: ThumbnailStore,
     private val dispatchers: DispatcherProvider
 ) {
 
@@ -90,13 +91,16 @@ class PartUploader(
 
                 var stored: FilePartEntity? = null
                 val alreadySent = uploadedBefore
+                val previewPath = if (index == 0 && !encrypt) {
+                    thumbnailStore.uploadThumbnailFile(entity.id)?.absolutePath
+                } else null
                 telegramClient.uploadDocument(
                     chatId = chatId,
                     localPath = scratch.absolutePath,
                     fileName = partName,
                     mimeType = if (encrypt) OCTET_STREAM else entity.mimeType,
                     caption = manifestCodec.encode(partManifest, encrypt),
-                    thumbnailPath = null
+                    thumbnailPath = previewPath
                 ).collect { event ->
                     when (event) {
                         is TelegramUploadEvent.Started -> Unit
