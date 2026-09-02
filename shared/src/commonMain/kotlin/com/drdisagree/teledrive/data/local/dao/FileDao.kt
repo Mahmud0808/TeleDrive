@@ -236,8 +236,8 @@ interface FileDao {
     )
     suspend fun detachRemote(id: String)
 
-    @Query("UPDATE files SET localPath = :localPath, modifiedAt = :modifiedAt WHERE id = :id")
-    suspend fun setLocalPath(id: String, localPath: String?, modifiedAt: Long)
+    @Query("UPDATE files SET localPath = :localPath WHERE id = :id")
+    suspend fun setLocalPath(id: String, localPath: String?)
 
     @Query(
         """UPDATE files SET trashedAt = :trashedAt, preTrashFolderId = folderId, folderId = NULL

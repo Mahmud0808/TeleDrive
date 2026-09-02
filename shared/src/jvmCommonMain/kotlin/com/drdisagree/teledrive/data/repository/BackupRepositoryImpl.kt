@@ -204,7 +204,7 @@ class BackupRepositoryImpl(
             ?: matches.singleOrNull()?.takeIf { it.contentHash == null }
             ?: return false
 
-        fileDao.setLocalPath(match.id, candidate.absolutePath, System.currentTimeMillis())
+        fileDao.setLocalPath(match.id, candidate.absolutePath)
         recordBackedUp(candidate, match.id, localHash)
         SafeLog.d(TAG, "Linked an existing upload to its local copy")
         return true

@@ -495,7 +495,7 @@ class TransferExecutor(
             }
         )
 
-        fileDao.setLocalPath(fileId, savedPath, System.currentTimeMillis())
+        fileDao.setLocalPath(fileId, savedPath)
         transferDao.setCompleted(transfer.id, System.currentTimeMillis())
         return Outcome.Completed
     }

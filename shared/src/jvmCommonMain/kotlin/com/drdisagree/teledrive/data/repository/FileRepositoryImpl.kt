@@ -221,7 +221,7 @@ class FileRepositoryImpl(
             if (localFile.exists()) {
                 val renamed = File(localFile.parentFile, unique)
                 if (localFile.renameTo(renamed)) {
-                    fileDao.setLocalPath(id, renamed.absolutePath, now)
+                    fileDao.setLocalPath(id, renamed.absolutePath)
                 }
             }
         }
@@ -478,10 +478,9 @@ class FileRepositoryImpl(
         fileDao.observeByIds(ids).map { rows -> rows.map { it.toDomain() } }
 
     override suspend fun reconcileLocalCopies(ids: List<String>) {
-        val now = System.currentTimeMillis()
         fileDao.byIds(ids)
             .filter { entity -> entity.localPath?.let { !File(it).exists() } == true }
-            .forEach { entity -> fileDao.setLocalPath(entity.id, null, now) }
+            .forEach { entity -> fileDao.setLocalPath(entity.id, null) }
     }
 
     override suspend fun saveNote(
@@ -606,7 +605,7 @@ class FileRepositoryImpl(
         val now = System.currentTimeMillis()
         fileDao.restoreFromTrash(listOf(match.id))
         fileDao.move(listOf(match.id), folderId, now)
-        fileDao.setLocalPath(match.id, source.absolutePath, now)
+        fileDao.setLocalPath(match.id, source.absolutePath)
         markFilesDirty(listOf(match.id))
         return fileDao.byId(match.id)?.toDomain()
     }
@@ -626,7 +625,7 @@ class FileRepositoryImpl(
         for (entity in candidates) {
             val path = entity.localPath ?: continue
             if (localCopyDeleter.isGone(path)) {
-                fileDao.setLocalPath(entity.id, null, System.currentTimeMillis())
+                fileDao.setLocalPath(entity.id, null)
                 cleared++
             }
         }
