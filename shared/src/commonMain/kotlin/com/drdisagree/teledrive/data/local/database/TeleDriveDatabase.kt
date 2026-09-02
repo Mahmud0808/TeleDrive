@@ -42,7 +42,7 @@ import com.drdisagree.teledrive.data.local.entity.TransferEntity
         FilePartEntity::class,
         ProxyEntity::class
     ],
-    version = 9,
+    version = 10,
     exportSchema = true
 )
 @ConstructedBy(TeleDriveDatabaseConstructor::class)

@@ -6,6 +6,7 @@ import com.drdisagree.teledrive.core.crypto.CryptoKeys
 import com.drdisagree.teledrive.core.crypto.StreamCrypto
 import com.drdisagree.teledrive.core.crypto.WrappedKeyRepository
 import com.drdisagree.teledrive.core.dispatchers.DispatcherProvider
+import com.drdisagree.teledrive.core.media.ThumbnailStore
 import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.core.telegram.TelegramUploadEvent
 import com.drdisagree.teledrive.data.local.dao.FilePartDao
@@ -13,6 +14,8 @@ import com.drdisagree.teledrive.data.local.entity.FileEntity
 import com.drdisagree.teledrive.data.local.entity.FilePartEntity
 import com.drdisagree.teledrive.data.remote.telegram.ManifestCodec
 import com.drdisagree.teledrive.data.remote.telegram.RemoteFileManifest
+import com.drdisagree.teledrive.core.files.MimeTypes
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -35,7 +38,9 @@ class PartUploader(
     private val manifestCodec: ManifestCodec,
     private val streamCrypto: StreamCrypto,
     private val wrappedKeyRepository: WrappedKeyRepository,
-    private val dispatchers: DispatcherProvider
+    private val thumbnailStore: ThumbnailStore,
+    private val dispatchers: DispatcherProvider,
+    private val apkIconUploader: ApkIconUploader
 ) {
 
     sealed interface Event {
@@ -75,12 +80,18 @@ class PartUploader(
                     writePart(source, plainOffset, plainSize, scratch, encrypt)
                 }
                 if (encrypt) emit(Event.PartDone(index, partCount))
+
+                val iconFileId = if (index == 0) {
+                    apkIconUploader.uploadIconIfApk(entity, chatId, encrypt)
+                } else null
+
                 val partManifest = manifest.copy(
                     version = RemoteFileManifest.PART_VERSION,
                     partCount = partCount,
                     partIndex = index,
                     partOffset = plainOffset,
-                    partSize = plainSize
+                    partSize = plainSize,
+                    iconFileId = if (index == 0) iconFileId ?: manifest.iconFileId else null
                 )
                 val partName = if (encrypt) {
                     FileParts.nameFor(entity.id, index)

@@ -4,6 +4,13 @@ import androidx.room.migration.Migration
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
 
+/** Adds iconFileId for storing uploaded APK icon remote file IDs. */
+val MIGRATION_9_10 = object : Migration(9, 10) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("ALTER TABLE files ADD COLUMN iconFileId TEXT")
+    }
+}
+
 /** Adds saved proxies, for networks that block Telegram outright. */
 val MIGRATION_8_9 = object : Migration(8, 9) {
     override fun migrate(connection: SQLiteConnection) {

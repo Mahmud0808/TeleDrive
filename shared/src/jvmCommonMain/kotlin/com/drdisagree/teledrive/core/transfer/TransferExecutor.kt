@@ -5,6 +5,7 @@ import com.drdisagree.teledrive.core.crypto.CryptoKeys
 import com.drdisagree.teledrive.core.crypto.KeyUnavailableException
 import com.drdisagree.teledrive.core.crypto.StreamCrypto
 import com.drdisagree.teledrive.core.crypto.WrappedKeyRepository
+import com.drdisagree.teledrive.core.files.MimeTypes
 import com.drdisagree.teledrive.core.files.DownloadWriter
 import com.drdisagree.teledrive.core.files.Hashing
 import com.drdisagree.teledrive.core.media.ThumbnailStore
@@ -63,7 +64,8 @@ class TransferExecutor(
     private val settingsRepository: SettingsRepository,
     private val filePartDao: FilePartDao,
     private val partUploader: PartUploader,
-    private val partDownloader: PartDownloader
+    private val partDownloader: PartDownloader,
+    private val apkIconUploader: ApkIconUploader
 ) {
 
     /**
@@ -131,6 +133,10 @@ class TransferExecutor(
             fileDao.upsert(entity.copy(contentHash = contentHash))
         }
 
+        val rawIconPath = thumbnailStore.uploadThumbnailFile(entity.id)?.absolutePath
+        val iconFileId = apkIconUploader.uploadIconIfApk(entity, chatId, encrypt)
+        val previewPath = if (encrypt) null else rawIconPath
+
         val manifest = RemoteFileManifest(
             fileId = entity.id,
             name = entity.name,
@@ -146,7 +152,8 @@ class TransferExecutor(
             modifiedAt = entity.modifiedAt,
             width = entity.width,
             height = entity.height,
-            durationMs = entity.durationMs
+            durationMs = entity.durationMs,
+            iconFileId = iconFileId
         )
         val caption = manifestCodec.encode(manifest, encrypt)
 
@@ -187,11 +194,6 @@ class TransferExecutor(
         return try {
             var outcome: Outcome =
                 Outcome.Failed(messages.uploadEnded)
-            val previewPath = if (encrypt) {
-                null
-            } else {
-                thumbnailStore.uploadThumbnailFile(entity.id)?.absolutePath
-            }
             telegramClient.uploadDocument(
                 chatId = chatId,
                 localPath = uploadPath,
@@ -221,7 +223,8 @@ class TransferExecutor(
                             messageId = document.messageId,
                             remoteFileId = document.remoteFileId,
                             remoteUniqueId = document.uniqueFileId,
-                            state = BackupState.BACKED_UP
+                            state = BackupState.BACKED_UP,
+                            iconFileId = iconFileId
                         )
                         if (transfer.type == TransferType.BACKUP) {
                             backupDao.upsertRecord(
@@ -322,7 +325,8 @@ class TransferExecutor(
                                 messageId = first.messageId,
                                 remoteFileId = first.remoteFileId,
                                 remoteUniqueId = first.remoteUniqueId,
-                                state = BackupState.BACKED_UP
+                                state = BackupState.BACKED_UP,
+                                iconFileId = manifest.iconFileId
                             )
                             if (transfer.type == TransferType.BACKUP) {
                                 backupDao.upsertRecord(

@@ -209,7 +209,8 @@ class SyncRepositoryImpl(
         document.fileName == RemoteFolderState.FILE_NAME ||
                 document.fileName == KeyBackupCodec.BACKUP_FILE_NAME ||
                 document.caption.startsWith(RemoteFolderState.MARKER) ||
-                document.caption.startsWith(KEY_BACKUP_MARKER)
+                document.caption.startsWith(KEY_BACKUP_MARKER) ||
+                document.caption.startsWith(ICON_MARKER)
 
     private fun isNewToLocal(document: RemoteDocument, known: KnownRows): Boolean {
         val existing = known.byUniqueId[document.uniqueFileId] ?: return true
@@ -335,7 +336,8 @@ class SyncRepositoryImpl(
             modifiedAt = local?.modifiedAt ?: manifest?.modifiedAt ?: existing?.modifiedAt
             ?: (document.dateSeconds * 1000L),
             addedAt = existing?.addedAt ?: now,
-            partCount = manifest?.partCount ?: existing?.partCount ?: 0
+            partCount = manifest?.partCount ?: existing?.partCount ?: 0,
+            iconFileId = manifest?.iconFileId ?: existing?.iconFileId
         )
 
         if (manifest != null && manifest.isPart && manifest.partIndex != 0) {
@@ -397,6 +399,7 @@ class SyncRepositoryImpl(
     companion object {
         private const val TAG = "SyncRepository"
         private const val KEY_BACKUP_MARKER = "#teledrive-keybackup"
+        private const val ICON_MARKER = "#teledrive-icon"
         private const val PAGE_SIZE = 100
         private const val MAX_PAGES = 2000
     }

@@ -217,6 +217,7 @@ interface FileDao {
     @Query(
         """UPDATE files SET chatId = :chatId, messageId = :messageId,
            remoteFileId = :remoteFileId, remoteUniqueId = :remoteUniqueId,
+           iconFileId = COALESCE(:iconFileId, iconFileId),
            backupState = :state WHERE id = :id"""
     )
     suspend fun setRemoteMapping(
@@ -225,7 +226,8 @@ interface FileDao {
         messageId: Long?,
         remoteFileId: String?,
         remoteUniqueId: String?,
-        state: BackupState
+        state: BackupState,
+        iconFileId: String? = null
     )
 
     @Query(

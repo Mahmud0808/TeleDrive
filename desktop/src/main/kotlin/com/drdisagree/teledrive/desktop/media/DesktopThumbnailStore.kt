@@ -8,8 +8,10 @@ import com.drdisagree.teledrive.core.files.MimeTypes
 import com.drdisagree.teledrive.core.files.Urls
 import com.drdisagree.teledrive.core.media.ThumbnailStore
 import com.drdisagree.teledrive.core.telegram.TelegramClient
+import com.drdisagree.teledrive.core.telegram.TelegramDownloadEvent
 import com.drdisagree.teledrive.data.local.dao.FileDao
 import com.drdisagree.teledrive.data.local.dao.ThumbnailDao
+import com.drdisagree.teledrive.data.local.entity.FileEntity
 import com.drdisagree.teledrive.data.local.entity.ThumbnailEntity
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import java.awt.Color
@@ -92,15 +94,13 @@ class DesktopThumbnailStore(
         val jpegBytes = if (local != null) {
             toJpeg(local)
         } else {
-            val chatId = entity.chatId
-            val messageId = entity.messageId
-            if (chatId == null || messageId == null) return null
-            if (MimeTypes.isText(entity.mimeType) &&
-                !settingsRepository.preferences.first().linkPreviews
-            ) return null
-            runCatching { telegramClient.fetchThumbnail(chatId, messageId) }.getOrNull()
-                ?: return null
-        }
+            val iconFileId = entity.iconFileId
+            if (iconFileId != null) {
+                fetchIconBytes(entity, iconFileId) ?: fetchRemoteThumbnail(entity)
+            } else {
+                fetchRemoteThumbnail(entity)
+            }
+        } ?: return null
 
         val encrypt = settingsRepository.preferences.first().encryptThumbnails
         val stored = if (encrypt) {
@@ -145,16 +145,22 @@ class DesktopThumbnailStore(
     }
 
     private fun decodeImageThumbnail(file: File): BufferedImage? = runCatching {
-        val source = ImageIO.read(file) ?: return null
-        val scale = MAX_DIMENSION.toDouble() / maxOf(source.width, source.height)
-        if (scale >= 1.0) return source
-        val width = (source.width * scale).toInt().coerceAtLeast(1)
-        val height = (source.height * scale).toInt().coerceAtLeast(1)
-        val scaled = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
-        val graphics = scaled.createGraphics()
-        graphics.drawImage(source.getScaledInstance(width, height, IMAGE_SCALE_MODE), 0, 0, null)
-        graphics.dispose()
-        scaled
+        val original = ImageIO.read(file) ?: return null
+        if (original.width <= MAX_DIMENSION && original.height <= MAX_DIMENSION) {
+            return@runCatching original
+        }
+        val scale = minOf(
+            MAX_DIMENSION.toDouble() / original.width,
+            MAX_DIMENSION.toDouble() / original.height
+        )
+        val targetW = (original.width * scale).toInt().coerceAtLeast(1)
+        val targetH = (original.height * scale).toInt().coerceAtLeast(1)
+        val scaled = original.getScaledInstance(targetW, targetH, IMAGE_SCALE_MODE)
+        BufferedImage(targetW, targetH, BufferedImage.TYPE_INT_RGB).also { copy ->
+            val graphics = copy.createGraphics()
+            graphics.drawImage(scaled, 0, 0, Color.WHITE, null)
+            graphics.dispose()
+        }
     }.getOrNull()
 
     private fun toJpeg(image: BufferedImage): ByteArray {
@@ -171,6 +177,35 @@ class DesktopThumbnailStore(
             ImageIO.write(rgb, "jpg", output)
             output.toByteArray()
         }
+    }
+
+    private suspend fun fetchIconBytes(entity: FileEntity, iconFileId: String): ByteArray? {
+        var readyPath: String? = null
+        val rawRemoteFileId = iconFileId.substringBefore(":")
+        runCatching {
+            telegramClient.downloadDocument(rawRemoteFileId).collect { event ->
+                if (event is TelegramDownloadEvent.Completed) {
+                    readyPath = event.localPath
+                }
+            }
+        }
+        val path = readyPath ?: return null
+        val rawBytes = runCatching { File(path).readBytes() }.getOrNull() ?: return null
+        return if (entity.isEncrypted) {
+            val key = wrappedKeyRepository.get(CryptoKeys.CONTENT) ?: return null
+            runCatching { streamCrypto.decryptBytes(key, rawBytes) }.getOrNull()
+        } else {
+            rawBytes
+        }
+    }
+
+    private suspend fun fetchRemoteThumbnail(entity: FileEntity): ByteArray? {
+        val chatId = entity.chatId ?: return null
+        val messageId = entity.messageId ?: return null
+        if (MimeTypes.isText(entity.mimeType) &&
+            !settingsRepository.preferences.first().linkPreviews
+        ) return null
+        return runCatching { telegramClient.fetchThumbnail(chatId, messageId) }.getOrNull()
     }
 
     private fun thumbnailKey(): ByteArray =

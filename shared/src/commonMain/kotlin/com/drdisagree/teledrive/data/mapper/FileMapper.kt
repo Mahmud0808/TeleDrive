@@ -25,6 +25,7 @@ fun FileEntity.toDomain(): DriveFile = DriveFile(
     height = height,
     durationMs = durationMs,
     trashedAt = trashedAt,
+    iconFileId = iconFileId,
     createdAt = createdAt,
     modifiedAt = modifiedAt,
     addedAt = addedAt
@@ -53,6 +54,7 @@ fun DriveFile.toEntity(preTrashFolderId: String? = null): FileEntity = FileEntit
     durationMs = durationMs,
     trashedAt = trashedAt,
     preTrashFolderId = preTrashFolderId,
+    iconFileId = iconFileId,
     createdAt = createdAt,
     modifiedAt = modifiedAt,
     addedAt = addedAt
