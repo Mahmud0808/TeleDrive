@@ -3,9 +3,9 @@ package com.drdisagree.teledrive.core.transfer
 import com.drdisagree.teledrive.core.crypto.CryptoKeys
 import com.drdisagree.teledrive.core.crypto.StreamCrypto
 import com.drdisagree.teledrive.core.crypto.WrappedKeyRepository
-import com.drdisagree.teledrive.core.media.MimeTypes
+import com.drdisagree.teledrive.core.files.MimeTypes
 import com.drdisagree.teledrive.core.media.ThumbnailStore
-import com.drdisagree.teledrive.core.storage.AppStoragePaths
+import com.drdisagree.teledrive.core.files.AppStoragePaths
 import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.core.telegram.TelegramUploadEvent
 import com.drdisagree.teledrive.data.local.entity.FileEntity
