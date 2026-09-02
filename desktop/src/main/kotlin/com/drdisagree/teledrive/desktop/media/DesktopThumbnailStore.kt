@@ -95,7 +95,7 @@ class DesktopThumbnailStore(
         } else {
             val iconFileId = entity.iconFileId
             if (iconFileId != null) {
-                fetchIconBytes(iconFileId) ?: fetchRemoteThumbnail(entity)
+                fetchIconBytes(entity, iconFileId) ?: fetchRemoteThumbnail(entity)
             } else {
                 fetchRemoteThumbnail(entity)
             }
@@ -144,16 +144,22 @@ class DesktopThumbnailStore(
     }
 
     private fun decodeImageThumbnail(file: File): BufferedImage? = runCatching {
-        val source = ImageIO.read(file) ?: return null
-        val scale = MAX_DIMENSION.toDouble() / maxOf(source.width, source.height)
-        if (scale >= 1.0) return source
-        val width = (source.width * scale).toInt().coerceAtLeast(1)
-        val height = (source.height * scale).toInt().coerceAtLeast(1)
-        val scaled = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
-        val graphics = scaled.createGraphics()
-        graphics.drawImage(source.getScaledInstance(width, height, IMAGE_SCALE_MODE), 0, 0, null)
-        graphics.dispose()
-        scaled
+        val original = ImageIO.read(file) ?: return null
+        if (original.width <= MAX_DIMENSION && original.height <= MAX_DIMENSION) {
+            return@runCatching original
+        }
+        val scale = minOf(
+            MAX_DIMENSION.toDouble() / original.width,
+            MAX_DIMENSION.toDouble() / original.height
+        )
+        val targetW = (original.width * scale).toInt().coerceAtLeast(1)
+        val targetH = (original.height * scale).toInt().coerceAtLeast(1)
+        val scaled = original.getScaledInstance(targetW, targetH, IMAGE_SCALE_MODE)
+        BufferedImage(targetW, targetH, BufferedImage.TYPE_INT_RGB).also { copy ->
+            val graphics = copy.createGraphics()
+            graphics.drawImage(scaled, 0, 0, Color.WHITE, null)
+            graphics.dispose()
+        }
     }.getOrNull()
 
     private fun toJpeg(image: BufferedImage): ByteArray {
@@ -172,7 +178,7 @@ class DesktopThumbnailStore(
         }
     }
 
-    private suspend fun fetchIconBytes(iconFileId: String): ByteArray? {
+    private suspend fun fetchIconBytes(entity: FileEntity, iconFileId: String): ByteArray? {
         var readyPath: String? = null
         runCatching {
             telegramClient.downloadDocument(iconFileId).collect { event ->
@@ -182,7 +188,13 @@ class DesktopThumbnailStore(
             }
         }
         val path = readyPath ?: return null
-        return runCatching { File(path).readBytes() }.getOrNull()
+        val rawBytes = runCatching { File(path).readBytes() }.getOrNull() ?: return null
+        return if (entity.isEncrypted) {
+            val key = runCatching { thumbnailKey() }.getOrNull() ?: return null
+            runCatching { streamCrypto.decryptBytes(key, rawBytes) }.getOrNull()
+        } else {
+            rawBytes
+        }
     }
 
     private suspend fun fetchRemoteThumbnail(entity: FileEntity): ByteArray? {

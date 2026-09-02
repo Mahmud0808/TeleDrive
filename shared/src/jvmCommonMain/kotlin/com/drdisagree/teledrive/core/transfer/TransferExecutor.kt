@@ -132,27 +132,53 @@ class TransferExecutor(
             fileDao.upsert(entity.copy(contentHash = contentHash))
         }
 
-        val previewPath = if (encrypt) {
-            null
-        } else {
-            thumbnailStore.uploadThumbnailFile(entity.id)?.absolutePath
-        }
+        val rawIconPath = thumbnailStore.uploadThumbnailFile(entity.id)?.absolutePath
 
         var iconFileId: String? = null
-        if (!encrypt && MimeTypes.isApk(entity.mimeType, entity.name) && previewPath != null) {
+        if (MimeTypes.isApk(entity.mimeType, entity.name) && rawIconPath != null) {
+            val iconUploadPath: String
+            val iconFileName: String
+            val iconMimeType: String
+            var stagingIconFile: File? = null
+
+            if (encrypt) {
+                val rawIconBytes = runCatching { File(rawIconPath).readBytes() }.getOrNull()
+                val key = runCatching { wrappedKeyRepository.getOrCreate(CryptoKeys.THUMBNAIL) }.getOrNull()
+                if (rawIconBytes != null && key != null) {
+                    val encryptedBytes = streamCrypto.encryptBytes(key, rawIconBytes)
+                    val staging = File(stagingDir(), "icon-${entity.id}.tde")
+                    staging.writeBytes(encryptedBytes)
+                    stagingIconFile = staging
+                    iconUploadPath = staging.absolutePath
+                    iconFileName = "icon-${entity.id}.tde"
+                    iconMimeType = "application/octet-stream"
+                } else {
+                    iconUploadPath = rawIconPath
+                    iconFileName = "icon-${entity.id}.jpg"
+                    iconMimeType = "image/jpeg"
+                }
+            } else {
+                iconUploadPath = rawIconPath
+                iconFileName = "icon-${entity.id}.jpg"
+                iconMimeType = "image/jpeg"
+            }
+
             runCatching {
                 telegramClient.uploadDocument(
                     chatId = chatId,
-                    localPath = previewPath,
-                    fileName = "icon-${entity.id}.jpg",
-                    mimeType = "image/jpeg",
+                    localPath = iconUploadPath,
+                    fileName = iconFileName,
+                    mimeType = iconMimeType,
                     caption = "#teledrive-icon-${entity.id}",
                     thumbnailPath = null
                 ).first { it is TelegramUploadEvent.Completed } as? TelegramUploadEvent.Completed
             }.getOrNull()?.let { completed ->
                 iconFileId = completed.document.remoteFileId
             }
+            stagingIconFile?.delete()
         }
+
+        val previewPath = if (encrypt) null else rawIconPath
 
         val manifest = RemoteFileManifest(
             fileId = entity.id,
