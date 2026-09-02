@@ -10,7 +10,7 @@ import java.io.File
 
 /* ActivityThread is hidden API, so the application context is reached through
    reflection: this extractor runs from shared code with no context to inject. */
-@SuppressLint("PrivateApi", "UseKtx")
+@Suppress("DiscouragedPrivateApi")
 internal actual fun platformApkIconBytes(file: File): ByteArray? = runCatching {
     val context = Class.forName("android.app.ActivityThread")
         .getMethod("currentApplication")
@@ -30,7 +30,7 @@ internal actual fun platformApkIconBytes(file: File): ByteArray? = runCatching {
         val height = drawable.intrinsicHeight.takeIf { it > 0 } ?: FALLBACK_ICON_SIZE
         Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888).also { rendered ->
             val canvas = Canvas(rendered)
-            drawable.setBounds(0, 0, canvas.width, canvas.height)
+            drawable.setBounds(0, 0, width, height)
             drawable.draw(canvas)
         }
     }
