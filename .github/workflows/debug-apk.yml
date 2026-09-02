@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   android-debug:
-    name: Build arm64-v8a Debug APK
+    name: Build Debug APK
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -31,6 +31,6 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: TeleDrive-arm64-v8a-debug
-          path: android/build/outputs/apk/debug/*-arm64-v8a-debug.apk
+          name: TeleDrive-debug-apks
+          path: android/build/outputs/apk/debug/*.apk
           if-no-files-found: error
