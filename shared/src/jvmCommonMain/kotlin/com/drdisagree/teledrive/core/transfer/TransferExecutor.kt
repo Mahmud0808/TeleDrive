@@ -266,7 +266,8 @@ class TransferExecutor(
                             messageId = document.messageId,
                             remoteFileId = document.remoteFileId,
                             remoteUniqueId = document.uniqueFileId,
-                            state = BackupState.BACKED_UP
+                            state = BackupState.BACKED_UP,
+                            iconFileId = iconFileId
                         )
                         if (transfer.type == TransferType.BACKUP) {
                             backupDao.upsertRecord(
@@ -367,7 +368,8 @@ class TransferExecutor(
                                 messageId = first.messageId,
                                 remoteFileId = first.remoteFileId,
                                 remoteUniqueId = first.remoteUniqueId,
-                                state = BackupState.BACKED_UP
+                                state = BackupState.BACKED_UP,
+                                iconFileId = manifest.iconFileId
                             )
                             if (transfer.type == TransferType.BACKUP) {
                                 backupDao.upsertRecord(
