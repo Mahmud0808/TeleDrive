@@ -5,6 +5,7 @@ import com.drdisagree.teledrive.core.crypto.CryptoKeys
 import com.drdisagree.teledrive.core.crypto.KeyUnavailableException
 import com.drdisagree.teledrive.core.crypto.StreamCrypto
 import com.drdisagree.teledrive.core.crypto.WrappedKeyRepository
+import com.drdisagree.teledrive.core.files.MimeTypes
 import com.drdisagree.teledrive.core.files.DownloadWriter
 import com.drdisagree.teledrive.core.files.Hashing
 import com.drdisagree.teledrive.core.media.ThumbnailStore
@@ -131,6 +132,28 @@ class TransferExecutor(
             fileDao.upsert(entity.copy(contentHash = contentHash))
         }
 
+        val previewPath = if (encrypt) {
+            null
+        } else {
+            thumbnailStore.uploadThumbnailFile(entity.id)?.absolutePath
+        }
+
+        var iconFileId: String? = null
+        if (!encrypt && MimeTypes.isApk(entity.mimeType, entity.name) && previewPath != null) {
+            runCatching {
+                telegramClient.uploadDocument(
+                    chatId = chatId,
+                    localPath = previewPath,
+                    fileName = "icon-${entity.id}.jpg",
+                    mimeType = "image/jpeg",
+                    caption = "#teledrive-icon-${entity.id}",
+                    thumbnailPath = null
+                ).first { it is TelegramUploadEvent.Completed } as? TelegramUploadEvent.Completed
+            }.getOrNull()?.let { completed ->
+                iconFileId = completed.document.remoteFileId
+            }
+        }
+
         val manifest = RemoteFileManifest(
             fileId = entity.id,
             name = entity.name,
@@ -146,7 +169,8 @@ class TransferExecutor(
             modifiedAt = entity.modifiedAt,
             width = entity.width,
             height = entity.height,
-            durationMs = entity.durationMs
+            durationMs = entity.durationMs,
+            iconFileId = iconFileId
         )
         val caption = manifestCodec.encode(manifest, encrypt)
 
@@ -187,11 +211,6 @@ class TransferExecutor(
         return try {
             var outcome: Outcome =
                 Outcome.Failed(messages.uploadEnded)
-            val previewPath = if (encrypt) {
-                null
-            } else {
-                thumbnailStore.uploadThumbnailFile(entity.id)?.absolutePath
-            }
             telegramClient.uploadDocument(
                 chatId = chatId,
                 localPath = uploadPath,

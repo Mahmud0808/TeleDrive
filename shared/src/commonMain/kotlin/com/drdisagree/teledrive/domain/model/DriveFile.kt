@@ -22,6 +22,7 @@ data class DriveFile(
     val height: Int?,
     val durationMs: Long?,
     val trashedAt: Long?,
+    val iconFileId: String? = null,
     val createdAt: Long,
     val modifiedAt: Long,
     val addedAt: Long

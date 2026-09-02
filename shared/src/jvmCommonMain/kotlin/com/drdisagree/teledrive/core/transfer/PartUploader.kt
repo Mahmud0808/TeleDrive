@@ -14,6 +14,8 @@ import com.drdisagree.teledrive.data.local.entity.FileEntity
 import com.drdisagree.teledrive.data.local.entity.FilePartEntity
 import com.drdisagree.teledrive.data.remote.telegram.ManifestCodec
 import com.drdisagree.teledrive.data.remote.telegram.RemoteFileManifest
+import com.drdisagree.teledrive.core.files.MimeTypes
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -77,12 +79,34 @@ class PartUploader(
                     writePart(source, plainOffset, plainSize, scratch, encrypt)
                 }
                 if (encrypt) emit(Event.PartDone(index, partCount))
+
+                val previewPath = if (index == 0 && !encrypt) {
+                    thumbnailStore.uploadThumbnailFile(entity.id)?.absolutePath
+                } else null
+
+                var iconFileId: String? = null
+                if (index == 0 && !encrypt && MimeTypes.isApk(entity.mimeType, entity.name) && previewPath != null) {
+                    runCatching {
+                        telegramClient.uploadDocument(
+                            chatId = chatId,
+                            localPath = previewPath,
+                            fileName = "icon-${entity.id}.jpg",
+                            mimeType = "image/jpeg",
+                            caption = "#teledrive-icon-${entity.id}",
+                            thumbnailPath = null
+                        ).first { it is TelegramUploadEvent.Completed } as? TelegramUploadEvent.Completed
+                    }.getOrNull()?.let { completed ->
+                        iconFileId = completed.document.remoteFileId
+                    }
+                }
+
                 val partManifest = manifest.copy(
                     version = RemoteFileManifest.PART_VERSION,
                     partCount = partCount,
                     partIndex = index,
                     partOffset = plainOffset,
-                    partSize = plainSize
+                    partSize = plainSize,
+                    iconFileId = if (index == 0) iconFileId ?: manifest.iconFileId else null
                 )
                 val partName = if (encrypt) {
                     FileParts.nameFor(entity.id, index)
@@ -92,9 +116,6 @@ class PartUploader(
 
                 var stored: FilePartEntity? = null
                 val alreadySent = uploadedBefore
-                val previewPath = if (index == 0 && !encrypt) {
-                    thumbnailStore.uploadThumbnailFile(entity.id)?.absolutePath
-                } else null
                 telegramClient.uploadDocument(
                     chatId = chatId,
                     localPath = scratch.absolutePath,

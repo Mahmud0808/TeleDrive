@@ -133,6 +133,17 @@ val desktopModule = module {
         Room.databaseBuilder<TeleDriveDatabase>(
             name = File(storagePaths.filesDir, "teledrive.db").absolutePath
         )
+            .addMigrations(
+                com.drdisagree.teledrive.data.local.database.MIGRATION_1_2,
+                com.drdisagree.teledrive.data.local.database.MIGRATION_2_3,
+                com.drdisagree.teledrive.data.local.database.MIGRATION_3_4,
+                com.drdisagree.teledrive.data.local.database.MIGRATION_4_5,
+                com.drdisagree.teledrive.data.local.database.MIGRATION_5_6,
+                com.drdisagree.teledrive.data.local.database.MIGRATION_6_7,
+                com.drdisagree.teledrive.data.local.database.MIGRATION_7_8,
+                com.drdisagree.teledrive.data.local.database.MIGRATION_8_9,
+                com.drdisagree.teledrive.data.local.database.MIGRATION_9_10
+            )
             .setDriver(BundledSQLiteDriver())
             .setQueryCoroutineContext(Dispatchers.IO)
             .build()

@@ -54,6 +54,7 @@ data class FileEntity(
     val preTrashFolderId: String? = null,
     val pendingPublish: Boolean = false,
     val partCount: Int = 0,
+    val iconFileId: String? = null,
     val createdAt: Long,
     val modifiedAt: Long,
     val addedAt: Long

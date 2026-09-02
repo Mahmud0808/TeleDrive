@@ -335,7 +335,8 @@ class SyncRepositoryImpl(
             modifiedAt = local?.modifiedAt ?: manifest?.modifiedAt ?: existing?.modifiedAt
             ?: (document.dateSeconds * 1000L),
             addedAt = existing?.addedAt ?: now,
-            partCount = manifest?.partCount ?: existing?.partCount ?: 0
+            partCount = manifest?.partCount ?: existing?.partCount ?: 0,
+            iconFileId = manifest?.iconFileId ?: existing?.iconFileId
         )
 
         if (manifest != null && manifest.isPart && manifest.partIndex != 0) {
