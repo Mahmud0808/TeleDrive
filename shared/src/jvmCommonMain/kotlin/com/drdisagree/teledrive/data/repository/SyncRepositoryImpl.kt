@@ -195,7 +195,14 @@ class SyncRepositoryImpl(
                     }
                     localOnly.forEach { entity -> fileDao.detachRemote(entity.id) }
                 }
-                detached = stale.size
+            }
+        }
+        val internalIconEntries = fileDao.filesWithRemote().filter { entity ->
+            entity.name.startsWith("icon-") && entity.mimeType == "image/jpeg"
+        }
+        if (internalIconEntries.isNotEmpty()) {
+            database.inImmediateTransaction {
+                fileDao.deleteByIds(internalIconEntries.map { it.id })
             }
         }
         SafeLog.d(TAG, "Sync done: +$inserted ~$updated -$detached, $locked locked")
@@ -209,7 +216,8 @@ class SyncRepositoryImpl(
         document.fileName == RemoteFolderState.FILE_NAME ||
                 document.fileName == KeyBackupCodec.BACKUP_FILE_NAME ||
                 document.caption.startsWith(RemoteFolderState.MARKER) ||
-                document.caption.startsWith(KEY_BACKUP_MARKER)
+                document.caption.startsWith(KEY_BACKUP_MARKER) ||
+                document.caption.startsWith(ICON_MARKER)
 
     private fun isNewToLocal(document: RemoteDocument, known: KnownRows): Boolean {
         val existing = known.byUniqueId[document.uniqueFileId] ?: return true
@@ -398,6 +406,7 @@ class SyncRepositoryImpl(
     companion object {
         private const val TAG = "SyncRepository"
         private const val KEY_BACKUP_MARKER = "#teledrive-keybackup"
+        private const val ICON_MARKER = "#teledrive-icon"
         private const val PAGE_SIZE = 100
         private const val MAX_PAGES = 2000
     }
