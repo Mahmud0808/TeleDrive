@@ -1,0 +1,50 @@
+<resources>
+    <!-- App-wide -->
+    <string name="app_name">TeleDrive</string>
+
+    <!-- Shared labels and dialogs -->
+    <string name="common_actions">Действия</string>
+    <string name="common_back">Назад</string>
+    <string name="common_download">Скачать</string>
+    <string name="common_free_space">Освободить место</string>
+    <string name="common_move_trash">В корзину</string>
+    <string name="common_rename">Переименовать</string>
+    <string name="common_rename_file">Переименовать файл</string>
+    <string name="common_upload">Загрузить</string>
+
+    <!-- Notes -->
+    <string name="note_edit_action">Редактировать текст</string>
+
+    <!-- Transfers -->
+    <string name="transfer_error_decryption_failed">Ошибка расшифровки</string>
+    <string name="transfer_error_download_ended">Скачивание неожиданно завершилось</string>
+    <string name="transfer_error_download_stalled">Скачивание перестало отвечать</string>
+    <string name="transfer_error_downloaded_missing">Скачанный файл отсутствует</string>
+    <string name="transfer_error_file_record_missing">Запись файла отсутствует</string>
+    <string name="transfer_error_key_missing">Ключ шифрования отсутствует. Восстановите его в Настройках.</string>
+    <string name="transfer_error_local_file_gone">Локальный файл удален</string>
+    <string name="transfer_error_no_file_reference">Передача не содержит ссылки на файл</string>
+    <string name="transfer_error_no_local_copy">Нет локальной копии для загрузки</string>
+    <string name="transfer_error_no_remote_copy">Файл не имеет копии на сервере</string>
+    <string name="transfer_error_save_failed">Не удалось сохранить скачанный файл</string>
+    <string name="transfer_error_upload_ended">Загрузка неожиданно завершилась</string>
+    <string name="transfer_error_upload_stalled">Загрузка перестала отвечать</string>
+
+    <!-- Notifications -->
+    <string name="notification_backup_complete">Резервное копирование завершено</string>
+    <string name="notification_backup_summary">Сохранено файлов: %1$d из %2$d</string>
+    <string name="notification_channel_backup">Резервное копирование</string>
+    <string name="notification_channel_backup_desc">Прогресс и результаты копирования</string>
+    <string name="notification_channel_failures">Ошибки</string>
+    <string name="notification_channel_failures_desc">Ошибки передач и копирования</string>
+    <string name="notification_channel_transfers">Передачи</string>
+    <string name="notification_channel_transfers_desc">Прогресс загрузки и скачивания</string>
+    <string name="notification_channel_updates">Обновления приложения</string>
+    <string name="notification_channel_updates_desc">Уведомляет о выходе новых версий</string>
+    <string name="notification_download_failed">Ошибка скачивания</string>
+    <string name="notification_transfers_active">Выполняются передачи</string>
+    <string name="notification_update_message">%1$s %2$s готова к скачиванию</string>
+    <string name="notification_update_skip">Пропустить эту версию</string>
+    <string name="notification_update_title">Доступно обновление</string>
+    <string name="notification_upload_failed">Ошибка загрузки</string>
+</resources>

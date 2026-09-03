@@ -96,6 +96,7 @@ class SettingsRepositoryImpl(
             keyBackupCreated = this[PreferenceKeys.KEY_BACKUP_CREATED]
                 ?: defaults.keyBackupCreated,
             theme = enumOrDefault(this[PreferenceKeys.THEME], defaults.theme),
+            language = enumOrDefault(this[PreferenceKeys.LANGUAGE], defaults.language),
             dynamicColor = this[PreferenceKeys.DYNAMIC_COLOR] ?: defaults.dynamicColor,
             viewMode = enumOrDefault(this[PreferenceKeys.VIEW_MODE], defaults.viewMode),
             gridSize = this[PreferenceKeys.GRID_SIZE] ?: defaults.gridSize,
@@ -166,6 +167,7 @@ class SettingsRepositoryImpl(
         this[PreferenceKeys.ENCRYPT_THUMBNAILS] = prefs.encryptThumbnails
         this[PreferenceKeys.KEY_BACKUP_CREATED] = prefs.keyBackupCreated
         this[PreferenceKeys.THEME] = prefs.theme.name
+        this[PreferenceKeys.LANGUAGE] = prefs.language.name
         this[PreferenceKeys.DYNAMIC_COLOR] = prefs.dynamicColor
         this[PreferenceKeys.VIEW_MODE] = prefs.viewMode.name
         this[PreferenceKeys.GRID_SIZE] = prefs.gridSize

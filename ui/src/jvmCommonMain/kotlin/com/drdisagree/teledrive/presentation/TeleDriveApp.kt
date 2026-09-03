@@ -44,6 +44,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -73,6 +74,10 @@ import androidx.navigation.compose.rememberNavController
 import androidx.window.core.layout.WindowSizeClass
 import com.drdisagree.teledrive.core.common.NotificationDestinations
 import com.drdisagree.teledrive.core.files.PendingShare
+import androidx.compose.ui.platform.LocalLocaleList
+import androidx.compose.ui.text.intl.Locale
+import androidx.compose.ui.text.intl.LocaleList
+import com.drdisagree.teledrive.domain.model.AppLanguage
 import com.drdisagree.teledrive.domain.model.AppTheme
 import com.drdisagree.teledrive.presentation.applock.LockScreen
 import com.drdisagree.teledrive.presentation.components.LoadingState
@@ -125,8 +130,29 @@ fun TeleDriveApp(
     val sessionBroken by viewModel.sessionBroken.collectAsStateWithLifecycle()
     val urlOpener = LocalUrlOpener.current
 
+    val systemLocaleList = LocalLocaleList.current
+    val targetLocaleList = remember(state.language, systemLocaleList) {
+        when (state.language) {
+            AppLanguage.SYSTEM -> systemLocaleList
+            AppLanguage.ENGLISH -> LocaleList(Locale("en"))
+            AppLanguage.RUSSIAN -> LocaleList(Locale("ru"))
+        }
+    }
+
+    LaunchedEffect(state.language) {
+        val javaLocale = when (state.language) {
+            AppLanguage.SYSTEM -> java.util.Locale.getDefault()
+            AppLanguage.ENGLISH -> java.util.Locale.forLanguageTag("en")
+            AppLanguage.RUSSIAN -> java.util.Locale.forLanguageTag("ru")
+        }
+        java.util.Locale.setDefault(javaLocale)
+    }
+
     TeleDriveTheme(darkTheme = darkTheme, dynamicColor = state.dynamicColor) {
-        CompositionLocalProvider(LocalCompactLayout provides state.compactLayout) {
+        CompositionLocalProvider(
+            (LocalLocaleList as ProvidableCompositionLocal<LocaleList>) provides targetLocaleList,
+            LocalCompactLayout provides state.compactLayout
+        ) {
             when {
                 state.loading -> LoadingState()
                 state.locked -> LockScreen(onUnlocked = viewModel::unlock)

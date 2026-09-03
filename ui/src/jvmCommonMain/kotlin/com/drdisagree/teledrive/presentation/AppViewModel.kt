@@ -32,12 +32,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.data.repository.LocalDataWiper
 import kotlinx.coroutines.NonCancellable
+import com.drdisagree.teledrive.domain.model.AppLanguage
 import kotlinx.coroutines.withContext
 
 data class AppUiState(
     val loading: Boolean = true,
     val onboardingComplete: Boolean = false,
     val theme: AppTheme = AppTheme.SYSTEM,
+    val language: AppLanguage = AppLanguage.SYSTEM,
     val dynamicColor: Boolean = true,
     val compactLayout: Boolean = false,
     val locked: Boolean = false
@@ -71,6 +73,7 @@ class AppViewModel(
             loading = false,
             onboardingComplete = prefs.onboardingComplete,
             theme = prefs.theme,
+            language = prefs.language,
             dynamicColor = prefs.dynamicColor,
             compactLayout = prefs.layoutDensity == LayoutDensity.COMPACT,
             locked = locked

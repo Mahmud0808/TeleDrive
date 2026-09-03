@@ -1,0 +1,74 @@
+<resources>
+    <!-- App-wide -->
+    <string name="app_name">TeleDrive</string>
+    <string name="app_already_running">TeleDrive уже запущен.</string>
+
+    <!-- Navigation -->
+    <string name="nav_files">Файлы</string>
+    <string name="nav_gallery">Галерея</string>
+    <string name="nav_transfers">Передачи</string>
+    <string name="nav_trash">Корзина</string>
+    <string name="nav_channels">Диски</string>
+    <string name="nav_proxy">Прокси</string>
+
+    <!-- Sign in -->
+    <string name="auth_credentials_prompt">Введите учетные данные API Telegram с сайта my.telegram.org</string>
+    <string name="auth_api_id">API ID</string>
+    <string name="auth_api_hash">API hash</string>
+    <string name="auth_continue">Продолжить</string>
+    <string name="auth_connecting">Подключение к Telegram</string>
+    <string name="auth_phone_number">Номер телефона</string>
+    <string name="auth_send_code">Отправить код</string>
+    <string name="auth_code_sent_to">Введите код, отправленный на %1$s</string>
+    <string name="auth_code">Код</string>
+    <string name="auth_verify">Подтвердить</string>
+    <string name="auth_email_address">Email адрес</string>
+    <string name="auth_password">Пароль</string>
+    <string name="auth_password_prompt">Пароль двухэтапной аутентификации</string>
+    <string name="auth_password_hint">Пароль (подсказка: %1$s)</string>
+    <string name="auth_sign_in">Войти</string>
+    <string name="auth_confirm_other_device">Подтвердите на другом устройстве</string>
+    <string name="auth_registration_required">К этому номеру не привязан аккаунт Telegram. Зарегистрируйтесь с телефона.</string>
+    <string name="auth_signed_in_as">Вы вошли как %1$s</string>
+    <string name="auth_signing_out">Выход из системы</string>
+    <string name="auth_session_closed">Сессия закрыта. Перезапустите приложение.</string>
+    <string name="auth_failed">Ошибка входа: %1$s</string>
+    <string name="auth_your_account">ваш аккаунт</string>
+    <string name="auth_sign_out">Выйти</string>
+
+    <!-- Drive -->
+    <string name="drive_loading">Загрузка дисков</string>
+    <string name="drive_pick_title">Выберите диск</string>
+    <string name="drive_pick_subtitle">Файлы хранятся в приватном канале Telegram</string>
+    <string name="drive_create">Создать новый диск</string>
+    <string name="drive_open">Открыть</string>
+    <string name="drive_file_count">Файлов: %1$d</string>
+    <string name="drive_syncing">Синхронизация с Telegram</string>
+    <string name="drive_empty">На этом диске пока нет файлов</string>
+    <string name="drive_sync">Синхронизировать</string>
+    <string name="drive_upload">Загрузить</string>
+    <string name="drive_download">Скачать</string>
+    <string name="drive_downloaded">Скачано</string>
+    <string name="drive_queued">В очереди</string>
+    <string name="drive_upload_chooser_title">Выберите файл для загрузки</string>
+
+    <!-- Preview -->
+    <string name="preview_open_externally">Открыть в системном приложении</string>
+    <string name="preview_stream">Воспроизвести в системном плеере</string>
+    <string name="preview_open_failed">Не удалось открыть файл через системное приложение</string>
+
+    <!-- Transfer errors -->
+    <string name="transfer_error_key_missing">Ключ шифрования отсутствует. Восстановите его в Настройках.</string>
+    <string name="transfer_error_no_file_reference">Передача не содержит ссылки на файл</string>
+    <string name="transfer_error_file_record_missing">Запись файла отсутствует</string>
+    <string name="transfer_error_no_local_copy">Нет локальной копии для загрузки</string>
+    <string name="transfer_error_local_file_gone">Локальный файл удален</string>
+    <string name="transfer_error_upload_ended">Загрузка неожиданно завершилась</string>
+    <string name="transfer_error_upload_stalled">Загрузка перестала отвечать</string>
+    <string name="transfer_error_download_ended">Скачивание неожиданно завершилось</string>
+    <string name="transfer_error_download_stalled">Скачивание перестало отвечать</string>
+    <string name="transfer_error_downloaded_missing">Скачанный файл отсутствует</string>
+    <string name="transfer_error_no_remote_copy">Файл не имеет копии на сервере</string>
+    <string name="transfer_error_decryption_failed">Ошибка расшифровки</string>
+    <string name="transfer_error_save_failed">Не удалось сохранить скачанный файл</string>
+</resources>
