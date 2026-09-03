@@ -139,9 +139,11 @@ fun TeleDriveApp(
         }
     }
 
+    val initialJavaLocale = remember { java.util.Locale.getDefault() }
+
     LaunchedEffect(state.language) {
         val javaLocale = when (state.language) {
-            AppLanguage.SYSTEM -> java.util.Locale.getDefault()
+            AppLanguage.SYSTEM -> initialJavaLocale
             AppLanguage.ENGLISH -> java.util.Locale.forLanguageTag("en")
             AppLanguage.RUSSIAN -> java.util.Locale.forLanguageTag("ru")
         }
