@@ -139,15 +139,15 @@ fun TeleDriveApp(
         }
     }
 
-    val initialJavaLocale = remember { java.util.Locale.getDefault() }
-
-    LaunchedEffect(state.language) {
+    DisposableEffect(state.language) {
+        val previousLocale = java.util.Locale.getDefault()
         val javaLocale = when (state.language) {
-            AppLanguage.SYSTEM -> initialJavaLocale
+            AppLanguage.SYSTEM -> previousLocale
             AppLanguage.ENGLISH -> java.util.Locale.forLanguageTag("en")
             AppLanguage.RUSSIAN -> java.util.Locale.forLanguageTag("ru")
         }
         java.util.Locale.setDefault(javaLocale)
+        onDispose { java.util.Locale.setDefault(previousLocale) }
     }
 
     TeleDriveTheme(darkTheme = darkTheme, dynamicColor = state.dynamicColor) {
