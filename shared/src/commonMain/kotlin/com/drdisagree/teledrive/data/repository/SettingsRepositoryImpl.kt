@@ -96,7 +96,7 @@ class SettingsRepositoryImpl(
             keyBackupCreated = this[PreferenceKeys.KEY_BACKUP_CREATED]
                 ?: defaults.keyBackupCreated,
             theme = enumOrDefault(this[PreferenceKeys.THEME], defaults.theme),
-            language = enumOrDefault(this[PreferenceKeys.LANGUAGE], defaults.language),
+            language = com.drdisagree.teledrive.domain.model.AppLanguage.fromCode(this[PreferenceKeys.LANGUAGE]),
             dynamicColor = this[PreferenceKeys.DYNAMIC_COLOR] ?: defaults.dynamicColor,
             viewMode = enumOrDefault(this[PreferenceKeys.VIEW_MODE], defaults.viewMode),
             gridSize = this[PreferenceKeys.GRID_SIZE] ?: defaults.gridSize,
