@@ -6,38 +6,14 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.drdisagree.teledrive.resources.Res
-import com.drdisagree.teledrive.resources.files_import_copied
-import com.drdisagree.teledrive.resources.files_import_duplicates
-import com.drdisagree.teledrive.resources.files_import_failed
-import com.drdisagree.teledrive.resources.files_import_restored
-import com.drdisagree.teledrive.resources.files_import_uploading
-import com.drdisagree.teledrive.resources.files_import_uploading_copied
-import com.drdisagree.teledrive.resources.files_import_uploading_duplicates
-import com.drdisagree.teledrive.resources.files_import_uploading_failed
-import com.drdisagree.teledrive.resources.files_import_uploading_restored
-import com.drdisagree.teledrive.resources.files_moving_to_trash
-import com.drdisagree.teledrive.resources.files_queued_for_upload
-import com.drdisagree.teledrive.resources.files_queued_for_download
-import com.drdisagree.teledrive.resources.files_queued_partial
-import com.drdisagree.teledrive.resources.files_copied_all
-import com.drdisagree.teledrive.resources.files_copied_partial
-import com.drdisagree.teledrive.resources.files_removed_local_copies
-import com.drdisagree.teledrive.resources.files_root_name
-import com.drdisagree.teledrive.resources.files_sync_result
-import com.drdisagree.teledrive.resources.files_share_needs_local
-import com.drdisagree.teledrive.resources.message_moved_count
-import com.drdisagree.teledrive.resources.message_moved_to_trash_count
-import com.drdisagree.teledrive.resources.message_nothing_to_download
-import com.drdisagree.teledrive.resources.note_not_editable
-import com.drdisagree.teledrive.core.files.DeleteConsentRequest
 import com.drdisagree.teledrive.core.common.AppResult
+import com.drdisagree.teledrive.core.files.DeleteConsentRequest
 import com.drdisagree.teledrive.core.files.FileImporter
 import com.drdisagree.teledrive.core.files.MimeTypes
 import com.drdisagree.teledrive.core.files.PendingShare
-import com.drdisagree.teledrive.domain.model.FileQuerySpec
 import com.drdisagree.teledrive.domain.model.DriveFile
 import com.drdisagree.teledrive.domain.model.DriveFolder
+import com.drdisagree.teledrive.domain.model.FileQuerySpec
 import com.drdisagree.teledrive.domain.model.FileSortField
 import com.drdisagree.teledrive.domain.model.SortDirection
 import com.drdisagree.teledrive.domain.model.UserPreferences
@@ -55,6 +31,31 @@ import com.drdisagree.teledrive.presentation.components.SelectionCapabilities
 import com.drdisagree.teledrive.presentation.components.zoomedIn
 import com.drdisagree.teledrive.presentation.components.zoomedOut
 import com.drdisagree.teledrive.presentation.navigation.Route
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.files_copied_all
+import com.drdisagree.teledrive.resources.files_copied_partial
+import com.drdisagree.teledrive.resources.files_import_copied
+import com.drdisagree.teledrive.resources.files_import_duplicates
+import com.drdisagree.teledrive.resources.files_import_failed
+import com.drdisagree.teledrive.resources.files_import_restored
+import com.drdisagree.teledrive.resources.files_import_uploading
+import com.drdisagree.teledrive.resources.files_import_uploading_copied
+import com.drdisagree.teledrive.resources.files_import_uploading_duplicates
+import com.drdisagree.teledrive.resources.files_import_uploading_failed
+import com.drdisagree.teledrive.resources.files_import_uploading_restored
+import com.drdisagree.teledrive.resources.files_moving_to_trash
+import com.drdisagree.teledrive.resources.files_queued_for_download
+import com.drdisagree.teledrive.resources.files_queued_for_upload
+import com.drdisagree.teledrive.resources.files_queued_partial
+import com.drdisagree.teledrive.resources.files_removed_local_copies
+import com.drdisagree.teledrive.resources.files_root_name
+import com.drdisagree.teledrive.resources.files_share_needs_local
+import com.drdisagree.teledrive.resources.files_sync_result
+import com.drdisagree.teledrive.resources.message_moved_count
+import com.drdisagree.teledrive.resources.message_moved_to_trash_count
+import com.drdisagree.teledrive.resources.message_nothing_to_download
+import com.drdisagree.teledrive.resources.note_not_editable
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
@@ -497,7 +498,8 @@ class FilesViewModel(
                 }
             }
             if (failures == 0) _messages.tryEmit(
-                UiText.Resource(Res.string.message_moved_count,
+                UiText.Resource(
+                    Res.string.message_moved_count,
                     ids.size + folderIds.size
                 )
             )
@@ -533,7 +535,8 @@ class FilesViewModel(
 
     suspend fun parentFolderId(id: String): String? = fileRepository.getFolder(id)?.parentId
 
-    private val _deleteConsentRequests = MutableSharedFlow<DeleteConsentRequest>(extraBufferCapacity = 1)
+    private val _deleteConsentRequests =
+        MutableSharedFlow<DeleteConsentRequest>(extraBufferCapacity = 1)
     val deleteConsentRequests = _deleteConsentRequests.asSharedFlow()
     private var pendingLocalCopyIds: List<String> = emptyList()
 
@@ -585,7 +588,7 @@ class FilesViewModel(
 
     fun importAndUpload(uris: List<String>, target: String? = folderId) {
         if (uris.isEmpty()) return
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             var imported = 0
             var restored = 0
             var duplicates = 0
@@ -597,9 +600,6 @@ class FilesViewModel(
                     failed++
                     continue
                 }
-                /* Identical bytes are already in Telegram. In this folder that
-                   is a plain duplicate; elsewhere it only needs a server-side
-                   copy, which costs no upload. */
                 val existing = fileRepository.findDuplicate(file.path)
                 if (existing != null) {
                     if (existing.folderId == target) {
