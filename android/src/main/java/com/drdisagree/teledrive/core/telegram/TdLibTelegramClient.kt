@@ -582,15 +582,13 @@ class TdLibTelegramClient(
 
     override suspend fun fetchChannelPhoto(chatId: Long): String? {
         awaitAuthorized()
-        return runCatching {
-            val chat = send<TdApi.Chat>(TdApi.GetChat(chatId))
-            val photo = chat.photo?.small ?: return null
-            photo.local?.path?.takeIf { it.isNotEmpty() && File(it).exists() }?.let { return it }
-            val downloaded = send<TdApi.File>(
-                TdApi.DownloadFile(photo.id, PHOTO_PRIORITY, 0, 0, true)
-            )
-            downloaded.local?.path?.takeIf { it.isNotEmpty() && File(it).exists() }
-        }.getOrNull()
+        val chat = send<TdApi.Chat>(TdApi.GetChat(chatId))
+        val photo = chat.photo?.small ?: return null
+        photo.local?.path?.takeIf { it.isNotEmpty() && File(it).exists() }?.let { return it }
+        val downloaded = send<TdApi.File>(
+            TdApi.DownloadFile(photo.id, PHOTO_PRIORITY, 0, 0, true)
+        )
+        return downloaded.local?.path?.takeIf { it.isNotEmpty() && File(it).exists() }
     }
 
     override suspend fun chatExists(chatId: Long): Boolean? = try {

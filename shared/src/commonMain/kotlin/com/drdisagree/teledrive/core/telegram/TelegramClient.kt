@@ -49,7 +49,11 @@ interface TelegramClient {
     /** True when the chat is reachable, false when gone, null when unclear. */
     suspend fun chatExists(chatId: Long): Boolean?
 
-    /** Downloads the channel picture, returning its local path or null. */
+    /**
+     * Downloads the channel picture, returning its local path, or null when
+     * the channel has none. Failures throw so callers can tell a missing
+     * picture from an unreachable one.
+     */
     suspend fun fetchChannelPhoto(chatId: Long): String?
 
     /** Dialing codes as Telegram lists them, localized by TDLib. */
