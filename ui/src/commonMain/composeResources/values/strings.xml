@@ -148,6 +148,8 @@
     <string name="onboarding_api_hash_short">API hash looks too short</string>
     <string name="onboarding_api_id">API ID</string>
     <string name="onboarding_api_id_number">API ID must be a number</string>
+    <string name="onboarding_choose_api_dev_tools">Choose &quot;API development tools&quot; and create an app. Any name works.</string>
+    <string name="onboarding_copy_api_keys">Copy the api_id and api_hash into TeleDrive.</string>
     <string name="onboarding_get_api_keys">Get your API keys</string>
     <string name="onboarding_my_telegram_org">my.telegram.org</string>
     <string name="onboarding_one_time_setup_keys">One-time setup. Your keys stay on this device, encrypted.</string>
@@ -655,6 +657,10 @@
     <string name="settings_shows_archived_collection_home">Shows the Archived collection on the home screen</string>
     <string name="settings_shows_hidden_collection_home">Shows the Hidden collection on the home screen</string>
     <string name="settings_theme">Theme</string>
+    <string name="settings_language">Language</string>
+    <string name="language_system">System default</string>
+    <string name="language_english">English</string>
+    <string name="language_russian">Русский</string>
     <string name="settings_tighter_list_rows_without">Tighter list rows without the size and date line</string>
     <string name="settings_use_wallpaper_colors_available">Use wallpaper colors when available</string>
     <string name="theme_dark">Dark</string>
@@ -879,5 +885,10 @@
         <item>Light</item>
         <item>Dark</item>
         <item>Follow system</item>
+    </string-array>
+    <string-array name="language_labels">
+        <item>System default</item>
+        <item>English</item>
+        <item>Русский</item>
     </string-array>
 </resources>

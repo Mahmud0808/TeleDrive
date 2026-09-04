@@ -35,7 +35,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.StringArrayResource
 import org.jetbrains.compose.resources.stringArrayResource
 import org.jetbrains.compose.resources.pluralStringResource
@@ -43,7 +42,13 @@ import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.unit.dp
 import org.koin.compose.viewmodel.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.drdisagree.teledrive.domain.model.AppLanguage
 import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.language_english
+import com.drdisagree.teledrive.resources.language_labels
+import com.drdisagree.teledrive.resources.language_russian
+import com.drdisagree.teledrive.resources.language_system
+import com.drdisagree.teledrive.resources.settings_language
 import com.drdisagree.teledrive.resources.backup_folder_remove_message
 import com.drdisagree.teledrive.resources.backup_folder_subtitle
 import com.drdisagree.teledrive.resources.backup_interval_labels
@@ -899,6 +904,7 @@ private fun AppearanceSection(state: SettingsUiState, viewModel: SettingsViewMod
     val prefs = state.preferences
     val capabilities = LocalPlatformCapabilities.current
     var showThemeDialog by remember { mutableStateOf(false) }
+    var showLanguageDialog by remember { mutableStateOf(false) }
 
     if (showThemeDialog) {
         ChoiceDialog(
@@ -913,6 +919,19 @@ private fun AppearanceSection(state: SettingsUiState, viewModel: SettingsViewMod
         )
     }
 
+    if (showLanguageDialog) {
+        ChoiceDialog(
+            title = stringResource(Res.string.settings_language),
+            options = AppLanguage.entries.zip(stringArrayResource(Res.array.language_labels)),
+            selected = prefs.language,
+            onSelect = { choice ->
+                showLanguageDialog = false
+                viewModel.update { it.copy(language = choice) }
+            },
+            onDismiss = { showLanguageDialog = false }
+        )
+    }
+
     SettingsGroup {
         add {
             SettingsClickRow(
@@ -923,6 +942,17 @@ private fun AppearanceSection(state: SettingsUiState, viewModel: SettingsViewMod
                     AppTheme.SYSTEM -> stringResource(Res.string.theme_system)
                 },
                 onClick = { showThemeDialog = true }
+            )
+        }
+        add {
+            SettingsClickRow(
+                title = stringResource(Res.string.settings_language),
+                subtitle = when (prefs.language) {
+                    AppLanguage.SYSTEM -> stringResource(Res.string.language_system)
+                    AppLanguage.ENGLISH -> stringResource(Res.string.language_english)
+                    AppLanguage.RUSSIAN -> stringResource(Res.string.language_russian)
+                },
+                onClick = { showLanguageDialog = true }
             )
         }
         add(visible = capabilities.supportsDynamicColor) {

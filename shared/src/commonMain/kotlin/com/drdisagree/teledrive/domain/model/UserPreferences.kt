@@ -24,6 +24,7 @@ data class UserPreferences(
     val keyBackupCreated: Boolean = false,
 
     val theme: AppTheme = AppTheme.SYSTEM,
+    val language: AppLanguage = AppLanguage.SYSTEM,
     val dynamicColor: Boolean = true,
     val viewMode: ViewMode = ViewMode.GRID,
     val gridSize: Int = 3,

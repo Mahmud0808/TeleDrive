@@ -33,6 +33,7 @@ object PreferenceKeys {
     val KEY_BACKUP_CREATED = booleanPreferencesKey("key_backup_created")
 
     val THEME = stringPreferencesKey("theme")
+    val LANGUAGE = stringPreferencesKey("language")
     val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
     val VIEW_MODE = stringPreferencesKey("view_mode")
     val GRID_SIZE = intPreferencesKey("grid_size")

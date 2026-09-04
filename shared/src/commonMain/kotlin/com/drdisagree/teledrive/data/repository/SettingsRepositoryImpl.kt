@@ -7,6 +7,7 @@ import com.drdisagree.teledrive.core.crypto.CredentialCipher
 import kotlin.io.encoding.Base64
 import com.drdisagree.teledrive.core.telegram.TelegramCredentials
 import com.drdisagree.teledrive.data.local.preferences.PreferenceKeys
+import com.drdisagree.teledrive.domain.model.AppLanguage
 import com.drdisagree.teledrive.domain.model.UserPreferences
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.Flow
@@ -96,6 +97,7 @@ class SettingsRepositoryImpl(
             keyBackupCreated = this[PreferenceKeys.KEY_BACKUP_CREATED]
                 ?: defaults.keyBackupCreated,
             theme = enumOrDefault(this[PreferenceKeys.THEME], defaults.theme),
+            language = AppLanguage.fromCode(this[PreferenceKeys.LANGUAGE]),
             dynamicColor = this[PreferenceKeys.DYNAMIC_COLOR] ?: defaults.dynamicColor,
             viewMode = enumOrDefault(this[PreferenceKeys.VIEW_MODE], defaults.viewMode),
             gridSize = this[PreferenceKeys.GRID_SIZE] ?: defaults.gridSize,
@@ -166,6 +168,7 @@ class SettingsRepositoryImpl(
         this[PreferenceKeys.ENCRYPT_THUMBNAILS] = prefs.encryptThumbnails
         this[PreferenceKeys.KEY_BACKUP_CREATED] = prefs.keyBackupCreated
         this[PreferenceKeys.THEME] = prefs.theme.name
+        this[PreferenceKeys.LANGUAGE] = prefs.language.code
         this[PreferenceKeys.DYNAMIC_COLOR] = prefs.dynamicColor
         this[PreferenceKeys.VIEW_MODE] = prefs.viewMode.name
         this[PreferenceKeys.GRID_SIZE] = prefs.gridSize

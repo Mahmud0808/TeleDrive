@@ -1,0 +1,916 @@
+<resources>
+    <!-- App-wide -->
+    <string name="app_name">TeleDrive</string>
+    <string name="app_backed_up">Загружено</string>
+    <string name="app_drive_recreated">Ваш диск был удален в Telegram, поэтому был создан новый пустой диск</string>
+    <string name="app_no_results">Нет результатов</string>
+    <string name="app_not_backed_up">Не загружено</string>
+    <string name="app_nothing_matches_search">Ничего не найдено по вашему запросу.</string>
+    <string name="app_search_drive">Поиск по диску</string>
+    <string name="app_search_files">Поиск файлов</string>
+    <string name="app_search_name_filter_type">Поиск по имени или фильтрация по типу и статусу резервного копирования.</string>
+    <plurals name="file_count">
+        <item quantity="one">%1$d файл</item>
+        <item quantity="few">%1$d файла</item>
+        <item quantity="many">%1$d файлов</item>
+        <item quantity="other">%1$d файлов</item>
+    </plurals>
+    <plurals name="folder_count">
+        <item quantity="one">%1$d папка</item>
+        <item quantity="few">%1$d папки</item>
+        <item quantity="many">%1$d папок</item>
+        <item quantity="other">%1$d папок</item>
+    </plurals>
+    <plurals name="backup_age_minutes">
+        <item quantity="one">%1$d минуту назад</item>
+        <item quantity="few">%1$d минуты назад</item>
+        <item quantity="many">%1$d минут назад</item>
+        <item quantity="other">%1$d минут назад</item>
+    </plurals>
+    <plurals name="backup_age_hours">
+        <item quantity="one">%1$d час назад</item>
+        <item quantity="few">%1$d часа назад</item>
+        <item quantity="many">%1$d часов назад</item>
+        <item quantity="other">%1$d часов назад</item>
+    </plurals>
+    <plurals name="backup_age_days">
+        <item quantity="one">%1$d день назад</item>
+        <item quantity="few">%1$d дня назад</item>
+        <item quantity="many">%1$d дней назад</item>
+        <item quantity="other">%1$d дней назад</item>
+    </plurals>
+    <plurals name="item_count">
+        <item quantity="one">%1$d элемент</item>
+        <item quantity="few">%1$d элемента</item>
+        <item quantity="many">%1$d элементов</item>
+        <item quantity="other">%1$d элементов</item>
+    </plurals>
+    <plurals name="rebuild_indexed_files">
+        <item quantity="one">Проиндексирован %1$d файл</item>
+        <item quantity="few">Проиндексировано %1$d файла</item>
+        <item quantity="many">Проиндексировано %1$d файлов</item>
+        <item quantity="other">Проиндексировано %1$d файлов</item>
+    </plurals>
+    <plurals name="rebuild_locked_files">
+        <item quantity="one">Пропущен %1$d зашифрованный файл. Восстановите резервную копию ключа для индексации.</item>
+        <item quantity="few">Пропущено %1$d зашифрованных файла. Восстановите резервную копию ключа для индексации.</item>
+        <item quantity="many">Пропущено %1$d зашифрованных файлов. Восстановите резервную копию ключа для индексации.</item>
+        <item quantity="other">Пропущено %1$d зашифрованных файлов. Восстановите резервную копию ключа для индексации.</item>
+    </plurals>
+    <plurals name="home_back_up_pending">
+        <item quantity="one">Резервное копирование %1$d файла</item>
+        <item quantity="few">Резервное копирование %1$d файлов</item>
+        <item quantity="many">Резервное копирование %1$d файлов</item>
+        <item quantity="other">Резервное копирование %1$d файлов</item>
+    </plurals>
+    <plurals name="home_queued_files">
+        <item quantity="one">%1$d файл в очереди</item>
+        <item quantity="few">%1$d файла в очереди</item>
+        <item quantity="many">%1$d файлов в очереди</item>
+        <item quantity="other">%1$d файлов в очереди</item>
+    </plurals>
+    <plurals name="transfers_more_queued">
+        <item quantity="one">Ещё %1$d скрыт</item>
+        <item quantity="few">Ещё %1$d скрыто</item>
+        <item quantity="many">Ещё %1$d скрыто</item>
+        <item quantity="other">Ещё %1$d скрыто</item>
+    </plurals>
+
+    <!-- Bottom navigation -->
+    <string name="nav_files">Файлы</string>
+    <string name="nav_gallery">Галерея</string>
+    <string name="nav_home">Главная</string>
+    <string name="nav_settings">Настройки</string>
+
+    <!-- Shared labels and dialogs -->
+    <string name="common_actions">Действия</string>
+    <string name="common_add">Добавить</string>
+    <string name="common_add_favorites">В избранное</string>
+    <string name="common_back">Назад</string>
+    <string name="common_backup_failed">Ошибка копирования</string>
+    <string name="common_backup_not_backed_up">Не сохранен</string>
+    <string name="common_backup_queued">В очереди</string>
+    <string name="common_backup_uploading">Загрузка</string>
+    <string name="common_cancel">Отмена</string>
+    <string name="common_category_archives">Архивы</string>
+    <string name="common_category_audio">Аудио</string>
+    <string name="common_category_documents">Документы</string>
+    <string name="common_category_other">Прочее</string>
+    <string name="common_category_photos">Фотографии</string>
+    <string name="common_category_videos">Видео</string>
+    <string name="common_clear">Очистить</string>
+    <string name="common_clear_selection">Снять выделение</string>
+    <string name="common_collapse">Свернуть</string>
+    <string name="common_confirm_trash_count_title">Переместить %1$d в корзину?</string>
+    <string name="common_content_description_favorite">Избранное</string>
+    <string name="common_content_description_selected">Выбрано</string>
+    <string name="common_create">Создать</string>
+    <string name="common_delete_forever">Удалить навсегда</string>
+    <string name="common_deselect_all">Снять выделение со всех</string>
+    <string name="common_dismiss">Закрыть</string>
+    <string name="common_download">Скачать</string>
+    <string name="common_drive_root">Корень диска</string>
+    <string name="common_empty">Пусто</string>
+    <string name="common_expand">Развернуть</string>
+    <string name="common_file_size_and_date">%1$s \u00b7 %2$s</string>
+    <string name="common_folder_name">Имя папки</string>
+    <string name="common_free_space">Освободить место</string>
+    <string name="common_grant_permissions">Предоставить разрешения</string>
+    <string name="common_move_trash">В корзину</string>
+    <string name="common_name">Имя</string>
+    <string name="common_no_subfolders">Здесь нет подпапок</string>
+    <string name="common_one_level">На уровень вверх</string>
+    <string name="common_pause">Пауза</string>
+    <string name="common_refresh">Обновить</string>
+    <string name="common_rename">Переименовать</string>
+    <string name="common_rename_file">Переименовать файл</string>
+    <string name="common_restore">Восстановить</string>
+    <string name="common_restore_trash_emptied">Файлы можно восстановить из Корзины перед её очисткой.</string>
+    <string name="common_resume">Возобновить</string>
+    <string name="common_retry">Повторить</string>
+    <string name="common_save">Сохранить</string>
+    <string name="common_select_all">Выбрать все</string>
+    <string name="common_selection_count">Выбрано: %1$d</string>
+    <string name="common_share">Поделиться</string>
+    <string name="common_storage_channels">Диски хранения</string>
+    <string name="common_try_again">Попробовать снова</string>
+    <string name="common_upload">Загрузить</string>
+
+    <!-- Dates -->
+    <string name="date_days_ago">%1$d дн. назад</string>
+    <string name="date_today">Сегодня</string>
+    <string name="date_yesterday">Вчера</string>
+
+    <!-- App lock -->
+    <string name="lock_no_screen_lock">Блокировка экрана недоступна на этом устройстве. Разблокировка.</string>
+    <string name="lock_prompt_title">Разблокировать TeleDrive</string>
+    <string name="lock_screen_title">TeleDrive заблокирован</string>
+    <string name="lock_too_many_attempts">Слишком много попыток. Попробуйте позже.</string>
+    <string name="lock_unlock">Разблокировать</string>
+    <string name="session_broken_action">Войти снова</string>
+    <string name="session_broken_message">Устройство не может прочитать сохраненную сессию Telegram. Это происходит при переносе данных или смене блокировки экрана. Ваши файлы в безопасности. Войдите заново.</string>
+    <string name="session_broken_title">Сессия недоступна</string>
+
+    <!-- Onboarding flow -->
+    <string name="onboarding_action_continue">Продолжить</string>
+    <string name="onboarding_continue">Продолжить</string>
+    <string name="onboarding_continue_without">Продолжить без этого</string>
+    <string name="onboarding_files_live_own_private">Ваши файлы хранятся в вашем личном канале Telegram. Ваш аккаунт, ваше хранилище, ваш контроль.</string>
+    <string name="onboarding_get_started">Начать работу</string>
+    <string name="onboarding_got">Понятно</string>
+    <string name="onboarding_opening">Открытие</string>
+    <string name="onboarding_sign">Войти</string>
+    <string name="onboarding_step">onboarding-step</string>
+    <string name="onboarding_step_counter">Шаг %1$d из %2$d</string>
+    <string name="onboarding_verify">Подтвердить</string>
+
+    <!-- Onboarding: API credentials -->
+    <string name="onboarding_api_access">Доступ к API</string>
+    <string name="onboarding_api_hash">API hash</string>
+    <string name="onboarding_api_hash_short">API hash слишком короткий</string>
+    <string name="onboarding_api_id">API ID</string>
+    <string name="onboarding_api_id_number">API ID должен быть числом</string>
+    <string name="onboarding_choose_api_dev_tools">Выберите «API development tools» и создайте приложение. Подойдёт любое название.</string>
+    <string name="onboarding_copy_api_keys">Скопируйте api_id и api_hash в TeleDrive.</string>
+    <string name="onboarding_get_api_keys">Получить ключи API</string>
+    <string name="onboarding_my_telegram_org">my.telegram.org</string>
+    <string name="onboarding_one_time_setup_keys">Однократная настройка. Ключи хранятся на устройстве в зашифрованном виде.</string>
+    <string name="onboarding_open_dev_page">Открыть страницу разработчиков Telegram и войти</string>
+    <string name="onboarding_set_up_proxy">Настроить прокси</string>
+    <string name="onboarding_telegram_blocked">Telegram заблокирован в этой сети?</string>
+    <string name="onboarding_where_i_get_these">Где их получить?</string>
+
+    <!-- Onboarding: phone and code -->
+    <string name="onboarding_choose_country">Выберите страну</string>
+    <string name="onboarding_code">Код</string>
+    <string name="onboarding_code_sent">Код подтверждения отправлен.</string>
+    <string name="onboarding_code_via_call">Вам поступит звонок на номер %1$s с продиктованным кодом.</string>
+    <string name="onboarding_code_via_email">Код отправлен на %1$s.</string>
+    <string name="onboarding_code_via_flash_call">Telegram совершит звонок на %1$s и сбросит. Код — номер звонящего.</string>
+    <string name="onboarding_code_via_fragment">Ваш код ожидает на Fragment для %1$s. Откройте fragment.com.</string>
+    <string name="onboarding_code_via_missed_call">Telegram совершит звонок на %1$s. Код — последние цифры звонящего номера.</string>
+    <string name="onboarding_code_via_sms">Код отправлен по SMS на номер %1$s.</string>
+    <string name="onboarding_code_via_sms_phrase">Telegram отправил фразу по SMS на номер %1$s. Введите её.</string>
+    <string name="onboarding_code_via_sms_word">Telegram отправил слово по SMS на номер %1$s. Введите его.</string>
+    <string name="onboarding_code_via_telegram">Telegram отправил код на ваши другие устройства.</string>
+    <string name="onboarding_country">Страна</string>
+    <string name="onboarding_email_code_title">Введите код из Email</string>
+    <string name="onboarding_email_continue">Отправить код</string>
+    <string name="onboarding_email_description">Этот аккаунт использует вход через Email. Введите адрес для получения кода.</string>
+    <string name="onboarding_email_label">Email адрес</string>
+    <string name="onboarding_email_title">Email для входа</string>
+    <string name="onboarding_enter_code">Введите код</string>
+    <string name="onboarding_enter_password">Введите пароль Telegram.</string>
+    <string name="onboarding_enter_phone">Введите номер телефона</string>
+    <string name="onboarding_include_country_code_like">Указывайте код страны, например +7 или +375</string>
+    <string name="onboarding_no_account">К этому номеру не привязан аккаунт Telegram. Создайте его в официальном приложении.</string>
+    <string name="onboarding_no_country_match">Страна не найдена.</string>
+    <string name="onboarding_number">Ваш номер</string>
+    <string name="onboarding_password">Пароль</string>
+    <string name="onboarding_phone_number">Номер телефона</string>
+    <string name="onboarding_phone_number_telegram_account">Номер телефона аккаунта Telegram с кодом страны.</string>
+    <string name="onboarding_resend_code">Отправить код повторно</string>
+    <string name="onboarding_search_country">Поиск страны</string>
+    <string name="onboarding_send_code">Отправить код</string>
+    <string name="onboarding_two_step_verification">Двухэтапная аутентификация</string>
+
+    <!-- Onboarding: QR sign-in -->
+    <string name="onboarding_qr_code_description">QR-код для входа</string>
+    <string name="onboarding_qr_confirm_instead">Подтвердить на этом телефоне</string>
+    <string name="onboarding_qr_description">Откройте Telegram на устройстве, где вы уже вошли, и отсканируйте этот код.</string>
+    <string name="onboarding_qr_open_failed">Не удалось открыть Telegram на этом устройстве.</string>
+    <string name="onboarding_qr_open_telegram">Подтвердить в Telegram</string>
+    <string name="onboarding_qr_same_device_description">Telegram установлен на этом устройстве. Подтвердите вход для продолжения.</string>
+    <string name="onboarding_qr_scan_instead">Отсканировать с другого устройства</string>
+    <string name="onboarding_qr_sign_in">Вход по QR-коду</string>
+    <string name="onboarding_qr_step_1">Откройте Telegram на другом устройстве</string>
+    <string name="onboarding_qr_step_2">Перейдите в Настройки -> Устройства</string>
+    <string name="onboarding_qr_step_3">Нажмите «Подключить устройство» и отсканируйте код</string>
+    <string name="onboarding_qr_title">Сканируйте для входа</string>
+    <string name="onboarding_qr_use_phone">Использовать номер телефона</string>
+    <string name="onboarding_qr_waiting">Ожидание сканирования</string>
+
+    <!-- Onboarding: permissions -->
+    <string name="onboarding_allow_all_files">Разрешить доступ ко всем файлам</string>
+    <string name="onboarding_allow_media">Разрешить доступ к медиа</string>
+    <string name="onboarding_files_access_covers_documents">Доступ ко всем файлам включает документы, загрузки и SD-карту. Без него бэкап этих папок недоступен.</string>
+    <string name="onboarding_storage_access">Доступ к хранилищу</string>
+    <string name="onboarding_teledrive_needs_media_files">TeleDrive требуется доступ к вашим файлам для резервного копирования и уведомления для отображения прогресса.</string>
+
+    <!-- Onboarding: drive setup -->
+    <string name="onboarding_channel_files_in_channel">Файлов в канале: %1$d</string>
+    <string name="onboarding_choose_drive">Выберите диск</string>
+    <string name="onboarding_drive_created_desc">В вашем аккаунте создан приватный канал. Всё сохраняемое отправляется туда и доступно только вам.</string>
+    <string name="onboarding_drive_ready">Ваш диск готов</string>
+    <string name="onboarding_looking_for_drives">Поиск ваших дисков</string>
+    <string name="onboarding_no_drive_yet">Не удалось создать диск</string>
+    <string name="onboarding_pick_drive_desc">У вас уже есть диски TeleDrive. Выберите диск для открытия; переключить или добавить диски можно в Настройках.</string>
+    <string name="onboarding_single_drive_desc">Файлы сохраняются в этот приватный канал. Добавить другие диски можно позже в Настройках.</string>
+
+    <!-- Onboarding: backup setup -->
+    <string name="onboarding_choose_what_back_change">Выберите, что копировать. Вы можете изменить это в любой момент в Настройках.</string>
+    <string name="onboarding_section_behavior">Поведение</string>
+    <string name="onboarding_section_folders">Папки</string>
+    <string name="onboarding_toggle_auto_backup">Автоматическое копирование</string>
+    <string name="onboarding_toggle_camera">Камера (DCIM)</string>
+    <string name="onboarding_toggle_movies">Фильмы и видео</string>
+    <string name="onboarding_toggle_pictures">Изображения</string>
+    <string name="onboarding_toggle_wifi_only">Только по Wi-Fi</string>
+
+    <!-- Home -->
+    <string name="home_active_transfers">Активных передач: %1$d</string>
+    <string name="home_backing_up">Выполняется резервное копирование…</string>
+    <string name="home_backing_up_new_files">Копирование новых файлов</string>
+    <string name="home_backup_all_in_telegram">Все файлы сохранены в Telegram</string>
+    <string name="home_backup_at">Последний бэкап %1$s</string>
+    <string name="home_backup_auto_off">Автоматический бэкап отключен</string>
+    <string name="home_backup_just_now">Бэкап только что выполнен</string>
+    <string name="home_backup_never">Бэкапов еще не было</string>
+    <string name="home_backup_nothing_to_back_up">Нечего копировать</string>
+    <string name="home_backup_paused">Бэкап приостановлен</string>
+    <string name="home_cancel_backup_action">Отменить бэкап</string>
+    <string name="home_cancel_backup_title">Отменить копирование?</string>
+    <string name="home_choose_folders">Выбрать папки</string>
+    <string name="home_deleted_files_kept_removal">Удаленные файлы хранятся до очистки</string>
+    <string name="home_failed_count">Ошибок: %1$d</string>
+    <string name="home_lock_app">Заблокировать</string>
+    <string name="home_not_backed_up_count">Не сохранены: %1$d</string>
+    <string name="home_nothing_new_to_back_up">Нет новых файлов для бэкапа</string>
+    <string name="home_open_drives">Сменить диск</string>
+    <string name="home_queued_uploads_discarded_files">Загрузки в очереди отменены. Уже загруженные файлы останутся в Telegram.</string>
+    <string name="home_scan_now">Сканировать</string>
+    <string name="home_scanning">Сканирование…</string>
+    <string name="home_section_favorites">Избранное</string>
+    <string name="home_section_recent">Недавние</string>
+    <string name="home_section_storage">Хранилище</string>
+    <string name="home_session_progress">Файлов: %1$d из %2$d</string>
+    <string name="home_status_connected">Подключено</string>
+    <string name="home_status_connecting">Подключение…</string>
+    <string name="home_status_offline">Офлайн</string>
+    <string name="home_status_rebuilding">Переиндексация…</string>
+    <string name="home_status_syncing">Синхронизация…</string>
+    <string name="home_storage_percent">%1$d%</string>
+    <string name="home_storage_percent_min">&lt;1%</string>
+    <string name="home_transfer_history">История передач</string>
+    <string name="home_transfer_history_subtitle">Загрузки и скачивания</string>
+    <string name="home_waiting_count">В ожидании: %1$d</string>
+
+    <!-- Search -->
+    <string name="search_section_files">Файлы</string>
+    <string name="search_section_folders">Папки</string>
+
+    <!-- Files -->
+    <string name="files">Файлы</string>
+    <string name="files_add_files">Загрузить файлы</string>
+    <string name="files_archive">В архив</string>
+    <string name="files_back_import_appear">Файлы после импорта или бэкапа появятся здесь.</string>
+    <string name="files_copy">Копировать в…</string>
+    <string name="files_copy_here">Копировать сюда</string>
+    <string name="files_copy_to">Копировать в</string>
+    <string name="files_delete_local">Удалить локально</string>
+    <string name="files_delete_local_copies">Удалить локальные копии?</string>
+    <string name="files_drop_folders_unsupported">Загрузка папок не поддерживается</string>
+    <string name="files_drop_to_upload">Перетащите файлы для загрузки</string>
+    <string name="files_hide">Скрыть</string>
+    <string name="files_import_copied">Скопировано %1$d уже имеющихся в Telegram</string>
+    <string name="files_import_duplicates">%1$d уже есть на вашем диске</string>
+    <string name="files_import_failed">Не удалось импортировать выбранные файлы</string>
+    <string name="files_import_restored">Восстановлено %1$d из корзины</string>
+    <string name="files_import_uploading">Загрузка %1$d</string>
+    <string name="files_import_uploading_copied">Загрузка %1$d, скопировано %2$d имеющихся в Telegram</string>
+    <string name="files_import_uploading_duplicates">Загрузка %1$d, %2$d уже на диске</string>
+    <string name="files_import_uploading_failed">Загрузка %1$d, не удалось: %2$d</string>
+    <string name="files_import_uploading_restored">Загрузка %1$d, восстановлено %2$d</string>
+    <string name="files_move">Переместить</string>
+    <string name="files_move_here">Переместить сюда</string>
+    <string name="files_move_to">Переместить в</string>
+    <string name="files_new_folder">Новая папка</string>
+    <string name="files_nothing_here_yet">Здесь пока ничего нет</string>
+    <string name="files_only_files_verified_telegram">С устройства будут удалены только файлы с подтвержденной копией в Telegram.</string>
+    <string name="files_rename_file">Переименовать файл</string>
+    <string name="files_rename_folder">Переименовать папку</string>
+    <string name="files_root_name">Файлы</string>
+    <string name="files_search">Поиск</string>
+    <string name="files_share_destination_confirm">Сохранить сюда</string>
+    <string name="files_share_destination_title">Сохранить отправленные файлы в</string>
+    <string name="files_share_needs_local">Скачайте эти файлы перед отправкой</string>
+    <string name="files_show_in_file_manager">Показать в файловом менеджере</string>
+    <string name="files_sort">Сортировка</string>
+    <string name="files_sort_ascending">По возрастанию</string>
+    <string name="files_sort_backup_status">Статус копии</string>
+    <string name="files_sort_date_added">Дата добавления</string>
+    <string name="files_sort_date_modified">Дата изменения</string>
+    <string name="files_sort_descending">По убыванию</string>
+    <string name="files_sort_name">Имя</string>
+    <string name="files_sort_size">Размер</string>
+    <string name="files_sort_type">Тип</string>
+    <string name="files_unhide">Показать</string>
+    <string name="files_copied_all">Скопировано %1$d</string>
+    <string name="files_copied_partial">Скопировано %1$d из %2$d</string>
+    <string name="files_moving_to_trash">Перемещение %1$d в корзину…</string>
+    <string name="files_queued_for_download">В очереди на скачивание: %1$d</string>
+    <string name="files_queued_for_upload">В очереди на загрузку: %1$d</string>
+    <string name="files_queued_partial">В очереди: %1$d, ошибок: %2$d</string>
+    <string name="files_removed_local_copies">Удалено локальных копий: %1$d</string>
+    <string name="files_sync_result">Новых: %1$d, обновлено: %2$d</string>
+
+    <!-- File and folder info -->
+    <string name="info_added">Добавлен</string>
+    <string name="info_backup">Статус копии</string>
+    <string name="info_backup_done">Сохранено в Telegram</string>
+    <string name="info_backup_failed">Ошибка</string>
+    <string name="info_backup_none">Не сохранен</string>
+    <string name="info_backup_queued">В очереди</string>
+    <string name="info_backup_uploading">Загрузка</string>
+    <string name="info_contents">Содержимое</string>
+    <string name="info_created">Создан</string>
+    <string name="info_details">Сведения</string>
+    <string name="info_duration">Длительность</string>
+    <string name="info_encrypted">Зашифровано</string>
+    <string name="info_extension">Расширение</string>
+    <string name="info_favorite">Избранное</string>
+    <string name="info_local_copy">Локальная копия</string>
+    <string name="info_modified">Изменен</string>
+    <string name="info_no">Нет</string>
+    <string name="info_path">Путь</string>
+    <string name="info_resolution">Разрешение</string>
+    <string name="info_sha256">SHA-256</string>
+    <string name="info_size">Размер</string>
+    <string name="info_type">Тип</string>
+    <string name="info_yes">Да</string>
+
+    <!-- Notes -->
+    <string name="note_body_hint">Текст, ссылки или всё вместе</string>
+    <string name="note_bold">Жирный</string>
+    <string name="note_bullet">Маркированный список</string>
+    <string name="note_code">Код</string>
+    <string name="note_edit">Редактировать заметку</string>
+    <string name="note_edit_action">Редактировать текст</string>
+    <string name="note_heading">Заголовок</string>
+    <string name="note_italic">Курсив</string>
+    <string name="note_link">Ссылка</string>
+    <string name="note_link_text">текст</string>
+    <string name="note_link_url">https://</string>
+    <string name="note_new">Новая заметка</string>
+    <string name="note_not_editable">Здесь можно редактировать только текстовые файлы</string>
+    <string name="note_quote">Цитата</string>
+    <string name="note_save">Сохранить</string>
+    <string name="note_saved">Заметка сохранена</string>
+    <string name="note_strikethrough">Зачеркнутый</string>
+    <string name="note_title_hint">Заголовок (необязательно)</string>
+
+    <!-- Gallery -->
+    <string name="album_not_in_folder">Не в папке</string>
+    <string name="gallery_albums_appear_organise_media">Альбомы появляются при раскладке медиафайлов по папкам.</string>
+    <string name="gallery_no_albums">Нет альбомов</string>
+    <string name="gallery_no_media">Нет медиафайлов</string>
+    <string name="gallery_photos_videos_appear_here">Фотографии и видео появятся здесь после импорта или бэкапа.</string>
+    <string name="gallery_tab_albums">Альбомы</string>
+    <string name="gallery_tab_all">Все</string>
+    <string name="gallery_tab_photos">Фотографии</string>
+    <string name="gallery_tab_videos">Видео</string>
+    <string name="gallery_title">Галерея</string>
+
+    <!-- Preview -->
+    <string name="preview_add_favorites">В избранное</string>
+    <string name="preview_added_favorites">Добавлено в избранное</string>
+    <string name="preview_archive">Архивировать</string>
+    <string name="preview_archive_failed">Не удалось открыть архив</string>
+    <string name="preview_archive_format_title">Архив %1$s</string>
+    <string name="preview_archive_packed_summary">%1$s сжато из %2$s</string>
+    <string name="preview_archive_packed_summary_saved">%1$s сжато из %2$s, меньше на %3$d%</string>
+    <string name="preview_archived">Заархивировано</string>
+    <string name="preview_back_10_seconds">Назад на 10 секунд</string>
+    <string name="preview_chevron">стрелка</string>
+    <string name="preview_confirm_trash_file_message">«%1$s» будет перемещен в корзину. Вы сможете восстановить его позже.</string>
+    <string name="preview_download_view">Скачать для просмотра</string>
+    <string name="preview_extraction_supported_yet_download">Распаковка пока не поддерживается. Скачайте архив для открытия.</string>
+    <string name="preview_fetch_failed">Не удалось получить файл</string>
+    <string name="preview_file_info">Информация о файле</string>
+    <string name="preview_forward_10_seconds">Вперед на 10 секунд</string>
+    <string name="preview_hidden">Скрыто</string>
+    <string name="preview_local_copy_removed">Локальная копия удалена</string>
+    <string name="preview_move_to_trash">В корзину?</string>
+    <string name="preview_next">Следующий файл</string>
+    <string name="preview_next_audio_track">Следующая аудиодорожка</string>
+    <string name="preview_no_copy_available">Нет локальной или серверной копии</string>
+    <string name="preview_no_preview">Предпросмотр недоступен</string>
+    <string name="preview_no_preview_for_type">Нет предпросмотра для данного типа файла</string>
+    <string name="preview_nothing_to_remove">Нечего удалять</string>
+    <string name="preview_only_zip">Просмотр доступен только для ZIP-архивов.</string>
+    <string name="preview_open_link">Открыть ссылку</string>
+    <string name="preview_page_number">Страница %1$d</string>
+    <string name="preview_pdf_open_failed">Не удалось открыть PDF</string>
+    <string name="preview_playback_speed">Скорость воспроизведения</string>
+    <string name="preview_preparing">Подготовка %1$s</string>
+    <string name="preview_previous">Предыдущий файл</string>
+    <string name="preview_progress_bytes">%1$s из %2$s</string>
+    <string name="preview_read_failed">Не удалось прочитать файл</string>
+    <string name="preview_remove_favorites">Убрать из избранного</string>
+    <string name="preview_removed_favorites">Убрано из избранного</string>
+    <string name="preview_requires_download">Этот файл весит %1$s и еще не скачан на устройство.</string>
+    <string name="preview_share_chooser_title">Поделиться</string>
+    <string name="preview_share_copy">Поделиться копией</string>
+    <string name="preview_truncated_download_view">\nПредпросмотр сокращен. Скачайте файл полностью для просмотра.</string>
+    <string name="preview_unarchive">Разархивировать</string>
+    <string name="preview_unarchived">Извлечено из архива</string>
+    <string name="preview_unhidden">Отображено</string>
+
+    <!-- Player -->
+    <string name="player_audio_track">Аудиодорожка</string>
+    <string name="player_codec_unsupported">Устройство не может декодировать это видео. Скачайте его и откройте в другом плеере.</string>
+    <string name="player_exit_full_screen">Выйти из полноэкранного режима</string>
+    <string name="player_fewer_controls">Меньше элементов управления</string>
+    <string name="player_full_screen">Полный экран</string>
+    <string name="player_hide_subtitles">Скрыть субтитры</string>
+    <string name="player_more_controls">Больше элементов управления</string>
+    <string name="player_mute">Выключить звук</string>
+    <string name="player_pause">Пауза</string>
+    <string name="player_play">Воспроизвести</string>
+    <string name="player_playback_failed">Ошибка воспроизведения</string>
+    <string name="player_repeat_off">Повтор выкл.</string>
+    <string name="player_repeat_one">Повторять один</string>
+    <string name="player_replay">Повторить</string>
+    <string name="player_scaling">Масштабирование</string>
+    <string name="player_skip_back">Назад на 10 секунд</string>
+    <string name="player_skip_forward">Вперед на 10 секунд</string>
+    <string name="player_show_subtitles">Показать субтитры</string>
+    <string name="player_unmute">Включить звук</string>
+
+    <!-- Collections -->
+    <string name="collection_archived_empty">Архивированные файлы скрыты из общего списка, но сохраняют копию.</string>
+    <string name="collection_archived_subtitle">Скрыты из основного файлового менеджера</string>
+    <string name="collection_archived_title">Архив</string>
+    <string name="collection_empty_title">Пусто в %1$s</string>
+    <string name="collection_favorites_empty">Отметьте файл звездочкой, чтобы сохранить его здесь.</string>
+    <string name="collection_favorites_subtitle">Отмеченные вами файлы</string>
+    <string name="collection_favorites_title">Избранное</string>
+    <string name="collection_hidden_empty">Скрытые файлы не отображаются в общем списке и галерее.</string>
+    <string name="collection_hidden_subtitle">Видны только в этом разделе</string>
+    <string name="collection_hidden_title">Скрытые</string>
+    <string name="collection_remove_from">Убрать из %1$s</string>
+
+    <!-- Trash -->
+    <string name="trash">Корзина</string>
+    <string name="trash_delete_permanently">Удалить навсегда?</string>
+    <string name="trash_delete_selected_message">%1$d элементов, включая содержимое выбранных папок, будут безвозвратно удалены из устройства и из Telegram.</string>
+    <string name="trash_empty">Корзина пуста</string>
+    <string name="trash_empty_trash_action">Очистить корзину</string>
+    <string name="trash_empty_trash_title">Очистить корзину?</string>
+    <string name="trash_items_permanently_deleted_device">Все элементы будут навсегда удалены с устройства и из Telegram. Это действие нельзя отменить.</string>
+    <string name="trash_restores_with_folder">Восстанавливается вместе с папкой</string>
+    <string name="trash_trashed_at">Удалено %1$s</string>
+    <string name="trash_delete_partial">%1$d из %2$d не удалось удалить</string>
+    <string name="trash_deleted_permanently">Удалено навсегда: %1$d</string>
+    <string name="trash_emptying">Очистка корзины…</string>
+    <string name="trash_restored">Восстановлено %1$d</string>
+    <string name="trash_restored_partial">Восстановлено %1$d, не удалось: %2$d</string>
+    <plurals name="trash_deleting_items"><item quantity="one">Удаление %1$d элемента…</item><item quantity="few">Удаление %1$d элементов…</item><item quantity="many">Удаление %1$d элементов…</item><item quantity="other">Удаление %1$d элементов…</item></plurals>
+    <plurals name="trash_restoring_items"><item quantity="one">Восстановление %1$d элемента…</item><item quantity="few">Восстановление %1$d элементов…</item><item quantity="many">Восстановление %1$d элементов…</item><item quantity="other">Восстановление %1$d элементов…</item></plurals>
+
+    <!-- Transfers -->
+    <string name="transfer_stage_joining">Объединение частей</string>
+    <string name="transfer_stage_sealing">Шифрование части</string>
+    <string name="transfer_type_backup">Бэкап</string>
+    <string name="transfer_type_download">Скачивание</string>
+    <string name="transfer_type_restore">Восстановление</string>
+    <string name="transfer_type_upload">Загрузка</string>
+    <string name="transfers">Передачи</string>
+    <string name="transfers_cancel">Отменить все</string>
+    <string name="transfers_cancel_transfers">Отменить все передачи?</string>
+    <string name="transfers_clear_finished">Очистить завершенные</string>
+    <string name="transfers_clear_finished_transfers">Очистить завершенные передачи?</string>
+    <string name="transfers_completed_canceled_entries_removed">Завершенные и отмененные передачи удаляются из этого списка. Ваши файлы не затронуты.</string>
+    <string name="transfers_failed">Ошибка</string>
+    <string name="transfers_failed_downloads">Ошибки скачивания</string>
+    <string name="transfers_failed_transfers">Ошибки передач</string>
+    <string name="transfers_failed_uploads">Ошибки загрузки</string>
+    <string name="transfers_no_transfers">Нет передач</string>
+    <string name="transfers_pause">Приостановить все</string>
+    <string name="transfers_queued_running_paused_failed">Передачи в очереди, активные, приостановленные и с ошибками будут отменены. Уже загруженные файлы останутся в Telegram.</string>
+    <string name="transfers_resume">Возобновить все</string>
+    <string name="transfers_section_active">Активные</string>
+    <string name="transfers_section_finished">Завершенные</string>
+    <string name="transfers_section_paused">Приостановленные</string>
+    <string name="transfers_uploads_downloads_appear_here">Здесь отображаются загрузки и скачивания.</string>
+
+    <!-- Drives and channels -->
+    <string name="channels_channel_container">channel-container</string>
+    <string name="channels_create_one_teledrive_store">Создайте диск, и TeleDrive будет сохранять ваши файлы в этом приватном канале.</string>
+    <string name="channels_creates_private_channel_account">Создает приватный канал в вашем аккаунте. Имя помогает различать диски.</string>
+    <string name="channels_creating_drive">Создание диска</string>
+    <string name="channels_delete_confirm_hint">Введите %1$s для подтверждения</string>
+    <string name="channels_delete_message">Канал и все %1$d файлов в нем (%2$s) будут навсегда удалены из Telegram. Это действие нельзя отменить.</string>
+    <string name="channels_delete_telegram">Удалить из Telegram</string>
+    <string name="channels_delete_title">Удалить %1$s?</string>
+    <string name="channels_deleting">Удаление канала</string>
+    <string name="channels_drive_actions">Действия с диском</string>
+    <string name="channels_drive_name">Имя диска</string>
+    <string name="channels_look_drives">Поиск дисков</string>
+    <string name="channels_looking_for_drives">Поиск дисков…</string>
+    <string name="channels_new_drive">Новый диск</string>
+    <string name="channels_no_drives_yet">Дисков пока нет</string>
+    <string name="channels_open_drive">Открыть диск</string>
+    <string name="channels_opening_drive">Открытие диска</string>
+    <string name="channels_removed_missing">Удалены диски (%1$d), чьи каналы больше не существуют в Telegram</string>
+    <string name="channels_rename_drive">Переименовать диск</string>
+    <string name="channels_renames_channel_telegram_well">Переименовывает канал также и в самом Telegram.</string>
+    <string name="channels_renaming">Переименование</string>
+
+    <!-- Settings home -->
+    <string name="settings">Настройки</string>
+    <string name="settings_section_about_subtitle">Версия, ссылки и обновления</string>
+    <string name="settings_section_about_title">О приложении</string>
+    <string name="settings_section_account_subtitle">Сессия Telegram, синхронизация, выход</string>
+    <string name="settings_section_account_title">Аккаунт</string>
+    <string name="settings_section_advanced_subtitle">Передачи, повторы, прокси, логгирование</string>
+    <string name="settings_section_advanced_title">Дополнительно</string>
+    <string name="settings_section_appearance_subtitle">Тема, язык, сетка, интерфейс</string>
+    <string name="settings_section_appearance_title">Внешний вид</string>
+    <string name="settings_section_backup_subtitle">Папки, расписание, сеть</string>
+    <string name="settings_section_backup_title">Резервное копирование</string>
+    <string name="settings_section_notifications_subtitle">Оповещения о прогрессе и ошибках</string>
+    <string name="settings_section_notifications_title">Уведомления</string>
+    <string name="settings_section_permissions_subtitle">Доступ к медиафайлам, уведомления</string>
+    <string name="settings_section_permissions_title">Разрешения</string>
+    <string name="settings_section_playback_subtitle">Стриминг, фоновый звук</string>
+    <string name="settings_section_playback_title">Воспроизведение</string>
+    <string name="settings_section_security_subtitle">Блокировка приложения, шифрование</string>
+    <string name="settings_section_security_title">Безопасность</string>
+    <string name="settings_section_storage_subtitle">Кэш, автоочистка корзины</string>
+    <string name="settings_section_storage_title">Хранилище</string>
+
+    <!-- Settings: account -->
+    <string name="settings_files_stay_telegram_channel">Ваши файлы останутся в канале Telegram. Это устройство сбросит локальный индекс, превью и кэши, и пересоздаст их при повторном входе.</string>
+    <string name="settings_log">Выйти</string>
+    <string name="settings_log_telegram">Выйти из Telegram?</string>
+    <string name="settings_reading_channel">Чтение вашего канала хранения</string>
+    <string name="settings_rebuild_index_telegram">Переиндексировать диск из Telegram</string>
+    <string name="settings_removes_session_stored_api">Удаляет сессию и сохраненные ключи API</string>
+    <string name="settings_restores_file_list">Восстанавливает список файлов из вашего канала хранения</string>
+    <string name="settings_shown_channels_private_owned">Отображаются приватные каналы, созданные вами с именем TeleDrive.</string>
+    <string name="settings_state_connected">Подключено</string>
+    <string name="settings_state_connecting">Подключение</string>
+    <string name="settings_state_syncing">Синхронизация</string>
+    <string name="settings_state_waiting_network">Ожидание сети</string>
+    <string name="settings_switch_drives_create_another">Переключить диски, создать другой или удалить</string>
+    <string name="settings_telegram_account">Аккаунт Telegram</string>
+
+    <!-- Settings: backup -->
+    <string name="settings_add">Добавить</string>
+    <string name="settings_add_another_folder">Добавить еще папку</string>
+    <string name="settings_automatic_backup">Автоматический бэкап</string>
+    <string name="settings_back_new_media_instantly">Мгновенный бэкап новых медиафайлов</string>
+    <string name="settings_backup_folders_title">Папки для копирования</string>
+    <string name="settings_backup_interval">Интервал бэкапа</string>
+    <string name="settings_folder_unreadable">Эта папка недоступна для прямого чтения</string>
+    <string name="settings_no_folders_selected">Папки не выбраны, автобэкап ничего не делает. Ручные загрузки из Файлов работают как обычно.</string>
+    <string name="settings_only_charging">Только при зарядке</string>
+    <string name="settings_remove_backup_folder">Удалить папку из бэкапа?</string>
+    <string name="settings_skip_files_larger_than">Пропускать файлы крупнее</string>
+    <string name="settings_uploads_photos_videos_soon">Загружает фото и видео сразу при их появлении</string>
+    <string name="settings_wi_fi_only">Бэкап только по Wi-Fi</string>
+    <string name="settings_wi_fi_only_summary">Автоматический бэкап ждет подключения к безлимитной сети</string>
+
+    <!-- Settings: storage -->
+    <string name="settings_auto_clear_trash">Автоочистка корзины</string>
+    <string name="settings_cache_current_size">Текущий размер %1$s</string>
+    <string name="settings_cache_limit">Лимит кэша</string>
+    <string name="settings_cached_previews_thumbnails_temporary">Кэшированные превью, миниатюры и временные файлы будут удалены. Ваши файлы и бэкапы не затронуты.</string>
+    <string name="settings_clear_cache_action">Очистить кэш</string>
+    <string name="settings_clear_cache_title">Очистить кэш?</string>
+    <string name="settings_download_location">Место скачивания</string>
+    <string name="settings_download_location_default">Загрузки/TeleDrive</string>
+    <string name="settings_download_location_reset">Сбросить путь скачивания</string>
+    <string name="settings_free_up_subtitle">%1$s загруженных файлов хранятся локально</string>
+    <string name="settings_free_up_none">Нет загруженных файлов, занимающих локальную память</string>
+    <string name="settings_clear_thumbnails_action">Очистить миниатюры</string>
+    <string name="settings_clear_thumbnails_title">Очистить миниатюры?</string>
+    <string name="settings_free_up_space_title">Освободить %1$s?</string>
+    <string name="settings_gallery_previews_regenerated_browse">Превью в галерее будут пересозданы по мере просмотра. Ваши файлы не затронуты.</string>
+    <string name="settings_local_copies_files_already">Локальные копии файлов, уже загруженных в Telegram, будут удалены с устройства. Они остаются в вашем канале Telegram и могут быть скачаны снова.</string>
+
+    <!-- Settings: security -->
+    <string name="settings_app_lock">Блокировка приложения</string>
+    <string name="settings_auto_lock">Автоблокировка через</string>
+    <string name="settings_back_encryption_key">Сохранить ключ шифрования</string>
+    <string name="settings_block_screenshots">Запрет скриншотов</string>
+    <string name="settings_change_passphrase">Сменить кодовую фразу</string>
+    <string name="settings_confirm_removing_lock">Подтвердите личность перед снятием блокировки</string>
+    <string name="settings_encrypt_thumbnails">Шифровать миниатюры</string>
+    <string name="settings_encrypt_uploads">Шифровать загружаемое</string>
+    <string name="settings_encryption_stays_off">Шифрование отключено до установки кодовой фразы</string>
+    <string name="settings_enter_passphrase_used_backing">Введите кодовую фразу, использованную при бэкапе ключа.</string>
+    <string name="settings_files_sealed_leaving_device">Файлы шифруются перед отправкой с устройства. Требуется кодовая фраза.</string>
+    <string name="settings_forgot_show_hint">Забыли? Показать подсказку</string>
+    <string name="settings_hides_app_screenshots_screen">Скрывает приложение на скриншотах, при записи экрана и в списке недавних</string>
+    <string name="settings_hint_optional">Подсказка (необязательно)</string>
+    <string name="settings_key_backup_stored">Копия ключа сохранена в вашем канале Telegram</string>
+    <string name="settings_no_key_backup_found">Копия ключа не найдена в вашем канале хранилища.</string>
+    <string name="settings_no_recovery_passphrase">Нет кодовой фразы восстановления</string>
+    <string name="settings_passphrase">Кодовая фраза</string>
+    <string name="settings_passphrase_min_length">Не менее %1$d символов</string>
+    <string name="settings_passphrases_do_not_match">Кодовые фразы не совпадают</string>
+    <string name="settings_protects_cached_previews_device">Защищает кэшированные превью ключом устройства. Фраза не требуется. Галерея грузится медленнее.</string>
+    <string name="settings_reading_hint">Чтение подсказки…</string>
+    <string name="settings_repeat_passphrase">Повторите кодовую фразу</string>
+    <string name="settings_require_fingerprint_screen_lock">Требовать отпечаток или блокировку экрана</string>
+    <string name="settings_required_before_encrypt">Требуется перед включением шифрования загрузок</string>
+    <string name="settings_required_encryption_key_wrapped">Требуется для шифрования. Ключ защищен этой фразой и сохранен в канале Telegram для восстановления на новом устройстве. Telegram не знает фразу.</string>
+    <string name="settings_restore_encryption_key">Восстановить ключ шифрования</string>
+    <string name="settings_save_backup">Сохранить копию</string>
+    <string name="settings_set">Задать</string>
+    <string name="settings_set_passphrase">Установить кодовую фразу</string>
+    <string name="settings_stored_unencrypted_never_put">Хранится в открытом виде. Не указывайте сюда кодовую фразу.</string>
+    <string name="settings_turn_off_app_lock">Отключить блокировку приложения</string>
+    <string name="settings_unlock_files_encrypted_earlier">Расшифровать файлы, зашифрованные ранней кодовой фразой</string>
+    <string name="settings_uploads_stay_unencrypted_set">Загрузки остаются незашифрованными до её установки. Зашифрованные ранее файлы остаются защищенными.</string>
+    <string name="settings_nothing_to_remove">Нечего удалять</string>
+
+    <!-- Settings: appearance -->
+    <string name="settings_archived_shortcut">Ярлык архива</string>
+    <string name="settings_compact_layout">Компактный вид</string>
+    <string name="settings_dynamic_color">Динамические цвета</string>
+    <string name="settings_grid_columns">Колонок в сетке</string>
+    <string name="settings_grid_view">Вид сеткой</string>
+    <string name="settings_hidden_shortcut">Ярлык скрытого</string>
+    <string name="settings_recent_files">Недавние файлы</string>
+    <string name="settings_recent_files_subtitle">Отображать недавние файлы на главном экране</string>
+    <string name="settings_shows_archived_collection_home">Отображает коллекцию «Архив» на главном экране</string>
+    <string name="settings_shows_hidden_collection_home">Отображает коллекцию «Скрытое» на главном экране</string>
+    <string name="settings_theme">Тема оформления</string>
+    <string name="settings_language">Язык приложения</string>
+    <string name="language_system">Системный (по умолчанию)</string>
+    <string name="language_english">English</string>
+    <string name="language_russian">Русский</string>
+    <string name="settings_tighter_list_rows_without">Компактные строки без размера и даты</string>
+    <string name="settings_use_wallpaper_colors_available">Использовать цвета обоев при наличии</string>
+    <string name="theme_dark">Тёмная</string>
+    <string name="theme_light">Светлая</string>
+    <string name="theme_system">Системная</string>
+
+    <!-- Settings: playback -->
+    <string name="settings_background_playback">Фоновое воспроизведение</string>
+    <string name="settings_play_videos_load_instead">Воспроизводить видео во время загрузки вместо предварительного скачивания</string>
+    <string name="settings_stream_downloading">Стриминг при загрузке</string>
+
+    <!-- Settings: notifications -->
+    <string name="settings_backup_results">Результаты копирования</string>
+    <string name="settings_failures">Ошибки</string>
+
+    <!-- Settings: advanced -->
+    <string name="settings_debug_logging">Журнал отладки</string>
+    <string name="settings_link_previews">Предпросмотр ссылок</string>
+    <string name="settings_link_previews_subtitle">Telegram загружает заголовок и картинку для сохраненных ссылок</string>
+    <string name="settings_parallel_transfers">Параллельные передачи</string>
+    <string name="settings_proxy">Прокси</string>
+    <string name="settings_proxy_subtitle">Обход блокировок Telegram</string>
+    <string name="settings_retry_attempts">Количество повторов</string>
+    <string name="settings_transfers_wi_fi_only">Передача только по Wi-Fi</string>
+    <string name="settings_transfers_wi_fi_only_summary">Применяется к вручную запущенным загрузкам и скачиваниям</string>
+
+    <!-- Exclusions -->
+    <string name="exclusions_change_file">Изменить файл</string>
+    <string name="exclusions_change_folder">Изменить папку</string>
+    <string name="exclusions_choose_file">Выбрать файл</string>
+    <string name="exclusions_choose_folder">Выбрать папку</string>
+    <string name="exclusions_dot_names">Имена, начинающиеся с точки</string>
+    <string name="exclusions_size_in_bytes">Размер в байтах</string>
+    <string name="exclusions_type_extension">Расширение</string>
+    <string name="exclusions_type_file">Файл</string>
+    <string name="exclusions_type_folder">Папка</string>
+    <string name="exclusions_type_hidden">Скрытые файлы</string>
+    <string name="exclusions_type_max_size">Максимальный размер</string>
+    <string name="exclusions_type_mime">Тип</string>
+    <string name="exclusions_type_pattern">Шаблон</string>
+    <string name="settings_add_exclusion">Добавить исключение</string>
+    <string name="settings_choose_folder_device">Выберите любую папку на устройстве</string>
+    <string name="settings_excluded_files_folders_skipped">Исключенные файлы и папки пропускаются при автобэкапе.</string>
+    <string name="settings_exclusion_remove_message">«%1$s» снова будет включаться в бэкапы.</string>
+    <string name="settings_exclusions">Исключения</string>
+    <string name="settings_files_folders_skipped_backup">Файлы и папки, пропущенные бэкапом</string>
+    <string name="settings_item_lives_app_cloud">Элемент находится в приложении без локального пути. Добавьте правило с Шаблоном.</string>
+    <string name="settings_no_exclusions">Нет исключений</string>
+    <string name="settings_remove">Удалить</string>
+    <string name="settings_remove_exclusion">Удалить исключение?</string>
+    <string name="settings_skips_every_file_folder">Пропускает любой файл или папку, имя которых начинается с точки (.thumbnails, .trashed и др.).</string>
+
+    <!-- Proxy -->
+    <string name="proxy_add">Добавить прокси</string>
+    <string name="proxy_add_one_first">Сохраните прокси перед включением</string>
+    <string name="proxy_delete_action">Удалить</string>
+    <string name="proxy_delete_message">%1$s будет удален из списка.</string>
+    <string name="proxy_delete_title">Удалить этот прокси?</string>
+    <string name="proxy_edit">Редактировать</string>
+    <string name="proxy_endpoint">%1$s \u00b7 %2$s:%3$d</string>
+    <string name="proxy_host">Сервер</string>
+    <string name="proxy_import">Импортировать</string>
+    <string name="proxy_link">Ссылка на прокси</string>
+    <string name="proxy_link_imported">Сохранено: %1$s</string>
+    <string name="proxy_link_not_recognised">Эта ссылка не является прокси-ссылкой</string>
+    <string name="proxy_name_optional">Имя (необязательно)</string>
+    <string name="proxy_none_saved">Нет сохраненных прокси</string>
+    <string name="proxy_none_saved_summary">Добавьте прокси или вставьте полученную ссылку</string>
+    <string name="proxy_password_optional">Пароль (необязательно)</string>
+    <string name="proxy_paste_link">Вставить ссылку</string>
+    <string name="proxy_paste_link_summary">Прокси обычно передаются ссылками tg:// или t.me. Вставьте ссылку сюда, и поля заполнятся автоматически.</string>
+    <string name="proxy_port">Порт</string>
+    <string name="proxy_reachable">Telegram ответил</string>
+    <string name="proxy_route_needs_one">Сохраните сервер ниже перед включением</string>
+    <string name="proxy_route_off_summary">Telegram подключается напрямую</string>
+    <string name="proxy_route_on_summary">Telegram подключается через выбранный прокси-сервер</string>
+    <string name="proxy_route_through">Маршрутизация через прокси</string>
+    <string name="proxy_saved">Сохраненные серверы</string>
+    <string name="proxy_secret">Секрет</string>
+    <string name="proxy_test">Тест</string>
+    <string name="proxy_server_reachable">Сервер доступен, войдите для полной проверки</string>
+    <string name="proxy_testing">Тестирование</string>
+    <string name="proxy_title">Прокси</string>
+    <string name="proxy_type_http">HTTP</string>
+    <string name="proxy_type_mtproto">MTProto</string>
+    <string name="proxy_type_socks5">SOCKS5</string>
+    <string name="proxy_unreachable">Нет ответа через этот сервер</string>
+    <string name="proxy_username_optional">Имя пользователя (необязательно)</string>
+
+    <!-- Backup folders -->
+    <string name="backup">Бэкап</string>
+    <string name="backup_folder_camera">Камера (DCIM)</string>
+    <string name="backup_folder_documents">Документы</string>
+    <string name="backup_folder_downloads">Загрузки</string>
+    <string name="backup_folder_movies">Фильмы и видео</string>
+    <string name="backup_folder_pictures">Изображения</string>
+    <string name="backup_folder_remove_message">%1$s больше не будет копироваться. Загруженные ранее файлы останутся в Telegram.</string>
+    <string name="backup_folder_subtitle">%1$s \u00b7 Нажмите для удаления</string>
+    <string name="backup_interval_with_sweep">%1$s \u00b7 с догонкой</string>
+    <string name="backup_paused">Бэкап приостановлен</string>
+
+    <!-- Permissions -->
+    <string name="permission_all_files_rationale">Требуется для бэкапа документов, загрузок и папок на SD-карте</string>
+    <string name="permission_all_files_title">Доступ ко всем файлам</string>
+    <string name="permission_missing_message">TeleDrive не может прочитать %1$s без разрешения.</string>
+    <string name="permission_not_allowed">Запрещено \u00b7 %1$s</string>
+    <string name="permission_notifications_rationale">Показывает прогресс передач и бэкапа</string>
+    <string name="permission_notifications_title">Уведомления</string>
+    <string name="permission_photos_rationale">Требуется для бэкапа фотографий</string>
+    <string name="permission_photos_title">Фотографии</string>
+    <string name="permission_separator"> и </string>
+    <string name="permission_videos_rationale">Требуется для бэкапа видео</string>
+    <string name="permission_videos_title">Видео</string>
+    <string name="permissions_allowed">Разрешено</string>
+    <string name="permissions_not_allowed">Запрещено</string>
+    <string name="permissions_not_allowed_optional">Запрещено, необязательно</string>
+
+    <!-- About -->
+    <string name="about_auto_check">Автопроверка</string>
+    <string name="about_auto_check_summary">Проверяет наличие новой версии раз в день</string>
+    <string name="about_check_updates">Проверить обновления</string>
+    <string name="about_check_updates_summary">Сравнивает эту сборку с последним релизом</string>
+    <string name="about_checking">Проверка…</string>
+    <string name="about_donate">Угостить разработчика кофе</string>
+    <string name="about_donate_summary">Поддержать разработку приложения</string>
+    <string name="about_no_update">У вас установлена последняя версия</string>
+    <string name="about_section_project">Проект</string>
+    <string name="about_section_updates">Обновления</string>
+    <string name="about_source_code">Исходный код</string>
+    <string name="about_source_code_summary">Посмотреть проект на GitHub</string>
+    <string name="about_tagline">Ваше собственное облако, сохраненное в приватном канале Telegram.</string>
+    <string name="about_telegram">Telegram канал</string>
+    <string name="about_telegram_summary">Анонсы релизов и обсуждение</string>
+    <string name="about_update_download">Скачать</string>
+    <string name="about_update_from">Установлена %1$s, доступна %2$s</string>
+    <string name="about_update_later">Позже</string>
+    <string name="about_update_ready">Версия %1$s готова к скачиванию</string>
+    <string name="about_update_title">Обновление до %1$s</string>
+    <string name="about_version">Версия %1$s</string>
+
+    <!-- Snackbar messages -->
+    <string name="message_backing_up_new_folder">Бэкап новой папки</string>
+    <string name="message_cache_cleared">Кэш очищен</string>
+    <string name="message_created_drive">Создан диск %1$s</string>
+    <string name="message_download_queued">Скачивание добавлено в очередь</string>
+    <string name="message_key_backup_saved">Копия ключа сохранена в Telegram</string>
+    <string name="message_key_restored">Ключ шифрования восстановлен, переиндексация</string>
+    <string name="message_moved_count">Перемещено %1$d</string>
+    <string name="message_moved_to_trash">Перемещено в корзину</string>
+    <string name="message_moved_to_trash_count">Перемещено в корзину: %1$d</string>
+    <string name="message_nothing_to_download">Нечего скачивать</string>
+    <string name="message_rebuild_done">Индексация: добавлено %1$d, обновлено %2$d, удалено %3$d</string>
+    <string name="message_renamed">Переименовано</string>
+    <string name="message_thumbnails_cleared">Миниатюры очищены</string>
+    <string name="message_trash_emptied">Корзина очищена</string>
+    <string name="message_upload_queued">Загрузка добавлена в очередь</string>
+    <string name="message_wrong_passphrase">Неверная кодовая фраза</string>
+
+    <!-- Error messages -->
+    <string name="error_authentication_failed">Ошибка аутентификации</string>
+    <string name="error_backup_running">Бэкап уже выполняется</string>
+    <string name="error_channel_limit">Ваш аккаунт Telegram достиг лимита каналов и групп. Выйдите или удалите несколько каналов в Telegram и попробуйте снова.</string>
+    <string name="error_encryption_failed">Ошибка шифрования</string>
+    <string name="error_file_too_large">Размер файла %1$s. Лимит — %2$s</string>
+    <string name="error_folder_exists">Папка с таким именем уже существует</string>
+    <string name="error_folder_into_itself">Нельзя переместить папку саму в себя</string>
+    <string name="error_incorrect_code">Неверный код</string>
+    <string name="error_incorrect_password">Неверный пароль</string>
+    <string name="error_insufficient_storage">Недостаточно места. Требуется %1$s, свободно %2$s</string>
+    <string name="error_invalid_api">Недействительные API ID или API hash</string>
+    <string name="error_invalid_phone">Недействительный номер телефона</string>
+    <string name="error_key_unreadable">Устройство не может прочитать ключ шифрования. Сначала восстановите копию ключа кодовой фразой.</string>
+    <string name="error_last_drive">Это ваш единственный диск. Создайте другой диск перед удалением этого.</string>
+    <string name="error_no_internet">Нет подключения к Интернету</string>
+    <string name="error_no_local_copy">У файла нет локальной копии</string>
+    <string name="error_no_remote_copy">У файла нет копии в Telegram</string>
+    <string name="error_not_found">Не найдено</string>
+    <string name="error_not_supported">Не поддерживается</string>
+    <string name="error_permission_denied">В доступе отказано</string>
+    <string name="error_rate_limited">Лимит запросов Telegram. Попробуйте через %1$d сек.</string>
+    <string name="error_sign_in_required">Войдите в Telegram для продолжения</string>
+    <string name="error_telegram">Ошибка Telegram: %1$s</string>
+    <string name="error_timed_out">Время ожидания истекло</string>
+    <string name="error_transfer_incomplete">Передача не завершилась</string>
+    <string name="error_unknown">Что-то пошло не так</string>
+
+    <!-- Settings choice labels -->
+    <string-array name="backup_interval_labels">
+        <item>Каждый час</item>
+        <item>Каждые 2 часа</item>
+        <item>Каждые 4 часа</item>
+        <item>Каждые 6 часов</item>
+        <item>Каждые 12 часов</item>
+        <item>Ежедневно</item>
+        <item>Каждые 2 дня</item>
+    </string-array>
+    <string-array name="backup_size_limit_labels">
+        <item>Без ограничений</item>
+        <item>100 МБ</item>
+        <item>500 МБ</item>
+        <item>1 ГБ</item>
+        <item>2 ГБ</item>
+        <item>4 ГБ</item>
+    </string-array>
+    <string-array name="lock_timeout_labels">
+        <item>Сразу</item>
+        <item>Через 1 минуту</item>
+        <item>Через 5 минут</item>
+        <item>Через 10 минут</item>
+        <item>Через 15 минут</item>
+        <item>Через 30 минут</item>
+    </string-array>
+    <string-array name="trash_clear_labels">
+        <item>Никогда</item>
+        <item>Через день</item>
+        <item>Через неделю</item>
+        <item>Через месяц</item>
+        <item>Через 3 месяца</item>
+        <item>Через год</item>
+    </string-array>
+    <string-array name="theme_labels">
+        <item>Светлая</item>
+        <item>Тёмная</item>
+        <item>Системная</item>
+    </string-array>
+    <string-array name="language_labels">
+        <item>Системный (по умолчанию)</item>
+        <item>English</item>
+        <item>Русский</item>
+    </string-array>
+</resources>
