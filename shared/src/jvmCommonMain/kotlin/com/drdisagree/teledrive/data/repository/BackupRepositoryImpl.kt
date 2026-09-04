@@ -17,11 +17,11 @@ import com.drdisagree.teledrive.data.local.entity.FileEntity
 import com.drdisagree.teledrive.data.local.entity.TransferEntity
 import com.drdisagree.teledrive.data.mapper.toDomain
 import com.drdisagree.teledrive.domain.model.BackupDecision
-import com.drdisagree.teledrive.domain.model.ExclusionType
 import com.drdisagree.teledrive.domain.model.BackupSession
 import com.drdisagree.teledrive.domain.model.BackupSessionStatus
 import com.drdisagree.teledrive.domain.model.BackupState
 import com.drdisagree.teledrive.domain.model.BackupTrigger
+import com.drdisagree.teledrive.domain.model.ExclusionType
 import com.drdisagree.teledrive.domain.model.FileCategory
 import com.drdisagree.teledrive.domain.model.TransferState
 import com.drdisagree.teledrive.domain.repository.BackupRepository
@@ -250,12 +250,38 @@ class BackupRepositoryImpl(
         return normalized.trimStart('/')
     }
 
+    /**
+     * An existing row for this path may describe an older version of the file.
+     * Its size, timestamp, and hash must be refreshed before the upload is
+     * queued, otherwise the backup record written on completion carries stale
+     * values and every following scan re-uploads the file.
+     */
     private suspend fun registerFile(
         source: File,
         folderId: String?,
         chatId: Long?
     ): String {
-        fileDao.byLocalPath(source.absolutePath)?.let { return it.id }
+        fileDao.byLocalPath(source.absolutePath)?.let { existing ->
+            val changed = existing.sizeBytes != source.length() ||
+                    existing.modifiedAt != source.lastModified()
+            if (changed) {
+                val media = mediaMetadataExtractor.extract(
+                    source, MimeTypes.fromFileName(source.name)
+                )
+                fileDao.upsert(
+                    existing.copy(
+                        sizeBytes = source.length(),
+                        modifiedAt = source.lastModified()
+                            .takeIf { it > 0 } ?: existing.modifiedAt,
+                        contentHash = null,
+                        width = media.width,
+                        height = media.height,
+                        durationMs = media.durationMs
+                    )
+                )
+            }
+            return existing.id
+        }
 
         val mime = MimeTypes.fromFileName(source.name)
         val media = mediaMetadataExtractor.extract(source, mime)

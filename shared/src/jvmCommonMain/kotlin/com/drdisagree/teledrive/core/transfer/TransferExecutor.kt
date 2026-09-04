@@ -1,11 +1,10 @@
 package com.drdisagree.teledrive.core.transfer
 
-import com.drdisagree.teledrive.core.files.AppStoragePaths
 import com.drdisagree.teledrive.core.crypto.CryptoKeys
 import com.drdisagree.teledrive.core.crypto.KeyUnavailableException
 import com.drdisagree.teledrive.core.crypto.StreamCrypto
 import com.drdisagree.teledrive.core.crypto.WrappedKeyRepository
-import com.drdisagree.teledrive.core.files.MimeTypes
+import com.drdisagree.teledrive.core.files.AppStoragePaths
 import com.drdisagree.teledrive.core.files.DownloadWriter
 import com.drdisagree.teledrive.core.files.Hashing
 import com.drdisagree.teledrive.core.media.ThumbnailStore
@@ -128,10 +127,18 @@ class TransferExecutor(
             }
 
         val encrypt = prefs.encryptFiles && prefs.keyBackupCreated
-        val contentHash = entity.contentHash ?: Hashing.sha256(sourceFile)
-        if (contentHash != null && contentHash != entity.contentHash) {
-            fileDao.upsert(entity.copy(contentHash = contentHash))
+        val uploadSize = sourceFile.length()
+        val sizeChanged = entity.sizeBytes != uploadSize
+        val contentHash = if (sizeChanged) {
+            Hashing.sha256(sourceFile)
+        } else {
+            entity.contentHash ?: Hashing.sha256(sourceFile)
         }
+        if (sizeChanged || (contentHash != null && contentHash != entity.contentHash)) {
+            fileDao.upsert(entity.copy(sizeBytes = uploadSize, contentHash = contentHash))
+        }
+        val supersededMessageId = entity.messageId
+            ?.takeIf { entity.chatId == chatId && filePartDao.countOf(entity.id) == 0 }
 
         val rawIconPath = thumbnailStore.uploadThumbnailFile(entity.id)?.absolutePath
         val iconFileId = apkIconUploader.uploadIconIfApk(entity, chatId, encrypt)
@@ -143,7 +150,7 @@ class TransferExecutor(
             folderPath = folderPathResolver.pathOf(entity.folderId),
             folderId = entity.folderId,
             mimeType = entity.mimeType,
-            sizeBytes = entity.sizeBytes,
+            sizeBytes = uploadSize,
             contentHash = contentHash,
             hidden = entity.isHidden,
             archived = entity.isArchived,
@@ -184,7 +191,8 @@ class TransferExecutor(
                 chatId = chatId,
                 manifest = manifest,
                 encrypt = encrypt,
-                contentHash = contentHash
+                contentHash = contentHash,
+                supersededMessageId = supersededMessageId
             )
         }
 
@@ -232,13 +240,20 @@ class TransferExecutor(
                                     id = UUID.randomUUID().toString(),
                                     sourcePath = localPath,
                                     fileId = entity.id,
-                                    sizeBytes = entity.sizeBytes,
+                                    sizeBytes = uploadSize,
                                     modifiedAt = sourceFile.lastModified(),
                                     contentHash = contentHash,
                                     backedUpAt = System.currentTimeMillis()
                                 )
                             )
                         }
+                        supersededMessageId
+                            ?.takeIf { it != document.messageId }
+                            ?.let { stale ->
+                                runCatching {
+                                    telegramClient.deleteMessages(chatId, listOf(stale))
+                                }
+                            }
                         transferDao.setCompleted(transfer.id, System.currentTimeMillis())
                         outcome = Outcome.Completed
                     }
@@ -280,7 +295,8 @@ class TransferExecutor(
         chatId: Long,
         manifest: RemoteFileManifest,
         encrypt: Boolean,
-        contentHash: String?
+        contentHash: String?,
+        supersededMessageId: Long?
     ): Outcome {
         val ticker = ProgressTicker().apply { start(0, System.currentTimeMillis()) }
         var outcome: Outcome =
@@ -334,12 +350,17 @@ class TransferExecutor(
                                         id = UUID.randomUUID().toString(),
                                         sourcePath = localPath,
                                         fileId = entity.id,
-                                        sizeBytes = entity.sizeBytes,
+                                        sizeBytes = manifest.sizeBytes,
                                         modifiedAt = sourceFile.lastModified(),
                                         contentHash = contentHash,
                                         backedUpAt = System.currentTimeMillis()
                                     )
                                 )
+                            }
+                            supersededMessageId?.let { stale ->
+                                runCatching {
+                                    telegramClient.deleteMessages(chatId, listOf(stale))
+                                }
                             }
                             transferDao.setCompleted(transfer.id, System.currentTimeMillis())
                             outcome = Outcome.Completed
