@@ -779,6 +779,15 @@
     <string name="permissions_not_allowed">Not allowed</string>
     <string name="permissions_not_allowed_optional">Not allowed, optional</string>
 
+    <!-- Folder Picker -->
+    <string name="picker_folder_create_failed">Failed to create folder</string>
+    <string name="picker_folder_unreadable">Cannot read folder contents</string>
+    <string name="picker_folder_unreadable_hint">Grant All files access in Settings or use the system SAF picker below.</string>
+    <string name="picker_internal_storage">Internal Storage</string>
+    <string name="picker_select_this_folder">Select this folder</string>
+    <string name="picker_title_select_folder">Select Folder</string>
+    <string name="picker_use_saf">Use System SAF Picker</string>
+
     <!-- About -->
     <string name="about_auto_check">Check automatically</string>
     <string name="about_auto_check_summary">Looks for a new release once a day</string>
