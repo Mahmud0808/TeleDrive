@@ -219,13 +219,16 @@ class ChannelRepositoryImpl(
         channelDao.setBackupFolders(chatId, folders.joinToString(FOLDER_SEPARATOR))
     }
 
-    /** Channel pictures make drives recognisable at a glance in the picker. */
+    /**
+     * Channel pictures make drives recognizable at a glance in the picker.
+     * The picture is fetched on every refresh so a changed one propagates;
+     * a failed fetch keeps the last known picture.
+     */
     private suspend fun refreshPhoto(chatId: Long) {
-        val cached = channelDao.byId(chatId)?.photoPath
-        if (cached != null && File(cached).exists()) return
-        val path = runCatching { telegramClient.fetchChannelPhoto(chatId) }.getOrNull()
-        if (path != channelDao.byId(chatId)?.photoPath) {
-            channelDao.setPhotoPath(chatId, path)
+        val current = runCatching { telegramClient.fetchChannelPhoto(chatId) }
+            .getOrElse { return }
+        if (current != channelDao.byId(chatId)?.photoPath) {
+            channelDao.setPhotoPath(chatId, current)
         }
     }
 
