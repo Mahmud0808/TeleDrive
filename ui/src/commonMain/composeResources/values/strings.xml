@@ -269,6 +269,7 @@
     <string name="home_status_syncing">Syncing…</string>
     <string name="home_storage_percent">%1$d%</string>
     <string name="home_storage_percent_min">&lt;1%</string>
+    <string name="home_switched_drive">Switched to %1$s</string>
     <string name="home_transfer_history">Transfer history</string>
     <string name="home_transfer_history_subtitle">Uploads and downloads</string>
     <string name="home_waiting_count">%1$d waiting</string>

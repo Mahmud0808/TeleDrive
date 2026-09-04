@@ -133,7 +133,7 @@ import com.drdisagree.teledrive.presentation.common.add
 import com.drdisagree.teledrive.presentation.platform.LocalPermissionRequester
 import com.drdisagree.teledrive.presentation.platform.LocalPlatformCapabilities
 import com.drdisagree.teledrive.presentation.components.BottomBarSnackbarHost
-import com.drdisagree.teledrive.presentation.components.ChannelAvatar
+import com.drdisagree.teledrive.presentation.components.DriveAvatarSwitcher
 import com.drdisagree.teledrive.presentation.components.ConfirmDialog
 import com.drdisagree.teledrive.presentation.components.ConnectionDot
 import com.drdisagree.teledrive.presentation.components.ConnectionIndicator
@@ -233,12 +233,15 @@ fun HomeScreen(
                         }
                     }
                     state.activeChannel?.let { channel ->
+                        val driveCount by viewModel.driveCount.collectAsStateWithLifecycle()
                         IconButton(
                             onClick = onOpenChannels,
                             modifier = Modifier.padding(end = 8.dp)
                         ) {
-                            ChannelAvatar(
+                            DriveAvatarSwitcher(
                                 channel = channel,
+                                canCycle = driveCount > 1,
+                                onCycle = viewModel::cycleDrive,
                                 size = AVATAR_SIZE,
                                 contentDescription = stringResource(
                                     Res.string.home_open_drives

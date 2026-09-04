@@ -291,6 +291,7 @@
     <string name="home_status_syncing">Синхронизация…</string>
     <string name="home_storage_percent">%1$d%</string>
     <string name="home_storage_percent_min">&lt;1%</string>
+    <string name="home_switched_drive">Переключено на %1$s</string>
     <string name="home_transfer_history">История передач</string>
     <string name="home_transfer_history_subtitle">Загрузки и скачивания</string>
     <string name="home_waiting_count">В ожидании: %1$d</string>

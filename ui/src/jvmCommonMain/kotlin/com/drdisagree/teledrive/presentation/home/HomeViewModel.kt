@@ -30,6 +30,7 @@ import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.home_backing_up_new_files
 import com.drdisagree.teledrive.resources.home_nothing_new_to_back_up
 import com.drdisagree.teledrive.resources.home_queued_files
+import com.drdisagree.teledrive.resources.home_switched_drive
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
@@ -43,6 +44,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -106,6 +108,26 @@ class HomeViewModel(
                 channels.firstOrNull { it.chatId == chatId }
             }
         }
+
+    val driveCount: StateFlow<Int> = channelRepository.observeChannels()
+        .map { it.size }
+        .distinctUntilChanged()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 1)
+
+    fun cycleDrive(direction: Int) {
+        viewModelScope.launch {
+            val channels = channelRepository.observeChannels().first()
+            if (channels.size < 2) return@launch
+            val index = channels.indexOfFirst { it.isActive }
+            if (index < 0) return@launch
+            val target = channels[(index + direction).mod(channels.size)]
+            if (channelRepository.switchTo(target.chatId) is AppResult.Success) {
+                _messages.tryEmit(
+                    UiText.Resource(Res.string.home_switched_drive, target.displayName)
+                )
+            }
+        }
+    }
 
     @OptIn(FlowPreview::class)
     private val counts: Flow<HomeCounts> = activeChannel.observe().flatMapLatest { chatId ->
