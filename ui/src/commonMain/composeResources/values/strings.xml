@@ -148,6 +148,8 @@
     <string name="onboarding_api_hash_short">API hash looks too short</string>
     <string name="onboarding_api_id">API ID</string>
     <string name="onboarding_api_id_number">API ID must be a number</string>
+    <string name="onboarding_choose_api_dev_tools">Choose &quot;API development tools&quot; and create an app. Any name works.</string>
+    <string name="onboarding_copy_api_keys">Copy the api_id and api_hash into TeleDrive.</string>
     <string name="onboarding_get_api_keys">Get your API keys</string>
     <string name="onboarding_my_telegram_org">my.telegram.org</string>
     <string name="onboarding_one_time_setup_keys">One-time setup. Your keys stay on this device, encrypted.</string>

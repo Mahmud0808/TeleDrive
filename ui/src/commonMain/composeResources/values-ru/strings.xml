@@ -170,6 +170,8 @@
     <string name="onboarding_api_hash_short">API hash слишком короткий</string>
     <string name="onboarding_api_id">API ID</string>
     <string name="onboarding_api_id_number">API ID должен быть числом</string>
+    <string name="onboarding_choose_api_dev_tools">Выберите «API development tools» и создайте приложение. Подойдёт любое название.</string>
+    <string name="onboarding_copy_api_keys">Скопируйте api_id и api_hash в TeleDrive.</string>
     <string name="onboarding_get_api_keys">Получить ключи API</string>
     <string name="onboarding_my_telegram_org">my.telegram.org</string>
     <string name="onboarding_one_time_setup_keys">Однократная настройка. Ключи хранятся на устройстве в зашифрованном виде.</string>
@@ -194,7 +196,7 @@
     <string name="onboarding_country">Страна</string>
     <string name="onboarding_email_code_title">Введите код из Email</string>
     <string name="onboarding_email_continue">Отправить код</string>
-    <string name="onboarding_email_description">Этот аккаунт использует входе через Email. Введите адрес для получения кода.</string>
+    <string name="onboarding_email_description">Этот аккаунт использует вход через Email. Введите адрес для получения кода.</string>
     <string name="onboarding_email_label">Email адрес</string>
     <string name="onboarding_email_title">Email для входа</string>
     <string name="onboarding_enter_code">Введите код</string>
@@ -287,8 +289,8 @@
     <string name="home_status_offline">Офлайн</string>
     <string name="home_status_rebuilding">Переиндексация…</string>
     <string name="home_status_syncing">Синхронизация…</string>
-    <string name="home_storage_percent">%1$d%%</string>
-    <string name="home_storage_percent_min">&lt;1%%</string>
+    <string name="home_storage_percent">%1$d%</string>
+    <string name="home_storage_percent_min">&lt;1%</string>
     <string name="home_transfer_history">История передач</string>
     <string name="home_transfer_history_subtitle">Загрузки и скачивания</string>
     <string name="home_waiting_count">В ожидании: %1$d</string>
@@ -416,7 +418,7 @@
     <string name="preview_archive_failed">Не удалось открыть архив</string>
     <string name="preview_archive_format_title">Архив %1$s</string>
     <string name="preview_archive_packed_summary">%1$s сжато из %2$s</string>
-    <string name="preview_archive_packed_summary_saved">%1$s сжато из %2$s, меньше на %3$d%%</string>
+    <string name="preview_archive_packed_summary_saved">%1$s сжато из %2$s, меньше на %3$d%</string>
     <string name="preview_archived">Заархивировано</string>
     <string name="preview_back_10_seconds">Назад на 10 секунд</string>
     <string name="preview_chevron">стрелка</string>
@@ -550,7 +552,7 @@
     <string name="channels_no_drives_yet">Дисков пока нет</string>
     <string name="channels_open_drive">Открыть диск</string>
     <string name="channels_opening_drive">Открытие диска</string>
-    <string name="channels_removed_missing">Удален диски (%1$d), чьи каналы больше не существуют в Telegram</string>
+    <string name="channels_removed_missing">Удалены диски (%1$d), чьи каналы больше не существуют в Telegram</string>
     <string name="channels_rename_drive">Переименовать диск</string>
     <string name="channels_renames_channel_telegram_well">Переименовывает канал также и в самом Telegram.</string>
     <string name="channels_renaming">Переименование</string>

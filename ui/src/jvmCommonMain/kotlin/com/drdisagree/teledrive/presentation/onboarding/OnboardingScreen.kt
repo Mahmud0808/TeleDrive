@@ -113,6 +113,7 @@ import com.drdisagree.teledrive.resources.onboarding_api_access
 import com.drdisagree.teledrive.resources.onboarding_api_hash
 import com.drdisagree.teledrive.resources.onboarding_api_id
 import com.drdisagree.teledrive.resources.onboarding_channel_files_in_channel
+import com.drdisagree.teledrive.resources.onboarding_choose_api_dev_tools
 import com.drdisagree.teledrive.resources.onboarding_choose_country
 import com.drdisagree.teledrive.resources.onboarding_choose_drive
 import com.drdisagree.teledrive.resources.onboarding_choose_what_back_change
@@ -129,6 +130,7 @@ import com.drdisagree.teledrive.resources.onboarding_code_via_sms_word
 import com.drdisagree.teledrive.resources.onboarding_code_via_telegram
 import com.drdisagree.teledrive.resources.onboarding_continue
 import com.drdisagree.teledrive.resources.onboarding_continue_without
+import com.drdisagree.teledrive.resources.onboarding_copy_api_keys
 import com.drdisagree.teledrive.resources.onboarding_country
 import com.drdisagree.teledrive.resources.onboarding_drive_created_desc
 import com.drdisagree.teledrive.resources.onboarding_drive_ready
@@ -727,13 +729,13 @@ private fun ApiGuideDialog(onDismiss: () -> Unit) {
                 }
                 InstructionCard(number = 2) {
                     Text(
-                        "Choose “API development tools” and create an app. Any name works.",
+                        stringResource(Res.string.onboarding_choose_api_dev_tools),
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
                 InstructionCard(number = 3) {
                     Text(
-                        "Copy the api_id and api_hash into TeleDrive.",
+                        stringResource(Res.string.onboarding_copy_api_keys),
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
