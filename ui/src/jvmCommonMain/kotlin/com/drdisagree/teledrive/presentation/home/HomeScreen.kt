@@ -44,12 +44,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.LinearWavyProgressIndicator
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -61,19 +63,41 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import org.jetbrains.compose.resources.StringResource
-import org.jetbrains.compose.resources.pluralStringResource
-import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import org.koin.compose.viewmodel.koinViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.drdisagree.teledrive.core.telegram.TelegramConnectionState
+import com.drdisagree.teledrive.domain.model.BackupSessionStatus
+import com.drdisagree.teledrive.domain.model.FileSortField
+import com.drdisagree.teledrive.domain.model.SortDirection
+import com.drdisagree.teledrive.domain.model.StorageSlice
+import com.drdisagree.teledrive.presentation.collection.CollectionType
+import com.drdisagree.teledrive.presentation.common.AgeBucket
+import com.drdisagree.teledrive.presentation.common.CollectSnackbarMessages
+import com.drdisagree.teledrive.presentation.common.Formatters
+import com.drdisagree.teledrive.presentation.common.add
+import com.drdisagree.teledrive.presentation.components.BottomBarSnackbarHost
+import com.drdisagree.teledrive.presentation.components.ConfirmDialog
+import com.drdisagree.teledrive.presentation.components.ConnectionDot
+import com.drdisagree.teledrive.presentation.components.ConnectionIndicator
+import com.drdisagree.teledrive.presentation.components.DriveAvatarSwitcher
+import com.drdisagree.teledrive.presentation.components.FileThumbnail
+import com.drdisagree.teledrive.presentation.components.GroupedList
+import com.drdisagree.teledrive.presentation.components.LoadingState
+import com.drdisagree.teledrive.presentation.components.PermissionWarningCard
+import com.drdisagree.teledrive.presentation.components.chartColor
+import com.drdisagree.teledrive.presentation.components.label
+import com.drdisagree.teledrive.presentation.navigation.LocalBottomBarInset
+import com.drdisagree.teledrive.presentation.platform.LocalPermissionRequester
+import com.drdisagree.teledrive.presentation.platform.LocalPlatformCapabilities
+import com.drdisagree.teledrive.presentation.preview.PreviewSequence
 import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.app_backed_up
 import com.drdisagree.teledrive.resources.app_name
@@ -120,32 +144,11 @@ import com.drdisagree.teledrive.resources.home_transfer_history
 import com.drdisagree.teledrive.resources.home_transfer_history_subtitle
 import com.drdisagree.teledrive.resources.home_waiting_count
 import com.drdisagree.teledrive.resources.trash
-import com.drdisagree.teledrive.core.telegram.TelegramConnectionState
-import com.drdisagree.teledrive.domain.model.BackupSessionStatus
-import com.drdisagree.teledrive.domain.model.FileSortField
-import com.drdisagree.teledrive.domain.model.SortDirection
-import com.drdisagree.teledrive.domain.model.StorageSlice
-import com.drdisagree.teledrive.presentation.collection.CollectionType
-import com.drdisagree.teledrive.presentation.common.AgeBucket
-import com.drdisagree.teledrive.presentation.common.CollectSnackbarMessages
-import com.drdisagree.teledrive.presentation.common.Formatters
-import com.drdisagree.teledrive.presentation.common.add
-import com.drdisagree.teledrive.presentation.platform.LocalPermissionRequester
-import com.drdisagree.teledrive.presentation.platform.LocalPlatformCapabilities
-import com.drdisagree.teledrive.presentation.components.BottomBarSnackbarHost
-import com.drdisagree.teledrive.presentation.components.DriveAvatarSwitcher
-import com.drdisagree.teledrive.presentation.components.ConfirmDialog
-import com.drdisagree.teledrive.presentation.components.ConnectionDot
-import com.drdisagree.teledrive.presentation.components.ConnectionIndicator
-import com.drdisagree.teledrive.presentation.components.FileThumbnail
-import com.drdisagree.teledrive.presentation.components.GroupedList
-import com.drdisagree.teledrive.presentation.components.LoadingState
-import com.drdisagree.teledrive.presentation.components.PermissionWarningCard
-import com.drdisagree.teledrive.presentation.components.chartColor
-import com.drdisagree.teledrive.presentation.components.label
-import com.drdisagree.teledrive.presentation.navigation.LocalBottomBarInset
-import com.drdisagree.teledrive.presentation.preview.PreviewSequence
 import kotlinx.coroutines.delay
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -493,23 +496,44 @@ private fun BackupCard(
         ),
         shape = MaterialTheme.shapes.extraLarge
     ) {
-        Column(modifier = Modifier.padding(20.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = when {
-                        state.rebuilding -> Icons.Filled.CloudSync
-                        state.failedCount > 0 -> Icons.Outlined.ErrorOutline
-                        state.activeBackup?.status == BackupSessionStatus.PAUSED ->
-                            Icons.Filled.CloudSync
-
-                        state.pendingCount > 0 -> Icons.Filled.CloudUpload
-                        state.offline -> Icons.Filled.CloudOff
-                        else -> Icons.Filled.CloudDone
-                    },
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+        val statusIcon = when {
+            state.rebuilding -> Icons.Filled.CloudSync
+            state.failedCount > 0 -> Icons.Outlined.ErrorOutline
+            state.activeBackup?.status == BackupSessionStatus.PAUSED -> Icons.Filled.CloudSync
+            state.pendingCount > 0 -> Icons.Filled.CloudUpload
+            state.offline -> Icons.Filled.CloudOff
+            else -> Icons.Filled.CloudDone
+        }
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    Brush.linearGradient(
+                        listOf(
+                            MaterialTheme.colorScheme.primaryContainer,
+                            MaterialTheme.colorScheme.secondaryContainer
+                        )
+                    )
                 )
-                Spacer(Modifier.width(12.dp))
+                .padding(20.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(MaterialShapes.Cookie9Sided.toShape())
+                        .background(
+                            MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.12f)
+                        )
+                ) {
+                    Icon(
+                        imageVector = statusIcon,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+                Spacer(Modifier.width(16.dp))
                 Column {
                     Text(
                         text = when {
@@ -536,7 +560,7 @@ private fun BackupCard(
 
                             else -> stringResource(Res.string.app_backed_up)
                         },
-                        style = MaterialTheme.typography.titleLarge,
+                        style = MaterialTheme.typography.titleLargeEmphasized,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                     Text(
@@ -547,99 +571,121 @@ private fun BackupCard(
                             backedUpCount = state.backedUpCount
                         ),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
                     )
                 }
             }
-            state.activeBackup?.let { session ->
-                Spacer(Modifier.height(12.dp))
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    val sessionButtonColors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        contentColor = MaterialTheme.colorScheme.primaryContainer
-                    )
-                    if (session.status == BackupSessionStatus.PAUSED) {
-                        Button(
-                            onClick = { onResume(session.id) },
-                            shapes = ButtonDefaults.shapes(),
-                            colors = sessionButtonColors
-                        ) { Text(stringResource(Res.string.common_resume)) }
-                    } else {
-                        Button(
-                            onClick = { onPause(session.id) },
-                            shapes = ButtonDefaults.shapes(),
-                            colors = sessionButtonColors
-                        ) { Text(stringResource(Res.string.common_pause)) }
-                    }
-                    OutlinedButton(
-                        onClick = { onCancel(session.id) },
-                        shapes = ButtonDefaults.shapes(),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                        ),
-                        border = BorderStroke(
-                            width = 1.dp,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                                .copy(alpha = 0.5f)
-                        )
-                    ) { Text(stringResource(Res.string.common_cancel)) }
-                }
-                Spacer(Modifier.height(12.dp))
-                LinearWavyProgressIndicator(
-                    progress = { session.progress },
-                    amplitude = {
-                        if (session.status == BackupSessionStatus.RUNNING) 1f else 0f
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    text = stringResource(
-                        Res.string.home_session_progress,
-                        session.completedFiles,
-                        session.totalFiles
-                    ),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            }
-            if (state.rebuilding && state.activeBackup == null) {
-                Spacer(Modifier.height(12.dp))
-                LinearWavyProgressIndicator(modifier = Modifier.fillMaxWidth())
-            }
-            if (state.activeBackup == null) {
-                Spacer(Modifier.height(16.dp))
-                val foldersSelected = state.backupFoldersSelected
-                val pending = state.localOnlyCount
-                Button(
-                    onClick = when {
-                        pending > 0 -> onBackUpPending
-                        foldersSelected -> onScanNow
-                        else -> onChooseFolders
-                    },
-                    shapes = ButtonDefaults.shapes(),
-                    enabled = !scanning,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        contentColor = MaterialTheme.colorScheme.primaryContainer
-                    )
-                ) {
-                    Text(
-                        when {
-                            scanning -> stringResource(Res.string.home_scanning)
-                            pending > 0 -> pluralStringResource(
-                                Res.plurals.home_back_up_pending,
-                                pending,
-                                pending
+            var lastSession by remember { mutableStateOf(state.activeBackup) }
+            state.activeBackup?.let { lastSession = it }
+            AnimatedVisibility(
+                visible = state.activeBackup != null,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically()
+            ) {
+                lastSession?.let { session ->
+                    Column {
+                        Spacer(Modifier.height(12.dp))
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            val sessionButtonColors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                contentColor = MaterialTheme.colorScheme.primaryContainer
                             )
-
-                            foldersSelected -> stringResource(Res.string.home_scan_now)
-                            else -> stringResource(Res.string.home_choose_folders)
+                            if (session.status == BackupSessionStatus.PAUSED) {
+                                Button(
+                                    onClick = { onResume(session.id) },
+                                    shapes = ButtonDefaults.shapes(),
+                                    colors = sessionButtonColors
+                                ) { Text(stringResource(Res.string.common_resume)) }
+                            } else {
+                                Button(
+                                    onClick = { onPause(session.id) },
+                                    shapes = ButtonDefaults.shapes(),
+                                    colors = sessionButtonColors
+                                ) { Text(stringResource(Res.string.common_pause)) }
+                            }
+                            OutlinedButton(
+                                onClick = { onCancel(session.id) },
+                                shapes = ButtonDefaults.shapes(),
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                ),
+                                border = BorderStroke(
+                                    width = 1.dp,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                        .copy(alpha = 0.5f)
+                                )
+                            ) { Text(stringResource(Res.string.common_cancel)) }
                         }
-                    )
+                        Spacer(Modifier.height(12.dp))
+                        LinearWavyProgressIndicator(
+                            progress = { session.progress },
+                            amplitude = {
+                                if (session.status == BackupSessionStatus.RUNNING) 1f else 0f
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            text = stringResource(
+                                Res.string.home_session_progress,
+                                session.completedFiles,
+                                session.totalFiles
+                            ),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                        )
+                    }
+                }
+            }
+            AnimatedVisibility(
+                visible = state.rebuilding && state.activeBackup == null,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically()
+            ) {
+                Column {
+                    Spacer(Modifier.height(12.dp))
+                    LinearWavyProgressIndicator(modifier = Modifier.fillMaxWidth())
+                }
+            }
+            AnimatedVisibility(
+                visible = state.activeBackup == null,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically()
+            ) {
+                Column {
+                    Spacer(Modifier.height(16.dp))
+                    val foldersSelected = state.backupFoldersSelected
+                    val pending = state.localOnlyCount
+                    Button(
+                        onClick = when {
+                            pending > 0 -> onBackUpPending
+                            foldersSelected -> onScanNow
+                            else -> onChooseFolders
+                        },
+                        shapes = ButtonDefaults.shapes(),
+                        enabled = !scanning,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            contentColor = MaterialTheme.colorScheme.primaryContainer
+                        )
+                    ) {
+                        Text(
+                            when {
+                                scanning -> stringResource(Res.string.home_scanning)
+                                pending > 0 -> pluralStringResource(
+                                    Res.plurals.home_back_up_pending,
+                                    pending,
+                                    pending
+                                )
+
+                                foldersSelected -> stringResource(Res.string.home_scan_now)
+                                else -> stringResource(Res.string.home_choose_folders)
+                            }
+                        )
+                    }
                 }
             }
         }
