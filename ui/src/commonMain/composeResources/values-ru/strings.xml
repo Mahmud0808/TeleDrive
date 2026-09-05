@@ -801,6 +801,15 @@
     <string name="permissions_not_allowed">Запрещено</string>
     <string name="permissions_not_allowed_optional">Запрещено, необязательно</string>
 
+    <!-- Folder Picker -->
+    <string name="picker_folder_create_failed">Не удалось создать папку</string>
+    <string name="picker_folder_unreadable">Не удалось прочитать содержимое папки</string>
+    <string name="picker_folder_unreadable_hint">Предоставьте доступ ко всем файлам в Настройках или используйте системный SAF ниже.</string>
+    <string name="picker_internal_storage">Внутренняя память</string>
+    <string name="picker_select_this_folder">Выбрать эту папку</string>
+    <string name="picker_title_select_folder">Выберите папку</string>
+    <string name="picker_use_saf">Использовать системный SAF</string>
+
     <!-- About -->
     <string name="about_auto_check">Автопроверка</string>
     <string name="about_auto_check_summary">Проверяет наличие новой версии раз в день</string>
