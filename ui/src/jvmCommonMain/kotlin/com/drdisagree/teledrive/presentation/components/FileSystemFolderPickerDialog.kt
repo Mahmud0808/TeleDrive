@@ -1,8 +1,13 @@
 package com.drdisagree.teledrive.presentation.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -43,6 +49,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.drdisagree.teledrive.resources.Res
@@ -80,7 +88,13 @@ fun FileSystemFolderPickerDialog(
     onDismiss: () -> Unit
 ) {
     var currentPath by remember { mutableStateOf(rootPath) }
-    var resultState by remember { mutableStateOf<FolderListResult>(FolderListResult.Success(emptyList())) }
+    var resultState by remember {
+        mutableStateOf<FolderListResult>(
+            FolderListResult.Success(
+                emptyList()
+            )
+        )
+    }
     var loading by remember { mutableStateOf(true) }
     var naming by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
@@ -155,7 +169,7 @@ fun FileSystemFolderPickerDialog(
                     ) {
                         quickChips.forEach { chip ->
                             FilterChip(
-                                selected = if (chip.isHome) currentPath == chip.path else currentPath == chip.path,
+                                selected = currentPath == chip.path,
                                 onClick = { currentPath = chip.path },
                                 label = {
                                     Text(
@@ -220,29 +234,42 @@ fun FileSystemFolderPickerDialog(
                                 modifier = Modifier.padding(vertical = 16.dp)
                             )
                         } else {
-                            LazyColumn(modifier = Modifier.heightIn(max = 260.dp)) {
-                                items(subfolders, key = { it.path }) { item ->
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .clickable { currentPath = item.path }
-                                            .padding(vertical = 10.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Filled.Folder,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.primary
-                                        )
-                                        Spacer(Modifier.width(12.dp))
-                                        Text(
-                                            text = item.name,
-                                            style = MaterialTheme.typography.bodyLarge,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
+                            val listState = rememberLazyListState()
+                            Box(modifier = Modifier.heightIn(max = 260.dp)) {
+                                LazyColumn(state = listState) {
+                                    items(subfolders, key = { it.path }) { item ->
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .clickable { currentPath = item.path }
+                                                .padding(vertical = 10.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Filled.Folder,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.primary
+                                            )
+                                            Spacer(Modifier.width(12.dp))
+                                            Text(
+                                                text = item.name,
+                                                style = MaterialTheme.typography.bodyLarge,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                        }
                                     }
                                 }
+                                ScrollEdgeFade(
+                                    visible = listState.canScrollBackward,
+                                    top = true,
+                                    modifier = Modifier.align(Alignment.TopCenter)
+                                )
+                                ScrollEdgeFade(
+                                    visible = listState.canScrollForward,
+                                    top = false,
+                                    modifier = Modifier.align(Alignment.BottomCenter)
+                                )
                             }
                         }
                     }
@@ -324,6 +351,33 @@ fun FileSystemFolderPickerDialog(
                     shapes = ButtonDefaults.shapes()
                 ) { Text(stringResource(Res.string.common_cancel)) }
             }
+        )
+    }
+}
+
+@Composable
+private fun ScrollEdgeFade(
+    visible: Boolean,
+    top: Boolean,
+    modifier: Modifier = Modifier
+) {
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn(),
+        exit = fadeOut(),
+        modifier = modifier
+    ) {
+        val container = MaterialTheme.colorScheme.surfaceContainerHigh
+        val colors = if (top) {
+            listOf(container, Color.Transparent)
+        } else {
+            listOf(Color.Transparent, container)
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(28.dp)
+                .background(Brush.verticalGradient(colors))
         )
     }
 }
