@@ -11,4 +11,7 @@ interface FileImporter {
 
     /** Drops a staged copy the drive turned out not to need. */
     fun discard(imported: ImportedFile)
+
+    /** Deletes staged copies that no drive row references. */
+    fun sweepOrphans(referencedPaths: Set<String>)
 }

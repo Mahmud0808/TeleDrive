@@ -3,9 +3,9 @@ package com.drdisagree.teledrive.domain.repository
 import androidx.paging.PagingData
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.core.files.LocalCleanup
-import com.drdisagree.teledrive.domain.model.FileQuerySpec
 import com.drdisagree.teledrive.domain.model.DriveFile
 import com.drdisagree.teledrive.domain.model.DriveFolder
+import com.drdisagree.teledrive.domain.model.FileQuerySpec
 import com.drdisagree.teledrive.domain.model.FileSortField
 import com.drdisagree.teledrive.domain.model.LinkMetadata
 import com.drdisagree.teledrive.domain.model.MediaAlbum
@@ -125,6 +125,9 @@ interface FileRepository {
     suspend fun linkPreview(url: String): LinkMetadata?
 
     suspend fun findDuplicate(localPath: String): DriveFile?
+
+    /** Deletes import staging copies that no file references anymore. */
+    suspend fun sweepImportOrphans()
 
     suspend fun reviveTrashedCopy(localPath: String, folderId: String?): DriveFile?
 

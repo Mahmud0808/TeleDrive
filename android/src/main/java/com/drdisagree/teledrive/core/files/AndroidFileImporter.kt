@@ -3,8 +3,8 @@ package com.drdisagree.teledrive.core.files
 import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
-import androidx.core.net.toUri
 import android.provider.OpenableColumns
+import androidx.core.net.toUri
 import com.drdisagree.teledrive.core.common.SafeLog
 import java.io.File
 
@@ -62,6 +62,15 @@ class AndroidFileImporter(
     override fun discard(imported: ImportedFile) {
         val staged = File(imported.path)
         if (staged.parentFile?.name == IMPORT_DIR) staged.delete()
+    }
+
+    override fun sweepOrphans(referencedPaths: Set<String>) {
+        val staged = File(context.filesDir, IMPORT_DIR).listFiles() ?: return
+        staged.filter { it.isFile && it.absolutePath !in referencedPaths }
+            .forEach { orphan ->
+                SafeLog.d(TAG, "Dropping an orphaned import of ${orphan.length()} bytes")
+                orphan.delete()
+            }
     }
 
     private fun readablePath(uri: Uri): File? {

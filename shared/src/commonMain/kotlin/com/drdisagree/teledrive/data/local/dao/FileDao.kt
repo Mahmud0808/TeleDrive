@@ -288,6 +288,9 @@ interface FileDao {
     @Query("SELECT * FROM files WHERE messageId IS NOT NULL")
     suspend fun filesWithRemote(): List<FileEntity>
 
+    @Query("SELECT localPath FROM files WHERE localPath IS NOT NULL")
+    suspend fun allLocalPaths(): List<String>
+
     @Query(
         """SELECT COALESCE(SUM(sizeBytes), 0) FROM files
            WHERE localPath IS NOT NULL

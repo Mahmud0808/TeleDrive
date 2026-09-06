@@ -11,6 +11,7 @@ import com.drdisagree.teledrive.core.publish.PublishScheduler
 import com.drdisagree.teledrive.core.transfer.MaintenanceScheduler
 import com.drdisagree.teledrive.core.transfer.MediaStoreWatcher
 import com.drdisagree.teledrive.di.appModules
+import com.drdisagree.teledrive.domain.repository.FileRepository
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.repository.TransferRepository
 import com.drdisagree.teledrive.domain.repository.TrashRepository
@@ -39,6 +40,8 @@ class TeleDriveApplication : Application(), SingletonImageLoader.Factory {
     private val settingsRepository: SettingsRepository by inject()
 
     private val transferRepository: TransferRepository by inject()
+
+    private val fileRepository: FileRepository by inject()
 
     private val trashRepository: TrashRepository by inject()
 
@@ -70,6 +73,7 @@ class TeleDriveApplication : Application(), SingletonImageLoader.Factory {
                 .onEach { SafeLog.verbose = it || BuildConfig.DEBUG }
                 .launchIn(applicationScope)
             transferRepository.recoverOrphanedTransfers()
+            fileRepository.sweepImportOrphans()
             publishScheduler.kick()
             trashRepository.repairTrashTree()
             val prefs = settingsRepository.preferences.first()

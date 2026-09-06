@@ -625,7 +625,10 @@ class FilesViewModel(
                         }
                     }
 
-                    is AppResult.Failure -> failed++
+                    is AppResult.Failure -> {
+                        fileImporter.discard(file)
+                        failed++
+                    }
                 }
             }
             _messages.tryEmit(importSummary(imported, restored, duplicates, copied, failed))

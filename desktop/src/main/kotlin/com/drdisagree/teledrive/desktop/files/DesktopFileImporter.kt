@@ -29,6 +29,12 @@ class DesktopFileImporter(
         if (staged.parentFile == File(storagePaths.filesDir, IMPORT_DIR)) staged.delete()
     }
 
+    override fun sweepOrphans(referencedPaths: Set<String>) {
+        val staged = File(storagePaths.filesDir, IMPORT_DIR).listFiles() ?: return
+        staged.filter { it.isFile && it.absolutePath !in referencedPaths }
+            .forEach { it.delete() }
+    }
+
     private companion object {
         const val IMPORT_DIR = "imports"
     }

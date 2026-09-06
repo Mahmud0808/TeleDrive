@@ -9,6 +9,7 @@ import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.core.crypto.CryptoKeys
 import com.drdisagree.teledrive.core.crypto.StreamCrypto
 import com.drdisagree.teledrive.core.crypto.WrappedKeyRepository
+import com.drdisagree.teledrive.core.files.FileImporter
 import com.drdisagree.teledrive.core.files.FileNameUtils
 import com.drdisagree.teledrive.core.files.Hashing
 import com.drdisagree.teledrive.core.files.LocalCleanup
@@ -16,11 +17,11 @@ import com.drdisagree.teledrive.core.files.LocalCopyDeleter
 import com.drdisagree.teledrive.core.files.Markdown
 import com.drdisagree.teledrive.core.files.MimeTypes
 import com.drdisagree.teledrive.core.files.NoteStore
+import com.drdisagree.teledrive.core.publish.PublishScheduler
 import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.core.telegram.TelegramDownloadEvent
 import com.drdisagree.teledrive.core.telegram.TelegramException
 import com.drdisagree.teledrive.data.local.FileQueryBuilder
-import com.drdisagree.teledrive.domain.model.FileQuerySpec
 import com.drdisagree.teledrive.data.local.dao.FileDao
 import com.drdisagree.teledrive.data.local.dao.FolderDao
 import com.drdisagree.teledrive.data.local.entity.FileEntity
@@ -32,6 +33,7 @@ import com.drdisagree.teledrive.domain.model.BackupState
 import com.drdisagree.teledrive.domain.model.DriveFile
 import com.drdisagree.teledrive.domain.model.DriveFolder
 import com.drdisagree.teledrive.domain.model.FileCategory
+import com.drdisagree.teledrive.domain.model.FileQuerySpec
 import com.drdisagree.teledrive.domain.model.FileSortField
 import com.drdisagree.teledrive.domain.model.LinkMetadata
 import com.drdisagree.teledrive.domain.model.MediaAlbum
@@ -48,7 +50,6 @@ import kotlinx.coroutines.flow.map
 import java.io.File
 import java.net.URI
 import java.util.UUID
-import com.drdisagree.teledrive.core.publish.PublishScheduler
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class FileRepositoryImpl(
@@ -63,8 +64,13 @@ class FileRepositoryImpl(
     private val noteStore: NoteStore,
     private val streamCrypto: StreamCrypto,
     private val wrappedKeyRepository: WrappedKeyRepository,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val fileImporter: FileImporter
 ) : FileRepository {
+
+    override suspend fun sweepImportOrphans() {
+        fileImporter.sweepOrphans(fileDao.allLocalPaths().toSet())
+    }
 
     override fun pagedFiles(spec: FileQuerySpec): Flow<PagingData<DriveFile>> =
         activeChannel.observe().flatMapLatest { chatId ->
