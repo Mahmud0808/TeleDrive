@@ -303,8 +303,11 @@ class SyncRepositoryImpl(
         }
 
         val now = System.currentTimeMillis()
-        val trashedAt = local?.trashedAt
-            ?: manifest?.trashedAt ?: folderTrashedAt ?: existing?.trashedAt
+        val trashedAt = if (local != null) {
+            local.trashedAt
+        } else {
+            manifest?.trashedAt ?: folderTrashedAt ?: existing?.trashedAt
+        }
         val entity = FileEntity(
             id = manifest?.fileId ?: existing?.id ?: UUID.randomUUID().toString(),
             folderId = if (trashedAt != null) null else folderId,
