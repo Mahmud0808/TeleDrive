@@ -80,26 +80,31 @@ class ChannelRepositoryImpl(
         channelDao.all()
             .filter { it.chatId !in remoteIds && it.chatId != activeId }
             .forEach { stale ->
-                SafeLog.w(TAG, "Dropping a drive no longer on the account #${stale.chatId}")
-                forget(stale.chatId)
+                if (telegramClient.chatExists(stale.chatId) == false) {
+                    SafeLog.w(TAG, "Dropping a drive no longer on the account #${stale.chatId}")
+                    forget(stale.chatId)
+                }
             }
         AppResult.Success(channelDao.all().map { it.toDomain(activeId) })
     }
 
     /**
-     * Right after sign-in TDLib has not loaded the chat list yet, so a single
-     * pass can report no drives when the account has several. Creating a drive
-     * on that answer would strand the user's files in the channel they already
-     * had, so discovery is retried before it is believed.
+     * Right after sign-in TDLib has not loaded the chat list yet, so a pass
+     * can miss drives the account has. Discovery retries until a pass covers
+     * every locally known drive before it is believed.
      */
     private suspend fun discoverChannels(): List<StorageChannel>? {
+        val knownIds = channelDao.all().map { it.chatId }
         val found = withTimeoutOrNull(DISCOVERY_BUDGET_MS.milliseconds) {
+            var pass: List<StorageChannel> = emptyList()
             repeat(DISCOVERY_ATTEMPTS) { attempt ->
-                val pass = telegramClient.listStorageChannels(channelDao.all().map { it.chatId })
-                if (pass.isNotEmpty()) return@withTimeoutOrNull pass
+                pass = telegramClient.listStorageChannels(knownIds)
+                if (pass.isNotEmpty() && pass.map { it.chatId }.containsAll(knownIds)) {
+                    return@withTimeoutOrNull pass
+                }
                 if (attempt < DISCOVERY_ATTEMPTS - 1) delay(DISCOVERY_RETRY_MS.milliseconds)
             }
-            emptyList()
+            pass
         }
         if (found == null) {
             SafeLog.w(TAG, "Drive discovery ran out of time")
