@@ -1,13 +1,12 @@
 package com.drdisagree.teledrive.desktop.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
-import org.koin.compose.koinInject
-import com.drdisagree.teledrive.desktop.files.DesktopFileRevealer
-import com.drdisagree.teledrive.desktop.BuildInfo
-import androidx.compose.foundation.Image
 import androidx.compose.ui.Modifier
+import com.drdisagree.teledrive.desktop.BuildInfo
+import com.drdisagree.teledrive.desktop.files.DesktopFileRevealer
 import com.drdisagree.teledrive.presentation.platform.DeleteConsentLauncher
 import com.drdisagree.teledrive.presentation.platform.DeviceOwnerGate
 import com.drdisagree.teledrive.presentation.platform.FilePicker
@@ -19,24 +18,26 @@ import com.drdisagree.teledrive.presentation.platform.LocalDeleteConsentLauncher
 import com.drdisagree.teledrive.presentation.platform.LocalDeviceOwnerGate
 import com.drdisagree.teledrive.presentation.platform.LocalDownloadLocationConfigurable
 import com.drdisagree.teledrive.presentation.platform.LocalFilePicker
-import com.drdisagree.teledrive.presentation.platform.LocalFileSharer
 import com.drdisagree.teledrive.presentation.platform.LocalFileRevealer
+import com.drdisagree.teledrive.presentation.platform.LocalFileSharer
 import com.drdisagree.teledrive.presentation.platform.LocalFolderPicker
 import com.drdisagree.teledrive.presentation.platform.LocalMultiFilePicker
 import com.drdisagree.teledrive.presentation.platform.LocalPermissionRequester
 import com.drdisagree.teledrive.presentation.platform.LocalPlatformCapabilities
 import com.drdisagree.teledrive.presentation.platform.LocalPlatformScreens
 import com.drdisagree.teledrive.presentation.platform.LocalSystemScreens
+import com.drdisagree.teledrive.presentation.platform.LocalTelegramLinkOpener
 import com.drdisagree.teledrive.presentation.platform.LocalUrlOpener
-import com.drdisagree.teledrive.presentation.platform.PermissionRequester
-import com.drdisagree.teledrive.presentation.platform.PlatformCapabilities
 import com.drdisagree.teledrive.presentation.platform.MultiFilePicker
+import com.drdisagree.teledrive.presentation.platform.PermissionRequester
 import com.drdisagree.teledrive.presentation.platform.PickResult
+import com.drdisagree.teledrive.presentation.platform.PlatformCapabilities
 import com.drdisagree.teledrive.presentation.platform.SystemScreens
 import com.drdisagree.teledrive.presentation.platform.UrlOpener
 import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.ic_launcher
 import org.jetbrains.compose.resources.painterResource
+import org.koin.compose.koinInject
 import java.awt.Desktop
 import java.awt.FileDialog
 import java.awt.Frame
@@ -106,6 +107,7 @@ fun ProvideDesktopPlatformActions(content: @Composable () -> Unit) {
         DeleteConsentLauncher { _, onResult -> onResult(true) }
     }
     val fileRevealer = remember { DesktopFileRevealer() }
+    val telegramLinkOpener = remember { DesktopTelegramLinkOpener() }
     val permissionRequester = remember {
         PermissionRequester { _, onDone -> onDone() }
     }
@@ -130,6 +132,7 @@ fun ProvideDesktopPlatformActions(content: @Composable () -> Unit) {
     CompositionLocalProvider(
         LocalAppIcon provides appIcon,
         LocalUrlOpener provides urlOpener,
+        LocalTelegramLinkOpener provides telegramLinkOpener,
         LocalFolderPicker provides folderPicker,
         LocalFilePicker provides filePicker,
         LocalMultiFilePicker provides multiFilePicker,

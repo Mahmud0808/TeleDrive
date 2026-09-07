@@ -55,6 +55,7 @@ fun ProvidePlatformActions(content: @Composable () -> Unit) {
     }
 
     val urlOpener = remember(context) { UrlOpener { url -> openLink(context, url) } }
+    val telegramLinkOpener = remember(context) { AndroidTelegramLinkOpener(context) }
 
     var activeFolderPickerCallback by remember { mutableStateOf<((PickResult) -> Unit)?>(null) }
 
@@ -181,6 +182,7 @@ fun ProvidePlatformActions(content: @Composable () -> Unit) {
         LocalAppIcon provides appIcon,
         LocalStandardFolders provides standardFolders,
         LocalUrlOpener provides urlOpener,
+        LocalTelegramLinkOpener provides telegramLinkOpener,
         LocalFolderPicker provides folderPicker,
         LocalFilePicker provides filePicker,
         LocalMultiFilePicker provides multiFilePicker,
