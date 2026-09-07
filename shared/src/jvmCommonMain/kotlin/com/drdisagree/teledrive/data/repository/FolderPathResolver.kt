@@ -48,18 +48,24 @@ class FolderPathResolver(
     suspend fun exists(folderId: String?): Boolean =
         folderId != null && folderDao.byId(folderId) != null
 
-    /** Resolves a path, creating missing folders. Empty path means root. */
-    suspend fun resolveOrCreate(path: String): String? {
+    /**
+     * Resolves a path, creating missing folders. Empty path means root. A
+     * created leaf takes [leafId] so it keeps the identity the other device
+     * gave it, or the folder state document later adds an empty twin.
+     */
+    suspend fun resolveOrCreate(path: String, leafId: String? = null): String? {
         if (path.isBlank()) return null
         return creationMutex.withLock {
             var parentId: String? = null
-            for (segment in path.split('/').filter { it.isNotBlank() }.take(MAX_DEPTH)) {
+            val segments = path.split('/').filter { it.isNotBlank() }.take(MAX_DEPTH)
+            for ((index, segment) in segments.withIndex()) {
                 val existing = folderDao.childrenOf(parentId)
                     .firstOrNull { it.name.equals(segment, ignoreCase = true) }
                 parentId = existing?.id ?: run {
                     val now = System.currentTimeMillis()
                     val folder = FolderEntity(
-                        id = UUID.randomUUID().toString(),
+                        id = leafId.takeIf { index == segments.lastIndex }
+                            ?: UUID.randomUUID().toString(),
                         chatId = activeChannel.id(),
                         parentId = parentId,
                         name = segment,

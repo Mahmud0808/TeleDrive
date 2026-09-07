@@ -265,7 +265,7 @@ class SyncRepositoryImpl(
         val resolved = if (manifest.trashedAt != null) {
             folderPathResolver.resolveExisting(manifest.folderPath)
         } else {
-            folderPathResolver.resolveOrCreate(manifest.folderPath)
+            folderPathResolver.resolveOrCreate(manifest.folderPath, manifest.folderId)
         }
         cache[manifest.folderPath] = resolved
         return resolved
