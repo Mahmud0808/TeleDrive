@@ -4,6 +4,7 @@ import com.drdisagree.teledrive.data.local.database.inImmediateTransaction
 import com.drdisagree.teledrive.core.common.AppError
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.core.common.SafeLog
+import com.drdisagree.teledrive.core.publish.PublishScheduler
 import com.drdisagree.teledrive.core.crypto.KeyBackupCodec
 import com.drdisagree.teledrive.core.files.MimeTypes
 import com.drdisagree.teledrive.core.telegram.RemoteDocument
@@ -49,6 +50,7 @@ class SyncRepositoryImpl(
     private val activeChannel: ActiveChannel,
     private val channelOwnership: ChannelOwnership,
     private val folderStateSynchronizer: FolderStateSynchronizer,
+    private val publishScheduler: PublishScheduler,
     private val settingsRepository: SettingsRepository,
     private val database: TeleDriveDatabase
 ) : SyncRepository {
@@ -103,6 +105,7 @@ class SyncRepositoryImpl(
         }
 
         if (!incremental) {
+            if (folderDao.pendingPublishCount() > 0) publishScheduler.kick()
             runCatching { folderStateSynchronizer.pull() }
                 .onFailure { SafeLog.w(TAG, "Folder state pull failed", it) }
         }

@@ -105,7 +105,11 @@ class FolderStateSynchronizer(
         }.getOrNull()
     }
 
-    /** Restores folder rows from Telegram. Local rows win only when newer. */
+    /**
+     * Restores folder rows from Telegram. Local rows win only when newer.
+     * Skipped while local changes wait to publish, so callers should kick
+     * the publisher first or a stalled outbox blocks pulling forever.
+     */
     suspend fun pull(): Int {
         if (folderDao.pendingPublishCount() > 0) return 0
         val chatId = storageChatId()

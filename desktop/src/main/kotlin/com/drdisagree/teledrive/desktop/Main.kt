@@ -21,7 +21,11 @@ import com.drdisagree.teledrive.core.common.SafeLog
 import com.drdisagree.teledrive.core.files.AppStoragePaths
 import com.drdisagree.teledrive.desktop.window.WindowsTitleBar
 import com.drdisagree.teledrive.domain.model.AppTheme
+import com.drdisagree.teledrive.core.publish.PublishScheduler
+import com.drdisagree.teledrive.domain.repository.FileRepository
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
+import com.drdisagree.teledrive.domain.repository.TransferRepository
+import com.drdisagree.teledrive.domain.repository.TrashRepository
 import com.drdisagree.teledrive.core.files.PendingShare
 import com.drdisagree.teledrive.core.media.ThumbnailFetcher
 import com.drdisagree.teledrive.core.media.ThumbnailModel
@@ -44,6 +48,10 @@ import org.jetbrains.compose.resources.stringResource
 import javax.swing.JOptionPane
 import kotlin.system.exitProcess
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.flow.map
 import org.koin.core.context.startKoin
@@ -63,6 +71,12 @@ fun main() {
             JOptionPane.INFORMATION_MESSAGE
         )
         exitProcess(0)
+    }
+    CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
+        runCatching { getKoin().get<TransferRepository>().recoverOrphanedTransfers() }
+        runCatching { getKoin().get<FileRepository>().sweepImportOrphans() }
+        getKoin().get<PublishScheduler>().kick()
+        runCatching { getKoin().get<TrashRepository>().repairTrashTree() }
     }
     application {
         val windowState = rememberWindowState(width = 1200.dp, height = 800.dp)
