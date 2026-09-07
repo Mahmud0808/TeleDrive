@@ -26,7 +26,8 @@ interface FileDao {
     @Query(
         """SELECT * FROM files
             WHERE sizeBytes = :sizeBytes AND chatId IS :chatId
-              AND trashedAt IS NULL AND contentHash IS NOT NULL"""
+              AND trashedAt IS NULL AND contentHash IS NOT NULL
+              AND messageId IS NOT NULL"""
     )
     suspend fun liveMatchesBySize(sizeBytes: Long, chatId: Long?): List<FileEntity>
 

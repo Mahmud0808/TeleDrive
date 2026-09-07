@@ -586,9 +586,10 @@ class FileRepositoryImpl(
         if (!source.exists() || !source.isFile) return null
 
         /* Re-importing the very same path is the commonest duplicate of all,
-           and it needs no hashing to recognize. */
+           and it needs no hashing to recognize. Rows without a remote copy do
+           not count: an interrupted upload must not block its own retry. */
         fileDao.byLocalPath(source.absolutePath)
-            ?.takeIf { it.trashedAt == null }
+            ?.takeIf { it.trashedAt == null && it.messageId != null }
             ?.let { return it.toDomain() }
 
         val candidates = fileDao.liveMatchesBySize(source.length(), activeChannel.id())
