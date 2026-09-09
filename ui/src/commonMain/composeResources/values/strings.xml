@@ -294,6 +294,7 @@
     <string name="files_import_copied">Copied %1$d already in Telegram</string>
     <string name="files_import_duplicates">%1$d already in your drive</string>
     <string name="files_import_failed">Could not import the selected files</string>
+    <string name="files_import_preparing">Preparing files for upload…</string>
     <string name="files_import_restored">Restored %1$d from trash</string>
     <string name="files_import_uploading">Uploading %1$d</string>
     <string name="files_import_uploading_copied">Uploading %1$d, copied %2$d already in Telegram</string>

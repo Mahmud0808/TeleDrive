@@ -37,6 +37,7 @@ import com.drdisagree.teledrive.resources.files_copied_partial
 import com.drdisagree.teledrive.resources.files_import_copied
 import com.drdisagree.teledrive.resources.files_import_duplicates
 import com.drdisagree.teledrive.resources.files_import_failed
+import com.drdisagree.teledrive.resources.files_import_preparing
 import com.drdisagree.teledrive.resources.files_import_restored
 import com.drdisagree.teledrive.resources.files_import_uploading
 import com.drdisagree.teledrive.resources.files_import_uploading_copied
@@ -55,9 +56,11 @@ import com.drdisagree.teledrive.resources.message_moved_count
 import com.drdisagree.teledrive.resources.message_moved_to_trash_count
 import com.drdisagree.teledrive.resources.message_nothing_to_download
 import com.drdisagree.teledrive.resources.note_not_editable
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -586,9 +589,16 @@ class FilesViewModel(
 
     fun dismissShare() = pendingShare.clear()
 
+    /**
+     * Imports run outside viewModelScope: preparing a large pick can take
+     * minutes, and leaving this screen must not silently cancel it.
+     */
+    private val importScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
     fun importAndUpload(uris: List<String>, target: String? = folderId) {
         if (uris.isEmpty()) return
-        viewModelScope.launch(Dispatchers.IO) {
+        importScope.launch {
+            _messages.tryEmit(UiText.Resource(Res.string.files_import_preparing))
             var imported = 0
             var restored = 0
             var duplicates = 0

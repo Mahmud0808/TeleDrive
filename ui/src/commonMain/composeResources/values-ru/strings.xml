@@ -316,6 +316,7 @@
     <string name="files_import_copied">Скопировано %1$d уже имеющихся в Telegram</string>
     <string name="files_import_duplicates">%1$d уже есть на вашем диске</string>
     <string name="files_import_failed">Не удалось импортировать выбранные файлы</string>
+    <string name="files_import_preparing">Подготовка файлов к загрузке…</string>
     <string name="files_import_restored">Восстановлено %1$d из корзины</string>
     <string name="files_import_uploading">Загрузка %1$d</string>
     <string name="files_import_uploading_copied">Загрузка %1$d, скопировано %2$d имеющихся в Telegram</string>
