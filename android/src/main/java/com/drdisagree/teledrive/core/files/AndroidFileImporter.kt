@@ -33,7 +33,10 @@ class AndroidFileImporter(
             return ImportedFile(source.absolutePath, source.name, source.length())
         }
 
-        val metadata = queryMetadata(uri) ?: return null
+        val metadata = queryMetadata(uri) ?: run {
+            SafeLog.w(TAG, "Import failed: the provider returned no metadata")
+            return null
+        }
         val displayName = FileNameUtils.sanitize(metadata.first)
         val targetDir = File(context.filesDir, IMPORT_DIR).apply { mkdirs() }
 
@@ -49,7 +52,10 @@ class AndroidFileImporter(
         return runCatching {
             context.contentResolver.openInputStream(uri)?.use { input ->
                 target.outputStream().buffered().use { output -> input.copyTo(output) }
-            } ?: return null
+            } ?: run {
+                SafeLog.w(TAG, "Import failed: the provider refused to open the document")
+                return null
+            }
             ImportedFile(target.absolutePath, displayName, target.length())
         }.getOrElse {
             SafeLog.w(TAG, "Import failed", it)

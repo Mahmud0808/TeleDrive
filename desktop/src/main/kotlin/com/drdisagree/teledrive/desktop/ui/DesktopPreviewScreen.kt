@@ -26,15 +26,15 @@ import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Audiotrack
+import androidx.compose.material.icons.filled.BrokenImage
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material3.Button
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -44,6 +44,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -61,18 +62,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import coil3.compose.AsyncImagePainter
 import com.drdisagree.teledrive.core.crypto.CryptoKeys
 import com.drdisagree.teledrive.core.crypto.StreamCrypto
 import com.drdisagree.teledrive.core.crypto.WrappedKeyRepository
@@ -84,19 +86,18 @@ import com.drdisagree.teledrive.desktop.media.ExternalMediaPlayer
 import com.drdisagree.teledrive.desktop.media.MediaStreamServer
 import com.drdisagree.teledrive.desktop.media.player.DesktopMediaPlayer
 import com.drdisagree.teledrive.desktop.media.player.VlcPlayback
-import com.drdisagree.teledrive.desktop.resources.Res as DesktopRes
 import com.drdisagree.teledrive.desktop.resources.preview_open_externally
 import com.drdisagree.teledrive.desktop.resources.preview_open_failed
 import com.drdisagree.teledrive.desktop.resources.preview_stream
 import com.drdisagree.teledrive.domain.model.DriveFile
 import com.drdisagree.teledrive.presentation.common.Formatters
 import com.drdisagree.teledrive.presentation.common.LinkedText
-import com.drdisagree.teledrive.presentation.common.load
 import com.drdisagree.teledrive.presentation.common.MarkdownText
+import com.drdisagree.teledrive.presentation.common.load
 import com.drdisagree.teledrive.presentation.components.ConfirmDialog
 import com.drdisagree.teledrive.presentation.components.EmptyState
-import com.drdisagree.teledrive.presentation.components.FileInfoSheet
 import com.drdisagree.teledrive.presentation.components.ErrorState
+import com.drdisagree.teledrive.presentation.components.FileInfoSheet
 import com.drdisagree.teledrive.presentation.components.LoadingState
 import com.drdisagree.teledrive.presentation.components.RenameDialog
 import com.drdisagree.teledrive.presentation.platform.LocalFileRevealer
@@ -118,7 +119,9 @@ import com.drdisagree.teledrive.resources.files_unhide
 import com.drdisagree.teledrive.resources.preview_add_favorites
 import com.drdisagree.teledrive.resources.preview_archive
 import com.drdisagree.teledrive.resources.preview_confirm_trash_file_message
+import com.drdisagree.teledrive.resources.preview_download_view
 import com.drdisagree.teledrive.resources.preview_file_info
+import com.drdisagree.teledrive.resources.preview_image_undecodable
 import com.drdisagree.teledrive.resources.preview_move_to_trash
 import com.drdisagree.teledrive.resources.preview_next
 import com.drdisagree.teledrive.resources.preview_no_preview
@@ -127,15 +130,15 @@ import com.drdisagree.teledrive.resources.preview_previous
 import com.drdisagree.teledrive.resources.preview_progress_bytes
 import com.drdisagree.teledrive.resources.preview_remove_favorites
 import com.drdisagree.teledrive.resources.preview_requires_download
-import com.drdisagree.teledrive.resources.preview_download_view
 import com.drdisagree.teledrive.resources.preview_truncated_download_view
 import com.drdisagree.teledrive.resources.preview_unarchive
-import java.awt.Desktop
-import java.io.File
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
+import java.awt.Desktop
+import java.io.File
+import com.drdisagree.teledrive.desktop.resources.Res as DesktopRes
 
 /**
  * Desktop preview renders what the shared resolver can produce inline and
@@ -471,176 +474,189 @@ private fun PreviewPane(
             .fillMaxSize()
             .padding(top = if (edgeToEdge) 0.dp else TOP_BAR_INSET)
     ) {
-    when (val current = content) {
-        is PreviewContent.Loading -> LoadingState()
+        when (val current = content) {
+            is PreviewContent.Loading -> LoadingState()
 
-        is PreviewContent.DownloadProgress -> Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 48.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = stringResource(Res.string.preview_preparing, file.name),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                textAlign = TextAlign.Center,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(bottom = 20.dp)
-            )
-            if (current.total > 0) {
-                LinearWavyProgressIndicator(
-                    progress = {
-                        (current.transferred.toFloat() / current.total).coerceIn(0f, 1f)
-                    },
-                    modifier = Modifier.fillMaxWidth()
+            is PreviewContent.DownloadProgress -> Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 48.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = stringResource(Res.string.preview_preparing, file.name),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.Center,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(bottom = 20.dp)
+                )
+                if (current.total > 0) {
+                    LinearWavyProgressIndicator(
+                        progress = {
+                            (current.transferred.toFloat() / current.total).coerceIn(0f, 1f)
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                } else {
+                    LinearWavyProgressIndicator(modifier = Modifier.fillMaxWidth())
+                }
+                Text(
+                    text = stringResource(
+                        Res.string.preview_progress_bytes,
+                        Formatters.bytes(current.transferred),
+                        Formatters.bytes(current.total)
+                    ),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(top = 12.dp)
+                )
+            }
+
+            is PreviewContent.Image -> {
+                var undecodable by remember(current.model) { mutableStateOf(false) }
+                if (undecodable) {
+                    EmptyState(
+                        icon = Icons.Filled.BrokenImage,
+                        title = stringResource(Res.string.preview_image_undecodable)
+                    )
+                } else {
+                    AsyncImage(
+                        model = current.model,
+                        contentDescription = file.name,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Fit,
+                        onState = { state ->
+                            if (state is AsyncImagePainter.State.Error) undecodable = true
+                        }
+                    )
+                }
+            }
+
+            is PreviewContent.LocalMedia -> if (VlcPlayback.available) {
+                DesktopMediaPlayer(
+                    mrl = current.path,
+                    isAudio = current.isAudio,
+                    onControlsVisibilityChange = onPlayerControlsVisibilityChange
                 )
             } else {
-                LinearWavyProgressIndicator(modifier = Modifier.fillMaxWidth())
+                OpenExternallyState(
+                    icon = if (current.isAudio) Icons.Filled.Audiotrack else Icons.Filled.Movie,
+                    file = file,
+                    path = current.path,
+                    snackbarHostState = snackbarHostState
+                )
             }
-            Text(
-                text = stringResource(
-                    Res.string.preview_progress_bytes,
-                    Formatters.bytes(current.transferred),
-                    Formatters.bytes(current.total)
-                ),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 12.dp)
-            )
-        }
 
-        is PreviewContent.Image -> AsyncImage(
-            model = current.model,
-            contentDescription = file.name,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Fit
-        )
-
-        is PreviewContent.LocalMedia -> if (VlcPlayback.available) {
-            DesktopMediaPlayer(
-                mrl = current.path,
-                isAudio = current.isAudio,
-                onControlsVisibilityChange = onPlayerControlsVisibilityChange
-            )
-        } else {
-            OpenExternallyState(
-                icon = if (current.isAudio) Icons.Filled.Audiotrack else Icons.Filled.Movie,
+            is PreviewContent.Pdf -> OpenExternallyState(
+                icon = Icons.Filled.PictureAsPdf,
                 file = file,
                 path = current.path,
                 snackbarHostState = snackbarHostState
             )
-        }
 
-        is PreviewContent.Pdf -> OpenExternallyState(
-            icon = Icons.Filled.PictureAsPdf,
-            file = file,
-            path = current.path,
-            snackbarHostState = snackbarHostState
-        )
-
-        is PreviewContent.StreamedMedia -> if (VlcPlayback.available) {
-            InlineStreamPlayer(
-                file = file,
-                content = current,
-                onControlsVisibilityChange = onPlayerControlsVisibilityChange
-            )
-        } else {
-            StreamState(
-                file = file,
-                content = current,
-                onDownload = { viewModel.download(file) },
-                snackbarHostState = snackbarHostState
-            )
-        }
-
-        is PreviewContent.PlainText -> Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(24.dp)
-        ) {
-            if (MimeTypes.isMarkdown(file.mimeType)) {
-                MarkdownText(
-                    text = current.text,
-                    onOpenUrl = { url -> urlOpener.open(url) }
+            is PreviewContent.StreamedMedia -> if (VlcPlayback.available) {
+                InlineStreamPlayer(
+                    file = file,
+                    content = current,
+                    onControlsVisibilityChange = onPlayerControlsVisibilityChange
                 )
             } else {
-                LinkedText(
-                    text = current.text,
-                    style = MaterialTheme.typography.bodySmall
-                        .copy(fontFamily = FontFamily.Monospace)
-                        .copy(color = MaterialTheme.colorScheme.onSurface),
-                    linkColor = MaterialTheme.colorScheme.primary,
-                    onOpenUrl = { url -> urlOpener.open(url) }
+                StreamState(
+                    file = file,
+                    content = current,
+                    onDownload = { viewModel.download(file) },
+                    snackbarHostState = snackbarHostState
                 )
             }
-            if (current.truncated) {
-                Text(
-                    text = stringResource(Res.string.preview_truncated_download_view),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
 
-        is PreviewContent.Archive -> LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp)
-        ) {
-            items(current.entries) { entry ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = if (entry.isDirectory) {
-                            Icons.Filled.Folder
-                        } else {
-                            Icons.AutoMirrored.Filled.InsertDriveFile
-                        },
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+            is PreviewContent.PlainText -> Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(24.dp)
+            ) {
+                if (MimeTypes.isMarkdown(file.mimeType)) {
+                    MarkdownText(
+                        text = current.text,
+                        onOpenUrl = { url -> urlOpener.open(url) }
                     )
+                } else {
+                    LinkedText(
+                        text = current.text,
+                        style = MaterialTheme.typography.bodySmall
+                            .copy(fontFamily = FontFamily.Monospace)
+                            .copy(color = MaterialTheme.colorScheme.onSurface),
+                        linkColor = MaterialTheme.colorScheme.primary,
+                        onOpenUrl = { url -> urlOpener.open(url) }
+                    )
+                }
+                if (current.truncated) {
                     Text(
-                        text = entry.name,
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.weight(1f).padding(horizontal = 12.dp),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        text = stringResource(Res.string.preview_truncated_download_view),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    if (!entry.isDirectory) {
-                        Text(
-                            text = Formatters.bytes(entry.sizeBytes),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                }
+            }
+
+            is PreviewContent.Archive -> LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp)
+            ) {
+                items(current.entries) { entry ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = if (entry.isDirectory) {
+                                Icons.Filled.Folder
+                            } else {
+                                Icons.AutoMirrored.Filled.InsertDriveFile
+                            },
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+                        Text(
+                            text = entry.name,
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.weight(1f).padding(horizontal = 12.dp),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        if (!entry.isDirectory) {
+                            Text(
+                                text = Formatters.bytes(entry.sizeBytes),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
             }
+
+            is PreviewContent.RequiresDownload -> DownloadState(
+                sizeBytes = current.sizeBytes,
+                onDownload = { viewModel.download(file) }
+            )
+
+            is PreviewContent.Unsupported -> EmptyState(
+                icon = Icons.Outlined.Description,
+                title = stringResource(Res.string.preview_no_preview),
+                description = stringResource(current.reasonRes),
+                actionLabel = if (file.hasLocalCopy) null else stringResource(Res.string.common_download),
+                onAction = if (file.hasLocalCopy) null else ({ viewModel.download(file) })
+            )
+
+            is PreviewContent.Failed -> ErrorState(message = stringResource(current.messageRes))
         }
-
-        is PreviewContent.RequiresDownload -> DownloadState(
-            sizeBytes = current.sizeBytes,
-            onDownload = { viewModel.download(file) }
-        )
-
-        is PreviewContent.Unsupported -> EmptyState(
-            icon = Icons.Outlined.Description,
-            title = stringResource(Res.string.preview_no_preview),
-            description = stringResource(current.reasonRes),
-            actionLabel = if (file.hasLocalCopy) null else stringResource(Res.string.common_download),
-            onAction = if (file.hasLocalCopy) null else ({ viewModel.download(file) })
-        )
-
-        is PreviewContent.Failed -> ErrorState(message = stringResource(current.messageRes))
-    }
     }
 }
 

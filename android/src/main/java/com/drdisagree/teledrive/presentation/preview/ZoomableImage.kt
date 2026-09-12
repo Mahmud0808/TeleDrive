@@ -10,6 +10,8 @@ import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BrokenImage
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,11 +26,16 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntSize
 import coil3.compose.AsyncImage
+import coil3.compose.AsyncImagePainter
+import com.drdisagree.teledrive.presentation.components.EmptyState
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.preview_image_undecodable
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Pinch and double-tap zoomable image. Pan is clamped so the image cannot be
- * dragged off screen, and touches stay unconsumed while the image sits at 1x
+ * dragged off-screen, and touches stay unconsumed while the image sits at 1x
  * so a horizontal drag still reaches the pager.
  */
 @Composable
@@ -38,6 +45,15 @@ fun ZoomableImage(
     modifier: Modifier = Modifier,
     onTap: () -> Unit = {}
 ) {
+    var undecodable by remember(model) { mutableStateOf(false) }
+    if (undecodable) {
+        EmptyState(
+            icon = Icons.Filled.BrokenImage,
+            title = stringResource(Res.string.preview_image_undecodable),
+            modifier = modifier.fillMaxSize()
+        )
+        return
+    }
     val scale = remember { Animatable(1f) }
     val offset = remember { Animatable(Offset.Zero, Offset.VectorConverter) }
     val scope = rememberCoroutineScope()
@@ -103,6 +119,9 @@ fun ZoomableImage(
             model = model,
             contentDescription = contentDescription,
             contentScale = ContentScale.Fit,
+            onState = { state ->
+                if (state is AsyncImagePainter.State.Error) undecodable = true
+            },
             modifier = Modifier
                 .fillMaxSize()
                 .graphicsLayer {

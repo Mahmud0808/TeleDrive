@@ -431,6 +431,7 @@
     <string name="preview_file_info">Информация о файле</string>
     <string name="preview_forward_10_seconds">Вперед на 10 секунд</string>
     <string name="preview_hidden">Скрыто</string>
+    <string name="preview_image_undecodable">Этот формат изображения нельзя показать здесь. Скачайте файл и откройте его в другом приложении.</string>
     <string name="preview_local_copy_removed">Локальная копия удалена</string>
     <string name="preview_move_to_trash">В корзину?</string>
     <string name="preview_next">Следующий файл</string>

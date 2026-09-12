@@ -409,6 +409,7 @@
     <string name="preview_file_info">File info</string>
     <string name="preview_forward_10_seconds">Forward 10 seconds</string>
     <string name="preview_hidden">Hidden</string>
+    <string name="preview_image_undecodable">This image format cannot be displayed here. Download it and open it in another app.</string>
     <string name="preview_local_copy_removed">Local copy removed</string>
     <string name="preview_move_to_trash">Move to trash?</string>
     <string name="preview_next">Next file</string>
