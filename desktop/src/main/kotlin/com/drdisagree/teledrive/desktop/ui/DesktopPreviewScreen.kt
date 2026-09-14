@@ -461,6 +461,8 @@ private fun PreviewPane(
 ) {
     val content by viewModel.contentFor(file).collectAsState()
     val urlOpener = LocalUrlOpener.current
+    val preferredAudioLanguage by viewModel.preferredAudioLanguage.collectAsState()
+    val preferredSubtitleLanguage by viewModel.preferredSubtitleLanguage.collectAsState()
 
     val edgeToEdge = when (content) {
         is PreviewContent.Image,
@@ -540,6 +542,10 @@ private fun PreviewPane(
                 DesktopMediaPlayer(
                     mrl = current.path,
                     isAudio = current.isAudio,
+                    preferredAudioLanguage = preferredAudioLanguage,
+                    preferredSubtitleLanguage = preferredSubtitleLanguage,
+                    onPreferredAudioLanguage = viewModel::setPreferredAudioLanguage,
+                    onPreferredSubtitleLanguage = viewModel::setPreferredSubtitleLanguage,
                     onControlsVisibilityChange = onPlayerControlsVisibilityChange
                 )
             } else {
@@ -562,6 +568,10 @@ private fun PreviewPane(
                 InlineStreamPlayer(
                     file = file,
                     content = current,
+                    preferredAudioLanguage = preferredAudioLanguage,
+                    preferredSubtitleLanguage = preferredSubtitleLanguage,
+                    onPreferredAudioLanguage = viewModel::setPreferredAudioLanguage,
+                    onPreferredSubtitleLanguage = viewModel::setPreferredSubtitleLanguage,
                     onControlsVisibilityChange = onPlayerControlsVisibilityChange
                 )
             } else {
@@ -702,6 +712,10 @@ private fun OpenExternallyState(
 private fun InlineStreamPlayer(
     file: DriveFile,
     content: PreviewContent.StreamedMedia,
+    preferredAudioLanguage: String,
+    preferredSubtitleLanguage: String,
+    onPreferredAudioLanguage: (String) -> Unit,
+    onPreferredSubtitleLanguage: (String) -> Unit,
     onControlsVisibilityChange: (Boolean) -> Unit
 ) {
     val streamServer = koinInject<MediaStreamServer>()
@@ -730,6 +744,10 @@ private fun InlineStreamPlayer(
     DesktopMediaPlayer(
         mrl = url,
         isAudio = content.isAudio,
+        preferredAudioLanguage = preferredAudioLanguage,
+        preferredSubtitleLanguage = preferredSubtitleLanguage,
+        onPreferredAudioLanguage = onPreferredAudioLanguage,
+        onPreferredSubtitleLanguage = onPreferredSubtitleLanguage,
         onControlsVisibilityChange = onControlsVisibilityChange
     )
 }

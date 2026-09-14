@@ -147,6 +147,26 @@ class PreviewViewModel(
         .map { it.backgroundPlayback }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
 
+    val preferredAudioLanguage: StateFlow<String> = settingsRepository.preferences
+        .map { it.preferredAudioLanguage }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "")
+
+    val preferredSubtitleLanguage: StateFlow<String> = settingsRepository.preferences
+        .map { it.preferredSubtitleLanguage }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "")
+
+    fun setPreferredAudioLanguage(language: String) {
+        viewModelScope.launch {
+            settingsRepository.update { it.copy(preferredAudioLanguage = language) }
+        }
+    }
+
+    fun setPreferredSubtitleLanguage(language: String) {
+        viewModelScope.launch {
+            settingsRepository.update { it.copy(preferredSubtitleLanguage = language) }
+        }
+    }
+
     /**
      * Follows the row and the transfer queue rather than resolving once, so a
      * download the user starts reports progress and the viewer switches to the
@@ -202,7 +222,8 @@ class PreviewViewModel(
         }
     }
 
-    private val _deleteConsentRequests = MutableSharedFlow<DeleteConsentRequest>(extraBufferCapacity = 1)
+    private val _deleteConsentRequests =
+        MutableSharedFlow<DeleteConsentRequest>(extraBufferCapacity = 1)
     val deleteConsentRequests = _deleteConsentRequests.asSharedFlow()
     private var pendingLocalCopyId: String? = null
 
@@ -252,7 +273,8 @@ class PreviewViewModel(
             fileRepository.setFilesFavorite(listOf(file.id), favorite)
             refreshFile(file.id)
             _messages.tryEmit(
-                if (favorite) UiText.Resource(Res.string.preview_added_favorites) else UiText.Resource(Res.string.preview_removed_favorites
+                if (favorite) UiText.Resource(Res.string.preview_added_favorites) else UiText.Resource(
+                    Res.string.preview_removed_favorites
                 )
             )
         }
@@ -263,7 +285,8 @@ class PreviewViewModel(
             fileRepository.setFilesHidden(listOf(file.id), hidden)
             refreshFile(file.id)
             _messages.tryEmit(
-                if (hidden) UiText.Resource(Res.string.preview_hidden) else UiText.Resource(Res.string.preview_unhidden
+                if (hidden) UiText.Resource(Res.string.preview_hidden) else UiText.Resource(
+                    Res.string.preview_unhidden
                 )
             )
         }
@@ -274,7 +297,8 @@ class PreviewViewModel(
             fileRepository.setFilesArchived(listOf(file.id), archived)
             refreshFile(file.id)
             _messages.tryEmit(
-                if (archived) UiText.Resource(Res.string.preview_archived) else UiText.Resource(Res.string.preview_unarchived
+                if (archived) UiText.Resource(Res.string.preview_archived) else UiText.Resource(
+                    Res.string.preview_unarchived
                 )
             )
         }

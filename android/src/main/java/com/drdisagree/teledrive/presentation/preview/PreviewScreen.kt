@@ -169,6 +169,9 @@ fun PreviewScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val infoTarget by viewModel.infoTarget.collectAsStateWithLifecycle()
     val backgroundPlayback by viewModel.backgroundPlayback.collectAsStateWithLifecycle()
+    val preferredAudioLanguage by viewModel.preferredAudioLanguage.collectAsStateWithLifecycle()
+    val preferredSubtitleLanguage by
+    viewModel.preferredSubtitleLanguage.collectAsStateWithLifecycle()
     val storedTextScale by viewModel.textScale.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
@@ -266,6 +269,10 @@ fun PreviewScreen(
                     onDownload = { viewModel.download(file) },
                     chromeVisible = chromeVisible,
                     allowBackgroundPlayback = backgroundPlayback,
+                    preferredAudioLanguage = preferredAudioLanguage,
+                    preferredSubtitleLanguage = preferredSubtitleLanguage,
+                    onPreferredAudioLanguage = viewModel::setPreferredAudioLanguage,
+                    onPreferredSubtitleLanguage = viewModel::setPreferredSubtitleLanguage,
                     onToggleChrome = { chromeVisible = !chromeVisible },
                     onChromeRequested = { visible -> chromeVisible = visible }
                 )
@@ -472,6 +479,10 @@ private fun PreviewPage(
     onDownload: () -> Unit,
     chromeVisible: Boolean,
     allowBackgroundPlayback: Boolean,
+    preferredAudioLanguage: String,
+    preferredSubtitleLanguage: String,
+    onPreferredAudioLanguage: (String) -> Unit,
+    onPreferredSubtitleLanguage: (String) -> Unit,
     onToggleChrome: () -> Unit,
     onChromeRequested: (Boolean) -> Unit,
     loadLinkMetadata: suspend (String) -> LinkMetadata?,
@@ -553,6 +564,10 @@ private fun PreviewPage(
                 isActivePage = isActivePage,
                 controlsVisible = chromeVisible,
                 allowBackgroundPlayback = allowBackgroundPlayback,
+                preferredAudioLanguage = preferredAudioLanguage,
+                preferredSubtitleLanguage = preferredSubtitleLanguage,
+                onPreferredAudioLanguage = onPreferredAudioLanguage,
+                onPreferredSubtitleLanguage = onPreferredSubtitleLanguage,
                 onControlsVisibilityChanged = onChromeRequested
             )
 

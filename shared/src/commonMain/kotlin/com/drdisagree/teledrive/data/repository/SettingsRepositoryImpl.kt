@@ -132,6 +132,10 @@ class SettingsRepositoryImpl(
                 ?: defaults.backgroundPlayback,
             streamBeforeDownload = this[PreferenceKeys.STREAM_BEFORE_DOWNLOAD]
                 ?: defaults.streamBeforeDownload,
+            preferredAudioLanguage = this[PreferenceKeys.PREFERRED_AUDIO_LANGUAGE]
+                ?: defaults.preferredAudioLanguage,
+            preferredSubtitleLanguage = this[PreferenceKeys.PREFERRED_SUBTITLE_LANGUAGE]
+                ?: defaults.preferredSubtitleLanguage,
             backupNotifications = this[PreferenceKeys.BACKUP_NOTIFICATIONS]
                 ?: defaults.backupNotifications,
             failureNotifications = this[PreferenceKeys.FAILURE_NOTIFICATIONS]
@@ -189,6 +193,8 @@ class SettingsRepositoryImpl(
         this[PreferenceKeys.SORT_DIRECTION] = prefs.sortDirection.name
         this[PreferenceKeys.BACKGROUND_PLAYBACK] = prefs.backgroundPlayback
         this[PreferenceKeys.STREAM_BEFORE_DOWNLOAD] = prefs.streamBeforeDownload
+        this[PreferenceKeys.PREFERRED_AUDIO_LANGUAGE] = prefs.preferredAudioLanguage
+        this[PreferenceKeys.PREFERRED_SUBTITLE_LANGUAGE] = prefs.preferredSubtitleLanguage
         this[PreferenceKeys.BACKUP_NOTIFICATIONS] = prefs.backupNotifications
         this[PreferenceKeys.FAILURE_NOTIFICATIONS] = prefs.failureNotifications
         this[PreferenceKeys.TRANSFER_CONCURRENCY] = prefs.transferConcurrency

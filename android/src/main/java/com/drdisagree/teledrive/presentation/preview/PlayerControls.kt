@@ -84,6 +84,7 @@ import androidx.media3.common.Player
 import androidx.media3.common.TrackSelectionOverride
 import androidx.media3.common.Tracks
 import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.player_audio_track
 import com.drdisagree.teledrive.resources.player_fewer_controls
 import com.drdisagree.teledrive.resources.player_hide_subtitles
 import com.drdisagree.teledrive.resources.player_more_controls
@@ -94,10 +95,12 @@ import com.drdisagree.teledrive.resources.player_repeat_off
 import com.drdisagree.teledrive.resources.player_repeat_one
 import com.drdisagree.teledrive.resources.player_replay
 import com.drdisagree.teledrive.resources.player_show_subtitles
+import com.drdisagree.teledrive.resources.player_subtitles
+import com.drdisagree.teledrive.resources.player_subtitles_off
+import com.drdisagree.teledrive.resources.player_track
 import com.drdisagree.teledrive.resources.player_unmute
 import com.drdisagree.teledrive.resources.preview_back_10_seconds
 import com.drdisagree.teledrive.resources.preview_forward_10_seconds
-import com.drdisagree.teledrive.resources.preview_next_audio_track
 import com.drdisagree.teledrive.resources.preview_playback_speed
 import com.drdisagree.teledrive.presentation.common.Formatters
 import kotlinx.coroutines.delay
@@ -118,6 +121,8 @@ fun PlayerControls(
     resizeMode: PlayerResizeMode,
     onCycleResizeMode: () -> Unit,
     onInteraction: () -> Unit,
+    onPreferredAudioLanguage: (String) -> Unit = {},
+    onPreferredSubtitleLanguage: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var playing by remember(player) { mutableStateOf(player.isPlaying) }
@@ -138,6 +143,8 @@ fun PlayerControls(
     var rotation by remember { mutableStateOf(PlayerRotation.AUTO) }
     var expanded by remember { mutableStateOf(false) }
     var showSpeeds by remember { mutableStateOf(false) }
+    var showAudioTracks by remember { mutableStateOf(false) }
+    var showTextTracks by remember { mutableStateOf(false) }
 
     val activity = LocalActivity.current
 
@@ -149,8 +156,9 @@ fun PlayerControls(
     val waitingForData = playbackState == Player.STATE_BUFFERING ||
             (playWhenReady && !playing && !ended && playbackState != Player.STATE_IDLE)
 
-    val textGroups = tracks.groups.filter { it.type == C.TRACK_TYPE_TEXT }
-    val audioGroups = tracks.groups.filter { it.type == C.TRACK_TYPE_AUDIO }
+    val trackWord = stringResource(Res.string.player_track)
+    val textTracks = tracks.playerTracks(C.TRACK_TYPE_TEXT, trackWord)
+    val audioTracks = tracks.playerTracks(C.TRACK_TYPE_AUDIO, trackWord)
 
     DisposableEffect(player) {
         val listener = object : Player.Listener {
@@ -306,7 +314,7 @@ fun PlayerControls(
                                 )
                             }
                             if (!audioOnly) {
-                                ExtraControl(expanded) {
+                                ExtraControl(expanded || textTracks.isNotEmpty()) {
                                     ControlButton(
                                         icon = if (subtitlesOn) {
                                             Icons.Filled.Subtitles
@@ -319,38 +327,22 @@ fun PlayerControls(
                                             stringResource(Res.string.player_show_subtitles)
                                         },
                                         active = subtitlesOn,
-                                        enabled = textGroups.isNotEmpty(),
+                                        enabled = textTracks.isNotEmpty(),
                                         onClick = {
                                             onInteraction()
-                                            subtitlesOn = !subtitlesOn
-                                            player.trackSelectionParameters =
-                                                player.trackSelectionParameters
-                                                    .buildUpon()
-                                                    .setTrackTypeDisabled(
-                                                        C.TRACK_TYPE_TEXT,
-                                                        !subtitlesOn
-                                                    )
-                                                    .build()
+                                            showTextTracks = true
                                         }
                                     )
                                 }
                             }
-                            ExtraControl(expanded) {
+                            ExtraControl(expanded || audioTracks.size > 1) {
                                 ControlButton(
                                     icon = Icons.Filled.Audiotrack,
-                                    description = stringResource(Res.string.preview_next_audio_track),
-                                    enabled = audioGroups.size > 1,
+                                    description = stringResource(Res.string.player_audio_track),
+                                    enabled = audioTracks.isNotEmpty(),
                                     onClick = {
                                         onInteraction()
-                                        val selected = audioGroups.indexOfFirst { it.isSelected }
-                                        val next = audioGroups[(selected + 1) % audioGroups.size]
-                                        player.trackSelectionParameters =
-                                            player.trackSelectionParameters
-                                                .buildUpon()
-                                                .setOverrideForType(
-                                                    TrackSelectionOverride(next.mediaTrackGroup, 0)
-                                                )
-                                                .build()
+                                        showAudioTracks = true
                                     }
                                 )
                             }
@@ -496,6 +488,68 @@ fun PlayerControls(
                     .height(8.dp)
             )
         }
+    }
+
+    if (showAudioTracks) {
+        TrackPickerSheet(
+            title = stringResource(Res.string.player_audio_track),
+            tracks = audioTracks,
+            offLabel = null,
+            offSelected = false,
+            onSelectOff = {},
+            onSelect = { track ->
+                onInteraction()
+                showAudioTracks = false
+                player.trackSelectionParameters = player.trackSelectionParameters
+                    .buildUpon()
+                    .setTrackTypeDisabled(C.TRACK_TYPE_AUDIO, false)
+                    .clearOverridesOfType(C.TRACK_TYPE_AUDIO)
+                    .setOverrideForType(
+                        TrackSelectionOverride(track.group.mediaTrackGroup, track.index)
+                    )
+                    .setPreferredAudioLanguage(track.language.ifEmpty { null })
+                    .build()
+                onPreferredAudioLanguage(track.language)
+            },
+            onDismiss = { showAudioTracks = false }
+        )
+    }
+
+    if (showTextTracks) {
+        TrackPickerSheet(
+            title = stringResource(Res.string.player_subtitles),
+            tracks = textTracks,
+            offLabel = stringResource(Res.string.player_subtitles_off),
+            offSelected = !subtitlesOn,
+            onSelectOff = {
+                onInteraction()
+                showTextTracks = false
+                player.trackSelectionParameters = player.trackSelectionParameters
+                    .buildUpon()
+                    .clearOverridesOfType(C.TRACK_TYPE_TEXT)
+                    .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, true)
+                    .setPreferredTextLanguage(null)
+                    .build()
+                subtitlesOn = false
+                onPreferredSubtitleLanguage("")
+            },
+            onSelect = { track ->
+                onInteraction()
+                showTextTracks = false
+                player.trackSelectionParameters = player.trackSelectionParameters
+                    .buildUpon()
+                    .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, false)
+                    .clearOverridesOfType(C.TRACK_TYPE_TEXT)
+                    .setOverrideForType(
+                        TrackSelectionOverride(track.group.mediaTrackGroup, track.index)
+                    )
+                    .setPreferredTextLanguage(track.language.ifEmpty { null })
+                    .build()
+                subtitlesOn = true
+                onPreferredSubtitleLanguage(track.language)
+            },
+            onDismiss = { showTextTracks = false }
+        )
     }
 }
 

@@ -41,6 +41,8 @@ data class UserPreferences(
 
     val backgroundPlayback: Boolean = false,
     val streamBeforeDownload: Boolean = true,
+    val preferredAudioLanguage: String = "",
+    val preferredSubtitleLanguage: String = "",
 
     val backupNotifications: Boolean = true,
     val failureNotifications: Boolean = true,

@@ -37,6 +37,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -79,14 +80,18 @@ import com.drdisagree.teledrive.resources.player_scaling
 import com.drdisagree.teledrive.resources.player_show_subtitles
 import com.drdisagree.teledrive.resources.player_skip_back
 import com.drdisagree.teledrive.resources.player_skip_forward
+import com.drdisagree.teledrive.resources.player_subtitles_off
+import com.drdisagree.teledrive.resources.player_track
 import com.drdisagree.teledrive.resources.player_unmute
 import java.awt.Point
 import java.awt.Toolkit
 import java.awt.image.BufferedImage
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
+import uk.co.caprica.vlcj.media.TrackType
 import uk.co.caprica.vlcj.player.base.MediaPlayer
 import uk.co.caprica.vlcj.player.base.MediaPlayerEventAdapter
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Inline player backed by libVLC, mirroring the Android player: controls hide
@@ -99,6 +104,10 @@ fun DesktopMediaPlayer(
     mrl: String,
     isAudio: Boolean,
     modifier: Modifier = Modifier,
+    preferredAudioLanguage: String = "",
+    preferredSubtitleLanguage: String = "",
+    onPreferredAudioLanguage: (String) -> Unit = {},
+    onPreferredSubtitleLanguage: (String) -> Unit = {},
     onControlsVisibilityChange: (Boolean) -> Unit = {}
 ) {
     val factory = VlcPlayback.factory ?: return
@@ -111,7 +120,7 @@ fun DesktopMediaPlayer(
     var muted by remember { mutableStateOf(false) }
     var rate by remember { mutableStateOf(1.0f) }
     var repeatOne by remember { mutableStateOf(false) }
-    var subtitlesOn by remember { mutableStateOf(false) }
+    var trackTick by remember { mutableIntStateOf(0) }
     var scaling by remember { mutableStateOf(VideoScaling.FIT) }
     var controlsVisible by remember { mutableStateOf(true) }
     var interactionTick by remember { mutableIntStateOf(0) }
@@ -124,6 +133,15 @@ fun DesktopMediaPlayer(
                     playing = true
                     finished = false
                     buffering = false
+                    trackTick++
+                }
+
+                override fun elementaryStreamAdded(
+                    mediaPlayer: MediaPlayer,
+                    type: TrackType,
+                    id: Int
+                ) {
+                    trackTick++
                 }
 
                 override fun paused(mediaPlayer: MediaPlayer) {
@@ -170,6 +188,25 @@ fun DesktopMediaPlayer(
         }
     }
 
+    val trackWord = stringResource(Res.string.player_track)
+    var languagesApplied by remember(mrl) { mutableStateOf(false) }
+    LaunchedEffect(mrl, trackTick, preferredAudioLanguage, preferredSubtitleLanguage) {
+        if (languagesApplied || trackTick == 0) return@LaunchedEffect
+        val audio = player.audioTracks(trackWord)
+        val text = player.textTracks(trackWord)
+        if (audio.isEmpty() && text.isEmpty()) return@LaunchedEffect
+        languagesApplied = true
+        if (preferredAudioLanguage.isNotEmpty()) {
+            audio.firstOrNull { it.language == preferredAudioLanguage }
+                ?.let { player.audio().setTrack(it.id) }
+        }
+        if (preferredSubtitleLanguage.isNotEmpty()) {
+            text.firstOrNull { it.language == preferredSubtitleLanguage }
+                ?.let { player.subpictures().setTrack(it.id) }
+        }
+        trackTick++
+    }
+
     LaunchedEffect(playing, interactionTick) {
         if (!playing) {
             controlsVisible = true
@@ -178,7 +215,7 @@ fun DesktopMediaPlayer(
         }
         controlsVisible = true
         onControlsVisibilityChange(true)
-        delay(CONTROLS_HIDE_DELAY_MS)
+        delay(CONTROLS_HIDE_DELAY_MS.milliseconds)
         controlsVisible = false
         onControlsVisibilityChange(false)
     }
@@ -259,8 +296,18 @@ fun DesktopMediaPlayer(
                 muted = muted,
                 rate = rate,
                 repeatOne = repeatOne,
-                subtitlesOn = subtitlesOn,
+                trackTick = trackTick,
                 scaling = scaling,
+                onSelectAudioTrack = { track ->
+                    player.audio().setTrack(track.id)
+                    onPreferredAudioLanguage(track.language)
+                    trackTick++
+                },
+                onSelectTextTrack = { track ->
+                    player.subpictures().setTrack(track?.id ?: VLC_TRACK_DISABLED)
+                    onPreferredSubtitleLanguage(track?.language.orEmpty())
+                    trackTick++
+                },
                 onInteraction = { interactionTick++ },
                 onPlayPause = {
                     when {
@@ -285,16 +332,6 @@ fun DesktopMediaPlayer(
                 onToggleRepeat = {
                     repeatOne = !repeatOne
                     player.controls().repeat = repeatOne
-                },
-                onToggleSubtitles = {
-                    subtitlesOn = !subtitlesOn
-                    val tracks = player.subpictures().trackDescriptions()
-                    val target = if (subtitlesOn) {
-                        tracks.firstOrNull { it.id() >= 0 }?.id() ?: -1
-                    } else {
-                        -1
-                    }
-                    player.subpictures().setTrack(target)
                 },
                 onScaling = { scaling = it }
             )
@@ -321,7 +358,7 @@ private fun PlayerControlsBar(
     muted: Boolean,
     rate: Float,
     repeatOne: Boolean,
-    subtitlesOn: Boolean,
+    trackTick: Int,
     scaling: VideoScaling,
     onInteraction: () -> Unit,
     onPlayPause: () -> Unit,
@@ -329,13 +366,19 @@ private fun PlayerControlsBar(
     onToggleMute: () -> Unit,
     onRate: (Float) -> Unit,
     onToggleRepeat: () -> Unit,
-    onToggleSubtitles: () -> Unit,
+    onSelectAudioTrack: (VlcTrack) -> Unit,
+    onSelectTextTrack: (VlcTrack?) -> Unit,
     onScaling: (VideoScaling) -> Unit
 ) {
     var showRateMenu by remember { mutableStateOf(false) }
     var showAudioMenu by remember { mutableStateOf(false) }
+    var showSubtitleMenu by remember { mutableStateOf(false) }
     var scrubTarget by remember { mutableStateOf<Float?>(null) }
     val fullscreen = LocalFullscreenController.current
+    val trackWord = stringResource(Res.string.player_track)
+    val audioTracks = remember(player, trackTick) { player.audioTracks(trackWord) }
+    val textTracks = remember(player, trackTick) { player.textTracks(trackWord) }
+    val subtitlesOn = textTracks.any { it.selected }
 
     Column(
         modifier = Modifier
@@ -453,48 +496,88 @@ private fun PlayerControlsBar(
                 )
             }
             if (!isAudio) {
-                IconButton(onClick = {
-                    onInteraction()
-                    onToggleSubtitles()
-                }) {
-                    Icon(
-                        imageVector = if (subtitlesOn) {
-                            Icons.Filled.Subtitles
-                        } else {
-                            Icons.Filled.SubtitlesOff
+                Box {
+                    IconButton(
+                        onClick = {
+                            onInteraction()
+                            showSubtitleMenu = true
                         },
-                        contentDescription = stringResource(
-                            if (subtitlesOn) {
-                                Res.string.player_hide_subtitles
+                        enabled = textTracks.isNotEmpty()
+                    ) {
+                        Icon(
+                            imageVector = if (subtitlesOn) {
+                                Icons.Filled.Subtitles
                             } else {
-                                Res.string.player_show_subtitles
+                                Icons.Filled.SubtitlesOff
+                            },
+                            contentDescription = stringResource(
+                                if (subtitlesOn) {
+                                    Res.string.player_hide_subtitles
+                                } else {
+                                    Res.string.player_show_subtitles
+                                }
+                            ),
+                            tint = if (textTracks.isEmpty()) {
+                                Color.White.copy(alpha = 0.4f)
+                            } else {
+                                Color.White
                             }
-                        ),
-                        tint = Color.White
-                    )
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = showSubtitleMenu,
+                        onDismissRequest = { showSubtitleMenu = false }
+                    ) {
+                        TrackMenuItem(
+                            label = stringResource(Res.string.player_subtitles_off),
+                            selected = !subtitlesOn,
+                            onClick = {
+                                showSubtitleMenu = false
+                                onSelectTextTrack(null)
+                            }
+                        )
+                        textTracks.forEach { track ->
+                            TrackMenuItem(
+                                label = track.label,
+                                selected = track.selected,
+                                onClick = {
+                                    showSubtitleMenu = false
+                                    onSelectTextTrack(track)
+                                }
+                            )
+                        }
+                    }
                 }
             }
             Box {
-                IconButton(onClick = {
-                    onInteraction()
-                    showAudioMenu = true
-                }) {
+                IconButton(
+                    onClick = {
+                        onInteraction()
+                        showAudioMenu = true
+                    },
+                    enabled = audioTracks.isNotEmpty()
+                ) {
                     Icon(
                         Icons.Filled.Audiotrack,
                         contentDescription = stringResource(Res.string.player_audio_track),
-                        tint = Color.White
+                        tint = if (audioTracks.isEmpty()) {
+                            Color.White.copy(alpha = 0.4f)
+                        } else {
+                            Color.White
+                        }
                     )
                 }
                 DropdownMenu(
                     expanded = showAudioMenu,
                     onDismissRequest = { showAudioMenu = false }
                 ) {
-                    player.audio().trackDescriptions().forEach { track ->
-                        DropdownMenuItem(
-                            text = { Text(track.description()) },
+                    audioTracks.forEach { track ->
+                        TrackMenuItem(
+                            label = track.label,
+                            selected = track.selected,
                             onClick = {
                                 showAudioMenu = false
-                                player.audio().setTrack(track.id())
+                                onSelectAudioTrack(track)
                             }
                         )
                     }
@@ -556,6 +639,15 @@ private fun PlayerControlsBar(
             }
         }
     }
+}
+
+@Composable
+private fun TrackMenuItem(label: String, selected: Boolean, onClick: () -> Unit) {
+    DropdownMenuItem(
+        text = { Text(label) },
+        leadingIcon = { RadioButton(selected = selected, onClick = null) },
+        onClick = onClick
+    )
 }
 
 private const val CONTROLS_HIDE_DELAY_MS = 3_000L

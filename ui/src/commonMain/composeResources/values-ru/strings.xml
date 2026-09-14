@@ -435,7 +435,6 @@
     <string name="preview_local_copy_removed">Локальная копия удалена</string>
     <string name="preview_move_to_trash">В корзину?</string>
     <string name="preview_next">Следующий файл</string>
-    <string name="preview_next_audio_track">Следующая аудиодорожка</string>
     <string name="preview_no_copy_available">Нет локальной или серверной копии</string>
     <string name="preview_no_preview">Предпросмотр недоступен</string>
     <string name="preview_no_preview_for_type">Нет предпросмотра для данного типа файла</string>
@@ -461,6 +460,10 @@
 
     <!-- Player -->
     <string name="player_audio_track">Аудиодорожка</string>
+    <string name="player_subtitles">Субтитры</string>
+    <string name="player_subtitles_off">Выключены</string>
+    <string name="player_track">Дорожка</string>
+    <string name="player_track_unsupported">Не поддерживается на этом устройстве</string>
     <string name="player_codec_unsupported">Устройство не может декодировать это видео. Скачайте его и откройте в другом плеере.</string>
     <string name="player_exit_full_screen">Выйти из полноэкранного режима</string>
     <string name="player_fewer_controls">Меньше элементов управления</string>

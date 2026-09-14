@@ -41,6 +41,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.PlaybackException
@@ -77,12 +78,18 @@ fun MediaPlayer(
     isActivePage: Boolean,
     controlsVisible: Boolean = true,
     allowBackgroundPlayback: Boolean = false,
+    preferredAudioLanguage: String = "",
+    preferredSubtitleLanguage: String = "",
+    onPreferredAudioLanguage: (String) -> Unit = {},
+    onPreferredSubtitleLanguage: (String) -> Unit = {},
     onControlsVisibilityChanged: (Boolean) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     val activePage by rememberUpdatedState(isActivePage)
     val notifyControls by rememberUpdatedState(onControlsVisibilityChanged)
+    val audioLanguage by rememberUpdatedState(preferredAudioLanguage)
+    val subtitleLanguage by rememberUpdatedState(preferredSubtitleLanguage)
 
     val holder = remember(content) { mutableStateOf<ExoPlayer?>(null) }
     val player = holder.value
@@ -90,6 +97,11 @@ fun MediaPlayer(
     LaunchedEffect(holder, isActivePage) {
         if (!isActivePage || holder.value != null) return@LaunchedEffect
         holder.value = ExoPlayer.Builder(context).build().apply {
+            trackSelectionParameters = trackSelectionParameters.buildUpon()
+                .setPreferredAudioLanguage(audioLanguage.ifEmpty { null })
+                .setPreferredTextLanguage(subtitleLanguage.ifEmpty { null })
+                .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, subtitleLanguage.isEmpty())
+                .build()
             when (content) {
                 is PreviewContent.LocalMedia -> {
                     setMediaItem(MediaItem.fromUri("file://${content.path}"))
@@ -271,7 +283,9 @@ fun MediaPlayer(
                 audioOnly = audioOnly,
                 resizeMode = resizeMode,
                 onCycleResizeMode = { resizeMode = resizeMode.next() },
-                onInteraction = { interactionTick++ }
+                onInteraction = { interactionTick++ },
+                onPreferredAudioLanguage = onPreferredAudioLanguage,
+                onPreferredSubtitleLanguage = onPreferredSubtitleLanguage
             )
         }
     }

@@ -56,6 +56,8 @@ object PreferenceKeys {
 
     val BACKGROUND_PLAYBACK = booleanPreferencesKey("background_playback")
     val STREAM_BEFORE_DOWNLOAD = booleanPreferencesKey("stream_before_download")
+    val PREFERRED_AUDIO_LANGUAGE = stringPreferencesKey("preferred_audio_language")
+    val PREFERRED_SUBTITLE_LANGUAGE = stringPreferencesKey("preferred_subtitle_language")
     val BACKUP_NOTIFICATIONS = booleanPreferencesKey("backup_notifications")
     val FAILURE_NOTIFICATIONS = booleanPreferencesKey("failure_notifications")
 
