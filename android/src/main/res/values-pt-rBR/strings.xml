@@ -1,0 +1,50 @@
+<resources>
+    <!-- App-wide -->
+    <string name="app_name">TeleDrive</string>
+
+    <!-- Shared labels and dialogs -->
+    <string name="common_actions">Mais ações</string>
+    <string name="common_back">Voltar</string>
+    <string name="common_download">Baixar</string>
+    <string name="common_free_space">Liberar espaço</string>
+    <string name="common_move_trash">Mover para a lixeira</string>
+    <string name="common_rename">Renomear</string>
+    <string name="common_rename_file">Renomear arquivo</string>
+    <string name="common_upload">Enviar</string>
+
+    <!-- Notes -->
+    <string name="note_edit_action">Editar texto</string>
+
+    <!-- Transfers -->
+    <string name="transfer_error_decryption_failed">Falha na descriptografia</string>
+    <string name="transfer_error_download_ended">O download foi interrompido inesperadamente</string>
+    <string name="transfer_error_download_stalled">O download parou de responder</string>
+    <string name="transfer_error_downloaded_missing">Arquivo baixado não encontrado</string>
+    <string name="transfer_error_file_record_missing">Registro do arquivo não encontrado</string>
+    <string name="transfer_error_key_missing">Chave de criptografia ausente. Restaure-a nas Configurações.</string>
+    <string name="transfer_error_local_file_gone">O arquivo local não existe mais</string>
+    <string name="transfer_error_no_file_reference">A transferência não tem referência de arquivo</string>
+    <string name="transfer_error_no_local_copy">Não há cópia local para enviar</string>
+    <string name="transfer_error_no_remote_copy">O arquivo não possui cópia remota</string>
+    <string name="transfer_error_save_failed">Não foi possível salvar o download</string>
+    <string name="transfer_error_upload_ended">O envio foi interrompido inesperadamente</string>
+    <string name="transfer_error_upload_stalled">O envio parou de responder</string>
+
+    <!-- Notifications -->
+    <string name="notification_backup_complete">Backup concluído</string>
+    <string name="notification_backup_summary">%1$d de %2$d arquivos salvos em backup</string>
+    <string name="notification_channel_backup">Backup</string>
+    <string name="notification_channel_backup_desc">Progresso e resultados do backup</string>
+    <string name="notification_channel_failures">Falhas</string>
+    <string name="notification_channel_failures_desc">Falhas em transferências e backups</string>
+    <string name="notification_channel_transfers">Transferências</string>
+    <string name="notification_channel_transfers_desc">Progresso de envios e downloads</string>
+    <string name="notification_channel_updates">Atualizações do aplicativo</string>
+    <string name="notification_channel_updates_desc">Avisa quando uma nova versão estiver disponível</string>
+    <string name="notification_download_failed">Falha no download</string>
+    <string name="notification_transfers_active">Transferências em andamento</string>
+    <string name="notification_update_message">%1$s %2$s está pronto para download</string>
+    <string name="notification_update_skip">Pular esta versão</string>
+    <string name="notification_update_title">Atualização disponível</string>
+    <string name="notification_upload_failed">Falha no envio</string>
+</resources>

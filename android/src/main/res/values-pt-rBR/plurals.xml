@@ -1,0 +1,15 @@
+<resources>
+    <!-- App-wide -->
+    <plurals name="file_count">
+        <item quantity="one">%1$d arquivo</item>
+        <item quantity="other">%1$d arquivos</item>
+    </plurals>
+    <plurals name="folder_count">
+        <item quantity="one">%1$d pasta</item>
+        <item quantity="other">%1$d pastas</item>
+    </plurals>
+    <plurals name="item_count">
+        <item quantity="one">%1$d item</item>
+        <item quantity="other">%1$d itens</item>
+    </plurals>
+</resources>

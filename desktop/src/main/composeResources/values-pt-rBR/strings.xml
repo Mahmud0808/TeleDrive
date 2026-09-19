@@ -1,0 +1,74 @@
+<resources>
+    <!-- App-wide -->
+    <string name="app_name">TeleDrive</string>
+    <string name="app_already_running">O TeleDrive já está em execução.</string>
+
+    <!-- Navigation -->
+    <string name="nav_files">Arquivos</string>
+    <string name="nav_gallery">Galeria</string>
+    <string name="nav_transfers">Transferências</string>
+    <string name="nav_trash">Lixeira</string>
+    <string name="nav_channels">Drives</string>
+    <string name="nav_proxy">Proxy</string>
+
+    <!-- Sign in -->
+    <string name="auth_credentials_prompt">Insira suas credenciais da API do Telegram obtidas em my.telegram.org</string>
+    <string name="auth_api_id">ID da API</string>
+    <string name="auth_api_hash">Hash da API</string>
+    <string name="auth_continue">Continuar</string>
+    <string name="auth_connecting">Conectando ao Telegram</string>
+    <string name="auth_phone_number">Número de telefone</string>
+    <string name="auth_send_code">Enviar código</string>
+    <string name="auth_code_sent_to">Insira o código enviado para %1$s</string>
+    <string name="auth_code">Código</string>
+    <string name="auth_verify">Verificar</string>
+    <string name="auth_email_address">Endereço de e-mail</string>
+    <string name="auth_password">Senha</string>
+    <string name="auth_password_prompt">Senha de verificação em duas etapas</string>
+    <string name="auth_password_hint">Senha de verificação em duas etapas (dica: %1$s)</string>
+    <string name="auth_sign_in">Entrar</string>
+    <string name="auth_confirm_other_device">Confirmar em outro dispositivo</string>
+    <string name="auth_registration_required">Este número não possui uma conta do Telegram. Registre-se primeiro pelo celular.</string>
+    <string name="auth_signed_in_as">Conectado como %1$s</string>
+    <string name="auth_signing_out">Saindo</string>
+    <string name="auth_session_closed">Sessão encerrada. Reinicie o aplicativo.</string>
+    <string name="auth_failed">Falha ao entrar: %1$s</string>
+    <string name="auth_your_account">sua conta</string>
+    <string name="auth_sign_out">Sair</string>
+
+    <!-- Drive -->
+    <string name="drive_loading">Carregando seus drives</string>
+    <string name="drive_pick_title">Escolha um drive</string>
+    <string name="drive_pick_subtitle">Os arquivos são armazenados em um canal privado do Telegram</string>
+    <string name="drive_create">Criar um novo drive</string>
+    <string name="drive_open">Abrir</string>
+    <string name="drive_file_count">%1$d arquivos</string>
+    <string name="drive_syncing">Sincronizando com o Telegram</string>
+    <string name="drive_empty">Ainda não há arquivos neste drive</string>
+    <string name="drive_sync">Sincronizar</string>
+    <string name="drive_upload">Enviar</string>
+    <string name="drive_download">Baixar</string>
+    <string name="drive_downloaded">Baixado</string>
+    <string name="drive_queued">Na fila</string>
+    <string name="drive_upload_chooser_title">Escolha um arquivo para enviar</string>
+
+    <!-- Preview -->
+    <string name="preview_open_externally">Abrir com o aplicativo do sistema</string>
+    <string name="preview_stream">Reproduzir no reprodutor do sistema</string>
+    <string name="preview_open_failed">Não foi possível abrir o arquivo com um aplicativo do sistema</string>
+
+    <!-- Transfer errors -->
+    <string name="transfer_error_key_missing">Chave de criptografia ausente. Restaure-a nas Configurações.</string>
+    <string name="transfer_error_no_file_reference">A transferência não tem referência de arquivo</string>
+    <string name="transfer_error_file_record_missing">Registro do arquivo não encontrado</string>
+    <string name="transfer_error_no_local_copy">Não há cópia local para enviar</string>
+    <string name="transfer_error_local_file_gone">O arquivo local não existe mais</string>
+    <string name="transfer_error_upload_ended">O envio foi interrompido inesperadamente</string>
+    <string name="transfer_error_upload_stalled">O envio parou de responder</string>
+    <string name="transfer_error_download_ended">O download foi interrompido inesperadamente</string>
+    <string name="transfer_error_download_stalled">O download parou de responder</string>
+    <string name="transfer_error_downloaded_missing">Arquivo baixado não encontrado</string>
+    <string name="transfer_error_no_remote_copy">O arquivo não possui cópia remota</string>
+    <string name="transfer_error_decryption_failed">Falha na descriptografia</string>
+    <string name="transfer_error_save_failed">Não foi possível salvar o download</string>
+</resources>

@@ -689,6 +689,7 @@
     <string name="language_system">Системный (по умолчанию)</string>
     <string name="language_english">English</string>
     <string name="language_russian">Русский</string>
+    <string name="language_portuguese_br">Português (Brasil)</string>
     <string name="settings_tighter_list_rows_without">Компактные строки без размера и даты</string>
     <string name="settings_use_wallpaper_colors_available">Использовать цвета обоев при наличии</string>
     <string name="theme_dark">Тёмная</string>
@@ -927,5 +928,6 @@
         <item>Системный (по умолчанию)</item>
         <item>English</item>
         <item>Русский</item>
+        <item>Português (Brasil)</item>
     </string-array>
 </resources>

@@ -3,7 +3,8 @@ package com.drdisagree.teledrive.domain.model
 enum class AppLanguage(val code: String) {
     SYSTEM("system"),
     ENGLISH("en"),
-    RUSSIAN("ru");
+    RUSSIAN("ru"),
+    PORTUGUESE_BR("pt-BR");
 
     companion object {
         fun fromCode(code: String?): AppLanguage {
