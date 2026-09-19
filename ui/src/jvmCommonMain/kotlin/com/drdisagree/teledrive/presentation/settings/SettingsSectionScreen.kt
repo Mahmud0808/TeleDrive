@@ -46,6 +46,7 @@ import com.drdisagree.teledrive.domain.model.AppLanguage
 import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.language_english
 import com.drdisagree.teledrive.resources.language_labels
+import com.drdisagree.teledrive.resources.language_portuguese_br
 import com.drdisagree.teledrive.resources.language_russian
 import com.drdisagree.teledrive.resources.language_system
 import com.drdisagree.teledrive.resources.settings_language
@@ -951,6 +952,7 @@ private fun AppearanceSection(state: SettingsUiState, viewModel: SettingsViewMod
                     AppLanguage.SYSTEM -> stringResource(Res.string.language_system)
                     AppLanguage.ENGLISH -> stringResource(Res.string.language_english)
                     AppLanguage.RUSSIAN -> stringResource(Res.string.language_russian)
+                    AppLanguage.PORTUGUESE_BR -> stringResource(Res.string.language_portuguese_br)
                 },
                 onClick = { showLanguageDialog = true }
             )
