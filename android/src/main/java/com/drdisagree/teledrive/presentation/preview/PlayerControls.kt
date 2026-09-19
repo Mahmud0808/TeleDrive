@@ -58,6 +58,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -155,6 +156,15 @@ fun PlayerControls(
      */
     val waitingForData = playbackState == Player.STATE_BUFFERING ||
             (playWhenReady && !playing && !ended && playbackState != Player.STATE_IDLE)
+
+    val sliderRange = 0f..duration.coerceAtLeast(1).toFloat()
+    val sliderState = remember(player, sliderRange) {
+        SliderState(value = position.toFloat(), trackRange = sliderRange)
+    }
+
+    LaunchedEffect(sliderState, position, scrubTarget) {
+        if (scrubTarget == null) sliderState.value = position.toFloat()
+    }
 
     val trackWord = stringResource(Res.string.player_track)
     val textTracks = tracks.playerTracks(C.TRACK_TYPE_TEXT, trackWord)
@@ -400,7 +410,7 @@ fun PlayerControls(
                     )
                 }
                 Slider(
-                    value = scrubTarget ?: position.toFloat(),
+                    state = sliderState,
                     onValueChange = { value ->
                         onInteraction()
                         scrubTarget = value
@@ -414,7 +424,6 @@ fun PlayerControls(
                         }
                         scrubTarget = null
                     },
-                    valueRange = 0f..duration.coerceAtLeast(1).toFloat(),
                     thumb = {
                         Box(
                             modifier = Modifier
