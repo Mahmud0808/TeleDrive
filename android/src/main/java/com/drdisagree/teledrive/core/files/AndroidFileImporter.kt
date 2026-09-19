@@ -66,9 +66,11 @@ class AndroidFileImporter(
 
     /** Drops a staged copy the drive turned out not to need. */
     override fun discard(imported: ImportedFile) {
-        val staged = File(imported.path)
-        if (staged.parentFile?.name == IMPORT_DIR) staged.delete()
+        if (isStaged(imported.path)) File(imported.path).delete()
     }
+
+    override fun isStaged(path: String): Boolean =
+        File(path).parentFile == File(context.filesDir, IMPORT_DIR)
 
     override fun sweepOrphans(referencedPaths: Set<String>) {
         val staged = File(context.filesDir, IMPORT_DIR).listFiles() ?: return

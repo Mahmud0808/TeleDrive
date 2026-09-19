@@ -69,6 +69,12 @@ class FileRepositoryImpl(
 ) : FileRepository {
 
     override suspend fun sweepImportOrphans() {
+        fileDao.reclaimableLocalCopies()
+            .filter { fileImporter.isStaged(it.localPath) }
+            .forEach { ref ->
+                File(ref.localPath).delete()
+                fileDao.setLocalPath(ref.id, null)
+            }
         fileImporter.sweepOrphans(fileDao.allLocalPaths().toSet())
     }
 

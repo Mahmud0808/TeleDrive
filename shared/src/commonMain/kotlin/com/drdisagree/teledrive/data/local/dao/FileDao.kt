@@ -11,6 +11,7 @@ import androidx.room.Update
 import com.drdisagree.teledrive.data.local.entity.AlbumSummary
 import com.drdisagree.teledrive.data.local.entity.FileEntity
 import com.drdisagree.teledrive.data.local.entity.HomeAggregates
+import com.drdisagree.teledrive.data.local.entity.LocalCopyRef
 import com.drdisagree.teledrive.domain.model.BackupState
 import kotlinx.coroutines.flow.Flow
 
@@ -307,6 +308,14 @@ interface FileDao {
              AND backupState = 'BACKED_UP'"""
     )
     suspend fun reclaimableFileIds(): List<String>
+
+    @Query(
+        """SELECT id, localPath FROM files
+           WHERE localPath IS NOT NULL
+             AND messageId IS NOT NULL
+             AND backupState = 'BACKED_UP'"""
+    )
+    suspend fun reclaimableLocalCopies(): List<LocalCopyRef>
 
     /**
      * Held only on this device: never uploaded, or canceled or failed on the

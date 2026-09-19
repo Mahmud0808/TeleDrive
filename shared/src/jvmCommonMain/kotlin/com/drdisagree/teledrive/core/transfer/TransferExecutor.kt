@@ -6,6 +6,7 @@ import com.drdisagree.teledrive.core.crypto.StreamCrypto
 import com.drdisagree.teledrive.core.crypto.WrappedKeyRepository
 import com.drdisagree.teledrive.core.files.AppStoragePaths
 import com.drdisagree.teledrive.core.files.DownloadWriter
+import com.drdisagree.teledrive.core.files.FileImporter
 import com.drdisagree.teledrive.core.files.Hashing
 import com.drdisagree.teledrive.core.media.ThumbnailStore
 import com.drdisagree.teledrive.core.telegram.TelegramClient
@@ -60,6 +61,7 @@ class TransferExecutor(
     private val streamCrypto: StreamCrypto,
     private val wrappedKeyRepository: WrappedKeyRepository,
     private val downloadWriter: DownloadWriter,
+    private val fileImporter: FileImporter,
     private val settingsRepository: SettingsRepository,
     private val filePartDao: FilePartDao,
     private val partUploader: PartUploader,
@@ -254,6 +256,7 @@ class TransferExecutor(
                                     telegramClient.deleteMessages(chatId, listOf(stale))
                                 }
                             }
+                        dropStagedSource(entity.id, localPath)
                         transferDao.setCompleted(transfer.id, System.currentTimeMillis())
                         outcome = Outcome.Completed
                     }
@@ -362,6 +365,7 @@ class TransferExecutor(
                                     telegramClient.deleteMessages(chatId, listOf(stale))
                                 }
                             }
+                            dropStagedSource(entity.id, localPath)
                             transferDao.setCompleted(transfer.id, System.currentTimeMillis())
                             outcome = Outcome.Completed
                         }
@@ -523,6 +527,12 @@ class TransferExecutor(
         fileDao.setLocalPath(fileId, savedPath)
         transferDao.setCompleted(transfer.id, System.currentTimeMillis())
         return Outcome.Completed
+    }
+
+    private suspend fun dropStagedSource(fileId: String, localPath: String) {
+        if (!fileImporter.isStaged(localPath)) return
+        File(localPath).delete()
+        fileDao.setLocalPath(fileId, null)
     }
 
     private suspend fun checkControl(transferId: String) {
