@@ -8,8 +8,12 @@ description: >
 
 inputs:
   media3-version:
-    description: media3 release tag to build the extension from
-    required: true
+    description: >
+      media3 release tag to build the extension from. Defaults to the media3
+      version in the project's version catalog, which is what the app resolves
+      the extension against.
+    required: false
+    default: ""
   ffmpeg-version:
     description: FFmpeg release tag to compile
     required: false
@@ -26,19 +30,35 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Resolve the media3 version
+      id: version
+      run: |
+        set -euo pipefail
+        VERSION="${{ inputs.media3-version }}"
+        if [ -z "$VERSION" ]; then
+          VERSION="$(sed -n 's/^media3 *= *"\(.*\)"/\1/p' gradle/libs.versions.toml)"
+        fi
+        if [ -z "$VERSION" ]; then
+          echo "Could not determine the media3 version"
+          exit 1
+        fi
+        echo "Building the FFmpeg extension for media3 $VERSION"
+        echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+      shell: bash
+
     - name: Restore the built extension
       id: cache
       uses: actions/cache@v4
       with:
         path: ~/.m2/repository/androidx/media3/media3-decoder-ffmpeg
-        key: ffmpeg-decoder-${{ inputs.media3-version }}-${{ inputs.ffmpeg-version }}-${{ inputs.min-sdk }}-${{ hashFiles('.github/actions/build-ffmpeg-decoder/action.yml') }}
+        key: ffmpeg-decoder-${{ steps.version.outputs.version }}-${{ inputs.ffmpeg-version }}-${{ inputs.min-sdk }}-${{ hashFiles('.github/actions/build-ffmpeg-decoder/action.yml') }}
 
     - name: Check out media3
       if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/checkout@v4
       with:
         repository: androidx/media
-        ref: ${{ inputs.media3-version }}
+        ref: ${{ steps.version.outputs.version }}
         path: media3
 
     - name: Cross-compile FFmpeg
@@ -59,7 +79,7 @@ runs:
       if: steps.cache.outputs.cache-hit != 'true'
       run: |
         set -euo pipefail
-        VERSION="${{ inputs.media3-version }}"
+        VERSION="${{ steps.version.outputs.version }}"
         cd "$GITHUB_WORKSPACE/media3"
         ./gradlew --no-daemon :lib-decoder-ffmpeg:assembleRelease
 

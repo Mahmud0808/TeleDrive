@@ -21,8 +21,6 @@ jobs:
 
       - name: Build FFmpeg audio decoder
         uses: ./.github/actions/build-ffmpeg-decoder
-        with:
-          media3-version: 1.11.0
 
       - name: Decode keystore
         run: echo "${{ secrets.KEYSTORE }}" | base64 -d > "$RUNNER_TEMP/keystore.jks"
