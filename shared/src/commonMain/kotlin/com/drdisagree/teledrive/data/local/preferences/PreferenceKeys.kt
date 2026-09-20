@@ -37,6 +37,8 @@ object PreferenceKeys {
     val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
     val VIEW_MODE = stringPreferencesKey("view_mode")
     val GRID_SIZE = intPreferencesKey("grid_size")
+    val GALLERY_VIEW_MODE = stringPreferencesKey("gallery_view_mode")
+    val GALLERY_GRID_SIZE = intPreferencesKey("gallery_grid_size")
     val ALBUM_GRID_SIZE = intPreferencesKey("album_grid_size")
     val LAYOUT_DENSITY = stringPreferencesKey("layout_density")
     val SHOW_HIDDEN_FILES = booleanPreferencesKey("show_hidden_files")

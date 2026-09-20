@@ -166,11 +166,11 @@ class GalleryViewModel(
         sort,
         selectionCapabilities,
         settingsRepository.preferences
-            .map { it.gridSize to it.albumGridSize }
+            .map { it.galleryGridSize to it.albumGridSize }
             .distinctUntilChanged(),
         combine(
             albums,
-            settingsRepository.preferences.map { it.viewMode }.distinctUntilChanged()
+            settingsRepository.preferences.map { it.galleryViewMode }.distinctUntilChanged()
         ) { albumList, mode -> albumList to mode }
     ) { currentTab, (field, direction), selectionState, sizes, extras ->
         val (selected, capabilities) = selectionState
@@ -262,8 +262,8 @@ class GalleryViewModel(
     private fun applyZoom(transform: (GridZoomLevel) -> GridZoomLevel) {
         viewModelScope.launch {
             settingsRepository.update { prefs ->
-                val next = transform(GridZoomLevel(prefs.viewMode, prefs.gridSize))
-                prefs.copy(viewMode = next.viewMode, gridSize = next.gridSize)
+                val next = transform(GridZoomLevel(prefs.galleryViewMode, prefs.galleryGridSize))
+                prefs.copy(galleryViewMode = next.viewMode, galleryGridSize = next.gridSize)
             }
         }
     }

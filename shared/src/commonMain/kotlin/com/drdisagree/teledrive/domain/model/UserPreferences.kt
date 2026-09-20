@@ -28,6 +28,8 @@ data class UserPreferences(
     val dynamicColor: Boolean = true,
     val viewMode: ViewMode = ViewMode.GRID,
     val gridSize: Int = 3,
+    val galleryViewMode: ViewMode = ViewMode.GRID,
+    val galleryGridSize: Int = 3,
     val albumGridSize: Int = 3,
     val layoutDensity: LayoutDensity = LayoutDensity.COMFORTABLE,
     val showHiddenFiles: Boolean = false,

@@ -97,6 +97,8 @@ import com.drdisagree.teledrive.resources.settings_files_stay_telegram_channel
 import com.drdisagree.teledrive.resources.settings_folder_unreadable
 import com.drdisagree.teledrive.resources.settings_free_up_space_title
 import com.drdisagree.teledrive.resources.settings_gallery_previews_regenerated_browse
+import com.drdisagree.teledrive.resources.settings_gallery_grid_columns
+import com.drdisagree.teledrive.resources.settings_gallery_grid_view
 import com.drdisagree.teledrive.resources.settings_grid_columns
 import com.drdisagree.teledrive.resources.settings_grid_view
 import com.drdisagree.teledrive.resources.settings_hidden_shortcut
@@ -984,7 +986,26 @@ private fun AppearanceSection(state: SettingsUiState, viewModel: SettingsViewMod
                 onChange = { value -> viewModel.update { it.copy(gridSize = value) } }
             )
         }
-        add(visible = prefs.viewMode == ViewMode.LIST) {
+        add {
+            SettingsSwitchRow(
+                title = stringResource(Res.string.settings_gallery_grid_view),
+                checked = prefs.galleryViewMode == ViewMode.GRID,
+                onChange = { value ->
+                    viewModel.update {
+                        it.copy(galleryViewMode = if (value) ViewMode.GRID else ViewMode.LIST)
+                    }
+                }
+            )
+        }
+        add(visible = prefs.galleryViewMode == ViewMode.GRID) {
+            SettingsSliderRow(
+                title = stringResource(Res.string.settings_gallery_grid_columns),
+                value = prefs.galleryGridSize,
+                range = 2..6,
+                onChange = { value -> viewModel.update { it.copy(galleryGridSize = value) } }
+            )
+        }
+        add(visible = prefs.viewMode == ViewMode.LIST || prefs.galleryViewMode == ViewMode.LIST) {
             SettingsSwitchRow(
                 title = stringResource(Res.string.settings_compact_layout),
                 subtitle = stringResource(Res.string.settings_tighter_list_rows_without),

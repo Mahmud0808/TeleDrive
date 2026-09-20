@@ -655,8 +655,10 @@
     <string name="settings_archived_shortcut">Archived shortcut</string>
     <string name="settings_compact_layout">Compact layout</string>
     <string name="settings_dynamic_color">Dynamic color</string>
-    <string name="settings_grid_columns">Grid columns</string>
-    <string name="settings_grid_view">Grid view</string>
+    <string name="settings_gallery_grid_columns">Gallery grid columns</string>
+    <string name="settings_gallery_grid_view">Grid view in gallery</string>
+    <string name="settings_grid_columns">Files grid columns</string>
+    <string name="settings_grid_view">Grid view in files</string>
     <string name="settings_hidden_shortcut">Hidden shortcut</string>
     <string name="settings_recent_files">Recent files</string>
     <string name="settings_recent_files_subtitle">Shows recently added files on the home screen</string>

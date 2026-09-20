@@ -655,8 +655,10 @@
     <string name="settings_archived_shortcut">Atalho para Arquivados</string>
     <string name="settings_compact_layout">Layout compacto</string>
     <string name="settings_dynamic_color">Cor dinâmica</string>
-    <string name="settings_grid_columns">Colunas da grade</string>
-    <string name="settings_grid_view">Visualização em grade</string>
+    <string name="settings_gallery_grid_columns">Colunas da grade na galeria</string>
+    <string name="settings_gallery_grid_view">Visualização em grade na galeria</string>
+    <string name="settings_grid_columns">Colunas da grade nos arquivos</string>
+    <string name="settings_grid_view">Visualização em grade nos arquivos</string>
     <string name="settings_hidden_shortcut">Atalho para Ocultos</string>
     <string name="settings_recent_files">Arquivos recentes</string>
     <string name="settings_recent_files_subtitle">Exibe os arquivos adicionados recentemente na tela inicial</string>

@@ -100,6 +100,13 @@ class SettingsRepositoryImpl(
             language = AppLanguage.fromCode(this[PreferenceKeys.LANGUAGE]),
             dynamicColor = this[PreferenceKeys.DYNAMIC_COLOR] ?: defaults.dynamicColor,
             viewMode = enumOrDefault(this[PreferenceKeys.VIEW_MODE], defaults.viewMode),
+            galleryViewMode = enumOrDefault(
+                this[PreferenceKeys.GALLERY_VIEW_MODE],
+                enumOrDefault(this[PreferenceKeys.VIEW_MODE], defaults.galleryViewMode)
+            ),
+            galleryGridSize = this[PreferenceKeys.GALLERY_GRID_SIZE]
+                ?: this[PreferenceKeys.GRID_SIZE]
+                ?: defaults.galleryGridSize,
             gridSize = this[PreferenceKeys.GRID_SIZE] ?: defaults.gridSize,
             albumGridSize = this[PreferenceKeys.ALBUM_GRID_SIZE] ?: defaults.albumGridSize,
             layoutDensity = enumOrDefault(
@@ -175,6 +182,8 @@ class SettingsRepositoryImpl(
         this[PreferenceKeys.LANGUAGE] = prefs.language.code
         this[PreferenceKeys.DYNAMIC_COLOR] = prefs.dynamicColor
         this[PreferenceKeys.VIEW_MODE] = prefs.viewMode.name
+        this[PreferenceKeys.GALLERY_VIEW_MODE] = prefs.galleryViewMode.name
+        this[PreferenceKeys.GALLERY_GRID_SIZE] = prefs.galleryGridSize
         this[PreferenceKeys.GRID_SIZE] = prefs.gridSize
         this[PreferenceKeys.ALBUM_GRID_SIZE] = prefs.albumGridSize
         this[PreferenceKeys.LAYOUT_DENSITY] = prefs.layoutDensity.name

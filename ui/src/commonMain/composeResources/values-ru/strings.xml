@@ -677,8 +677,10 @@
     <string name="settings_archived_shortcut">Ярлык архива</string>
     <string name="settings_compact_layout">Компактный вид</string>
     <string name="settings_dynamic_color">Динамические цвета</string>
-    <string name="settings_grid_columns">Колонок в сетке</string>
-    <string name="settings_grid_view">Вид сеткой</string>
+    <string name="settings_gallery_grid_columns">Колонок в сетке галереи</string>
+    <string name="settings_gallery_grid_view">Вид сеткой в галерее</string>
+    <string name="settings_grid_columns">Колонок в сетке файлов</string>
+    <string name="settings_grid_view">Вид сеткой в файлах</string>
     <string name="settings_hidden_shortcut">Ярлык скрытого</string>
     <string name="settings_recent_files">Недавние файлы</string>
     <string name="settings_recent_files_subtitle">Отображать недавние файлы на главном экране</string>
