@@ -855,6 +855,7 @@
     <string name="error_no_remote_copy">O arquivo não possui cópia remota</string>
     <string name="error_not_found">Não encontrado</string>
     <string name="error_not_supported">Não suportado</string>
+    <string name="error_backup_folders_unreadable">Não foi possível ler as pastas de backup selecionadas. Conceda acesso a todos os arquivos nas configurações.</string>
     <string name="error_permission_denied">Permissão negada</string>
     <string name="error_rate_limited">Limite de requisições do Telegram atingido. Tente novamente em %1$ds</string>
     <string name="error_sign_in_required">Entre no Telegram para continuar</string>

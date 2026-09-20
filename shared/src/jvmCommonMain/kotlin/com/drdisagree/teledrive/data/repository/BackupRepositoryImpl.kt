@@ -84,13 +84,23 @@ class BackupRepositoryImpl(
         val maxSizeBytes = prefs.backupMaxFileSizeMb.toLong() * 1024 * 1024
         val skipHidden = exclusions.any { it.type == ExclusionType.HIDDEN }
         val candidates = mutableListOf<File>()
+        var unreadable = 0
         for (folderPath in folders) {
             val root = File(folderPath)
             if (!root.exists()) continue
+            if (root.listFiles() == null) {
+                unreadable++
+                SafeLog.w(TAG, "Backup folder cannot be read: $folderPath")
+                continue
+            }
             root.walkTopDown()
                 .onEnter { dir -> dir == root || !skipHidden || !isHiddenName(dir) }
                 .filter { it.isFile && it.length() > 0 }
                 .forEach { candidates.add(it) }
+        }
+
+        if (candidates.isEmpty() && (unreadable > 0 || storageUnreadable())) {
+            return AppResult.Failure(AppError.BackupFoldersUnreadable)
         }
 
         var totalBytes = 0L
@@ -385,6 +395,11 @@ class BackupRepositoryImpl(
      * contents are worth keeping, so it excludes nothing but itself.
      */
     private fun isHiddenName(file: File): Boolean = file.name.startsWith('.')
+
+    private fun storageUnreadable(): Boolean {
+        val root = storagePaths.externalStorageRoot ?: return false
+        return root.exists() && root.listFiles() == null
+    }
 
     companion object {
         private const val TAG = "BackupRepository"

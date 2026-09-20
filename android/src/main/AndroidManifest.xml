@@ -30,22 +30,23 @@
         android:name=".TeleDriveApplication"
         android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
-        android:fullBackupContent="@xml/backup_rules"
-        tools:replace="android:allowBackup"
         android:enableOnBackInvokedCallback="true"
+        android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:requestLegacyExternalStorage="true"
         android:supportsRtl="true"
         android:theme="@style/Theme.TeleDrive"
+        tools:replace="android:allowBackup"
         tools:targetApi="33">
 
         <activity
             android:name=".presentation.MainActivity"
-            android:launchMode="singleTop"
-            android:exported="true"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
-            android:windowSoftInputMode="adjustResize"
-            android:theme="@style/Theme.TeleDrive">
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:theme="@style/Theme.TeleDrive"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

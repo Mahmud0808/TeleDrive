@@ -1,5 +1,6 @@
 package com.drdisagree.teledrive.core.permissions
 
+import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
@@ -17,9 +18,21 @@ class AndroidPermissionChecker(
         } ?: true
     }
 
-    override fun hasAllFilesAccess(): Boolean =
-        Build.VERSION.SDK_INT < Build.VERSION_CODES.R ||
-                Environment.isExternalStorageManager()
+    override fun hasAllFilesAccess(): Boolean = when {
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.R ->
+            Environment.isExternalStorageManager()
+
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ->
+            Environment.isExternalStorageLegacy() && hasLegacyReadAccess()
+
+        else -> hasLegacyReadAccess()
+    }
+
+    private fun hasLegacyReadAccess(): Boolean =
+        ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        ) == PackageManager.PERMISSION_GRANTED
 
     override fun statuses(): Map<AppPermission, Boolean> =
         AppPermission.entries.associateWith(::isGranted)

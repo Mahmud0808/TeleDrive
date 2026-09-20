@@ -21,6 +21,7 @@ import com.drdisagree.teledrive.resources.error_no_local_copy
 import com.drdisagree.teledrive.resources.error_no_remote_copy
 import com.drdisagree.teledrive.resources.error_not_found
 import com.drdisagree.teledrive.resources.error_not_supported
+import com.drdisagree.teledrive.resources.error_backup_folders_unreadable
 import com.drdisagree.teledrive.resources.error_permission_denied
 import com.drdisagree.teledrive.resources.error_rate_limited
 import com.drdisagree.teledrive.resources.error_sign_in_required
@@ -53,6 +54,8 @@ fun AppError.toUiText(): UiText = when (this) {
     )
 
     is AppError.PermissionDenied -> UiText.Resource(Res.string.error_permission_denied)
+    is AppError.BackupFoldersUnreadable ->
+        UiText.Resource(Res.string.error_backup_folders_unreadable)
     is AppError.NotFound -> UiText.Resource(Res.string.error_not_found)
     is AppError.FolderNameTaken -> UiText.Resource(Res.string.error_folder_exists)
     is AppError.FolderInsideItself -> UiText.Resource(Res.string.error_folder_into_itself)

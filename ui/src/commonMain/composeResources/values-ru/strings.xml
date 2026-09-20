@@ -877,6 +877,7 @@
     <string name="error_no_remote_copy">У файла нет копии в Telegram</string>
     <string name="error_not_found">Не найдено</string>
     <string name="error_not_supported">Не поддерживается</string>
+    <string name="error_backup_folders_unreadable">Не удалось прочитать выбранные папки для резервного копирования. Предоставьте доступ ко всем файлам в настройках.</string>
     <string name="error_permission_denied">В доступе отказано</string>
     <string name="error_rate_limited">Лимит запросов Telegram. Попробуйте через %1$d сек.</string>
     <string name="error_sign_in_required">Войдите в Telegram для продолжения</string>

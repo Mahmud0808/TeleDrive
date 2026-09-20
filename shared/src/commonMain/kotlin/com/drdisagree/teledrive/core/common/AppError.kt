@@ -34,6 +34,8 @@ sealed interface AppError {
 
     data object BackupAlreadyRunning : AppError
 
+    data object BackupFoldersUnreadable : AppError
+
     data object NoRemoteCopy : AppError
 
     data object NoLocalCopy : AppError

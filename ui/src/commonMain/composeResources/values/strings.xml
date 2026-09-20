@@ -855,6 +855,7 @@
     <string name="error_no_remote_copy">File has no remote copy</string>
     <string name="error_not_found">Not found</string>
     <string name="error_not_supported">Not supported</string>
+    <string name="error_backup_folders_unreadable">Cannot read the selected backup folders. Grant All files access in Settings.</string>
     <string name="error_permission_denied">Permission denied</string>
     <string name="error_rate_limited">Telegram rate limit. Try again in %1$ds</string>
     <string name="error_sign_in_required">Sign in to Telegram to continue</string>
