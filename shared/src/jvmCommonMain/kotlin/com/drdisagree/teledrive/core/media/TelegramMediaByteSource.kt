@@ -56,7 +56,9 @@ class TelegramMediaByteSource(
         val info = telegramClient.getFileInfo(fileId)
         if (covers(info, readPosition, count)) return
 
-        if (readPosition < info.downloadOffset ||
+        val downloading = info.isDownloadingCompleted || info.downloadedPrefixSize > 0
+        if (!downloading ||
+            readPosition < info.downloadOffset ||
             readPosition > info.downloadOffset + info.downloadedPrefixSize
         ) {
             telegramClient.requestFileRange(fileId, readPosition, 0)

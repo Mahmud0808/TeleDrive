@@ -112,6 +112,9 @@ class PartedMediaByteSource(
 
         val remoteFileId = part.remoteFileId
         val info = telegramClient.resolveFile(remoteFileId)
+        if (!info.isDownloadingCompleted) {
+            telegramClient.requestFileRange(info.fileId, 0, 0)
+        }
         val salt = if (encrypted) {
             val headerSize = streamCrypto.headerSize().toLong()
             awaitAvailable(info.fileId, 0, headerSize)
@@ -147,7 +150,9 @@ class PartedMediaByteSource(
         val info = telegramClient.getFileInfo(fileId)
         if (covers(info, readPosition, count)) return
 
-        if (readPosition < info.downloadOffset ||
+        val downloading = info.isDownloadingCompleted || info.downloadedPrefixSize > 0
+        if (!downloading ||
+            readPosition < info.downloadOffset ||
             readPosition > info.downloadOffset + info.downloadedPrefixSize
         ) {
             telegramClient.requestFileRange(fileId, readPosition, 0)
