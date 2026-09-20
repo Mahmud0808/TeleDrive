@@ -297,17 +297,19 @@ interface FileDao {
         """SELECT COALESCE(SUM(sizeBytes), 0) FROM files
            WHERE localPath IS NOT NULL
              AND messageId IS NOT NULL
-             AND backupState = 'BACKED_UP'"""
+             AND backupState = 'BACKED_UP'
+             AND chatId IS :chatId"""
     )
-    fun observeReclaimableBytes(): Flow<Long>
+    fun observeReclaimableBytes(chatId: Long?): Flow<Long>
 
     @Query(
         """SELECT id FROM files
            WHERE localPath IS NOT NULL
              AND messageId IS NOT NULL
-             AND backupState = 'BACKED_UP'"""
+             AND backupState = 'BACKED_UP'
+             AND chatId IS :chatId"""
     )
-    suspend fun reclaimableFileIds(): List<String>
+    suspend fun reclaimableFileIds(chatId: Long?): List<String>
 
     @Query(
         """SELECT id, localPath FROM files

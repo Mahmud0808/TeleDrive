@@ -385,10 +385,13 @@ class FileRepositoryImpl(
         return AppResult.Success(Unit)
     }
 
-    override fun observeReclaimableBytes(): Flow<Long> = fileDao.observeReclaimableBytes()
+    override fun observeReclaimableBytes(): Flow<Long> =
+        activeChannel.observe().flatMapLatest { chatId ->
+            fileDao.observeReclaimableBytes(chatId)
+        }
 
     override suspend fun freeUpSpace(): AppResult<LocalCleanup> =
-        deleteLocalCopy(fileDao.reclaimableFileIds())
+        deleteLocalCopy(fileDao.reclaimableFileIds(activeChannel.id()))
 
     private suspend fun ancestorsOf(folderId: String?): List<String> {
         val chain = mutableListOf<String>()
