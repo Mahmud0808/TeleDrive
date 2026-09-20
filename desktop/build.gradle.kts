@@ -66,16 +66,44 @@ val downloadVlc = tasks.register("downloadVlc") {
     description = "Downloads the VLC natives archive for bundling"
     group = "build"
     val zipFile = vlcZip
-    val archiveUrl = "https://download.videolan.org/pub/videolan/vlc/" +
-            "$vlcVersion/win64/vlc-$vlcVersion-win64.zip"
+    val archiveName = "vlc-$vlcVersion-win64.zip"
+    val attempts = 3
+    val connectTimeoutMs = 30_000
+    val readTimeoutMs = 120_000
+    val retryBackoffMs = 5_000L
+    val mirrors = listOf(
+        "https://download.videolan.org/pub/videolan/vlc/$vlcVersion/win64/$archiveName",
+        "https://get.videolan.org/vlc/$vlcVersion/win64/$archiveName"
+    )
     outputs.file(zipFile)
     doLast {
         val target = zipFile.get().asFile
         if (target.length() > 0) return@doLast
         target.parentFile.mkdirs()
-        URI(archiveUrl).toURL().openStream().use { input ->
-            target.outputStream().use { output -> input.copyTo(output) }
+
+        var lastFailure: Exception? = null
+        repeat(attempts) { attempt ->
+            for (mirror in mirrors) {
+                try {
+                    val connection = URI(mirror).toURL().openConnection().apply {
+                        connectTimeout = connectTimeoutMs
+                        readTimeout = readTimeoutMs
+                    }
+                    connection.getInputStream().use { input ->
+                        target.outputStream().use { output -> input.copyTo(output) }
+                    }
+                    if (target.length() > 0) return@doLast
+                } catch (e: Exception) {
+                    lastFailure = e
+                    logger.warn("VLC download from $mirror failed: ${e.message}")
+                    target.delete()
+                }
+            }
+            if (attempt < attempts - 1) {
+                Thread.sleep((attempt + 1) * retryBackoffMs)
+            }
         }
+        throw GradleException("Could not download $archiveName from any mirror", lastFailure)
     }
 }
 

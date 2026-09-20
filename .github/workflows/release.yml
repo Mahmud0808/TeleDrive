@@ -54,6 +54,12 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
+      - name: Cache VLC natives
+        uses: actions/cache@v4
+        with:
+          path: desktop/build/vlc
+          key: vlc-natives-${{ hashFiles('desktop/build.gradle.kts') }}
+
       - name: Package installer
         run: ./gradlew :desktop:packageMsi
 
