@@ -65,17 +65,18 @@ class PreviewContentResolver(
         val isMedia = file.category == FileCategory.VIDEO || file.category == FileCategory.AUDIO
         val parts = if (isMedia) filePartDao.partsOf(file.id) else emptyList()
 
-        if (prefs.streamBeforeDownload && isMedia && parts.size > 1) {
-            if (!file.isEncrypted || wrappedKeyRepository.exists(CryptoKeys.CONTENT)) {
+        if (prefs.streamBeforeDownload && isMedia && parts.isNotEmpty()) {
+            val mediaParts = parts.mapNotNull { part ->
+                part.remoteFileId?.let { MediaPart(it, part.plainOffset, part.plainSize) }
+            }
+            if (mediaParts.size == parts.size &&
+                (!file.isEncrypted || wrappedKeyRepository.exists(CryptoKeys.CONTENT))
+            ) {
                 emit(
                     PreviewContent.StreamedMedia(
                         remoteFileId = remoteFileId,
                         isAudio = file.category == FileCategory.AUDIO,
-                        parts = parts.mapNotNull { part ->
-                            part.remoteFileId?.let {
-                                MediaPart(it, part.plainOffset, part.plainSize)
-                            }
-                        },
+                        parts = mediaParts,
                         encrypted = file.isEncrypted
                     )
                 )
