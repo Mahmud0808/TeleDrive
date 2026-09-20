@@ -1,0 +1,68 @@
+name: Build FFmpeg audio decoder
+description: >
+  Cross-compiles FFmpeg for the decoders Android often lacks and publishes
+  media3's FFmpeg extension to the local Maven repository. Cached on the
+  media3 version, the FFmpeg version and the decoder list, so the compile
+  only runs when one of those changes.
+
+inputs:
+  media3-version:
+    description: media3 release tag to build the extension from
+    required: true
+  ffmpeg-version:
+    description: FFmpeg release tag to compile
+    required: false
+    default: n6.0
+  decoders:
+    description: Space separated list of FFmpeg decoders to enable
+    required: false
+    default: ac3 eac3 dca
+  min-sdk:
+    description: Lowest API level the natives must run on, matching the app's minSdk
+    required: false
+    default: "26"
+
+runs:
+  using: composite
+  steps:
+    - name: Restore published extension
+      id: cache
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2/repository/androidx/media3/media3-decoder-ffmpeg
+        key: ffmpeg-decoder-${{ inputs.media3-version }}-${{ inputs.ffmpeg-version }}-${{ inputs.min-sdk }}-${{ hashFiles('.github/actions/build-ffmpeg-decoder/action.yml') }}
+
+    - name: Check out media3
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/checkout@v4
+      with:
+        repository: androidx/media
+        ref: ${{ inputs.media3-version }}
+        path: media3
+
+    - name: Cross-compile FFmpeg
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        set -euo pipefail
+        sudo apt-get update
+        sudo apt-get install -y make nasm yasm pkg-config
+        MODULE_PATH="$GITHUB_WORKSPACE/media3/libraries/decoder_ffmpeg/src/main"
+        git clone --depth 1 --branch "${{ inputs.ffmpeg-version }}" \
+          https://git.ffmpeg.org/ffmpeg.git "$MODULE_PATH/jni/ffmpeg"
+        cd "$MODULE_PATH/jni"
+        ./build_ffmpeg.sh "$MODULE_PATH" "$ANDROID_NDK_HOME" linux-x86_64 \
+          "${{ inputs.min-sdk }}" ${{ inputs.decoders }}
+      shell: bash
+
+    - name: Publish the extension
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        set -euo pipefail
+        cd "$GITHUB_WORKSPACE/media3"
+        ./gradlew --no-daemon :lib-decoder-ffmpeg:publishToMavenLocal
+      shell: bash
+
+    - name: Report native size
+      run: |
+        du -sh ~/.m2/repository/androidx/media3/media3-decoder-ffmpeg || true
+      shell: bash

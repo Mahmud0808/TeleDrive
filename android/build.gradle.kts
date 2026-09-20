@@ -135,6 +135,9 @@ dependencies {
     implementation(libs.androidx.media3.ui)
     implementation(libs.androidx.media3.session)
     implementation(libs.androidx.media3.datasource)
+    if (providers.gradleProperty("withFfmpegDecoder").isPresent) {
+        implementation(libs.androidx.media3.decoder.ffmpeg)
+    }
 
     implementation(libs.coil.compose)
     implementation(libs.coil.video)

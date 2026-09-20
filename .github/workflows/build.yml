@@ -37,6 +37,11 @@ jobs:
       - name: Unit tests
         run: ./gradlew testDebugUnitTest
 
+      - name: Build FFmpeg audio decoder
+        uses: ./.github/actions/build-ffmpeg-decoder
+        with:
+          media3-version: 1.11.0
+
       - name: Decode keystore
         if: ${{ github.event_name != 'pull_request' }}
         run: echo "${{ secrets.KEYSTORE }}" | base64 -d > "$RUNNER_TEMP/keystore.jks"
@@ -47,7 +52,7 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: ./gradlew :android:assembleDebug
+        run: ./gradlew :android:assembleDebug -PwithFfmpegDecoder
 
       - uses: actions/upload-artifact@v4
         with:
