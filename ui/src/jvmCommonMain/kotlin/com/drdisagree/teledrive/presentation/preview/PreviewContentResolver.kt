@@ -7,6 +7,7 @@ import com.drdisagree.teledrive.resources.preview_no_copy_available
 import com.drdisagree.teledrive.resources.preview_no_preview_for_type
 import com.drdisagree.teledrive.resources.preview_only_zip
 import com.drdisagree.teledrive.resources.preview_read_failed
+import com.drdisagree.teledrive.core.common.SafeLog
 import com.drdisagree.teledrive.core.files.AppStoragePaths
 import com.drdisagree.teledrive.core.crypto.CryptoKeys
 import com.drdisagree.teledrive.core.crypto.StreamCrypto
@@ -25,6 +26,7 @@ import com.drdisagree.teledrive.domain.model.DriveFile
 import com.drdisagree.teledrive.domain.model.FileCategory
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
@@ -112,7 +114,9 @@ class PreviewContentResolver(
            open, so browsing stays instant while a large transfer never starts
            without the user asking. */
         val autoFetchable = file.sizeBytes <= AUTO_PREVIEW_LIMIT &&
-                (MimeTypes.isImage(file.mimeType) || MimeTypes.isText(file.mimeType) || MimeTypes.isApk(file.mimeType, file.name))
+                (MimeTypes.isImage(file.mimeType) ||
+                        MimeTypes.isText(file.mimeType) ||
+                        MimeTypes.isApk(file.mimeType, file.name))
         if (!autoFetchable) {
             emit(PreviewContent.RequiresDownload(file.sizeBytes))
             return@flow
@@ -126,7 +130,12 @@ class PreviewContentResolver(
         } else {
             emit(fromLocal(file, cached.absolutePath))
         }
-    }.flowOn(dispatchers.io)
+    }
+        .catch { failure ->
+            SafeLog.w(TAG, "Preview failed", failure)
+            emit(PreviewContent.Failed(Res.string.preview_fetch_failed))
+        }
+        .flowOn(dispatchers.io)
 
     private fun fromLocal(file: DriveFile, path: String): PreviewContent = when {
         MimeTypes.isImage(file.mimeType) -> PreviewContent.Image(path)
@@ -239,6 +248,7 @@ class PreviewContentResolver(
     }
 
     companion object {
+        private const val TAG = "PreviewContent"
         private const val AUTO_PREVIEW_LIMIT = 10L * 1024 * 1024
         private const val TEXT_LIMIT = 256 * 1024
     }

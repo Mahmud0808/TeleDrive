@@ -999,8 +999,7 @@ class TdLibTelegramClient(
             }
 
             subscribed.await()
-            val file: TdApi.File =
-                send(TdApi.GetRemoteFile(remoteFileId, TdApi.FileTypeDocument()))
+            val file: TdApi.File = remoteFile(remoteFileId)
             val fileId = file.id
             downloadedFileId.complete(fileId)
 
@@ -1044,8 +1043,18 @@ class TdLibTelegramClient(
         return document.minithumbnail?.data
     }
 
+    private suspend fun remoteFile(remoteFileId: String): TdApi.File = try {
+        send(TdApi.GetRemoteFile(remoteFileId, TdApi.FileTypeDocument()))
+    } catch (documentFailure: TelegramException) {
+        try {
+            send(TdApi.GetRemoteFile(remoteFileId, TdApi.FileTypePhoto()))
+        } catch (_: TelegramException) {
+            throw documentFailure
+        }
+    }
+
     override suspend fun resolveFile(remoteFileId: String): TelegramFileInfo =
-        send(TdApi.GetRemoteFile(remoteFileId, TdApi.FileTypeDocument())).toInfo()
+        remoteFile(remoteFileId).toInfo()
 
     override suspend fun getFileInfo(fileId: Int): TelegramFileInfo =
         send(TdApi.GetFile(fileId)).toInfo()
