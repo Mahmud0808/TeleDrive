@@ -3,6 +3,7 @@ package com.drdisagree.teledrive.data.repository
 import com.drdisagree.teledrive.core.common.AppError
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.core.common.SafeLog
+import com.drdisagree.teledrive.core.dispatchers.DispatcherProvider
 import com.drdisagree.teledrive.core.files.AppStoragePaths
 import com.drdisagree.teledrive.core.files.Hashing
 import com.drdisagree.teledrive.core.files.MimeTypes
@@ -34,6 +35,7 @@ import com.drdisagree.teledrive.domain.usecase.EvaluateExclusionsUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.UUID
 
@@ -50,7 +52,8 @@ class BackupRepositoryImpl(
     private val folderPathResolver: FolderPathResolver,
     private val fileRepository: FileRepository,
     private val channelRepository: ChannelRepository,
-    private val storagePaths: AppStoragePaths
+    private val storagePaths: AppStoragePaths,
+    private val dispatchers: DispatcherProvider
 ) : BackupRepository {
 
     override fun observeActiveSession(): Flow<BackupSession?> =
@@ -58,7 +61,10 @@ class BackupRepositoryImpl(
 
     override fun observeLastBackupAt(): Flow<Long?> = backupDao.observeLastBackupAt()
 
-    override suspend fun startBackup(trigger: BackupTrigger): AppResult<String?> {
+    override suspend fun startBackup(trigger: BackupTrigger): AppResult<String?> =
+        withContext(dispatchers.io) { runBackup(trigger) }
+
+    private suspend fun runBackup(trigger: BackupTrigger): AppResult<String?> {
         if (backupDao.activeSession() != null) {
             return AppResult.Failure(AppError.BackupAlreadyRunning)
         }
