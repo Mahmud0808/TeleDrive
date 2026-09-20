@@ -1,9 +1,10 @@
 name: Build FFmpeg audio decoder
 description: >
-  Cross-compiles FFmpeg for the decoders Android often lacks and publishes
-  media3's FFmpeg extension to the local Maven repository. Cached on the
-  media3 version, the FFmpeg version and the decoder list, so the compile
-  only runs when one of those changes.
+  Cross-compiles FFmpeg for the decoders Android often lacks and installs
+  media3's FFmpeg extension into the local Maven repository. media3 does not
+  publish this extension, so the AAR is built from source and placed in the
+  repository layout by hand. Cached on the media3 version, the FFmpeg version
+  and the decoder list, so the compile only runs when one of those changes.
 
 inputs:
   media3-version:
@@ -25,7 +26,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Restore published extension
+    - name: Restore the built extension
       id: cache
       uses: actions/cache@v4
       with:
@@ -54,15 +55,42 @@ runs:
           "${{ inputs.min-sdk }}" ${{ inputs.decoders }}
       shell: bash
 
-    - name: Publish the extension
+    - name: Install the extension
       if: steps.cache.outputs.cache-hit != 'true'
       run: |
         set -euo pipefail
+        VERSION="${{ inputs.media3-version }}"
         cd "$GITHUB_WORKSPACE/media3"
-        ./gradlew --no-daemon :lib-decoder-ffmpeg:publishToMavenLocal
+        ./gradlew --no-daemon :lib-decoder-ffmpeg:assembleRelease
+
+        AAR="$(find libraries/decoder_ffmpeg -name '*release.aar' | head -1)"
+        if [ -z "$AAR" ]; then
+          echo "No AAR produced by :lib-decoder-ffmpeg:assembleRelease"
+          find libraries/decoder_ffmpeg -name '*.aar' || true
+          exit 1
+        fi
+        echo "Built $AAR"
+
+        DEST="$HOME/.m2/repository/androidx/media3/media3-decoder-ffmpeg/$VERSION"
+        mkdir -p "$DEST"
+        cp "$AAR" "$DEST/media3-decoder-ffmpeg-$VERSION.aar"
+        cat > "$DEST/media3-decoder-ffmpeg-$VERSION.pom" <<POM
+        <?xml version="1.0" encoding="UTF-8"?>
+        <project xmlns="http://maven.apache.org/POM/4.0.0"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+          <modelVersion>4.0.0</modelVersion>
+          <groupId>androidx.media3</groupId>
+          <artifactId>media3-decoder-ffmpeg</artifactId>
+          <version>$VERSION</version>
+          <packaging>aar</packaging>
+        </project>
+        POM
       shell: bash
 
     - name: Report native size
       run: |
         du -sh ~/.m2/repository/androidx/media3/media3-decoder-ffmpeg || true
+        unzip -l ~/.m2/repository/androidx/media3/media3-decoder-ffmpeg/*/*.aar \
+          | grep '\.so$' || true
       shell: bash
