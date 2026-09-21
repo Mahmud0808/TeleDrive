@@ -216,7 +216,7 @@ fun TransfersScreen(
             contentPadding = padding.add(horizontal = 16.dp, top = 16.dp, bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            section(activeTitle, state.active, state.activeTotal) { transfer ->
+            section("active", activeTitle, state.active, state.activeTotal) { transfer ->
                 TransferRow(
                     transfer = transfer,
                     primaryIcon = Icons.Filled.Pause,
@@ -225,7 +225,7 @@ fun TransfersScreen(
                     onCancel = { viewModel.cancel(transfer.id) }
                 )
             }
-            section(pausedTitle, state.paused, state.pausedTotal) { transfer ->
+            section("paused", pausedTitle, state.paused, state.pausedTotal) { transfer ->
                 TransferRow(
                     transfer = transfer,
                     primaryIcon = Icons.Filled.PlayArrow,
@@ -234,7 +234,7 @@ fun TransfersScreen(
                     onCancel = { viewModel.cancel(transfer.id) }
                 )
             }
-            section(failedTitle, state.failed, state.failedTotal) { transfer ->
+            section("failed", failedTitle, state.failed, state.failedTotal) { transfer ->
                 TransferRow(
                     transfer = transfer,
                     primaryIcon = Icons.Filled.Refresh,
@@ -243,7 +243,7 @@ fun TransfersScreen(
                     onCancel = { viewModel.cancel(transfer.id) }
                 )
             }
-            section(finishedTitle, state.completed, state.completedTotal) { transfer ->
+            section("finished", finishedTitle, state.completed, state.completedTotal) { transfer ->
                 TransferRow(transfer = transfer)
             }
         }
@@ -251,25 +251,26 @@ fun TransfersScreen(
 }
 
 private fun LazyListScope.section(
+    sectionKey: String,
     title: String,
     transfers: List<TransferTask>,
     total: Int,
     content: @Composable (TransferTask) -> Unit
 ) {
     if (transfers.isEmpty()) return
-    item(key = "header-$title") {
+    item(key = "header-$sectionKey") {
         Text(
             text = title,
             style = MaterialTheme.typography.titleSmall,
             modifier = Modifier.padding(top = 8.dp, bottom = 2.dp)
         )
     }
-    items(transfers, key = { it.id }) { transfer ->
+    items(transfers, key = { "$sectionKey-${it.id}" }) { transfer ->
         content(transfer)
     }
     val hidden = total - transfers.size
     if (hidden > 0) {
-        item(key = "more-$title") {
+        item(key = "more-$sectionKey") {
             Text(
                 text = pluralStringResource(Res.plurals.transfers_more_queued, hidden, hidden),
                 style = MaterialTheme.typography.bodySmall,

@@ -33,13 +33,17 @@ class TransfersViewModel(
         transferRepository.observeSection(TransferSection.FAILED, SECTION_LIMIT),
         transferRepository.observeSection(TransferSection.COMPLETED, SECTION_LIMIT)
     ) { active, paused, failed, completed ->
+        val seen = mutableSetOf<String>()
         listOf(
-            active.sortedWith(TRANSFER_ORDER),
-            paused.sortedWith(TRANSFER_ORDER),
-            failed.sortedWith(TRANSFER_ORDER),
-            completed.sortedWith(FINISHED_ORDER)
+            active.sortedWith(TRANSFER_ORDER).filterUnseen(seen),
+            paused.sortedWith(TRANSFER_ORDER).filterUnseen(seen),
+            failed.sortedWith(TRANSFER_ORDER).filterUnseen(seen),
+            completed.sortedWith(FINISHED_ORDER).filterUnseen(seen)
         )
     }
+
+    private fun List<TransferTask>.filterUnseen(seen: MutableSet<String>): List<TransferTask> =
+        filter { seen.add(it.id) }
 
     private val totals = combine(
         transferRepository.observeSectionCount(TransferSection.ACTIVE),
