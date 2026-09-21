@@ -74,9 +74,14 @@ interface FileDao {
 
     @Query(
         """SELECT * FROM files
-           WHERE trashedAt IS NOT NULL AND name = :name AND sizeBytes = :sizeBytes"""
+           WHERE trashedAt IS NOT NULL AND name = :name AND sizeBytes = :sizeBytes
+             AND chatId IS :chatId"""
     )
-    suspend fun trashedMatches(name: String, sizeBytes: Long): List<FileEntity>
+    suspend fun trashedMatches(
+        name: String,
+        sizeBytes: Long,
+        chatId: Long?
+    ): List<FileEntity>
 
     @RawQuery(observedEntities = [FileEntity::class])
     fun pagingSource(query: RoomRawQuery): PagingSource<Int, FileEntity>
@@ -118,10 +123,14 @@ interface FileDao {
 
     @Query(
         """SELECT * FROM files
-           WHERE name = :name AND sizeBytes = :sizeBytes
+           WHERE name = :name AND sizeBytes = :sizeBytes AND chatId IS :chatId
              AND messageId IS NOT NULL AND localPath IS NULL AND trashedAt IS NULL"""
     )
-    suspend fun unlinkedRemoteMatches(name: String, sizeBytes: Long): List<FileEntity>
+    suspend fun unlinkedRemoteMatches(
+        name: String,
+        sizeBytes: Long,
+        chatId: Long?
+    ): List<FileEntity>
 
     @Query("SELECT * FROM files WHERE remoteUniqueId IN (:uniqueIds)")
     suspend fun byRemoteUniqueIds(uniqueIds: List<String>): List<FileEntity>

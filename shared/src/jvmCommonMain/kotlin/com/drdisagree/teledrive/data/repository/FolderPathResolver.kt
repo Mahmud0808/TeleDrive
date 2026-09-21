@@ -36,7 +36,7 @@ class FolderPathResolver(
         if (path.isBlank()) return null
         var parentId: String? = null
         for (segment in path.split('/').filter { it.isNotBlank() }.take(MAX_DEPTH)) {
-            val match = folderDao.childrenOf(parentId)
+            val match = folderDao.childrenOf(parentId, activeChannel.id())
                 .firstOrNull { it.name.equals(segment, ignoreCase = true) }
                 ?: return null
             parentId = match.id
@@ -59,7 +59,7 @@ class FolderPathResolver(
             var parentId: String? = null
             val segments = path.split('/').filter { it.isNotBlank() }.take(MAX_DEPTH)
             for ((index, segment) in segments.withIndex()) {
-                val existing = folderDao.childrenOf(parentId)
+                val existing = folderDao.childrenOf(parentId, activeChannel.id())
                     .firstOrNull { it.name.equals(segment, ignoreCase = true) }
                 parentId = existing?.id ?: run {
                     val now = System.currentTimeMillis()

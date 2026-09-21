@@ -106,7 +106,9 @@ class FileRepositoryImpl(
             for (id in frontier) {
                 ids += fileDao.filesInFolder(id).map { it.id }
             }
-            frontier = frontier.flatMap { parent -> folderDao.childrenOf(parent).map { it.id } }
+            frontier = frontier.flatMap { parent ->
+                folderDao.childrenOf(parent, activeChannel.id()).map { it.id }
+            }
         }
         return ids
     }
@@ -200,7 +202,7 @@ class FileRepositoryImpl(
 
     override suspend fun createFolder(parentId: String?, name: String): AppResult<DriveFolder> {
         val sanitized = FileNameUtils.sanitize(name)
-        val siblings = folderDao.namesIn(parentId)
+        val siblings = folderDao.namesIn(parentId, activeChannel.id())
         if (siblings.any { it.equals(sanitized, ignoreCase = true) }) {
             return AppResult.Failure(AppError.FolderNameTaken)
         }
@@ -244,7 +246,11 @@ class FileRepositoryImpl(
     override suspend fun renameFolder(id: String, newName: String): AppResult<Unit> {
         val folder = folderDao.byId(id) ?: return AppResult.Failure(AppError.NotFound)
         val sanitized = FileNameUtils.sanitize(newName)
-        val siblings = folderDao.namesInExcluding(folder.parentId, id)
+        val siblings = folderDao.namesInExcluding(
+            folder.parentId,
+            activeChannel.id(),
+            id
+        )
         if (siblings.any { it.equals(sanitized, ignoreCase = true) }) {
             return AppResult.Failure(AppError.FolderNameTaken)
         }
@@ -415,7 +421,7 @@ class FileRepositoryImpl(
         while (frontier.isNotEmpty() && guard++ < MAX_FOLDER_DEPTH) {
             fileDao.markPendingPublishInFolders(frontier)
             frontier = frontier.flatMap { parent ->
-                folderDao.childrenOf(parent).map { it.id }
+                folderDao.childrenOf(parent, activeChannel.id()).map { it.id }
             }
         }
         publishScheduler.kick()
@@ -612,7 +618,11 @@ class FileRepositoryImpl(
         val source = File(localPath)
         if (!source.exists() || !source.isFile) return null
 
-        val candidates = fileDao.trashedMatches(source.name, source.length())
+        val candidates = fileDao.trashedMatches(
+            source.name,
+            source.length(),
+            activeChannel.id()
+        )
         if (candidates.isEmpty()) return null
 
         val localHash = Hashing.sha256(source) ?: return null

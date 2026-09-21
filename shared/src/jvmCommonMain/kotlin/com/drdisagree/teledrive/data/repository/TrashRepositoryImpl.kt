@@ -106,7 +106,7 @@ class TrashRepositoryImpl(
         var repaired: Int
         var guard = 0
         do {
-            val orphans = folderDao.untrashedChildrenOfTrashed()
+            val orphans = folderDao.untrashedChildrenOfTrashed(activeChannel.id())
             val trashedAt = System.currentTimeMillis()
             orphans.forEach { folder -> folderDao.moveToTrash(folder.id, trashedAt) }
             repaired = orphans.size
@@ -297,7 +297,7 @@ class TrashRepositoryImpl(
         var guard = 0
         while (frontier.isNotEmpty() && guard++ < MAX_FOLDER_DEPTH) {
             frontier = frontier.flatMap { parent ->
-                folderDao.childrenOf(parent).map { it.id }
+                folderDao.childrenOf(parent, activeChannel.id()).map { it.id }
             }
             result.addAll(frontier)
         }

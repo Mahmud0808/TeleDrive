@@ -117,7 +117,7 @@ class BackupRepositoryImpl(
             if (backupDao.recordByPath(candidate.absolutePath) == null &&
                 (adoptLinkedUpload(candidate) ||
                         reviveTrashedUpload(candidate) ||
-                        adoptUploadedCopy(candidate))
+                        adoptUploadedCopy(candidate, activeChatId))
             ) {
                 skipped++
                 continue
@@ -211,8 +211,8 @@ class BackupRepositoryImpl(
      * have no path on this device. Matching them back to the identical local
      * file avoids uploading a second copy and keeps the local copy reclaimable.
      */
-    private suspend fun adoptUploadedCopy(candidate: File): Boolean {
-        val matches = fileDao.unlinkedRemoteMatches(candidate.name, candidate.length())
+    private suspend fun adoptUploadedCopy(candidate: File, chatId: Long?): Boolean {
+        val matches = fileDao.unlinkedRemoteMatches(candidate.name, candidate.length(), chatId)
         if (matches.isEmpty()) return false
 
         val localHash = Hashing.sha256(candidate)

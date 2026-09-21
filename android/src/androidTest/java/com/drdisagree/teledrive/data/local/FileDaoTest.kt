@@ -141,8 +141,8 @@ class FileDaoTest {
     fun folderHierarchyQueries() = runBlocking {
         database.folderDao().upsert(folder("root"))
         database.folderDao().upsert(folder("child", parentId = "root"))
-        assertEquals(1, database.folderDao().childrenOf("root").size)
-        assertEquals(1, database.folderDao().childrenOf(null).size)
+        assertEquals(1, database.folderDao().childrenOf("root", null).size)
+        assertEquals(1, database.folderDao().childrenOf(null, null).size)
     }
 
     @Test

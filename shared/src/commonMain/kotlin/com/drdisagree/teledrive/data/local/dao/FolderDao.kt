@@ -84,8 +84,11 @@ interface FolderDao {
     @Query("UPDATE folders SET chatId = :chatId WHERE chatId IS NULL")
     suspend fun claimUnownedRows(chatId: Long)
 
-    @Query("SELECT * FROM folders WHERE parentId IS :parentId AND trashedAt IS NULL")
-    suspend fun childrenOf(parentId: String?): List<FolderEntity>
+    @Query(
+        """SELECT * FROM folders
+           WHERE parentId IS :parentId AND chatId IS :chatId AND trashedAt IS NULL"""
+    )
+    suspend fun childrenOf(parentId: String?, chatId: Long?): List<FolderEntity>
 
     @Query(
         """SELECT * FROM folders
@@ -94,14 +97,22 @@ interface FolderDao {
     )
     fun observeFavorites(chatId: Long?): Flow<List<FolderEntity>>
 
-    @Query("SELECT name FROM folders WHERE parentId IS :parentId AND trashedAt IS NULL")
-    suspend fun namesIn(parentId: String?): List<String>
+    @Query(
+        """SELECT name FROM folders
+           WHERE parentId IS :parentId AND chatId IS :chatId AND trashedAt IS NULL"""
+    )
+    suspend fun namesIn(parentId: String?, chatId: Long?): List<String>
 
     @Query(
         """SELECT name FROM folders
-           WHERE parentId IS :parentId AND trashedAt IS NULL AND id != :excludeId"""
+           WHERE parentId IS :parentId AND chatId IS :chatId
+             AND trashedAt IS NULL AND id != :excludeId"""
     )
-    suspend fun namesInExcluding(parentId: String?, excludeId: String): List<String>
+    suspend fun namesInExcluding(
+        parentId: String?,
+        chatId: Long?,
+        excludeId: String
+    ): List<String>
 
     @Query("UPDATE folders SET name = :name, modifiedAt = :modifiedAt WHERE id = :id")
     suspend fun rename(id: String, name: String, modifiedAt: Long)
@@ -156,9 +167,10 @@ interface FolderDao {
     @Query(
         """SELECT child.* FROM folders AS child
            JOIN folders AS parent ON child.parentId = parent.id
-           WHERE child.trashedAt IS NULL AND parent.trashedAt IS NOT NULL"""
+           WHERE child.trashedAt IS NULL AND parent.trashedAt IS NOT NULL
+             AND child.chatId IS :chatId"""
     )
-    suspend fun untrashedChildrenOfTrashed(): List<FolderEntity>
+    suspend fun untrashedChildrenOfTrashed(chatId: Long?): List<FolderEntity>
 
     @Query("SELECT * FROM folders WHERE trashedAt IS NOT NULL AND trashedAt < :threshold")
     suspend fun trashOlderThan(threshold: Long): List<FolderEntity>
