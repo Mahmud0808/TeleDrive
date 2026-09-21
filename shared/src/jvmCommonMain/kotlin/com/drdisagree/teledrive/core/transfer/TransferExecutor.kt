@@ -166,6 +166,22 @@ class TransferExecutor(
         )
         val caption = manifestCodec.encode(manifest, encrypt)
 
+        fileDao.setBackupState(entity.id, BackupState.UPLOADING)
+
+        if (splitsIntoParts(entity, sourceFile, encrypt)) {
+            return uploadInParts(
+                transfer = transfer,
+                entity = entity,
+                sourceFile = sourceFile,
+                localPath = localPath,
+                chatId = chatId,
+                manifest = manifest,
+                encrypt = encrypt,
+                contentHash = contentHash,
+                supersededMessageId = supersededMessageId
+            )
+        }
+
         var stagingFile: File? = null
         val (uploadPath, uploadName) = if (encrypt) {
             val staging = File(stagingDir(), "${entity.id}.tde")
@@ -179,23 +195,6 @@ class TransferExecutor(
             staging.absolutePath to "${entity.id}.tde"
         } else {
             sourceFile.absolutePath to entity.name
-        }
-
-        fileDao.setBackupState(entity.id, BackupState.UPLOADING)
-
-        if (splitsIntoParts(entity, sourceFile)) {
-            stagingFile?.delete()
-            return uploadInParts(
-                transfer = transfer,
-                entity = entity,
-                sourceFile = sourceFile,
-                localPath = localPath,
-                chatId = chatId,
-                manifest = manifest,
-                encrypt = encrypt,
-                contentHash = contentHash,
-                supersededMessageId = supersededMessageId
-            )
         }
 
         val startedAt = System.currentTimeMillis()
@@ -281,13 +280,24 @@ class TransferExecutor(
      * Splitting is decided by the account's current limit, but a file that was
      * already split stays split: the parts on record are what the file is made
      * of, whatever the limit happens to be today.
+     *
+     * What the limit is measured against is the sealed size, not the file on
+     * disk, because sealing is what Telegram receives and it grows the file by
+     * a frame header per megabyte. A file sitting just under the cap would
+     * otherwise be sent whole and come back rejected.
      */
-    private suspend fun splitsIntoParts(entity: FileEntity, source: File): Boolean {
+    private suspend fun splitsIntoParts(
+        entity: FileEntity,
+        source: File,
+        encrypt: Boolean
+    ): Boolean {
         if (filePartDao.countOf(entity.id) > 0) return true
         val limit = runCatching { telegramClient.getLimits() }
             .getOrDefault(TelegramLimits.REGULAR)
             .maxFileBytes
-        return FileParts.splits(source.length(), limit)
+        val plainSize = source.length()
+        val uploadSize = if (encrypt) streamCrypto.storedSize(plainSize) else plainSize
+        return FileParts.splits(uploadSize, limit)
     }
 
     private suspend fun uploadInParts(
