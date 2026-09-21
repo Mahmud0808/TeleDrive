@@ -31,6 +31,7 @@ object PreferenceKeys {
     val ENCRYPT_FILES = booleanPreferencesKey("encrypt_files")
     val ENCRYPT_THUMBNAILS = booleanPreferencesKey("encrypt_thumbnails")
     val KEY_BACKUP_CREATED = booleanPreferencesKey("key_backup_created")
+    val FOLDER_OWNERSHIP_REPAIRED = booleanPreferencesKey("folder_ownership_repaired")
 
     val THEME = stringPreferencesKey("theme")
     val LANGUAGE = stringPreferencesKey("language")

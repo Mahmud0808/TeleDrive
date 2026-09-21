@@ -180,4 +180,10 @@ interface FolderDao {
 
     @Query("SELECT * FROM folders WHERE chatId IS :chatId")
     suspend fun allFolders(chatId: Long?): List<FolderEntity>
+
+    @Query("SELECT * FROM folders")
+    suspend fun allFoldersAnyOwner(): List<FolderEntity>
+
+    @Query("UPDATE folders SET chatId = :chatId WHERE id = :id")
+    suspend fun setChatId(id: String, chatId: Long?)
 }

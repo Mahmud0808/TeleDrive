@@ -22,6 +22,7 @@ data class UserPreferences(
     val encryptFiles: Boolean = false,
     val encryptThumbnails: Boolean = false,
     val keyBackupCreated: Boolean = false,
+    val folderOwnershipRepaired: Boolean = false,
 
     val theme: AppTheme = AppTheme.SYSTEM,
     val language: AppLanguage = AppLanguage.SYSTEM,

@@ -109,6 +109,13 @@ interface FileDao {
     @Query("UPDATE files SET chatId = :chatId WHERE chatId IS NULL")
     suspend fun claimUnownedRows(chatId: Long)
 
+    @Query(
+        """SELECT folderId AS folderId, chatId AS chatId FROM files
+           WHERE folderId IS NOT NULL AND chatId IS NOT NULL AND trashedAt IS NULL
+           GROUP BY folderId, chatId"""
+    )
+    suspend fun folderOwners(): List<FolderOwner>
+
     @Query("SELECT COUNT(*) FROM files WHERE trashedAt IS NULL AND chatId IS :chatId")
     suspend fun fileCount(chatId: Long?): Int
 

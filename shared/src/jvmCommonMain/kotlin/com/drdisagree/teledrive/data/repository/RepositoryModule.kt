@@ -21,6 +21,7 @@ val repositoryModule = module {
     singleOf(::ManifestCodec)
     singleOf(::ActiveChannel)
     singleOf(::ChannelOwnership)
+    singleOf(::FolderOwnershipRepair)
     singleOf(::FileManifestPublisher)
     singleOf(::FolderPathResolver)
     singleOf(::FolderStateSynchronizer)
