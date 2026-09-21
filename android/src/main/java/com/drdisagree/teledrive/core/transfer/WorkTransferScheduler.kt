@@ -6,31 +6,37 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
+import androidx.work.WorkInfo
 import androidx.work.WorkManager
-import androidx.core.content.edit
 
 class WorkTransferScheduler(
     private val context: Context
 ) : TransferScheduler {
 
-    private val state =
-        context.getSharedPreferences(SCHEDULER_PREFS, Context.MODE_PRIVATE)
-
     /**
      * Ensures the queue worker is scheduled. A request carries its constraints
-     * for life, so queued work enqueued under Wi-Fi only would keep waiting for
-     * Wi-Fi after the user allows mobile data. The constraint that was used is
-     * remembered and the work is replaced whenever the rule changes.
+     * for life, so work enqueued under Wi-Fi only keeps waiting for Wi-Fi even
+     * after the user allows mobile data. Anything not already running is
+     * therefore replaced rather than kept, which also clears work restored from
+     * another device with constraints this one never chose.
      */
     override fun kick(allowMetered: Boolean) {
-        val policy = if (state.getBoolean(KEY_ALLOW_METERED, false) == allowMetered &&
-            state.contains(KEY_ALLOW_METERED)
-        ) {
-            ExistingWorkPolicy.KEEP
-        } else {
-            ExistingWorkPolicy.REPLACE
-        }
-        enqueue(allowMetered, policy, expedited = true)
+        val workManager = WorkManager.getInstance(context)
+        val pending = workManager.getWorkInfosForUniqueWork(TransferQueueWorker.UNIQUE_NAME)
+        pending.addListener(
+            {
+                val running = runCatching { pending.get() }
+                    .getOrNull()
+                    .orEmpty()
+                    .any { it.state == WorkInfo.State.RUNNING }
+                enqueue(
+                    allowMetered = allowMetered,
+                    policy = if (running) ExistingWorkPolicy.KEEP else ExistingWorkPolicy.REPLACE,
+                    expedited = true
+                )
+            },
+            Runnable::run
+        )
     }
 
     /** Restarts the worker so a waiting queue reacts to a settings change now. */
@@ -43,7 +49,6 @@ class WorkTransferScheduler(
         policy: ExistingWorkPolicy,
         expedited: Boolean
     ) {
-        state.edit { putBoolean(KEY_ALLOW_METERED, allowMetered) }
         val request = OneTimeWorkRequestBuilder<TransferQueueWorker>()
             .setConstraints(
                 Constraints.Builder()
@@ -61,10 +66,5 @@ class WorkTransferScheduler(
             policy,
             request
         )
-    }
-
-    private companion object {
-        const val SCHEDULER_PREFS = "transfer-scheduler"
-        const val KEY_ALLOW_METERED = "allow_metered"
     }
 }
