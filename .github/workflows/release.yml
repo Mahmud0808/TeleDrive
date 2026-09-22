@@ -70,6 +70,7 @@ jobs:
   linux:
     name: Linux
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 
@@ -91,7 +92,7 @@ jobs:
 
   publish:
     name: Publish release
-    if: startsWith(github.ref, 'refs/tags/')
+    if: startsWith(github.ref, 'refs/tags/') && always() && needs.android.result == 'success' && needs.windows.result == 'success'
     needs: [android, windows, linux]
     runs-on: ubuntu-latest
     permissions:

@@ -47,8 +47,14 @@ kotlin {
             dependsOn(jvmCommonMain)
             dependencies {
                 implementation(libs.tdlight.java)
-                implementation("it.tdlight:tdlight-natives:${libs.versions.tdlightNatives.get()}:windows_amd64")
-                implementation("it.tdlight:tdlight-natives:${libs.versions.tdlightNatives.get()}:linux_amd64_gnu_ssl3")
+                // Pick the native for the host so cross-platform packages do not
+                // carry a second, unused native set (Windows: Linux natives, and
+                // vice versa). TDLight loads the matching library at runtime.
+                val nativesClassifier = when {
+                    System.getProperty("os.name").lowercase().contains("win") -> "windows_amd64"
+                    else -> "linux_amd64_gnu_ssl3"
+                }
+                implementation("it.tdlight:tdlight-natives:${libs.versions.tdlightNatives.get()}:$nativesClassifier")
             }
         }
         named("desktopTest") {

@@ -62,7 +62,7 @@ dependencies {
 // The bundled VLC is a Windows-only payload (win64 archive, libvlc.dll). On any
 // other host the tasks must not exist, so Linux builds never download the
 // Windows archive or bundle DLLs into a non-Windows artifact.
-if (org.gradle.internal.os.OperatingSystem.current().isWindows) {
+if (System.getProperty("os.name").lowercase().contains("win")) {
     val vlcVersion = "3.0.21"
     val vlcZip = layout.buildDirectory.file("vlc/vlc-$vlcVersion-win64.zip")
 
@@ -145,6 +145,14 @@ val debVersion = libs.versions.appVersion.get()
     .let { parts -> (parts + List(3) { "0" }).take(3) }
     .joinToString(".")
 
+// The .deb publishes this in its control metadata, so it must be a real address.
+// Defaults to the address the maintainer actually uses in this repo's commits
+// (DrDisagree <29881338+Mahmud0808@users.noreply.github.com>); override per build
+// with -PdebMaintainer=email@example.com. jpackage renders it as "<vendor> <value>",
+// so pass a bare email here.
+val debMaintainerValue = providers.gradleProperty("debMaintainer")
+    .orElse("29881338+Mahmud0808@users.noreply.github.com")
+
 compose.desktop {
     application {
         mainClass = "com.drdisagree.teledrive.desktop.MainKt"
@@ -185,7 +193,7 @@ compose.desktop {
                 packageName = "teledrive"
                 appCategory = "Network"
                 menuGroup = "Network"
-                debMaintainer = "DrDisagree <maintainer@drdisagree.com>"
+                debMaintainer = debMaintainerValue.get()
             }
 
             macOS {
@@ -213,8 +221,7 @@ val packageDebUser = tasks.register("packageDebUser") {
     val workDir = layout.buildDirectory.dir("debwork")
     val javaHome = providers.gradleProperty("desktopJavaHome").orNull
     val jpackage = javaHome?.let { File(it, "bin/jpackage") }
-        ?: File(org.gradle.internal.jvm.Jvm.current().javaHome, "bin/jpackage")
-    val iconFile = project.file("icons/TeleDrive.png")
+        ?: File(System.getProperty("java.home"), "bin/jpackage")
     val debFile = destDir.map { it.file("teledrive_${debVersion}_amd64.deb") }
     inputs.dir(appImage)
     outputs.file(debFile)
@@ -232,7 +239,7 @@ val packageDebUser = tasks.register("packageDebUser") {
                 "--linux-shortcut",
                 "--linux-app-category", "Network",
                 "--linux-menu-group", "Network",
-                "--linux-deb-maintainer", "DrDisagree <maintainer@drdisagree.com>",
+                "--linux-deb-maintainer", debMaintainerValue.get(),
                 "--dest", destDir.get().asFile.absolutePath
             )
         }.result.get()
@@ -250,9 +257,6 @@ val packageDebUser = tasks.register("packageDebUser") {
             writeText(ROBUST_POSTRM)
             setExecutable(true)
         }
-        // jpackage re-encodes the Linux icon down to 32x32, which is why it
-        // looks blurry in the app menu. Restore the full-resolution icon.
-        iconFile.copyTo(File(work, "opt/teledrive/lib/TeleDrive.png"), overwrite = true)
         providers.exec {
             commandLine("dpkg-deb", "--build", work.absolutePath, debFile.get().asFile.absolutePath)
         }.result.get()
