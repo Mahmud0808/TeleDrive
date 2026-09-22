@@ -50,8 +50,11 @@ kotlin {
                 // Pick the native for the host so cross-platform packages do not
                 // carry a second, unused native set (Windows: Linux natives, and
                 // vice versa). TDLight loads the matching library at runtime.
+                // TDLight publishes macos_arm64 only, so Intel Macs have no build.
+                val hostOs = System.getProperty("os.name").lowercase()
                 val nativesClassifier = when {
-                    System.getProperty("os.name").lowercase().contains("win") -> "windows_amd64"
+                    hostOs.contains("win") -> "windows_amd64"
+                    hostOs.contains("mac") -> "macos_arm64"
                     else -> "linux_amd64_gnu_ssl3"
                 }
                 implementation("it.tdlight:tdlight-natives:${libs.versions.tdlightNatives.get()}:$nativesClassifier")

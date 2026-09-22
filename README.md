@@ -6,7 +6,10 @@
 
 Back up and browse your files using a private Telegram channel as storage.
 
-[![Platform](https://img.shields.io/badge/platform-Android%208.0%2B%20%7C%20Windows%20%7C%20Ubuntu%20x86_64-3DDC84?style=for-the-badge&logo=android&logoColor=white)](#requirements)
+[![Android](https://img.shields.io/badge/Android-8.0%2B-3DDC84?style=for-the-badge&logo=android&logoColor=white)](#requirements)
+[![Windows](https://img.shields.io/badge/Windows-10%2B-0078D4?style=for-the-badge&logo=data:image/svg%2Bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0wIDMuNDQ5IDkuNzUgMi4xdjkuNDUxSDB6bTEwLjk0OS0xLjUwMUwyNCAwdjExLjRIMTAuOTQ5ek0wIDEyLjZoOS43NXY5LjQ1MUwwIDIwLjY5OXptMTAuOTQ5IDBIMjRWMjRsLTEzLjA1MS0xLjgwMXoiLz48L3N2Zz4%3D)](#requirements)
+[![Ubuntu](https://img.shields.io/badge/Ubuntu-x86__64-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)](#requirements)
+[![macOS](https://img.shields.io/badge/macOS-Apple%20Silicon-111111?style=for-the-badge&logo=apple&logoColor=white)](#requirements)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.4-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)](https://kotlinlang.org)
 [![Compose](https://img.shields.io/badge/Compose%20Multiplatform-Material%203-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white)](https://www.jetbrains.com/compose-multiplatform/)
 [![Release](https://img.shields.io/github/v/release/Mahmud0808/TeleDrive?style=for-the-badge&logo=github&logoColor=white&color=1F883D)](https://github.com/Mahmud0808/TeleDrive/releases/latest)
@@ -24,9 +27,9 @@ TeleDrive stores your files in a private Telegram channel on your own account.
 There is no TeleDrive server and no account to create with us. The app keeps a
 local index so browsing and search stay fast and work offline.
 
-One Compose Multiplatform codebase ships the Android app and the Windows and
-Ubuntu x86_64 desktop apps. They share the storage engine, encryption, transfers
-and the entire UI layer, and both browse the same drive.
+One Compose Multiplatform codebase ships the Android app and the Windows, Ubuntu
+x86_64 and macOS desktop apps. They share the storage engine, encryption,
+transfers and the entire UI layer, and all of them browse the same drive.
 
 ## Features
 
@@ -79,6 +82,30 @@ distro's security updates. If libVLC ever fails to load, the app still opens,
 browses, uploads and downloads, and preview falls back to opening the file with
 your default application.
 
+### macOS (Apple Silicon)
+
+Download `TeleDrive-<version>.dmg` from the [releases page](../../releases), open
+it and drag TeleDrive to Applications. The build is Apple Silicon only, because
+the Telegram native library TeleDrive uses has no Intel Mac build.
+
+The app is not signed with an Apple Developer ID, so Gatekeeper blocks it on
+first launch. Clear the quarantine flag once and it opens normally from then on:
+
+```bash
+xattr -dr com.apple.quarantine /Applications/TeleDrive.app
+```
+
+Your session and settings live in `~/Library/Application Support/TeleDrive`.
+
+Media preview needs VLC in `/Applications`, which the app finds on its own:
+
+```bash
+brew install --cask vlc
+```
+
+Without it the app still opens, browses, uploads and downloads, and preview
+falls back to opening the file with your default application.
+
 ### Android
 
 Grab an APK from the [releases page](../../releases). Builds are split per CPU
@@ -98,7 +125,8 @@ library the app is built on.
 
 ## Requirements
 
-- Android 8.0 (API 26) or newer, 64-bit Windows 10+, or Ubuntu x86_64
+- Android 8.0 (API 26) or newer, 64-bit Windows 10+, Ubuntu x86_64, or macOS on
+  Apple Silicon
 - A Telegram account
 - Your own Telegram API credentials, free from
   [my.telegram.org](https://my.telegram.org) under *API development tools*
@@ -134,8 +162,9 @@ Then in the app:
 
 TDLib native libraries come prebuilt on every platform: the
 [`tdlibx/td`](https://github.com/tdlibx/td) AAR via JitPack on Android and
-[tdlight](https://github.com/tdlight-team/tdlight-java) on desktop (Windows and
-Linux), so no native toolchain is needed.
+[tdlight](https://github.com/tdlight-team/tdlight-java) on desktop (Windows,
+Linux and Apple Silicon macOS), so no native toolchain is needed. The build
+picks the native matching the host, so a package never carries an unused set.
 
 ### Packaging the desktop app
 
@@ -146,7 +175,8 @@ Point the build at a full JDK with a `desktopJavaHome` property in your global
 ```bash
 ./gradlew :desktop:packageMsi           # Windows installer
 ./gradlew :desktop:packageDebUser       # Linux .deb with system dependencies
-./gradlew :desktop:createDistributable  # portable app folder (Windows/Linux)
+./gradlew :desktop:packageDmg           # macOS disk image
+./gradlew :desktop:createDistributable  # portable app folder
 ```
 
 `packageDebUser` produces `desktop/build/deb/teledrive_<version>_amd64.deb`. It
