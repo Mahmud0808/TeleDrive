@@ -6,7 +6,7 @@
 
 Back up and browse your files using a private Telegram channel as storage.
 
-[![Platform](https://img.shields.io/badge/platform-Android%208.0%2B%20%7C%20Windows-3DDC84?style=for-the-badge&logo=android&logoColor=white)](#requirements)
+[![Platform](https://img.shields.io/badge/platform-Android%208.0%2B%20%7C%20Windows%20%7C%20Ubuntu%20x86_64-3DDC84?style=for-the-badge&logo=android&logoColor=white)](#requirements)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.4-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)](https://kotlinlang.org)
 [![Compose](https://img.shields.io/badge/Compose%20Multiplatform-Material%203-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white)](https://www.jetbrains.com/compose-multiplatform/)
 [![Release](https://img.shields.io/github/v/release/Mahmud0808/TeleDrive?style=for-the-badge&logo=github&logoColor=white&color=1F883D)](https://github.com/Mahmud0808/TeleDrive/releases/latest)
@@ -24,9 +24,9 @@ TeleDrive stores your files in a private Telegram channel on your own account.
 There is no TeleDrive server and no account to create with us. The app keeps a
 local index so browsing and search stay fast and work offline.
 
-One Compose Multiplatform codebase ships the Android app and the Windows
-desktop app. They share the storage engine, encryption, transfers and the
-entire UI layer, and both browse the same drive.
+One Compose Multiplatform codebase ships the Android app and the Windows and
+Ubuntu x86_64 desktop apps. They share the storage engine, encryption, transfers
+and the entire UI layer, and both browse the same drive.
 
 ## Features
 
@@ -57,6 +57,31 @@ run it. It installs per user with no admin prompt, adds Start menu and desktop
 shortcuts, and uninstalls from Windows Settings. Your session and settings live
 in `%APPDATA%\TeleDrive` and survive reinstalls.
 
+### Linux (Ubuntu x86_64)
+
+Download `teledrive_<version>_amd64.deb` from the [releases page](../../releases)
+and install it:
+
+```bash
+sudo apt install ./teledrive_1.4.2_amd64.deb
+```
+
+`apt` resolves the system libraries automatically (OpenSSL, zlib, libstdc++ and
+friends). The package bundles its own Java runtime, so **no JDK is required**.
+Launch TeleDrive from the applications menu, or run
+`/opt/teledrive/bin/TeleDrive`. Your session and settings live in
+`~/.local/share/TeleDrive`.
+
+Inline media playback uses a system VLC when present. Install it if you want to
+preview media inside the app:
+
+```bash
+sudo apt install vlc
+```
+
+Without VLC the app still opens, browses, uploads and downloads; media preview
+falls back to opening the file with your default application.
+
 ### Android
 
 Grab an APK from the [releases page](../../releases). Builds are split per CPU
@@ -76,7 +101,7 @@ library the app is built on.
 
 ## Requirements
 
-- Android 8.0 (API 26) or newer, or 64-bit Windows 10+
+- Android 8.0 (API 26) or newer, 64-bit Windows 10+, or Ubuntu x86_64
 - A Telegram account
 - Your own Telegram API credentials, free from
   [my.telegram.org](https://my.telegram.org) under *API development tools*
@@ -98,7 +123,7 @@ pooled with anyone else's, and a rate limit on someone else cannot affect you.
 git clone https://github.com/Mahmud0808/TeleDrive.git
 cd TeleDrive
 ./gradlew :android:installDebug  # Android
-./gradlew :desktop:run           # Windows desktop
+./gradlew :desktop:run           # Windows/Linux desktop
 ```
 
 Then in the app:
@@ -110,10 +135,10 @@ Then in the app:
 3. Choose the folders to back up.
 4. Optionally enable **Encrypt uploads** and set a recovery passphrase.
 
-TDLib native libraries come prebuilt on both platforms: the
+TDLib native libraries come prebuilt on every platform: the
 [`tdlibx/td`](https://github.com/tdlibx/td) AAR via JitPack on Android and
-[tdlight](https://github.com/tdlight-team/tdlight-java) on desktop, so no
-native toolchain is needed.
+[tdlight](https://github.com/tdlight-team/tdlight-java) on desktop (Windows and
+Linux), so no native toolchain is needed.
 
 ### Packaging the desktop app
 
@@ -122,9 +147,16 @@ Point the build at a full JDK with a `desktopJavaHome` property in your global
 `~/.gradle/gradle.properties`, then:
 
 ```bash
-./gradlew :desktop:packageMsi           # installer
-./gradlew :desktop:createDistributable  # portable folder with TeleDrive.exe
+./gradlew :desktop:packageMsi           # Windows installer
+./gradlew :desktop:packageDebUser       # Linux .deb with system dependencies
+./gradlew :desktop:createDistributable  # portable app folder (Windows/Linux)
 ```
+
+`packageDebUser` produces `desktop/build/deb/teledrive_<version>_amd64.deb`. It
+embeds a JVM runtime via jlink and declares its Debian dependencies, so end
+users only need `sudo apt install ./teledrive_<version>_amd64.deb`. VLC is not
+bundled on Linux; the app uses a system VLC when present and degrades gracefully
+without it.
 
 ## Bringing existing files in
 
@@ -156,19 +188,19 @@ Kotlin Multiplatform with Clean Architecture and MVVM. The dependency rule is
 `presentation -> domain <- data`, with `core` shared by both sides. No TDLib
 type leaves `core/telegram`. Almost everything lives in common code; each
 platform contributes only what the other cannot share, like workers, the
-Keystore, DPAPI and the app shells.
+Keystore, DPAPI or the desktop file-key store, and the app shells.
 
 ```text
 shared/               # KMP: storage engine, crypto, sync, transfers
 ├── commonMain/           # core, data, domain
 ├── jvmCommonMain/        # JVM pieces both apps use
 ├── androidMain/          # Keystore, MediaStore, WorkManager glue
-└── desktopMain/          # tdlight client, DPAPI, desktop schedulers
+└── desktopMain/          # tdlight client, platform ciphers, desktop schedulers
 ui/                   # KMP: every screen, theme and string resource
 ├── commonMain/           # compose resources
 └── jvmCommonMain/        # the entire presentation layer
 android/              # Android shell: workers, notifications, media3 player
-desktop/              # Windows shell: window, packaging, streaming bridge
+desktop/              # Windows/Linux shell: window, packaging, streaming bridge
 ```
 
 Stack: Kotlin Multiplatform, Coroutines, Compose Multiplatform, Material 3
@@ -179,7 +211,7 @@ TDLib and tdlight.
 
 | Layer | What is protected |
 | --- | --- |
-| On device | Room and TDLib databases sealed with a random, platform-wrapped key (Android Keystore, Windows DPAPI). Thumbnails and caches AES-GCM encrypted by default. |
+| On device | Room and TDLib databases sealed with a random, platform-wrapped key (Android Keystore, Windows DPAPI, or a local file key on Linux). Thumbnails and caches AES-GCM encrypted by default. |
 | In Telegram | With encryption on, the channel holds only sealed bytes, random file names, encrypted captions and an encrypted folder tree. |
 | Key custody | Content keys are random, wrapped by the platform master key, and never leave the device unwrapped. |
 | Recovery | The content key is backed up to your channel, sealed with your passphrase (PBKDF2, 310k iterations). Restoring it on a new device unlocks everything. |

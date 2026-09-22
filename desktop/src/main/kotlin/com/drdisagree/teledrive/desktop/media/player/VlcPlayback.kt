@@ -2,6 +2,7 @@ package com.drdisagree.teledrive.desktop.media.player
 
 import com.drdisagree.teledrive.core.common.SafeLog
 import com.sun.jna.NativeLibrary
+import com.sun.jna.Platform
 import java.io.File
 import uk.co.caprica.vlcj.factory.MediaPlayerFactory
 import uk.co.caprica.vlcj.factory.discovery.NativeDiscovery
@@ -16,7 +17,10 @@ object VlcPlayback {
 
     val factory: MediaPlayerFactory? by lazy {
         runCatching { createFactory() }
-            .onFailure { SafeLog.w(TAG, "Inline playback unavailable: ${it.message}") }
+            .onFailure {
+                val hint = if (Platform.isLinux()) " Install VLC, e.g. 'apt install vlc'." else ""
+                SafeLog.w(TAG, "Inline playback unavailable: ${it.message}$hint")
+            }
             .getOrNull()
     }
 

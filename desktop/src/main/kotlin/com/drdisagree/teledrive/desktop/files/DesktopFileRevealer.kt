@@ -1,5 +1,6 @@
 package com.drdisagree.teledrive.desktop.files
 
+import com.drdisagree.teledrive.core.common.SafeLog
 import com.drdisagree.teledrive.presentation.platform.FileRevealer
 import com.sun.jna.Platform
 import java.awt.Desktop
@@ -7,7 +8,10 @@ import java.io.File
 
 /**
  * Selects the file in the platform's file manager. Explorer takes the file
- * through /select; elsewhere the JDK API or the parent folder stands in.
+ * through /select; elsewhere the JDK API or the parent folder stands in. AWT's
+ * Desktop API is not guaranteed on every Linux session, so the whole reveal is
+ * guarded and reported as a controlled failure instead of an uncaught
+ * exception.
  */
 class DesktopFileRevealer : FileRevealer {
 
@@ -19,10 +23,17 @@ class DesktopFileRevealer : FileRevealer {
                 ProcessBuilder("explorer.exe", "/select,", target.absolutePath).start()
             }.isSuccess
         }
-        val desktop = Desktop.getDesktop()
-        if (desktop.isSupported(Desktop.Action.BROWSE_FILE_DIR)) {
-            return runCatching { desktop.browseFileDirectory(target) }.isSuccess
-        }
-        return runCatching { desktop.open(target.parentFile) }.isSuccess
+        return runCatching {
+            val desktop = Desktop.getDesktop()
+            if (desktop.isSupported(Desktop.Action.BROWSE_FILE_DIR)) {
+                desktop.browseFileDirectory(target)
+            } else {
+                desktop.open(target.parentFile)
+            }
+        }.onFailure { SafeLog.w(TAG, "Reveal failed for $path", it) }.isSuccess
+    }
+
+    private companion object {
+        const val TAG = "DesktopFileRevealer"
     }
 }
