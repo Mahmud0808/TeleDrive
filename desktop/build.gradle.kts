@@ -140,6 +140,121 @@ if (System.getProperty("os.name").lowercase().contains("win")) {
     }.configureEach { dependsOn(prepareVlcNatives) }
 }
 
+if (System.getProperty("os.name").lowercase().contains("mac")) {
+    val vlcVersion = "3.0.21"
+    val vlcDmg = layout.buildDirectory.file("vlc/vlc-$vlcVersion-arm64.dmg")
+
+    val downloadVlcMac = tasks.register("downloadVlcMac") {
+        description = "Downloads the VLC disk image for bundling"
+        group = "build"
+        val target = vlcDmg
+        val archiveName = "vlc-$vlcVersion-arm64.dmg"
+        val attempts = 3
+        val connectTimeoutMs = 30_000
+        val readTimeoutMs = 120_000
+        val retryBackoffMs = 5_000L
+        val mirrors = listOf(
+            "https://download.videolan.org/pub/videolan/vlc/$vlcVersion/macosx/$archiveName",
+            "https://get.videolan.org/vlc/$vlcVersion/macosx/$archiveName"
+        )
+        outputs.file(target)
+        doLast {
+            val file = target.get().asFile
+            if (file.length() > 0) return@doLast
+            file.parentFile.mkdirs()
+
+            var lastFailure: Exception? = null
+            repeat(attempts) { attempt ->
+                for (mirror in mirrors) {
+                    try {
+                        val connection = URI(mirror).toURL().openConnection().apply {
+                            connectTimeout = connectTimeoutMs
+                            readTimeout = readTimeoutMs
+                        }
+                        connection.getInputStream().use { input ->
+                            file.outputStream().use { output -> input.copyTo(output) }
+                        }
+                        if (file.length() > 0) return@doLast
+                    } catch (e: Exception) {
+                        lastFailure = e
+                        logger.warn("VLC download from $mirror failed: ${e.message}")
+                        file.delete()
+                    }
+                }
+                if (attempt < attempts - 1) {
+                    Thread.sleep((attempt + 1) * retryBackoffMs)
+                }
+            }
+            throw GradleException("Could not download $archiveName from any mirror", lastFailure)
+        }
+    }
+
+    val prepareVlcNativesMac = tasks.register("prepareVlcNativesMac") {
+        description = "Unpacks the VLC libraries the inline player loads"
+        group = "build"
+        dependsOn(downloadVlcMac)
+        notCompatibleWithConfigurationCache("runs hdiutil from a doLast closure")
+        val dmg = vlcDmg
+        val outDir = layout.buildDirectory.dir("appResources/macos-arm64/vlc")
+        val mountDir = layout.buildDirectory.dir("vlc/mount")
+        inputs.file(dmg)
+        outputs.dir(outDir)
+        doLast {
+            val out = outDir.get().asFile
+            val mount = mountDir.get().asFile
+            out.deleteRecursively()
+            out.mkdirs()
+            mount.deleteRecursively()
+            mount.mkdirs()
+
+            providers.exec {
+                commandLine(
+                    "hdiutil", "attach", dmg.get().asFile.absolutePath,
+                    "-nobrowse", "-readonly", "-mountpoint", mount.absolutePath
+                )
+            }.result.get()
+            try {
+                val payload = File(mount, "VLC.app/Contents/MacOS")
+                check(File(payload, "lib/libvlc.dylib").exists()) {
+                    "libvlc.dylib missing from $payload"
+                }
+                val libraries = File(out, "lib").apply { mkdirs() }
+                File(payload, "lib").listFiles()
+                    .orEmpty()
+                    .filter { it.isFile && it.name.startsWith("libvlc") && it.name.endsWith(".dylib") }
+                    .forEach { it.copyTo(File(libraries, it.name), overwrite = true) }
+
+                val pluginRoot = File(payload, "plugins")
+                val skipped = listOf("libqt", "liblua", "libskins2")
+                pluginRoot.walkTopDown()
+                    .filter { it.isFile }
+                    .forEach { source ->
+                        val relative = source.relativeTo(pluginRoot).invariantSeparatorsPath
+                        if (relative.startsWith("gui/") || relative.startsWith("lua/")) return@forEach
+                        if (skipped.any { source.name.startsWith(it) }) return@forEach
+                        val destination = File(out, "plugins/$relative")
+                        destination.parentFile.mkdirs()
+                        source.copyTo(destination, overwrite = true)
+                    }
+            } finally {
+                providers.exec {
+                    commandLine("hdiutil", "detach", mount.absolutePath, "-quiet")
+                }.result.get()
+            }
+        }
+    }
+
+    tasks.matching {
+        it.name in setOf(
+            "run",
+            "hotRun",
+            "packageDmg",
+            "createDistributable",
+            "packageDistributionForCurrentOS"
+        ) || it.name.startsWith("prepareAppResources")
+    }.configureEach { dependsOn(prepareVlcNativesMac) }
+}
+
 val debVersion = libs.versions.appVersion.get()
     .split(".")
     .let { parts -> (parts + List(3) { "0" }).take(3) }

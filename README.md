@@ -21,6 +21,17 @@ Back up and browse your files using a private Telegram channel as storage.
 
 ---
 
+## Contents
+
+- [About](#about) · [Features](#features) · [Screenshots](#screenshots)
+- **Install**: [Windows](#windows) · [Linux (Ubuntu x86_64)](#linux-ubuntu-x86_64) · [macOS (Apple Silicon)](#macos-apple-silicon) · [Android](#android)
+- [Requirements](#requirements) · [Getting started](#getting-started) · [Packaging the desktop app](#packaging-the-desktop-app)
+- [Bringing existing files in](#bringing-existing-files-in) · [Good to know](#good-to-know)
+- [Architecture](#architecture) · [Security model](#security-model) · [Testing](#testing)
+- [Contributing](#contributing) · [License](#license)
+
+---
+
 ## About
 
 TeleDrive stores your files in a private Telegram channel on your own account.
@@ -97,14 +108,11 @@ xattr -dr com.apple.quarantine /Applications/TeleDrive.app
 
 Your session and settings live in `~/Library/Application Support/TeleDrive`.
 
-Media preview needs VLC in `/Applications`, which the app finds on its own:
-
-```bash
-brew install --cask vlc
-```
-
-Without it the app still opens, browses, uploads and downloads, and preview
-falls back to opening the file with your default application.
+Media preview works out of the box. Like the Windows build, the app ships its
+own copy of libVLC, so there is nothing else to install. If it ever fails to
+load, a VLC in `/Applications` is used instead, and failing that the app still
+opens, browses, uploads and downloads, with preview falling back to opening the
+file in your default application.
 
 ### Android
 
