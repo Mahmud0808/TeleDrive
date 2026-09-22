@@ -48,14 +48,14 @@ runs:
 
     - name: Restore the built extension
       id: cache
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: ~/.m2/repository/androidx/media3/media3-decoder-ffmpeg
         key: ffmpeg-decoder-${{ steps.version.outputs.version }}-${{ inputs.ffmpeg-version }}-${{ inputs.min-sdk }}-${{ hashFiles('.github/actions/build-ffmpeg-decoder/action.yml') }}
 
     - name: Check out media3
       if: steps.cache.outputs.cache-hit != 'true'
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
       with:
         repository: androidx/media
         ref: ${{ steps.version.outputs.version }}
