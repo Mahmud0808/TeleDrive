@@ -1,6 +1,8 @@
 package com.drdisagree.teledrive.desktop.files
 
 import com.drdisagree.teledrive.core.files.AppStoragePaths
+import com.drdisagree.teledrive.core.files.ImportSource
+import com.drdisagree.teledrive.core.files.expandDirectory
 import com.drdisagree.teledrive.core.files.FileImporter
 import com.drdisagree.teledrive.core.files.FileNameUtils
 import com.drdisagree.teledrive.core.files.ImportedFile
@@ -27,6 +29,9 @@ class DesktopFileImporter(
     override fun discard(imported: ImportedFile) {
         if (isStaged(imported.path)) File(imported.path).delete()
     }
+
+    override fun expand(reference: String): List<ImportSource> =
+        expandDirectory(reference) ?: listOf(ImportSource(reference, ""))
 
     override fun isStaged(path: String): Boolean =
         File(path).parentFile == File(storagePaths.filesDir, IMPORT_DIR)

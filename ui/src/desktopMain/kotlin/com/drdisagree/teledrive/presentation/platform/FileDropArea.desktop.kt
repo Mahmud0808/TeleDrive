@@ -41,7 +41,7 @@ actual fun FileDropArea(
             override fun onDrop(event: DragAndDropEvent): Boolean {
                 indication = DropIndication.NONE
                 val paths = draggedFiles(event)
-                    .filter { it.isFile }
+                    .filter { it.isFile || it.isDirectory }
                     .map { it.absolutePath }
                 if (paths.isEmpty()) return false
                 onDropped(paths)
@@ -66,7 +66,7 @@ actual fun FileDropArea(
 private fun classify(event: DragAndDropEvent): DropIndication {
     val files = draggedFiles(event)
     return when {
-        files.isNotEmpty() && files.none { it.isFile } -> DropIndication.FOLDERS
+        files.isEmpty() -> DropIndication.NONE
         else -> DropIndication.FILES
     }
 }

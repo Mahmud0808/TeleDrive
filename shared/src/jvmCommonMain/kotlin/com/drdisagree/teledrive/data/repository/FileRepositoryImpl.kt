@@ -68,6 +68,13 @@ class FileRepositoryImpl(
     private val fileImporter: FileImporter
 ) : FileRepository {
 
+    override suspend fun resolveImportFolder(relativePath: String, parentId: String?): String? =
+        if (relativePath.isBlank()) {
+            parentId
+        } else {
+            folderPathResolver.resolveOrCreate(relativePath, startParentId = parentId)
+        }
+
     override suspend fun sweepImportOrphans() {
         fileDao.reclaimableLocalCopies()
             .filter { fileImporter.isStaged(it.localPath) }

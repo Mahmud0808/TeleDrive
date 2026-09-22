@@ -9,6 +9,12 @@ interface FileImporter {
 
     fun import(reference: String): ImportedFile?
 
+    /**
+     * Splits a picked reference into the files to import. A folder yields one
+     * entry per file inside it; anything else yields the reference itself.
+     */
+    fun expand(reference: String): List<ImportSource>
+
     /** Drops a staged copy the drive turned out not to need. */
     fun discard(imported: ImportedFile)
 

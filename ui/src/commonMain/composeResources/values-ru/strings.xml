@@ -303,6 +303,7 @@
     <!-- Files -->
     <string name="files">Файлы</string>
     <string name="files_add_files">Загрузить файлы</string>
+    <string name="files_add_folder">Загрузить папку</string>
     <string name="files_archive">В архив</string>
     <string name="files_back_import_appear">Файлы после импорта или бэкапа появятся здесь.</string>
     <string name="files_copy">Копировать в…</string>

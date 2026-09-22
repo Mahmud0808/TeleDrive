@@ -20,7 +20,13 @@ class AndroidFileImporter(
     private val context: Context
 ) : FileImporter {
 
-    override fun import(reference: String): ImportedFile? = import(reference.toUri())
+    override fun import(reference: String): ImportedFile? {
+        val direct = runCatching { File(reference) }.getOrNull()?.takeIf { it.isFile }
+        if (direct != null) {
+            return ImportedFile(direct.absolutePath, direct.name, direct.length())
+        }
+        return import(reference.toUri())
+    }
 
     private fun import(uri: Uri): ImportedFile? {
         if (uri.scheme == ContentResolver.SCHEME_FILE) {
@@ -68,6 +74,9 @@ class AndroidFileImporter(
     override fun discard(imported: ImportedFile) {
         if (isStaged(imported.path)) File(imported.path).delete()
     }
+
+    override fun expand(reference: String): List<ImportSource> =
+        expandDirectory(reference) ?: listOf(ImportSource(reference, ""))
 
     override fun isStaged(path: String): Boolean =
         File(path).parentFile == File(context.filesDir, IMPORT_DIR)

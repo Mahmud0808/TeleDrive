@@ -129,6 +129,9 @@ interface FileRepository {
     /** Deletes import staging copies that no file references anymore. */
     suspend fun sweepImportOrphans()
 
+    /** Creates [relativePath] under [parentId], reusing folders that exist. */
+    suspend fun resolveImportFolder(relativePath: String, parentId: String?): String?
+
     suspend fun reviveTrashedCopy(localPath: String, folderId: String?): DriveFile?
 
     /** Removes only the local copy; remote copy must be verified first. */

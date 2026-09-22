@@ -281,6 +281,7 @@
     <!-- Files -->
     <string name="files">Arquivos</string>
     <string name="files_add_files">Enviar arquivos</string>
+    <string name="files_add_folder">Enviar pasta</string>
     <string name="files_archive">Arquivar</string>
     <string name="files_back_import_appear">Os arquivos salvos em backup ou importados aparecem aqui.</string>
     <string name="files_copy">Copiar para…</string>

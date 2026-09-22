@@ -53,10 +53,14 @@ class FolderPathResolver(
      * created leaf takes [leafId] so it keeps the identity the other device
      * gave it, or the folder state document later adds an empty twin.
      */
-    suspend fun resolveOrCreate(path: String, leafId: String? = null): String? {
-        if (path.isBlank()) return null
+    suspend fun resolveOrCreate(
+        path: String,
+        leafId: String? = null,
+        startParentId: String? = null
+    ): String? {
+        if (path.isBlank()) return startParentId
         return creationMutex.withLock {
-            var parentId: String? = null
+            var parentId: String? = startParentId
             val segments = path.split('/').filter { it.isNotBlank() }.take(MAX_DEPTH)
             for ((index, segment) in segments.withIndex()) {
                 val existing = folderDao.childrenOf(parentId, activeChannel.id())

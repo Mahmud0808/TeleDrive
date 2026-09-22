@@ -604,17 +604,22 @@ class FilesViewModel(
             var duplicates = 0
             var copied = 0
             var failed = 0
-            for (uri in uris) {
-                val file = fileImporter.import(uri)
+            val sources = uris.flatMap { uri -> fileImporter.expand(uri) }
+            for (source in sources) {
+                val destination = fileRepository.resolveImportFolder(
+                    source.relativeFolder,
+                    target
+                )
+                val file = fileImporter.import(source.reference)
                 if (file == null) {
                     failed++
                     continue
                 }
                 val existing = fileRepository.findDuplicate(file.path)
                 if (existing != null) {
-                    if (existing.folderId == target) {
+                    if (existing.folderId == destination) {
                         duplicates++
-                    } else if (fileRepository.copyFiles(listOf(existing.id), target)
+                    } else if (fileRepository.copyFiles(listOf(existing.id), destination)
                                 is AppResult.Success
                     ) {
                         copied++
@@ -624,7 +629,9 @@ class FilesViewModel(
                     fileImporter.discard(file)
                     continue
                 }
-                when (val result = fileRepository.importLocalFile(file.path, target, file.name)) {
+                when (
+                    val result = fileRepository.importLocalFile(file.path, destination, file.name)
+                ) {
                     is AppResult.Success -> {
                         val drive = result.value
                         if (drive.hasRemoteCopy) {

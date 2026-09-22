@@ -34,6 +34,7 @@ import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CreateNewFolder
 import androidx.compose.material.icons.filled.Deselect
+import androidx.compose.material.icons.filled.DriveFolderUpload
 import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
@@ -115,7 +116,9 @@ import com.drdisagree.teledrive.presentation.platform.FileDropArea
 import com.drdisagree.teledrive.presentation.platform.LocalDeleteConsentLauncher
 import com.drdisagree.teledrive.presentation.platform.LocalFileRevealer
 import com.drdisagree.teledrive.presentation.platform.LocalFileSharer
+import com.drdisagree.teledrive.presentation.platform.LocalFolderPicker
 import com.drdisagree.teledrive.presentation.platform.LocalMultiFilePicker
+import com.drdisagree.teledrive.presentation.platform.PickResult
 import com.drdisagree.teledrive.presentation.preview.PreviewSequence
 import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.common_actions
@@ -137,6 +140,7 @@ import com.drdisagree.teledrive.resources.common_share
 import com.drdisagree.teledrive.resources.common_upload
 import com.drdisagree.teledrive.resources.files
 import com.drdisagree.teledrive.resources.files_add_files
+import com.drdisagree.teledrive.resources.files_add_folder
 import com.drdisagree.teledrive.resources.files_archive
 import com.drdisagree.teledrive.resources.files_back_import_appear
 import com.drdisagree.teledrive.resources.files_copy
@@ -211,6 +215,12 @@ fun FilesScreen(
     val onPickUploads = {
         uploadPicker.pick { references ->
             if (references.isNotEmpty()) viewModel.importAndUpload(references)
+        }
+    }
+    val folderUploadPicker = LocalFolderPicker.current
+    val onPickUploadFolder = {
+        folderUploadPicker.pick { result ->
+            if (result is PickResult.Picked) viewModel.importAndUpload(listOf(result.path))
         }
     }
 
@@ -535,6 +545,19 @@ fun FilesScreen(
                                 },
                                 icon = { Icon(Icons.Filled.Upload, contentDescription = null) },
                                 text = { Text(stringResource(Res.string.files_add_files)) }
+                            )
+                            FloatingActionButtonMenuItem(
+                                onClick = {
+                                    showAddMenu = false
+                                    onPickUploadFolder()
+                                },
+                                icon = {
+                                    Icon(
+                                        Icons.Filled.DriveFolderUpload,
+                                        contentDescription = null
+                                    )
+                                },
+                                text = { Text(stringResource(Res.string.files_add_folder)) }
                             )
                             FloatingActionButtonMenuItem(
                                 onClick = {
