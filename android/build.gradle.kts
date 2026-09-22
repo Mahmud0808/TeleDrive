@@ -22,12 +22,13 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    val splitAbis = providers.gradleProperty("splitAbis").orNull?.toBoolean() ?: true
     splits {
         abi {
-            isEnable = true
+            isEnable = splitAbis
             reset()
             include("arm64-v8a", "armeabi-v7a", "x86", "x86_64")
-            isUniversalApk = true
+            isUniversalApk = splitAbis
         }
     }
 
