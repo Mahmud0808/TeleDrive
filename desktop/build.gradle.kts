@@ -202,6 +202,17 @@ compose.desktop {
     }
 }
 
+val DEB_DEPENDS = listOf(
+    "libssl3t64",
+    "zlib1g",
+    "libstdc++6",
+    "libgcc-s1",
+    "libc6",
+    "libvlc5",
+    "vlc-plugin-base",
+    "vlc-plugin-video-output"
+).joinToString(",")
+
 // Compose's packageDeb cannot declare Debian dependencies, so a dedicated task
 // repackages the app image produced by createDistributable (which already
 // bundles the JVM runtime via jlink) with jpackage and the system libraries the
@@ -233,7 +244,7 @@ val packageDebUser = tasks.register("packageDebUser") {
                 "--app-version", debVersion,
                 "--vendor", "DrDisagree",
                 "--linux-package-name", "teledrive",
-                "--linux-package-deps", "libssl3t64,zlib1g,libstdc++6,libgcc-s1,libc6",
+                "--linux-package-deps", DEB_DEPENDS,
                 "--linux-shortcut",
                 "--linux-app-category", "Network",
                 "--linux-menu-group", "Network",

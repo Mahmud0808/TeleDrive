@@ -67,20 +67,17 @@ sudo apt install ./teledrive_1.4.2_amd64.deb
 ```
 
 `apt` resolves the system libraries automatically (OpenSSL, zlib, libstdc++ and
-friends). The package bundles its own Java runtime, so **no JDK is required**.
-Launch TeleDrive from the applications menu, or run
-`/opt/teledrive/bin/TeleDrive`. Your session and settings live in
+the libVLC packages that drive inline playback). The package bundles its own
+Java runtime, so **no JDK is required**. Launch TeleDrive from the applications
+menu, or run `/opt/teledrive/bin/TeleDrive`. Your session and settings live in
 `~/.local/share/TeleDrive`.
 
-Inline media playback uses a system VLC when present. Install it if you want to
-preview media inside the app:
-
-```bash
-sudo apt install vlc
-```
-
-Without VLC the app still opens, browses, uploads and downloads; media preview
-falls back to opening the file with your default application.
+Media preview works out of the box. Unlike the Windows build, which ships its
+own copy of libVLC, the `.deb` depends on the distro's `libvlc5`,
+`vlc-plugin-base` and `vlc-plugin-video-output`, so playback stays on your
+distro's security updates. If libVLC ever fails to load, the app still opens,
+browses, uploads and downloads, and preview falls back to opening the file with
+your default application.
 
 ### Android
 
@@ -154,9 +151,8 @@ Point the build at a full JDK with a `desktopJavaHome` property in your global
 
 `packageDebUser` produces `desktop/build/deb/teledrive_<version>_amd64.deb`. It
 embeds a JVM runtime via jlink and declares its Debian dependencies, so end
-users only need `sudo apt install ./teledrive_<version>_amd64.deb`. VLC is not
-bundled on Linux; the app uses a system VLC when present and degrades gracefully
-without it.
+users only need `sudo apt install ./teledrive_<version>_amd64.deb`. libVLC is
+not bundled on Linux, it is pulled in as a package dependency instead.
 
 ## Bringing existing files in
 
