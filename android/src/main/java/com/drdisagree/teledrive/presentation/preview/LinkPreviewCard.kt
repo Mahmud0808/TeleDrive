@@ -38,6 +38,7 @@ import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.preview_open_link
 import com.drdisagree.teledrive.domain.model.LinkMetadata
 import com.drdisagree.teledrive.presentation.common.scaledBy
+import java.io.File
 
 private sealed interface LinkState {
     data object Loading : LinkState
@@ -149,7 +150,7 @@ private fun ArticleCard(
     ) {
         metadata.imagePath?.let { path ->
             AsyncImage(
-                model = path,
+                model = File(path),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier

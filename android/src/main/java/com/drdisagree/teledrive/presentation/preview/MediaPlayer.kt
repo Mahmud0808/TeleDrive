@@ -2,6 +2,7 @@ package com.drdisagree.teledrive.presentation.preview
 
 import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.net.Uri
 import androidx.annotation.OptIn
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -59,6 +60,7 @@ import com.drdisagree.teledrive.core.media.ThumbnailModel
 import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.player_codec_unsupported
 import com.drdisagree.teledrive.resources.player_playback_failed
+import java.io.File
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Duration.Companion.milliseconds
@@ -107,7 +109,7 @@ fun MediaPlayer(
                 .build()
             when (content) {
                 is PreviewContent.LocalMedia -> {
-                    setMediaItem(MediaItem.fromUri("file://${content.path}"))
+                    setMediaItem(MediaItem.fromUri(Uri.fromFile(File(content.path))))
                 }
 
                 is PreviewContent.StreamedMedia -> {

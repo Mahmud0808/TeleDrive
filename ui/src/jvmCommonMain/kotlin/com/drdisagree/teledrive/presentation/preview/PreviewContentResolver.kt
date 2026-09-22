@@ -138,7 +138,7 @@ class PreviewContentResolver(
         .flowOn(dispatchers.io)
 
     private fun fromLocal(file: DriveFile, path: String): PreviewContent = when {
-        MimeTypes.isImage(file.mimeType) -> PreviewContent.Image(path)
+        MimeTypes.isImage(file.mimeType) -> PreviewContent.Image(File(path))
         MimeTypes.isVideo(file.mimeType) -> PreviewContent.LocalMedia(path, isAudio = false)
         MimeTypes.isAudio(file.mimeType) -> PreviewContent.LocalMedia(path, isAudio = true)
         MimeTypes.isPdf(file.mimeType) -> PreviewContent.Pdf(path)
