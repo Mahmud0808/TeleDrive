@@ -23,12 +23,16 @@ import com.drdisagree.teledrive.presentation.navigation.LocalBottomBarInset
 @Composable
 fun BottomBarSnackbarHost(
     hostState: SnackbarHostState,
-    applyInset: Boolean = true
+    applyInset: Boolean = true,
+    modifier: Modifier = Modifier
 ) {
     val target = if (applyInset) LocalBottomBarInset.current else 0.dp
     val inset by animateDpAsState(targetValue = target, label = "snackbarInset")
+
     SnackbarHost(
         hostState = hostState,
-        modifier = Modifier.padding(bottom = inset)
+        modifier = Modifier
+            .padding(bottom = inset)
+            .then(modifier)
     )
 }
