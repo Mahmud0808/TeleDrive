@@ -48,6 +48,7 @@ kotlin {
             dependencies {
                 implementation(libs.tdlight.java)
                 implementation("it.tdlight:tdlight-natives:${libs.versions.tdlightNatives.get()}:windows_amd64")
+                implementation("it.tdlight:tdlight-natives:${libs.versions.tdlightNatives.get()}:linux_amd64_gnu_ssl3")
             }
         }
         named("desktopTest") {
