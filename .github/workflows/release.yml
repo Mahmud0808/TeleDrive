@@ -98,6 +98,12 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Report a missing Linux build
+        if: needs.linux.result != 'success'
+        run: >-
+          echo "::warning title=No Linux artifact::Linux packaging did not
+          succeed (${{ needs.linux.result }}), so this draft has no .deb."
+
       - uses: actions/download-artifact@v4
         with:
           path: artifacts

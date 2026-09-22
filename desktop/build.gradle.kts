@@ -146,12 +146,10 @@ val debVersion = libs.versions.appVersion.get()
     .joinToString(".")
 
 // The .deb publishes this in its control metadata, so it must be a real address.
-// Defaults to the address the maintainer actually uses in this repo's commits
-// (DrDisagree <29881338+Mahmud0808@users.noreply.github.com>); override per build
-// with -PdebMaintainer=email@example.com. jpackage renders it as "<vendor> <value>",
-// so pass a bare email here.
+// Override per build with -PdebMaintainer=email@example.com. jpackage renders it
+// as "<vendor> <value>", so pass a bare email here.
 val debMaintainerValue = providers.gradleProperty("debMaintainer")
-    .orElse("29881338+Mahmud0808@users.noreply.github.com")
+    .orElse("mhofficial2020@gmail.com")
 
 compose.desktop {
     application {
