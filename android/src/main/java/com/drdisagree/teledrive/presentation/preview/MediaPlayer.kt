@@ -3,20 +3,28 @@ package com.drdisagree.teledrive.presentation.preview
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.net.Uri
+import android.view.WindowManager
+import androidx.activity.compose.LocalActivity
 import androidx.annotation.OptIn
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.outlined.ErrorOutline
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -31,8 +39,9 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color as ComposeColor
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
@@ -60,6 +69,7 @@ import com.drdisagree.teledrive.core.media.ThumbnailModel
 import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.player_codec_unsupported
 import com.drdisagree.teledrive.resources.player_playback_failed
+import com.drdisagree.teledrive.resources.player_unlock_controls
 import java.io.File
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
@@ -161,6 +171,8 @@ fun MediaPlayer(
     }
 
     var interactionTick by remember { mutableIntStateOf(0) }
+    var locked by remember(content) { mutableStateOf(false) }
+    var lockHintVisible by remember(content) { mutableStateOf(false) }
     val visibleControls by rememberUpdatedState(controlsVisible)
     var resizeMode by remember { mutableStateOf(PlayerResizeMode.FIT) }
     var playing by remember(player) { mutableStateOf(player?.isPlaying == true) }
@@ -201,7 +213,33 @@ fun MediaPlayer(
         notifyControls(false)
     }
 
-    Box(modifier = modifier.fillMaxSize()) {
+    LaunchedEffect(locked, lockHintVisible) {
+        if (!locked) {
+            lockHintVisible = false
+            return@LaunchedEffect
+        }
+        if (!lockHintVisible) return@LaunchedEffect
+        delay(CONTROLLER_TIMEOUT_MS.milliseconds)
+        lockHintVisible = false
+    }
+
+    val activity = LocalActivity.current
+    DisposableEffect(activity, playing, activePage, audioOnly) {
+        val window = activity?.window
+        if (playing && activePage && !audioOnly) {
+            window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+        onDispose { window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) }
+    }
+
+    val darkTheme = MaterialTheme.colorScheme.surface.luminance() < LIGHT_LUMINANCE
+    val stageColor = when {
+        audioOnly -> ComposeColor.Transparent
+        darkTheme -> ComposeColor.Black
+        else -> MaterialTheme.colorScheme.surfaceContainerLowest
+    }
+
+    Box(modifier = modifier.fillMaxSize().background(stageColor)) {
         if (audioOnly && player != null) {
             AudioStage(
                 player = player,
@@ -234,7 +272,7 @@ fun MediaPlayer(
             Box(
                 modifier = Modifier
                     .matchParentSize()
-                    .background(MaterialTheme.colorScheme.surfaceContainerLowest)
+                    .background(stageColor)
             ) {
                 AsyncImage(
                     model = ThumbnailModel(fileId),
@@ -274,14 +312,20 @@ fun MediaPlayer(
                 )
             }
         }
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .pointerInput(Unit) {
-                    detectTapGestures { notifyControls(!visibleControls) }
+        PlayerGestureArea(
+            onTap = {
+                if (locked) {
+                    lockHintVisible = !lockHintVisible
+                } else {
+                    notifyControls(!visibleControls)
                 }
+            },
+            onAdjustStart = { if (visibleControls) notifyControls(false) },
+            dragEnabled = !locked && !audioOnly,
+            chromeVisible = controlsVisible,
+            modifier = Modifier.matchParentSize()
         )
-        if (player != null) {
+        if (player != null && !locked) {
             PlayerControls(
                 player = player,
                 visible = controlsVisible,
@@ -289,9 +333,42 @@ fun MediaPlayer(
                 resizeMode = resizeMode,
                 onCycleResizeMode = { resizeMode = resizeMode.next() },
                 onInteraction = { interactionTick++ },
+                onLock = {
+                    locked = true
+                    lockHintVisible = true
+                    notifyControls(false)
+                },
                 onPreferredAudioLanguage = onPreferredAudioLanguage,
                 onPreferredSubtitleLanguage = onPreferredSubtitleLanguage
             )
+        }
+        if (locked) {
+            AnimatedVisibility(
+                visible = lockHintVisible,
+                enter = fadeIn(),
+                exit = fadeOut(),
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .navigationBarsPadding()
+                    .padding(start = 24.dp)
+            ) {
+                FilledIconButton(
+                    onClick = {
+                        locked = false
+                        lockHintVisible = false
+                        notifyControls(true)
+                    },
+                    colors = IconButtonDefaults.filledIconButtonColors(
+                        containerColor = ComposeColor.Black.copy(alpha = LOCK_ALPHA),
+                        contentColor = ComposeColor.White
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.LockOpen,
+                        contentDescription = stringResource(Res.string.player_unlock_controls)
+                    )
+                }
+            }
         }
     }
 }
@@ -386,6 +463,8 @@ private fun AudioStage(player: Player, fallbackTitle: String, modifier: Modifier
 }
 
 private const val CONTROLLER_TIMEOUT_MS = 3_000L
+private const val LOCK_ALPHA = 0.7f
+private const val LIGHT_LUMINANCE = 0.5f
 
 private val AUDIO_ICON_SIZE = 96.dp
 

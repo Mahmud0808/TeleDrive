@@ -464,6 +464,10 @@
     <string name="player_subtitles">Субтитры</string>
     <string name="player_subtitles_off">Выключены</string>
     <string name="player_track">Дорожка</string>
+    <string name="player_lock_controls">Заблокировать управление</string>
+    <string name="player_unlock_controls">Разблокировать управление</string>
+    <string name="player_brightness">Яркость</string>
+    <string name="player_volume">Громкость</string>
     <string name="player_track_unsupported">Не поддерживается на этом устройстве</string>
     <string name="player_codec_unsupported">Устройство не может декодировать это видео. Скачайте его и откройте в другом плеере.</string>
     <string name="player_exit_full_screen">Выйти из полноэкранного режима</string>

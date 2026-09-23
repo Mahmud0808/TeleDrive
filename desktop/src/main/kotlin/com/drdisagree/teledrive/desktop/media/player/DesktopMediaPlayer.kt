@@ -174,6 +174,11 @@ fun DesktopMediaPlayer(
         }
     }
 
+    DisposableEffect(playing, isAudio) {
+        ScreenAwake.keepAwake(playing && !isAudio)
+        onDispose { ScreenAwake.keepAwake(false) }
+    }
+
     val fullscreenController = LocalFullscreenController.current
     DisposableEffect(mrl) {
         player.media().play(mrl)

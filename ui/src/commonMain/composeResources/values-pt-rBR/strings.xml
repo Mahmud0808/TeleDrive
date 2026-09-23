@@ -442,6 +442,10 @@
     <string name="player_subtitles">Legendas</string>
     <string name="player_subtitles_off">Desativadas</string>
     <string name="player_track">Faixa</string>
+    <string name="player_lock_controls">Bloquear controles</string>
+    <string name="player_unlock_controls">Desbloquear controles</string>
+    <string name="player_brightness">Brilho</string>
+    <string name="player_volume">Volume</string>
     <string name="player_track_unsupported">Não suportado neste dispositivo</string>
     <string name="player_codec_unsupported">Este dispositivo não consegue decodificar este vídeo. Baixe-o e reproduza-o em outro app.</string>
     <string name="player_exit_full_screen">Sair da tela cheia</string>

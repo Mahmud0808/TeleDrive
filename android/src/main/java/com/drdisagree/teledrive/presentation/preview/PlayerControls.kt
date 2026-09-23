@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.FitScreen
 import androidx.compose.material.icons.filled.Forward10
 import androidx.compose.material.icons.filled.Fullscreen
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Repeat
@@ -61,6 +62,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -73,6 +75,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalLayoutDirection
 import org.jetbrains.compose.resources.stringResource
@@ -87,6 +90,7 @@ import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.player_audio_track
 import com.drdisagree.teledrive.resources.player_fewer_controls
 import com.drdisagree.teledrive.resources.player_hide_subtitles
+import com.drdisagree.teledrive.resources.player_lock_controls
 import com.drdisagree.teledrive.resources.player_more_controls
 import com.drdisagree.teledrive.resources.player_mute
 import com.drdisagree.teledrive.resources.player_pause
@@ -121,6 +125,7 @@ fun PlayerControls(
     resizeMode: PlayerResizeMode,
     onCycleResizeMode: () -> Unit,
     onInteraction: () -> Unit,
+    onLock: () -> Unit = {},
     onPreferredAudioLanguage: (String) -> Unit = {},
     onPreferredSubtitleLanguage: (String) -> Unit = {},
     modifier: Modifier = Modifier
@@ -225,6 +230,7 @@ fun PlayerControls(
         exit = fadeOut(),
         modifier = modifier.fillMaxSize()
     ) {
+      CompositionLocalProvider(LocalOverVideo provides !audioOnly) {
         Box(modifier = Modifier.fillMaxSize()) {
             Row(
                 modifier = Modifier
@@ -260,6 +266,16 @@ fun PlayerControls(
                                     player.volume = if (muted) 0f else 1f
                                 }
                             )
+                            if (!audioOnly) {
+                                ControlButton(
+                                    icon = Icons.Filled.Lock,
+                                    description = stringResource(Res.string.player_lock_controls),
+                                    onClick = {
+                                        onInteraction()
+                                        onLock()
+                                    }
+                                )
+                            }
                             ControlButton(
                                 icon = rotation.icon,
                                 description = rotation.description,
@@ -430,25 +446,26 @@ fun PlayerControls(
                     Text(
                         text = Formatters.duration(scrubTarget?.toLong() ?: position),
                         style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = playerContentColor()
                     )
                     Spacer(modifier = Modifier.weight(1f))
                     if (speed != 1f) {
                         Text(
                             text = speedLabel(speed),
                             style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = playerSecondaryColor()
                         )
                         Spacer(modifier = Modifier.weight(1f))
                     }
                     Text(
                         text = Formatters.duration(duration),
                         style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = playerSecondaryColor()
                     )
                 }
             }
         }
+      }
     }
 
     if (showSpeeds) {
@@ -575,9 +592,8 @@ private fun TransportRow(
                 player.seekTo((player.currentPosition - SEEK_STEP_MS).coerceAtLeast(0))
             },
             colors = IconButtonDefaults.filledTonalIconButtonColors(
-                containerColor = MaterialTheme.colorScheme.surface
-                    .copy(alpha = TRANSPORT_ALPHA),
-                contentColor = MaterialTheme.colorScheme.onSurface
+                containerColor = playerSurfaceColor().copy(alpha = TRANSPORT_ALPHA),
+                contentColor = playerContentColor()
             )
         ) {
             Icon(
@@ -599,9 +615,8 @@ private fun TransportRow(
                 }
             },
             colors = IconButtonDefaults.filledIconButtonColors(
-                containerColor = MaterialTheme.colorScheme.surface
-                    .copy(alpha = TRANSPORT_ALPHA),
-                contentColor = MaterialTheme.colorScheme.onSurface
+                containerColor = playerSurfaceColor().copy(alpha = TRANSPORT_ALPHA),
+                contentColor = playerContentColor()
             ),
             modifier = Modifier.size(PLAY_BUTTON_SIZE)
         ) {
@@ -633,9 +648,8 @@ private fun TransportRow(
                 player.seekTo((player.currentPosition + SEEK_STEP_MS).coerceAtMost(limit))
             },
             colors = IconButtonDefaults.filledTonalIconButtonColors(
-                containerColor = MaterialTheme.colorScheme.surface
-                    .copy(alpha = TRANSPORT_ALPHA),
-                contentColor = MaterialTheme.colorScheme.onSurface
+                containerColor = playerSurfaceColor().copy(alpha = TRANSPORT_ALPHA),
+                contentColor = playerContentColor()
             )
         ) {
             Icon(
@@ -672,14 +686,32 @@ private fun ControlButton(
             containerColor = if (active) {
                 MaterialTheme.colorScheme.primary.copy(alpha = SURFACE_ALPHA)
             } else {
-                MaterialTheme.colorScheme.surface.copy(alpha = SURFACE_ALPHA)
+                playerSurfaceColor().copy(alpha = SURFACE_ALPHA)
             },
-            contentColor = MaterialTheme.colorScheme.onSurface
+            contentColor = playerContentColor()
         )
     ) {
         Icon(imageVector = icon, contentDescription = description)
     }
 }
+
+private val LocalOverVideo = compositionLocalOf { true }
+
+@Composable
+private fun playerSurfaceColor(): Color =
+    if (LocalOverVideo.current) Color.Black else MaterialTheme.colorScheme.surface
+
+@Composable
+private fun playerContentColor(): Color =
+    if (LocalOverVideo.current) Color.White else MaterialTheme.colorScheme.onSurface
+
+@Composable
+private fun playerSecondaryColor(): Color =
+    if (LocalOverVideo.current) {
+        Color.White.copy(alpha = SECONDARY_ALPHA)
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
 
 /** Video scaling applied to the surface, cycled from the controls. */
 enum class PlayerResizeMode(val icon: ImageVector, val description: String) {
@@ -724,6 +756,7 @@ private const val PROGRESS_INTERVAL_MS = 250L
 private const val SEEK_TOLERANCE_MS = 500L
 private const val SCRIM_ALPHA = 0.35f
 private const val SURFACE_ALPHA = 0.35f
+private const val SECONDARY_ALPHA = 0.7f
 private const val TRANSPORT_ALPHA = 0.7f
 private val THUMB_WIDTH = 5.dp
 private val THUMB_HEIGHT = 26.dp

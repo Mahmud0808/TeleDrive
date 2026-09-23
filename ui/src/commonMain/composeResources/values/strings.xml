@@ -442,6 +442,10 @@
     <string name="player_subtitles">Subtitles</string>
     <string name="player_subtitles_off">Off</string>
     <string name="player_track">Track</string>
+    <string name="player_lock_controls">Lock controls</string>
+    <string name="player_unlock_controls">Unlock controls</string>
+    <string name="player_brightness">Brightness</string>
+    <string name="player_volume">Volume</string>
     <string name="player_track_unsupported">Not supported on this device</string>
     <string name="player_codec_unsupported">This device cannot decode this video. Download it and play it in another app.</string>
     <string name="player_exit_full_screen">Exit full screen</string>
