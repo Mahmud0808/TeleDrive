@@ -117,6 +117,7 @@ class TransferRepositoryImpl(
             entity.id,
             entity.name,
             entity.sizeBytes,
+            entity.chatId,
             TransferType.DOWNLOAD,
             priority,
             null
@@ -176,7 +177,7 @@ class TransferRepositoryImpl(
                     fileId = entity.id,
                     displayName = entity.name,
                     localPath = null,
-                    chatId = null,
+                    chatId = entity.chatId,
                     messageId = null,
                     remoteFileId = null,
                     sizeBytes = entity.sizeBytes,
@@ -226,13 +227,22 @@ class TransferRepositoryImpl(
         )?.let { return AppResult.Failure(it) }
 
         fileDao.setBackupStateIfLocalOnly(entity.id, BackupState.QUEUED)
-        return insertTransfer(entity.id, entity.name, entity.sizeBytes, type, priority, sessionId)
+        return insertTransfer(
+            entity.id,
+            entity.name,
+            entity.sizeBytes,
+            entity.chatId,
+            type,
+            priority,
+            sessionId
+        )
     }
 
     private suspend fun insertTransfer(
         fileId: String,
         name: String,
         sizeBytes: Long,
+        chatId: Long?,
         type: TransferType,
         priority: Int,
         sessionId: String?
@@ -244,7 +254,7 @@ class TransferRepositoryImpl(
             fileId = fileId,
             displayName = name,
             localPath = null,
-            chatId = null,
+            chatId = chatId,
             messageId = null,
             remoteFileId = null,
             sizeBytes = sizeBytes,

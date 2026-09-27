@@ -122,6 +122,7 @@ class TransferExecutor(
 
         val prefs = settingsRepository.preferences.first()
         val chatId = transfer.chatId
+            ?: entity.chatId
             ?: telegramClient.ensureStorageChat(prefs.storageChatId).also { resolved ->
                 if (resolved != prefs.storageChatId) {
                     settingsRepository.update { it.copy(storageChatId = resolved) }
