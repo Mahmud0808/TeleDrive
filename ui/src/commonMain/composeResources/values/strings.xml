@@ -82,6 +82,8 @@
     <string name="common_confirm_trash_count_title">Move %1$d to trash?</string>
     <string name="common_content_description_favorite">Favorite</string>
     <string name="common_keep_on_device">Keep on device</string>
+    <string name="common_organize">Organize</string>
+    <string name="common_storage_actions">Storage</string>
     <string name="common_stop_keeping_on_device">Stop keeping on device</string>
     <string name="common_content_description_pinned">Kept on device</string>
     <string name="common_content_description_selected">Selected</string>

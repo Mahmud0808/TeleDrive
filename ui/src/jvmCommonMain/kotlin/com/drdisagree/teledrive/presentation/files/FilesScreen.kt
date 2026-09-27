@@ -1,5 +1,24 @@
 package com.drdisagree.teledrive.presentation.files
 
+import androidx.compose.material.icons.filled.EditNote
+import androidx.compose.material.icons.filled.Archive
+import androidx.compose.material.icons.filled.CleaningServices
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.DeleteOutline
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.DriveFileRenameOutline
+import androidx.compose.material.icons.filled.FolderOpen
+import androidx.compose.material.icons.filled.PushPin
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.StarOutline
+import androidx.compose.material.icons.filled.Storage
+import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.outlined.Info
+import com.drdisagree.teledrive.presentation.components.ActionMenu
+import com.drdisagree.teledrive.presentation.components.MenuAction
+import com.drdisagree.teledrive.resources.common_organize
+import com.drdisagree.teledrive.resources.common_storage_actions
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -326,146 +345,154 @@ fun FilesScreen(
                                             contentDescription = stringResource(Res.string.common_actions)
                                         )
                                     }
-                                    DropdownMenu(
-                                        expanded = showSelectionOverflow,
-                                        onDismissRequest = { showSelectionOverflow = false }
-                                    ) {
-                                        DropdownMenuItem(
-                                            text = { Text(stringResource(Res.string.common_download)) },
-                                            enabled = state.folderInSelection ||
-                                                    state.capabilities.canDownload,
-                                            onClick = {
-                                                showSelectionOverflow = false
-                                                viewModel.downloadSelected()
-                                            }
+                                    val fileRevealer = LocalFileRevealer.current
+                                    val revealPath = state.capabilities.soleLocalPath
+                                        ?.takeIf { path -> remember(path) { File(path).exists() } }
+                                    val editableNote = state.capabilities.canEditNote &&
+                                            state.selectionCount == 1 &&
+                                            state.folderSelection.isEmpty()
+                                    val filesOnly = !state.folderInSelection
+
+                                    val organize = buildList {
+                                        add(
+                                            MenuAction(
+                                                label = stringResource(Res.string.common_add_favorites),
+                                                icon = Icons.Filled.StarOutline
+                                            ) { viewModel.favoriteSelected(true) }
                                         )
-                                        DropdownMenuItem(
-                                            text = { Text(stringResource(Res.string.common_upload)) },
-                                            enabled = !state.folderInSelection &&
-                                                    state.capabilities.canUpload,
-                                            onClick = {
-                                                showSelectionOverflow = false
-                                                viewModel.uploadSelected()
-                                            }
+                                        add(
+                                            MenuAction(
+                                                label = stringResource(
+                                                    if (state.allSelectedPinned) {
+                                                        Res.string.common_stop_keeping_on_device
+                                                    } else {
+                                                        Res.string.common_keep_on_device
+                                                    }
+                                                ),
+                                                icon = Icons.Filled.PushPin
+                                            ) { viewModel.pinSelected(!state.allSelectedPinned) }
                                         )
-                                        val fileRevealer = LocalFileRevealer.current
-                                        if (fileRevealer != null) {
-                                            val revealPath = state.capabilities.soleLocalPath
-                                            DropdownMenuItem(
-                                                text = {
-                                                    Text(stringResource(Res.string.files_show_in_file_manager))
-                                                },
-                                                enabled = revealPath != null &&
-                                                        remember(revealPath) { File(revealPath).exists() },
-                                                onClick = {
-                                                    showSelectionOverflow = false
-                                                    revealPath?.let(fileRevealer::reveal)
-                                                }
+                                        if (filesOnly) {
+                                            add(
+                                                MenuAction(
+                                                    label = stringResource(Res.string.files_hide),
+                                                    icon = Icons.Filled.VisibilityOff
+                                                ) { viewModel.hideSelected(true) }
+                                            )
+                                            add(
+                                                MenuAction(
+                                                    label = stringResource(Res.string.files_archive),
+                                                    icon = Icons.Filled.Archive
+                                                ) { viewModel.archiveSelected(true) }
                                             )
                                         }
-                                        DropdownMenuItem(
-                                            text = { Text(stringResource(Res.string.note_edit_action)) },
-                                            enabled = state.selectionCount == 1 &&
-                                                    state.folderSelection.isEmpty(),
-                                            onClick = {
-                                                showSelectionOverflow = false
-                                                viewModel.editSelectedNote()
-                                            }
-                                        )
-                                        DropdownMenuItem(
-                                            text = { Text(stringResource(Res.string.common_share)) },
-                                            /* A folder is not a stream Android can hand
-                                               to another app, so any folder in the
-                                               selection rules sharing out. */
-                                            enabled = state.selectionCount > 0 &&
-                                                    state.folderSelection.isEmpty(),
-                                            onClick = {
-                                                showSelectionOverflow = false
-                                                viewModel.shareSelected()
-                                            }
-                                        )
-                                        DropdownMenuItem(
-                                            text = { Text(stringResource(Res.string.info_details)) },
-                                            enabled = state.selectionCount +
-                                                    state.folderSelection.size == 1,
-                                            onClick = {
-                                                showSelectionOverflow = false
-                                                viewModel.showInfoForSelection()
-                                            }
-                                        )
-                                        DropdownMenuItem(
-                                            text = { Text(stringResource(Res.string.common_rename)) },
-                                            enabled = state.selectionCount == 1,
-                                            onClick = {
-                                                showSelectionOverflow = false
-                                                viewModel.requestRenameSelected()
-                                            }
-                                        )
-                                        DropdownMenuItem(
-                                            text = { Text(stringResource(Res.string.files_copy)) },
-                                            enabled = !state.folderInSelection,
-                                            onClick = {
-                                                showSelectionOverflow = false
-                                                showCopyPicker = true
-                                            }
-                                        )
-                                        DropdownMenuItem(
-                                            text = { Text(stringResource(Res.string.common_add_favorites)) },
-                                            onClick = {
-                                                showSelectionOverflow = false
-                                                viewModel.favoriteSelected(true)
-                                            }
-                                        )
-                                        DropdownMenuItem(
-                                            text = {
-                                                Text(
-                                                    stringResource(
-                                                        if (state.allSelectedPinned) {
-                                                            Res.string.common_stop_keeping_on_device
-                                                        } else {
-                                                            Res.string.common_keep_on_device
-                                                        }
-                                                    )
+                                    }
+
+                                    val storage = buildList {
+                                        if (state.folderInSelection || state.capabilities.canDownload) {
+                                            add(
+                                                MenuAction(
+                                                    label = stringResource(Res.string.common_download),
+                                                    icon = Icons.Filled.Download
+                                                ) { viewModel.downloadSelected() }
+                                            )
+                                        }
+                                        if (filesOnly && state.capabilities.canUpload) {
+                                            add(
+                                                MenuAction(
+                                                    label = stringResource(Res.string.common_upload),
+                                                    icon = Icons.Filled.Upload
+                                                ) { viewModel.uploadSelected() }
+                                            )
+                                        }
+                                        if (filesOnly && state.capabilities.canFreeUpSpace) {
+                                            add(
+                                                MenuAction(
+                                                    label = stringResource(Res.string.common_free_space),
+                                                    icon = Icons.Filled.CleaningServices
+                                                ) { confirmDeleteLocal = true }
+                                            )
+                                        }
+                                        if (fileRevealer != null && revealPath != null) {
+                                            add(
+                                                MenuAction(
+                                                    label = stringResource(Res.string.files_show_in_file_manager),
+                                                    icon = Icons.Filled.FolderOpen
+                                                ) { fileRevealer.reveal(revealPath) }
+                                            )
+                                        }
+                                    }
+
+                                    val actions = buildList {
+                                        if (filesOnly) {
+                                            add(
+                                                MenuAction(
+                                                    label = stringResource(Res.string.common_share),
+                                                    icon = Icons.Filled.Share
+                                                ) { viewModel.shareSelected() }
+                                            )
+                                        }
+                                        if (state.selectionCount == 1) {
+                                            add(
+                                                MenuAction(
+                                                    label = stringResource(Res.string.common_rename),
+                                                    icon = Icons.Filled.DriveFileRenameOutline
+                                                ) { viewModel.requestRenameSelected() }
+                                            )
+                                        }
+                                        if (filesOnly) {
+                                            add(
+                                                MenuAction(
+                                                    label = stringResource(Res.string.files_copy),
+                                                    icon = Icons.Filled.ContentCopy
+                                                ) { showCopyPicker = true }
+                                            )
+                                        }
+                                        if (storage.isNotEmpty()) {
+                                            add(
+                                                MenuAction(
+                                                    label = stringResource(Res.string.common_storage_actions),
+                                                    icon = Icons.Filled.Storage,
+                                                    children = storage
                                                 )
-                                            },
-                                            onClick = {
-                                                showSelectionOverflow = false
-                                                viewModel.pinSelected(!state.allSelectedPinned)
-                                            }
+                                            )
+                                        }
+                                        add(
+                                            MenuAction(
+                                                label = stringResource(Res.string.common_organize),
+                                                icon = Icons.Filled.Tune,
+                                                children = organize
+                                            )
                                         )
-                                        DropdownMenuItem(
-                                            text = { Text(stringResource(Res.string.common_free_space)) },
-                                            enabled = !state.folderInSelection &&
-                                                    state.capabilities.canFreeUpSpace,
-                                            onClick = {
-                                                showSelectionOverflow = false
-                                                confirmDeleteLocal = true
-                                            }
-                                        )
-                                        DropdownMenuItem(
-                                            text = { Text(stringResource(Res.string.files_hide)) },
-                                            enabled = !state.folderInSelection,
-                                            onClick = {
-                                                showSelectionOverflow = false
-                                                viewModel.hideSelected(true)
-                                            }
-                                        )
-                                        DropdownMenuItem(
-                                            text = { Text(stringResource(Res.string.files_archive)) },
-                                            enabled = !state.folderInSelection,
-                                            onClick = {
-                                                showSelectionOverflow = false
-                                                viewModel.archiveSelected(true)
-                                            }
-                                        )
-                                        DropdownMenuItem(
-                                            text = { Text(stringResource(Res.string.common_move_trash)) },
-                                            onClick = {
-                                                showSelectionOverflow = false
-                                                confirmTrash = true
-                                            }
+                                        if (editableNote) {
+                                            add(
+                                                MenuAction(
+                                                    label = stringResource(Res.string.note_edit_action),
+                                                    icon = Icons.Filled.EditNote
+                                                ) { viewModel.editSelectedNote() }
+                                            )
+                                        }
+                                        if (state.selectionCount + state.folderSelection.size == 1) {
+                                            add(
+                                                MenuAction(
+                                                    label = stringResource(Res.string.info_details),
+                                                    icon = Icons.Outlined.Info
+                                                ) { viewModel.showInfoForSelection() }
+                                            )
+                                        }
+                                        add(
+                                            MenuAction(
+                                                label = stringResource(Res.string.common_move_trash),
+                                                icon = Icons.Filled.DeleteOutline
+                                            ) { confirmTrash = true }
                                         )
                                     }
+
+                                    ActionMenu(
+                                        expanded = showSelectionOverflow,
+                                        onDismissRequest = { showSelectionOverflow = false },
+                                        actions = actions
+                                    )
                                 }
                             }
                         )

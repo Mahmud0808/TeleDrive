@@ -1,5 +1,6 @@
 package com.drdisagree.teledrive.presentation.components
 
+import com.drdisagree.teledrive.core.files.MimeTypes
 import com.drdisagree.teledrive.domain.model.DriveFile
 
 data class SelectionCapabilities(
@@ -7,6 +8,7 @@ data class SelectionCapabilities(
     val canDownload: Boolean = false,
     val canFreeUpSpace: Boolean = false,
     val anyUnpinned: Boolean = false,
+    val canEditNote: Boolean = false,
     val soleLocalPath: String? = null
 ) {
     companion object {
@@ -15,6 +17,7 @@ data class SelectionCapabilities(
             canDownload = files.any { it.hasRemoteCopy && !it.hasLocalCopy },
             canFreeUpSpace = files.any { it.hasRemoteCopy && it.hasLocalCopy },
             anyUnpinned = files.any { !it.isPinned },
+            canEditNote = files.singleOrNull()?.let { MimeTypes.isText(it.mimeType) } == true,
             soleLocalPath = files.singleOrNull()?.localPath
         )
     }
