@@ -20,6 +20,7 @@ data class UserPreferences(
     val blockScreenCapture: Boolean = false,
     val autoLockTimeoutMinutes: Int = 5,
     val encryptFiles: Boolean = false,
+    val deleteAfterUpload: Boolean = false,
     val encryptThumbnails: Boolean = false,
     val keyBackupCreated: Boolean = false,
     val folderOwnershipRepaired: Boolean = false,

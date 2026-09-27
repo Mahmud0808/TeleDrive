@@ -622,6 +622,8 @@
     <string name="settings_clear_thumbnails_action">Clear thumbnails</string>
     <string name="settings_clear_thumbnails_title">Clear thumbnails?</string>
     <string name="settings_free_up_space_title">Free up %1$s?</string>
+    <string name="settings_delete_after_upload">Delete local copy after backup</string>
+    <string name="settings_delete_after_upload_summary">Removes the file from this device once it is stored in the channel and its hash still matches. Items kept on device are never removed.</string>
     <string name="settings_gallery_previews_regenerated_browse">Gallery previews will be regenerated as you browse. Your files are not affected.</string>
     <string name="settings_local_copies_files_already">Local copies of files already backed up to Telegram will be deleted from this device. They stay in your Telegram channel and can be downloaded again.</string>
 

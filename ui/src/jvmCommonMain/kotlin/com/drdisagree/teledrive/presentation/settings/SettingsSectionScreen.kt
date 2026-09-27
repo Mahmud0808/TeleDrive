@@ -43,6 +43,8 @@ import androidx.compose.ui.unit.dp
 import org.koin.compose.viewmodel.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.drdisagree.teledrive.domain.model.AppLanguage
+import com.drdisagree.teledrive.resources.settings_delete_after_upload
+import com.drdisagree.teledrive.resources.settings_delete_after_upload_summary
 import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.language_english
 import com.drdisagree.teledrive.resources.language_labels
@@ -641,6 +643,16 @@ private fun StorageSection(
                 title = stringResource(Res.string.settings_download_location_reset),
                 subtitle = stringResource(Res.string.settings_download_location_default),
                 onClick = { viewModel.update { it.copy(downloadDirectory = null) } }
+            )
+        }
+        add {
+            SettingsSwitchRow(
+                title = stringResource(Res.string.settings_delete_after_upload),
+                subtitle = stringResource(Res.string.settings_delete_after_upload_summary),
+                checked = prefs.deleteAfterUpload,
+                onChange = { value ->
+                    viewModel.update { it.copy(deleteAfterUpload = value) }
+                }
             )
         }
         add {

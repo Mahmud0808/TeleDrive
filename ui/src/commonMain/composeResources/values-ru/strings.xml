@@ -644,6 +644,8 @@
     <string name="settings_clear_thumbnails_action">Очистить миниатюры</string>
     <string name="settings_clear_thumbnails_title">Очистить миниатюры?</string>
     <string name="settings_free_up_space_title">Освободить %1$s?</string>
+    <string name="settings_delete_after_upload">Удалять локальную копию после бэкапа</string>
+    <string name="settings_delete_after_upload_summary">Удаляет файл с этого устройства, когда он сохранён в канале и его хеш совпадает. Файлы, хранящиеся на устройстве, не удаляются.</string>
     <string name="settings_gallery_previews_regenerated_browse">Превью в галерее будут пересозданы по мере просмотра. Ваши файлы не затронуты.</string>
     <string name="settings_local_copies_files_already">Локальные копии файлов, уже загруженных в Telegram, будут удалены с устройства. Они остаются в вашем канале Telegram и могут быть скачаны снова.</string>
 

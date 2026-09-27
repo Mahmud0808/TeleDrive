@@ -256,7 +256,7 @@ class TransferExecutor(
                                     telegramClient.deleteMessages(chatId, listOf(stale))
                                 }
                             }
-                        dropStagedSource(entity.id, localPath)
+                        releaseLocalCopy(transfer.type, entity, localPath, contentHash)
                         transferDao.setCompleted(transfer.id, System.currentTimeMillis())
                         outcome = Outcome.Completed
                     }
@@ -376,7 +376,7 @@ class TransferExecutor(
                                     telegramClient.deleteMessages(chatId, listOf(stale))
                                 }
                             }
-                            dropStagedSource(entity.id, localPath)
+                            releaseLocalCopy(transfer.type, entity, localPath, contentHash)
                             transferDao.setCompleted(transfer.id, System.currentTimeMillis())
                             outcome = Outcome.Completed
                         }
@@ -540,10 +540,31 @@ class TransferExecutor(
         return Outcome.Completed
     }
 
-    private suspend fun dropStagedSource(fileId: String, localPath: String) {
-        if (!fileImporter.isStaged(localPath)) return
-        File(localPath).delete()
-        fileDao.setLocalPath(fileId, null)
+    /**
+     * Frees the source now the bytes are stored remotely. A staged import is
+     * always dropped because the app made that copy itself. The user's own file
+     * only goes when the setting asks for it, the file is not kept offline, and
+     * it still hashes to what was uploaded, so a file edited mid-upload stays.
+     */
+    private suspend fun releaseLocalCopy(
+        type: TransferType,
+        entity: FileEntity,
+        localPath: String,
+        contentHash: String?
+    ) {
+        if (fileImporter.isStaged(localPath)) {
+            File(localPath).delete()
+            fileDao.setLocalPath(entity.id, null)
+            return
+        }
+        if (type != TransferType.BACKUP) return
+        if (!settingsRepository.preferences.first().deleteAfterUpload) return
+        if (fileDao.isKeptOffline(entity.id)) return
+
+        val source = File(localPath)
+        if (!source.isFile || contentHash == null) return
+        if (Hashing.sha256(source) != contentHash) return
+        if (source.delete()) fileDao.setLocalPath(entity.id, null)
     }
 
     private suspend fun checkControl(transferId: String) {

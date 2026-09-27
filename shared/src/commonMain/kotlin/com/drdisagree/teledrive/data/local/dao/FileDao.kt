@@ -173,6 +173,23 @@ interface FileDao {
     @Query("UPDATE files SET isFavorite = :favorite WHERE id IN (:ids)")
     suspend fun setFavorite(ids: List<String>, favorite: Boolean)
 
+    @Query(
+        """WITH RECURSIVE pinned_folders(id) AS (
+               SELECT id FROM folders WHERE isPinned = 1
+               UNION
+               SELECT folders.id FROM folders
+               JOIN pinned_folders ON folders.parentId = pinned_folders.id
+           )
+           SELECT EXISTS(
+               SELECT 1 FROM files
+               WHERE id = :id
+                 AND (isPinned = 1
+                      OR (folderId IS NOT NULL
+                          AND folderId IN (SELECT id FROM pinned_folders)))
+           )"""
+    )
+    suspend fun isKeptOffline(id: String): Boolean
+
     @Query("UPDATE files SET isPinned = :pinned WHERE id IN (:ids)")
     suspend fun setPinned(ids: List<String>, pinned: Boolean)
 

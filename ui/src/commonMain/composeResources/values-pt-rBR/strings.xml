@@ -622,6 +622,8 @@
     <string name="settings_clear_thumbnails_action">Limpar miniaturas</string>
     <string name="settings_clear_thumbnails_title">Limpar miniaturas?</string>
     <string name="settings_free_up_space_title">Liberar %1$s?</string>
+    <string name="settings_delete_after_upload">Excluir cópia local após o backup</string>
+    <string name="settings_delete_after_upload_summary">Remove o arquivo deste dispositivo assim que ele estiver armazenado no canal e o hash ainda corresponder. Itens mantidos no dispositivo nunca são removidos.</string>
     <string name="settings_gallery_previews_regenerated_browse">As pré-visualizações da galeria serão geradas novamente conforme você navega. Seus arquivos não serão afetados.</string>
     <string name="settings_local_copies_files_already">As cópias locais dos arquivos que já estão salvos em backup no Telegram serão excluídas deste dispositivo. Elas permanecem no seu canal do Telegram e podem ser baixadas novamente.</string>
 

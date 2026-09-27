@@ -29,6 +29,7 @@ object PreferenceKeys {
     val APP_LOCK_ENABLED = booleanPreferencesKey("app_lock_enabled")
     val AUTO_LOCK_TIMEOUT_MINUTES = intPreferencesKey("auto_lock_timeout_minutes")
     val ENCRYPT_FILES = booleanPreferencesKey("encrypt_files")
+    val DELETE_AFTER_UPLOAD = booleanPreferencesKey("delete_after_upload")
     val ENCRYPT_THUMBNAILS = booleanPreferencesKey("encrypt_thumbnails")
     val KEY_BACKUP_CREATED = booleanPreferencesKey("key_backup_created")
     val FOLDER_OWNERSHIP_REPAIRED = booleanPreferencesKey("folder_ownership_repaired")
