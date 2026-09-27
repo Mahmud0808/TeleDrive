@@ -1,14 +1,5 @@
 package com.drdisagree.teledrive.presentation.preview
 
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.VectorConverter
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.gestures.calculatePan
-import androidx.compose.foundation.gestures.calculateZoom
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BrokenImage
@@ -16,27 +7,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.unit.IntSize
-import coil3.compose.AsyncImage
-import coil3.compose.AsyncImagePainter
+import androidx.compose.ui.platform.LocalContext
+import coil3.request.ImageRequest
 import com.drdisagree.teledrive.presentation.components.EmptyState
 import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.preview_image_undecodable
-import kotlinx.coroutines.launch
+import me.saket.telephoto.zoomable.ZoomSpec
+import me.saket.telephoto.zoomable.coil3.ZoomableAsyncImage
+import me.saket.telephoto.zoomable.rememberZoomableImageState
+import me.saket.telephoto.zoomable.rememberZoomableState
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * Pinch and double-tap zoomable image. Pan is clamped so the image cannot be
- * dragged off-screen, and touches stay unconsumed while the image sits at 1x
- * so a horizontal drag still reaches the pager.
+ * Pinch and double-tap zoomable image. Tiles are decoded from the file at the
+ * current zoom level, so a photo stays sharp well past the point where a single
+ * screen-sized bitmap would blur, without holding the whole image in memory.
  */
 @Composable
 fun ZoomableImage(
@@ -54,96 +41,24 @@ fun ZoomableImage(
         )
         return
     }
-    val scale = remember { Animatable(1f) }
-    val offset = remember { Animatable(Offset.Zero, Offset.VectorConverter) }
-    val scope = rememberCoroutineScope()
-    var viewport by remember { mutableStateOf(IntSize.Zero) }
 
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .onSizeChanged { viewport = it }
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onTap = { onTap() },
-                    onDoubleTap = { tapOffset ->
-                        val zoomedIn = scale.value > 1f
-                        val target = if (zoomedIn) 1f else DOUBLE_TAP_SCALE
-                        val focus = if (zoomedIn) {
-                            Offset.Zero
-                        } else {
-                            clampOffset(
-                                Offset(
-                                    (viewport.width / 2f - tapOffset.x) * (target - 1f),
-                                    (viewport.height / 2f - tapOffset.y) * (target - 1f)
-                                ),
-                                target,
-                                viewport
-                            )
-                        }
-                        scope.launch {
-                            launch { scale.animateTo(target, tween(ZOOM_ANIMATION_MS)) }
-                            launch { offset.animateTo(focus, tween(ZOOM_ANIMATION_MS)) }
-                        }
-                    }
-                )
-            }
-            .pointerInput(Unit) {
-                awaitEachGesture {
-                    awaitFirstDown(requireUnconsumed = false)
-                    do {
-                        val event = awaitPointerEvent()
-                        val pinching = event.changes.count { it.pressed } > 1
-                        if (!pinching && scale.value <= 1f) continue
-
-                        val zoom = event.calculateZoom()
-                        val pan = event.calculatePan()
-                        if (zoom == 1f && pan == Offset.Zero) continue
-
-                        val target = (scale.value * zoom).coerceIn(1f, MAX_SCALE)
-                        val moved = if (target > 1f) {
-                            clampOffset(offset.value + pan, target, viewport)
-                        } else {
-                            Offset.Zero
-                        }
-                        scope.launch {
-                            launch { scale.snapTo(target) }
-                            launch { offset.snapTo(moved) }
-                        }
-                        event.changes.forEach { it.consume() }
-                    } while (event.changes.any { it.pressed })
-                }
-            }
-    ) {
-        AsyncImage(
-            model = model,
-            contentDescription = contentDescription,
-            contentScale = ContentScale.Fit,
-            onState = { state ->
-                if (state is AsyncImagePainter.State.Error) undecodable = true
-            },
-            modifier = Modifier
-                .fillMaxSize()
-                .graphicsLayer {
-                    scaleX = scale.value
-                    scaleY = scale.value
-                    translationX = offset.value.x
-                    translationY = offset.value.y
-                }
-        )
+    val context = LocalContext.current
+    val request = remember(model) {
+        ImageRequest.Builder(context)
+            .data(model)
+            .listener(onError = { _, _ -> undecodable = true })
+            .build()
     }
-}
 
-/** Keeps the scaled image covering the viewport, so no empty edge shows. */
-private fun clampOffset(target: Offset, scale: Float, viewport: IntSize): Offset {
-    val maxX = viewport.width * (scale - 1f) / 2f
-    val maxY = viewport.height * (scale - 1f) / 2f
-    return Offset(
-        x = target.x.coerceIn(-maxX, maxX),
-        y = target.y.coerceIn(-maxY, maxY)
+    ZoomableAsyncImage(
+        model = request,
+        contentDescription = contentDescription,
+        state = rememberZoomableImageState(
+            rememberZoomableState(zoomSpec = ZoomSpec(maxZoomFactor = MAX_ZOOM))
+        ),
+        onClick = { onTap() },
+        modifier = modifier.fillMaxSize()
     )
 }
 
-private const val MAX_SCALE = 6f
-private const val DOUBLE_TAP_SCALE = 2.5f
-private const val ZOOM_ANIMATION_MS = 250
+private const val MAX_ZOOM = 6f
