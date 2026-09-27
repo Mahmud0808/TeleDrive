@@ -281,6 +281,7 @@
 
     <!-- Search -->
     <string name="search_section_files">Files</string>
+    <string name="search_open_folder">Open containing folder</string>
     <string name="search_section_folders">Folders</string>
 
     <!-- Files -->

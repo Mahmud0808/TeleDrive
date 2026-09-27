@@ -2,15 +2,20 @@ package com.drdisagree.teledrive.presentation.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.drdisagree.teledrive.domain.model.FileQuerySpec
 import com.drdisagree.teledrive.domain.model.DriveFile
 import com.drdisagree.teledrive.domain.model.DriveFolder
 import com.drdisagree.teledrive.domain.model.FileCategory
+import com.drdisagree.teledrive.domain.model.FileQuerySpec
 import com.drdisagree.teledrive.domain.model.FileSortField
 import com.drdisagree.teledrive.domain.model.SortDirection
 import com.drdisagree.teledrive.domain.repository.FileRepository
+import com.drdisagree.teledrive.domain.repository.TransferRepository
+import com.drdisagree.teledrive.domain.repository.TrashRepository
+import com.drdisagree.teledrive.presentation.components.SelectionCapabilities
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -22,6 +27,8 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.time.Duration.Companion.milliseconds
 
 data class SearchFilters(
@@ -39,8 +46,15 @@ data class SearchUiState(
     val results: List<DriveFile> = emptyList(),
     val folders: List<DriveFolder> = emptyList(),
     val searching: Boolean = false,
-    val searched: Boolean = false
-)
+    val searched: Boolean = false,
+    val selection: Set<String> = emptySet()
+) {
+    val selectionMode: Boolean get() = selection.isNotEmpty()
+    val selectedFiles: List<DriveFile> get() = results.filter { it.id in selection }
+    val capabilities: SelectionCapabilities get() = SelectionCapabilities.of(selectedFiles)
+    val allSelectedPinned: Boolean get() = selectionMode && !capabilities.anyUnpinned
+    val soleFolderId: String? get() = selectedFiles.singleOrNull()?.folderId
+}
 
 /**
  * Local-metadata search with debounced input. No remote calls happen while
@@ -48,8 +62,12 @@ data class SearchUiState(
  */
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 class SearchViewModel(
-    private val fileRepository: FileRepository
+    private val fileRepository: FileRepository,
+    private val trashRepository: TrashRepository,
+    private val transferRepository: TransferRepository
 ) : ViewModel() {
+
+    private val selection = MutableStateFlow<Set<String>>(emptySet())
 
     private val query = MutableStateFlow("")
     private val filters = MutableStateFlow(SearchFilters())
@@ -100,7 +118,7 @@ class SearchViewModel(
             }
         }
 
-    val uiState: StateFlow<SearchUiState> = combine(
+    private val base: Flow<SearchUiState> = combine(
         query,
         filters,
         results,
@@ -115,7 +133,48 @@ class SearchViewModel(
             searching = isSearching,
             searched = text.isNotBlank() || filterValues != SearchFilters()
         )
+    }
+
+    val uiState: StateFlow<SearchUiState> = combine(base, selection) { state, selected ->
+        // Results change as the query does, so a selection cannot outlive them.
+        state.copy(selection = selected.intersect(state.results.map { it.id }.toSet()))
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SearchUiState())
+
+    fun toggleSelection(id: String) = selection.update { current ->
+        if (id in current) current - id else current + id
+    }
+
+    fun clearSelection() = selection.update { emptySet() }
+
+    fun selectAll() {
+        selection.value = uiState.value.results.map { it.id }.toSet()
+    }
+
+    fun downloadSelected() {
+        val ids = selection.value.toList()
+        clearSelection()
+        viewModelScope.launch { ids.forEach { transferRepository.enqueueDownload(it) } }
+    }
+
+    fun favoriteSelected() {
+        val ids = selection.value.toList()
+        clearSelection()
+        viewModelScope.launch { fileRepository.setFilesFavorite(ids, true) }
+    }
+
+    fun pinSelected(pinned: Boolean) {
+        val ids = selection.value.toList()
+        clearSelection()
+        viewModelScope.launch { fileRepository.setFilesPinned(ids, pinned) }
+    }
+
+    fun trashSelected() {
+        val ids = selection.value.toList()
+        clearSelection()
+        viewModelScope.launch {
+            withContext(NonCancellable) { trashRepository.moveFilesToTrash(ids) }
+        }
+    }
 
     fun setQuery(value: String) = query.update { value }
 

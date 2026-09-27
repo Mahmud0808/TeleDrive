@@ -303,6 +303,7 @@
 
     <!-- Search -->
     <string name="search_section_files">Файлы</string>
+    <string name="search_open_folder">Открыть папку файла</string>
     <string name="search_section_folders">Папки</string>
 
     <!-- Files -->
