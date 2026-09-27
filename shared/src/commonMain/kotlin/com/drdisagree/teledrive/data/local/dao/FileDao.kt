@@ -190,6 +190,9 @@ interface FileDao {
     )
     suspend fun isKeptOffline(id: String): Boolean
 
+    @Query("UPDATE files SET contentHash = :contentHash WHERE id = :id")
+    suspend fun setContentHash(id: String, contentHash: String)
+
     @Query("UPDATE files SET isPinned = :pinned WHERE id IN (:ids)")
     suspend fun setPinned(ids: List<String>, pinned: Boolean)
 

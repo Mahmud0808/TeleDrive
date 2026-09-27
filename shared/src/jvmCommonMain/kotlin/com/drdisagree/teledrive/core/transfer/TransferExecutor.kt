@@ -132,10 +132,12 @@ class TransferExecutor(
         val encrypt = prefs.encryptFiles && prefs.keyBackupCreated
         val uploadSize = sourceFile.length()
         val sizeChanged = entity.sizeBytes != uploadSize
-        val contentHash = if (sizeChanged) {
-            Hashing.sha256(sourceFile)
-        } else {
-            entity.contentHash ?: Hashing.sha256(sourceFile)
+        val hashUpFront = uploadSize <= EAGER_HASH_LIMIT ||
+                !splitsIntoParts(entity, sourceFile, encrypt)
+        val contentHash = when {
+            !hashUpFront -> entity.contentHash
+            sizeChanged -> Hashing.sha256(sourceFile)
+            else -> entity.contentHash ?: Hashing.sha256(sourceFile)
         }
         if (sizeChanged || (contentHash != null && contentHash != entity.contentHash)) {
             fileDao.upsert(entity.copy(sizeBytes = uploadSize, contentHash = contentHash))
@@ -348,6 +350,9 @@ class TransferExecutor(
                         is PartUploader.Event.Completed -> {
                             val first = event.parts.firstOrNull()
                                 ?: error("Upload finished with no parts")
+                            event.contentHash
+                                ?.takeIf { it != entity.contentHash }
+                                ?.let { fileDao.setContentHash(entity.id, it) }
                             fileDao.setPartCount(entity.id, event.parts.size)
                             fileDao.setRemoteMapping(
                                 id = entity.id,
@@ -562,8 +567,12 @@ class TransferExecutor(
         if (fileDao.isKeptOffline(entity.id)) return
 
         val source = File(localPath)
-        if (!source.isFile || contentHash == null) return
-        if (Hashing.sha256(source) != contentHash) return
+        if (!source.isFile || source.length() != entity.sizeBytes) return
+        if (source.length() <= EAGER_HASH_LIMIT &&
+            (contentHash == null || Hashing.sha256(source) != contentHash)
+        ) {
+            return
+        }
         if (source.delete()) fileDao.setLocalPath(entity.id, null)
     }
 
@@ -581,6 +590,7 @@ class TransferExecutor(
     private class TransferControlException(val paused: Boolean) : Exception()
 
     companion object {
+        private const val EAGER_HASH_LIMIT = 512L * 1024 * 1024
         private const val STALL_TIMEOUT_MS = 180_000L
         private const val STALL_CODE = 408
     }

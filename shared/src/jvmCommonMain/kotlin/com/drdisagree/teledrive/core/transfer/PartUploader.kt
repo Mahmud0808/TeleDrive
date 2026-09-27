@@ -1,5 +1,6 @@
 package com.drdisagree.teledrive.core.transfer
 
+import com.drdisagree.teledrive.core.files.Hashing
 import com.drdisagree.teledrive.core.files.AppStoragePaths
 import com.drdisagree.teledrive.core.common.SafeLog
 import com.drdisagree.teledrive.core.crypto.CryptoKeys
@@ -47,7 +48,10 @@ class PartUploader(
         data class Progress(val transferredBytes: Long) : Event
         data class PartDone(val partIndex: Int, val partCount: Int) : Event
         data class Sealing(val partIndex: Int) : Event
-        data class Completed(val parts: List<FilePartEntity>) : Event
+        data class Completed(
+            val parts: List<FilePartEntity>,
+            val contentHash: String?
+        ) : Event
     }
 
     fun upload(
@@ -67,6 +71,8 @@ class PartUploader(
         var uploadedBefore = done.values.sumOf { it.plainSize }
         emit(Event.Progress(uploadedBefore))
 
+        val hasher = if (done.isEmpty()) Hashing.Accumulator() else null
+
         for (index in 0 until partCount) {
             if (done.containsKey(index)) continue
 
@@ -77,7 +83,7 @@ class PartUploader(
             try {
                 if (encrypt) emit(Event.Sealing(index))
                 withContext(dispatchers.io) {
-                    writePart(source, plainOffset, plainSize, scratch, encrypt)
+                    writePart(source, plainOffset, plainSize, scratch, encrypt, hasher)
                 }
                 if (encrypt) emit(Event.PartDone(index, partCount))
 
@@ -146,7 +152,7 @@ class PartUploader(
             }
         }
 
-        emit(Event.Completed(done.values.sortedBy { it.partIndex }))
+        emit(Event.Completed(done.values.sortedBy { it.partIndex }, hasher?.result()))
     }
 
     /** Removes whatever reached Telegram, for a canceled or deleted upload. */
@@ -167,18 +173,20 @@ class PartUploader(
         plainOffset: Long,
         plainSize: Long,
         target: File,
-        encrypt: Boolean
+        encrypt: Boolean,
+        hasher: Hashing.Accumulator?
     ) {
         target.parentFile?.mkdirs()
         source.inputStream().use { input ->
             skipExactly(input, plainOffset)
             val ranged = RangeInputStream(input, plainSize)
+            val hashed = hasher?.wrap(ranged) ?: ranged
             target.outputStream().buffered().use { output ->
                 if (encrypt) {
                     val key = wrappedKeyRepository.getOrCreate(CryptoKeys.CONTENT)
-                    streamCrypto.encryptStream(key, ranged, output)
+                    streamCrypto.encryptStream(key, hashed, output)
                 } else {
-                    ranged.copyTo(output)
+                    hashed.copyTo(output)
                 }
             }
         }
