@@ -94,8 +94,13 @@ fun PlayerGestureArea(
     }
     var adjustment by remember { mutableStateOf<AdjustmentLevel?>(null) }
 
+    var overrodeBrightness by remember(activity) { mutableStateOf(false) }
     DisposableEffect(activity) {
-        onDispose { applyBrightness(activity, WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE) }
+        onDispose {
+            if (overrodeBrightness) {
+                applyBrightness(activity, WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE)
+            }
+        }
     }
 
     LaunchedEffect(chromeVisible) {
@@ -131,6 +136,7 @@ fun PlayerGestureArea(
                             if (onLeftHalf) {
                                 brightness = (brightness + step).coerceIn(MIN_BRIGHTNESS, 1f)
                                 applyBrightness(activity, brightness)
+                                overrodeBrightness = true
                                 adjustment = AdjustmentLevel(Adjustment.BRIGHTNESS, brightness)
                             } else {
                                 volume = (volume + step).coerceIn(0f, 1f)

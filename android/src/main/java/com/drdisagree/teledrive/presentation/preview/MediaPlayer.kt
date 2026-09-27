@@ -244,10 +244,11 @@ fun MediaPlayer(
     val activity = LocalActivity.current
     DisposableEffect(activity, playing, activePage, audioOnly) {
         val window = activity?.window
-        if (playing && activePage && !audioOnly) {
-            window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        val holding = playing && activePage && !audioOnly
+        if (holding) window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        onDispose {
+            if (holding) window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
-        onDispose { window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) }
     }
 
     val darkTheme = MaterialTheme.colorScheme.surface.luminance() < LIGHT_LUMINANCE
@@ -345,10 +346,10 @@ fun MediaPlayer(
                 modifier = Modifier.matchParentSize()
             )
         }
-        if (player != null && !locked && !inPipMode) {
+        if (player != null) {
             PlayerControls(
                 player = player,
-                visible = controlsVisible,
+                visible = controlsVisible && !locked && !inPipMode,
                 audioOnly = audioOnly,
                 resizeMode = resizeMode,
                 onCycleResizeMode = { resizeMode = resizeMode.next() },
