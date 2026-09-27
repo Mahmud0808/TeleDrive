@@ -81,6 +81,9 @@
     <string name="common_collapse">Recolher</string>
     <string name="common_confirm_trash_count_title">Mover %1$d para a lixeira?</string>
     <string name="common_content_description_favorite">Favorito</string>
+    <string name="common_keep_on_device">Manter no dispositivo</string>
+    <string name="common_stop_keeping_on_device">Parar de manter no dispositivo</string>
+    <string name="common_content_description_pinned">Mantido no dispositivo</string>
     <string name="common_content_description_selected">Selecionado</string>
     <string name="common_create">Criar</string>
     <string name="common_delete_forever">Excluir permanentemente</string>

@@ -11,6 +11,7 @@ fun FolderEntity.toDomain(): DriveFolder = DriveFolder(
     isHidden = isHidden,
     isArchived = isArchived,
     isFavorite = isFavorite,
+    isPinned = isPinned,
     trashedAt = trashedAt,
     createdAt = createdAt,
     modifiedAt = modifiedAt

@@ -107,6 +107,11 @@ data class FilesUiState(
     val selectionMode: Boolean get() = selection.isNotEmpty() || folderSelection.isNotEmpty()
     val selectionCount: Int get() = selection.size + folderSelection.size
     val folderInSelection: Boolean get() = folderSelection.isNotEmpty()
+
+    val allSelectedPinned: Boolean
+        get() = selectionMode &&
+                !capabilities.anyUnpinned &&
+                folders.filter { it.id in folderSelection }.all { it.isPinned }
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -456,6 +461,35 @@ class FilesViewModel(
                 }
             )
         }
+    }
+
+    fun pinSelected(pinned: Boolean) {
+        val ids = selection.value.toList()
+        val folderIds = folderSelection.value.toList()
+        clearSelection()
+        viewModelScope.launch {
+            if (ids.isNotEmpty()) fileRepository.setFilesPinned(ids, pinned)
+            folderIds.forEach { fileRepository.setFolderPinned(it, pinned) }
+            if (pinned) fetchForOffline(ids + folderIds.flatMap { fileRepository.fileIdsInTree(it) })
+        }
+    }
+
+    /**
+     * Pinning promises an offline copy, so anything missing one is queued.
+     * Paths are reconciled first because a copy deleted outside the app still
+     * reads as present until something looks.
+     */
+    private suspend fun fetchForOffline(fileIds: List<String>) {
+        val ids = fileIds.distinct()
+        if (ids.isEmpty()) return
+        fileRepository.reconcileLocalCopies(ids)
+        val missing = fileRepository.filesByIds(ids)
+            .filter { it.hasRemoteCopy && !it.hasLocalCopy }
+        if (missing.isEmpty()) return
+        missing.forEach { transferRepository.enqueueDownload(it.id) }
+        _messages.tryEmit(
+            UiText.Resource(Res.string.files_queued_for_download, missing.size)
+        )
     }
 
     fun favoriteSelected(favorite: Boolean) {

@@ -78,11 +78,15 @@ interface FileRepository {
 
     suspend fun setFilesFavorite(ids: List<String>, favorite: Boolean)
 
+    suspend fun setFilesPinned(ids: List<String>, pinned: Boolean)
+
     suspend fun setFilesHidden(ids: List<String>, hidden: Boolean)
 
     suspend fun setFilesArchived(ids: List<String>, archived: Boolean)
 
     suspend fun setFolderFavorite(id: String, favorite: Boolean)
+
+    suspend fun setFolderPinned(id: String, pinned: Boolean)
 
     /** Registers a local file into the drive without uploading it. */
     suspend fun importLocalFile(
@@ -91,16 +95,10 @@ interface FileRepository {
         displayName: String? = null
     ): AppResult<DriveFile>
 
-    /**
-     * Brings a trashed file back when [localPath] holds the very same bytes,
-     * so re-uploading a deleted file restores it instead of storing a copy.
-     */
-    /**
-     * A file already in this drive with the same bytes, or null. Size narrows
-     * the candidates so the hash is only read when one could actually match.
-     */
     /** Live view of specific files, so open menus follow row changes. */
     fun observeFilesByIds(ids: List<String>): Flow<List<DriveFile>>
+
+    suspend fun filesByIds(ids: List<String>): List<DriveFile>
 
     /**
      * Clears local paths whose file has vanished from storage, so a copy the

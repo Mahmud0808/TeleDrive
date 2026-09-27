@@ -123,6 +123,9 @@ interface FolderDao {
     @Query("UPDATE folders SET isFavorite = :favorite WHERE id = :id")
     suspend fun setFavorite(id: String, favorite: Boolean)
 
+    @Query("UPDATE folders SET isPinned = :pinned WHERE id = :id")
+    suspend fun setPinned(id: String, pinned: Boolean)
+
     @Query("UPDATE folders SET isHidden = :hidden WHERE id = :id")
     suspend fun setHidden(id: String, hidden: Boolean)
 

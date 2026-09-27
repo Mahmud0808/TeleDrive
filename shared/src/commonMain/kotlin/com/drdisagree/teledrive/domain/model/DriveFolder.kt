@@ -7,6 +7,7 @@ data class DriveFolder(
     val isHidden: Boolean,
     val isArchived: Boolean,
     val isFavorite: Boolean,
+    val isPinned: Boolean = false,
     val trashedAt: Long?,
     val createdAt: Long,
     val modifiedAt: Long,

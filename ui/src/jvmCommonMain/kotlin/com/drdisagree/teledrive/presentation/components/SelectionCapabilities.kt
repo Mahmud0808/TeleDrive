@@ -6,6 +6,7 @@ data class SelectionCapabilities(
     val canUpload: Boolean = false,
     val canDownload: Boolean = false,
     val canFreeUpSpace: Boolean = false,
+    val anyUnpinned: Boolean = false,
     val soleLocalPath: String? = null
 ) {
     companion object {
@@ -13,6 +14,7 @@ data class SelectionCapabilities(
             canUpload = files.any { !it.hasRemoteCopy },
             canDownload = files.any { it.hasRemoteCopy && !it.hasLocalCopy },
             canFreeUpSpace = files.any { it.hasRemoteCopy && it.hasLocalCopy },
+            anyUnpinned = files.any { !it.isPinned },
             soleLocalPath = files.singleOrNull()?.localPath
         )
     }

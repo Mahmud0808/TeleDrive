@@ -103,6 +103,9 @@
     <string name="common_collapse">Свернуть</string>
     <string name="common_confirm_trash_count_title">Переместить %1$d в корзину?</string>
     <string name="common_content_description_favorite">Избранное</string>
+    <string name="common_keep_on_device">Хранить на устройстве</string>
+    <string name="common_stop_keeping_on_device">Не хранить на устройстве</string>
+    <string name="common_content_description_pinned">Хранится на устройстве</string>
     <string name="common_content_description_selected">Выбрано</string>
     <string name="common_create">Создать</string>
     <string name="common_delete_forever">Удалить навсегда</string>

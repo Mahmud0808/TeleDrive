@@ -173,6 +173,9 @@ interface FileDao {
     @Query("UPDATE files SET isFavorite = :favorite WHERE id IN (:ids)")
     suspend fun setFavorite(ids: List<String>, favorite: Boolean)
 
+    @Query("UPDATE files SET isPinned = :pinned WHERE id IN (:ids)")
+    suspend fun setPinned(ids: List<String>, pinned: Boolean)
+
     @Query("UPDATE files SET isHidden = :hidden WHERE id IN (:ids)")
     suspend fun setHidden(ids: List<String>, hidden: Boolean)
 
@@ -310,28 +313,52 @@ interface FileDao {
     suspend fun allLocalPaths(): List<String>
 
     @Query(
-        """SELECT COALESCE(SUM(sizeBytes), 0) FROM files
+        """WITH RECURSIVE pinned_folders(id) AS (
+               SELECT id FROM folders WHERE isPinned = 1
+               UNION
+               SELECT folders.id FROM folders
+               JOIN pinned_folders ON folders.parentId = pinned_folders.id
+           )
+           SELECT COALESCE(SUM(sizeBytes), 0) FROM files
            WHERE localPath IS NOT NULL
              AND messageId IS NOT NULL
              AND backupState = 'BACKED_UP'
-             AND chatId IS :chatId"""
+             AND chatId IS :chatId
+             AND isPinned = 0
+             AND (folderId IS NULL OR folderId NOT IN (SELECT id FROM pinned_folders))"""
     )
     fun observeReclaimableBytes(chatId: Long?): Flow<Long>
 
     @Query(
-        """SELECT id FROM files
+        """WITH RECURSIVE pinned_folders(id) AS (
+               SELECT id FROM folders WHERE isPinned = 1
+               UNION
+               SELECT folders.id FROM folders
+               JOIN pinned_folders ON folders.parentId = pinned_folders.id
+           )
+           SELECT id FROM files
            WHERE localPath IS NOT NULL
              AND messageId IS NOT NULL
              AND backupState = 'BACKED_UP'
-             AND chatId IS :chatId"""
+             AND chatId IS :chatId
+             AND isPinned = 0
+             AND (folderId IS NULL OR folderId NOT IN (SELECT id FROM pinned_folders))"""
     )
     suspend fun reclaimableFileIds(chatId: Long?): List<String>
 
     @Query(
-        """SELECT id, localPath FROM files
+        """WITH RECURSIVE pinned_folders(id) AS (
+               SELECT id FROM folders WHERE isPinned = 1
+               UNION
+               SELECT folders.id FROM folders
+               JOIN pinned_folders ON folders.parentId = pinned_folders.id
+           )
+           SELECT id, localPath FROM files
            WHERE localPath IS NOT NULL
              AND messageId IS NOT NULL
-             AND backupState = 'BACKED_UP'"""
+             AND backupState = 'BACKED_UP'
+             AND isPinned = 0
+             AND (folderId IS NULL OR folderId NOT IN (SELECT id FROM pinned_folders))"""
     )
     suspend fun reclaimableLocalCopies(): List<LocalCopyRef>
 

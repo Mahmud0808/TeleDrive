@@ -445,6 +445,14 @@ class FileRepositoryImpl(
         publishScheduler.kick()
     }
 
+    override suspend fun setFilesPinned(ids: List<String>, pinned: Boolean) {
+        fileDao.setPinned(ids, pinned)
+    }
+
+    override suspend fun setFolderPinned(id: String, pinned: Boolean) {
+        folderDao.setPinned(id, pinned)
+    }
+
     override suspend fun setFilesFavorite(ids: List<String>, favorite: Boolean) {
         fileDao.setFavorite(ids, favorite)
         markFilesDirty(ids)
@@ -504,6 +512,9 @@ class FileRepositoryImpl(
 
     override fun observeFilesByIds(ids: List<String>): Flow<List<DriveFile>> =
         fileDao.observeByIds(ids).map { rows -> rows.map { it.toDomain() } }
+
+    override suspend fun filesByIds(ids: List<String>): List<DriveFile> =
+        fileDao.byIds(ids).map { it.toDomain() }
 
     override suspend fun reconcileLocalCopies(ids: List<String>) {
         fileDao.byIds(ids)

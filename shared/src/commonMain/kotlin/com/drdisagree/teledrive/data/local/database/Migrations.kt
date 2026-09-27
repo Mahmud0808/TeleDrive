@@ -4,6 +4,14 @@ import androidx.room.migration.Migration
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
 
+/** Adds the device-local pin that keeps a copy out of "free up space". */
+val MIGRATION_10_11 = object : Migration(10, 11) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("ALTER TABLE files ADD COLUMN isPinned INTEGER NOT NULL DEFAULT 0")
+        connection.execSQL("ALTER TABLE folders ADD COLUMN isPinned INTEGER NOT NULL DEFAULT 0")
+    }
+}
+
 /** Adds iconFileId for storing uploaded APK icon remote file IDs. */
 val MIGRATION_9_10 = object : Migration(9, 10) {
     override fun migrate(connection: SQLiteConnection) {

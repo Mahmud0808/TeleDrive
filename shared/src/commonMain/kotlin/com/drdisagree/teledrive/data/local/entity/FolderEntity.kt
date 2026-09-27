@@ -25,6 +25,7 @@ data class FolderEntity(
     val isHidden: Boolean = false,
     val isArchived: Boolean = false,
     val isFavorite: Boolean = false,
+    val isPinned: Boolean = false,
     val trashedAt: Long? = null,
     val preTrashParentId: String? = null,
     val pendingPublish: Boolean = false,

@@ -130,7 +130,9 @@ import com.drdisagree.teledrive.resources.common_confirm_trash_count_title
 import com.drdisagree.teledrive.resources.common_create
 import com.drdisagree.teledrive.resources.common_deselect_all
 import com.drdisagree.teledrive.resources.common_download
+import com.drdisagree.teledrive.resources.common_keep_on_device
 import com.drdisagree.teledrive.resources.common_free_space
+import com.drdisagree.teledrive.resources.common_stop_keeping_on_device
 import com.drdisagree.teledrive.resources.common_move_trash
 import com.drdisagree.teledrive.resources.common_rename
 import com.drdisagree.teledrive.resources.common_restore_trash_emptied
@@ -412,6 +414,23 @@ fun FilesScreen(
                                             onClick = {
                                                 showSelectionOverflow = false
                                                 viewModel.favoriteSelected(true)
+                                            }
+                                        )
+                                        DropdownMenuItem(
+                                            text = {
+                                                Text(
+                                                    stringResource(
+                                                        if (state.allSelectedPinned) {
+                                                            Res.string.common_stop_keeping_on_device
+                                                        } else {
+                                                            Res.string.common_keep_on_device
+                                                        }
+                                                    )
+                                                )
+                                            },
+                                            onClick = {
+                                                showSelectionOverflow = false
+                                                viewModel.pinSelected(!state.allSelectedPinned)
                                             }
                                         )
                                         DropdownMenuItem(
