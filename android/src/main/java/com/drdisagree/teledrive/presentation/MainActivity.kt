@@ -22,6 +22,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.drdisagree.teledrive.core.common.AppNotifications
 import com.drdisagree.teledrive.core.files.PendingShare
+import com.drdisagree.teledrive.core.media.PipController
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.presentation.platform.ProvidePlatformActions
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,6 +38,7 @@ import org.koin.android.ext.android.inject
 class MainActivity : FragmentActivity() {
 
     private val settingsRepository: SettingsRepository by inject()
+    private val pipController: PipController by inject()
 
 
     /**
@@ -67,9 +69,23 @@ class MainActivity : FragmentActivity() {
                         } else {
                             window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
                         }
+                        pipController.setSecureWindow(locked)
                     }
             }
         }
+    }
+
+    override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
+        pipController.enter(this)
+    }
+
+    override fun onPictureInPictureModeChanged(
+        isInPictureInPictureMode: Boolean,
+        newConfig: Configuration
+    ) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        pipController.onModeChanged(isInPictureInPictureMode)
     }
 
     private val pendingShare: PendingShare by inject()

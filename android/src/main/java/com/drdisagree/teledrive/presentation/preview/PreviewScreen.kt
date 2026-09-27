@@ -134,6 +134,7 @@ import com.drdisagree.teledrive.resources.preview_share_copy
 import com.drdisagree.teledrive.resources.preview_truncated_download_view
 import com.drdisagree.teledrive.resources.preview_unarchive
 import com.drdisagree.teledrive.core.files.MimeTypes
+import com.drdisagree.teledrive.core.media.PipController
 import com.drdisagree.teledrive.core.media.TelegramDataSourceFactory
 import com.drdisagree.teledrive.domain.model.DriveFile
 import com.drdisagree.teledrive.domain.model.FileCategory
@@ -221,7 +222,8 @@ fun PreviewScreen(
     val immersive = currentFile.category == FileCategory.IMAGE ||
             currentFile.category == FileCategory.VIDEO
     var chromeVisible by remember { mutableStateOf(true) }
-    val chromeShown = chromeVisible || !immersive
+    val inPipMode by koinInject<PipController>().inPipMode.collectAsStateWithLifecycle()
+    val chromeShown = (chromeVisible || !immersive) && !inPipMode
 
     val view = LocalView.current
     val activity = LocalActivity.current

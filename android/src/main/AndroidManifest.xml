@@ -45,6 +45,7 @@
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
             android:exported="true"
             android:launchMode="singleTop"
+            android:supportsPictureInPicture="true"
             android:theme="@style/Theme.TeleDrive"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>

@@ -26,4 +26,5 @@ val mediaModule = module {
     singleOf(::AndroidMediaMetadataExtractor) bind MediaMetadataExtractor::class
     factoryOf(::TelegramDataSourceFactory)
     single<ThumbnailMemoryCache> { CoilThumbnailMemoryCache(get()) }
+    single { PipController(androidContext()) }
 }

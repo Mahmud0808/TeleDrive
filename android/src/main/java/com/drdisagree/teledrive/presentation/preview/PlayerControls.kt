@@ -35,6 +35,7 @@ import androidx.compose.material.icons.filled.Forward10
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PictureInPictureAlt
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.RepeatOne
@@ -94,6 +95,7 @@ import com.drdisagree.teledrive.resources.player_lock_controls
 import com.drdisagree.teledrive.resources.player_more_controls
 import com.drdisagree.teledrive.resources.player_mute
 import com.drdisagree.teledrive.resources.player_pause
+import com.drdisagree.teledrive.resources.player_picture_in_picture
 import com.drdisagree.teledrive.resources.player_play
 import com.drdisagree.teledrive.resources.player_repeat_off
 import com.drdisagree.teledrive.resources.player_repeat_one
@@ -126,6 +128,7 @@ fun PlayerControls(
     onCycleResizeMode: () -> Unit,
     onInteraction: () -> Unit,
     onLock: () -> Unit = {},
+    onEnterPip: (() -> Unit)? = null,
     onPreferredAudioLanguage: (String) -> Unit = {},
     onPreferredSubtitleLanguage: (String) -> Unit = {},
     modifier: Modifier = Modifier
@@ -250,22 +253,38 @@ fun PlayerControls(
                         CompositionLocalProvider(
                             LocalLayoutDirection provides LayoutDirection.Ltr
                         ) {
-                            ControlButton(
-                                icon = if (muted) {
-                                    Icons.AutoMirrored.Filled.VolumeOff
-                                } else {
-                                    Icons.AutoMirrored.Filled.VolumeUp
-                                },
-                                description = if (muted) stringResource(Res.string.player_unmute) else stringResource(
-                                    Res.string.player_mute
-                                ),
-                                active = muted,
-                                onClick = {
-                                    onInteraction()
-                                    muted = !muted
-                                    player.volume = if (muted) 0f else 1f
-                                }
-                            )
+                            ExtraControl(expanded || audioOnly) {
+                                ControlButton(
+                                    icon = if (muted) {
+                                        Icons.AutoMirrored.Filled.VolumeOff
+                                    } else {
+                                        Icons.AutoMirrored.Filled.VolumeUp
+                                    },
+                                    description = if (muted) {
+                                        stringResource(Res.string.player_unmute)
+                                    } else {
+                                        stringResource(Res.string.player_mute)
+                                    },
+                                    active = muted,
+                                    onClick = {
+                                        onInteraction()
+                                        muted = !muted
+                                        player.volume = if (muted) 0f else 1f
+                                    }
+                                )
+                            }
+                            if (onEnterPip != null) {
+                                ControlButton(
+                                    icon = Icons.Filled.PictureInPictureAlt,
+                                    description = stringResource(
+                                        Res.string.player_picture_in_picture
+                                    ),
+                                    onClick = {
+                                        onInteraction()
+                                        onEnterPip()
+                                    }
+                                )
+                            }
                             if (!audioOnly) {
                                 ControlButton(
                                     icon = Icons.Filled.Lock,
@@ -276,25 +295,29 @@ fun PlayerControls(
                                     }
                                 )
                             }
-                            ControlButton(
-                                icon = rotation.icon,
-                                description = rotation.description,
-                                active = rotation != PlayerRotation.AUTO,
-                                onClick = {
-                                    onInteraction()
-                                    rotation = rotation.next()
-                                    activity?.requestedOrientation = rotation.orientation
-                                }
-                            )
-                            if (!audioOnly) {
+                            ExtraControl(expanded) {
                                 ControlButton(
-                                    icon = resizeMode.icon,
-                                    description = resizeMode.description,
+                                    icon = rotation.icon,
+                                    description = rotation.description,
+                                    active = rotation != PlayerRotation.AUTO,
                                     onClick = {
                                         onInteraction()
-                                        onCycleResizeMode()
+                                        rotation = rotation.next()
+                                        activity?.requestedOrientation = rotation.orientation
                                     }
                                 )
+                            }
+                            if (!audioOnly) {
+                                ExtraControl(expanded) {
+                                    ControlButton(
+                                        icon = resizeMode.icon,
+                                        description = resizeMode.description,
+                                        onClick = {
+                                            onInteraction()
+                                            onCycleResizeMode()
+                                        }
+                                    )
+                                }
                             }
                             ExtraControl(expanded) {
                                 ControlButton(

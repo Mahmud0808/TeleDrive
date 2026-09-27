@@ -476,6 +476,7 @@
     <string name="player_hide_subtitles">Скрыть субтитры</string>
     <string name="player_more_controls">Больше элементов управления</string>
     <string name="player_mute">Выключить звук</string>
+    <string name="player_picture_in_picture">Картинка в картинке</string>
     <string name="player_pause">Пауза</string>
     <string name="player_play">Воспроизвести</string>
     <string name="player_playback_failed">Ошибка воспроизведения</string>

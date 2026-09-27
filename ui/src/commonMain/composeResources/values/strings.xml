@@ -454,6 +454,7 @@
     <string name="player_hide_subtitles">Hide subtitles</string>
     <string name="player_more_controls">More controls</string>
     <string name="player_mute">Mute</string>
+    <string name="player_picture_in_picture">Picture in picture</string>
     <string name="player_pause">Pause</string>
     <string name="player_play">Play</string>
     <string name="player_playback_failed">Playback failed</string>

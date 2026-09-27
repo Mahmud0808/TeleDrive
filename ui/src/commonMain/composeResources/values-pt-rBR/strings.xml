@@ -454,6 +454,7 @@
     <string name="player_hide_subtitles">Ocultar legendas</string>
     <string name="player_more_controls">Mais controles</string>
     <string name="player_mute">Silenciar</string>
+    <string name="player_picture_in_picture">Picture-in-picture</string>
     <string name="player_pause">Pausar</string>
     <string name="player_play">Reproduzir</string>
     <string name="player_playback_failed">Falha na reprodução</string>

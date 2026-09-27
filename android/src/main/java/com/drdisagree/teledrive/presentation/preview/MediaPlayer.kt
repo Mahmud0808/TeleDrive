@@ -3,6 +3,7 @@ package com.drdisagree.teledrive.presentation.preview
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.net.Uri
+import android.util.Rational
 import android.view.WindowManager
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.OptIn
@@ -51,6 +52,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
@@ -64,6 +66,7 @@ import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import coil3.compose.AsyncImage
+import com.drdisagree.teledrive.core.media.PipController
 import com.drdisagree.teledrive.core.media.TelegramDataSourceFactory
 import com.drdisagree.teledrive.core.media.ThumbnailModel
 import com.drdisagree.teledrive.resources.Res
@@ -73,6 +76,7 @@ import com.drdisagree.teledrive.resources.player_unlock_controls
 import java.io.File
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
@@ -177,6 +181,9 @@ fun MediaPlayer(
     var resizeMode by remember { mutableStateOf(PlayerResizeMode.FIT) }
     var playing by remember(player) { mutableStateOf(player?.isPlaying == true) }
     var sized by remember(player) { mutableStateOf((player?.videoSize?.width ?: 0) > 0) }
+    var videoRatio by remember(player) {
+        mutableStateOf(player?.videoSize?.toRational())
+    }
     var decoderFailed by remember(player) { mutableStateOf(false) }
     var playbackFailed by remember(player) { mutableStateOf(false) }
 
@@ -189,6 +196,7 @@ fun MediaPlayer(
 
             override fun onVideoSizeChanged(videoSize: VideoSize) {
                 sized = videoSize.width > 0 && videoSize.height > 0
+                videoRatio = videoSize.toRational()
             }
 
             override fun onPlayerError(error: PlaybackException) {
@@ -221,6 +229,16 @@ fun MediaPlayer(
         if (!lockHintVisible) return@LaunchedEffect
         delay(CONTROLLER_TIMEOUT_MS.milliseconds)
         lockHintVisible = false
+    }
+
+    val pipController = koinInject<PipController>()
+    val inPipMode by pipController.inPipMode.collectAsStateWithLifecycle()
+    val pipAvailable by pipController.available.collectAsStateWithLifecycle()
+
+    val pipOwner = remember { Any() }
+    DisposableEffect(pipController, pipOwner, videoRatio, activePage, audioOnly) {
+        pipController.offerVideo(pipOwner, videoRatio.takeIf { activePage && !audioOnly })
+        onDispose { pipController.offerVideo(pipOwner, null) }
     }
 
     val activity = LocalActivity.current
@@ -312,20 +330,22 @@ fun MediaPlayer(
                 )
             }
         }
-        PlayerGestureArea(
-            onTap = {
-                if (locked) {
-                    lockHintVisible = !lockHintVisible
-                } else {
-                    notifyControls(!visibleControls)
-                }
-            },
-            onAdjustStart = { if (visibleControls) notifyControls(false) },
-            dragEnabled = !locked && !audioOnly,
-            chromeVisible = controlsVisible,
-            modifier = Modifier.matchParentSize()
-        )
-        if (player != null && !locked) {
+        if (!inPipMode) {
+            PlayerGestureArea(
+                onTap = {
+                    if (locked && !inPipMode) {
+                        lockHintVisible = !lockHintVisible
+                    } else {
+                        notifyControls(!visibleControls)
+                    }
+                },
+                onAdjustStart = { if (visibleControls) notifyControls(false) },
+                dragEnabled = !locked && !audioOnly,
+                chromeVisible = controlsVisible,
+                modifier = Modifier.matchParentSize()
+            )
+        }
+        if (player != null && !locked && !inPipMode) {
             PlayerControls(
                 player = player,
                 visible = controlsVisible,
@@ -333,6 +353,9 @@ fun MediaPlayer(
                 resizeMode = resizeMode,
                 onCycleResizeMode = { resizeMode = resizeMode.next() },
                 onInteraction = { interactionTick++ },
+                onEnterPip = activity
+                    ?.takeIf { pipAvailable }
+                    ?.let { host -> { pipController.enter(host) } },
                 onLock = {
                     locked = true
                     lockHintVisible = true
@@ -461,6 +484,9 @@ private fun AudioStage(player: Player, fallbackTitle: String, modifier: Modifier
         }
     }
 }
+
+private fun VideoSize.toRational(): Rational? =
+    if (width > 0 && height > 0) Rational(width, height) else null
 
 private const val CONTROLLER_TIMEOUT_MS = 3_000L
 private const val LOCK_ALPHA = 0.7f
