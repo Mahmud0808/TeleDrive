@@ -8,6 +8,7 @@ import com.drdisagree.teledrive.core.files.AppStoragePaths
 import com.drdisagree.teledrive.core.files.DownloadWriter
 import com.drdisagree.teledrive.core.files.FileImporter
 import com.drdisagree.teledrive.core.files.Hashing
+import com.drdisagree.teledrive.core.files.LocalCopyDeleter
 import com.drdisagree.teledrive.core.media.ThumbnailStore
 import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.core.telegram.TelegramDownloadEvent
@@ -66,7 +67,8 @@ class TransferExecutor(
     private val filePartDao: FilePartDao,
     private val partUploader: PartUploader,
     private val partDownloader: PartDownloader,
-    private val apkIconUploader: ApkIconUploader
+    private val apkIconUploader: ApkIconUploader,
+    private val localCopyDeleter: LocalCopyDeleter
 ) {
 
     /**
@@ -573,7 +575,8 @@ class TransferExecutor(
         ) {
             return
         }
-        if (source.delete()) fileDao.setLocalPath(entity.id, null)
+        localCopyDeleter.delete(listOf(localPath))
+        if (localCopyDeleter.isGone(localPath)) fileDao.setLocalPath(entity.id, null)
     }
 
     private suspend fun checkControl(transferId: String) {
