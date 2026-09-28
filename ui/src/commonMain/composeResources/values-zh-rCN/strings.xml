@@ -1,0 +1,919 @@
+<resources>
+    <!-- App-wide -->
+    <string name="app_name">TeleDrive</string>
+    <string name="app_backed_up">已备份</string>
+    <string name="app_drive_recreated">你的云端硬盘在 Telegram 中已被删除，因此创建了一个新的空硬盘</string>
+    <string name="app_no_results">无结果</string>
+    <string name="app_not_backed_up">未备份</string>
+    <string name="app_nothing_matches_search">没有符合你搜索条件的内容。</string>
+    <string name="app_search_drive">搜索云端硬盘</string>
+    <string name="app_search_files">搜索文件</string>
+    <string name="app_search_name_filter_type">按名称搜索，或按类型和备份状态筛选。</string>
+    <plurals name="file_count">
+        <item quantity="other">%1$d 个文件</item>
+    </plurals>
+    <plurals name="folder_count">
+        <item quantity="other">%1$d 个文件夹</item>
+    </plurals>
+    <plurals name="backup_age_minutes">
+        <item quantity="other">%1$d 分钟前</item>
+    </plurals>
+    <plurals name="backup_age_hours">
+        <item quantity="other">%1$d 小时前</item>
+    </plurals>
+    <plurals name="backup_age_days">
+        <item quantity="other">%1$d 天前</item>
+    </plurals>
+    <plurals name="item_count">
+        <item quantity="other">%1$d 项</item>
+    </plurals>
+    <plurals name="rebuild_indexed_files">
+        <item quantity="other">已索引 %1$d 个文件</item>
+    </plurals>
+    <plurals name="rebuild_locked_files">
+        <item quantity="other">跳过 %1$d 个加密文件。恢复密钥备份后即可为其建立索引。</item>
+    </plurals>
+    <plurals name="home_back_up_pending">
+        <item quantity="other">备份 %1$d 个文件</item>
+    </plurals>
+    <plurals name="home_queued_files">
+        <item quantity="other">%1$d 个文件已排队</item>
+    </plurals>
+    <plurals name="transfers_more_queued">
+        <item quantity="other">还有 %1$d 项未显示</item>
+    </plurals>
+
+    <!-- Bottom navigation -->
+    <string name="nav_files">文件</string>
+    <string name="nav_gallery">图库</string>
+    <string name="nav_home">首页</string>
+    <string name="nav_settings">设置</string>
+
+    <!-- Shared labels and dialogs -->
+    <string name="common_actions">更多操作</string>
+    <string name="common_add">添加</string>
+    <string name="common_add_favorites">添加到收藏</string>
+    <string name="common_back">返回</string>
+    <string name="common_backup_failed">备份失败</string>
+    <string name="common_backup_not_backed_up">未备份</string>
+    <string name="common_backup_queued">已排队</string>
+    <string name="common_backup_uploading">正在上传</string>
+    <string name="common_cancel">取消</string>
+    <string name="common_category_archives">压缩包</string>
+    <string name="common_category_audio">音频</string>
+    <string name="common_category_documents">文档</string>
+    <string name="common_category_other">其他</string>
+    <string name="common_category_photos">照片</string>
+    <string name="common_category_videos">视频</string>
+    <string name="common_clear">清除</string>
+    <string name="common_clear_selection">取消选择</string>
+    <string name="common_collapse">收起</string>
+    <string name="common_confirm_trash_count_title">将 %1$d 项移入回收站？</string>
+    <string name="common_content_description_favorite">收藏</string>
+    <string name="common_keep_on_device">保留在本机</string>
+    <string name="common_organize">整理</string>
+    <string name="common_storage_actions">存储</string>
+    <string name="common_stop_keeping_on_device">取消保留在本机</string>
+    <string name="common_content_description_pinned">已保留在本机</string>
+    <string name="common_content_description_selected">已选中</string>
+    <string name="common_create">创建</string>
+    <string name="common_delete_forever">永久删除</string>
+    <string name="common_deselect_all">取消全选</string>
+    <string name="common_dismiss">忽略</string>
+    <string name="common_download">下载</string>
+    <string name="common_drive_root">云端硬盘根目录</string>
+    <string name="common_empty">空</string>
+    <string name="common_expand">展开</string>
+    <string name="common_file_size_and_date">%1$s \u00b7 %2$s</string>
+    <string name="common_folder_name">文件夹名称</string>
+    <string name="common_free_space">释放空间</string>
+    <string name="common_grant_permissions">授予权限</string>
+    <string name="common_move_trash">移入回收站</string>
+    <string name="common_name">名称</string>
+    <string name="common_no_subfolders">这里没有子文件夹</string>
+    <string name="common_one_level">上一级</string>
+    <string name="common_pause">暂停</string>
+    <string name="common_refresh">刷新</string>
+    <string name="common_rename">重命名</string>
+    <string name="common_rename_file">重命名文件</string>
+    <string name="common_restore">恢复</string>
+    <string name="common_restore_trash_emptied">在回收站被清空之前，你都可以将它们恢复。</string>
+    <string name="common_resume">继续</string>
+    <string name="common_retry">重试</string>
+    <string name="common_save">保存</string>
+    <string name="common_select_all">全选</string>
+    <string name="common_selection_count">已选中 %1$d 项</string>
+    <string name="common_share">分享</string>
+    <string name="common_storage_channels">存储频道</string>
+    <string name="common_try_again">再试一次</string>
+    <string name="common_upload">上传</string>
+
+    <!-- Dates -->
+    <string name="date_days_ago">%1$d 天前</string>
+    <string name="date_today">今天</string>
+    <string name="date_yesterday">昨天</string>
+
+    <!-- App lock -->
+    <string name="lock_no_screen_lock">此设备不支持屏幕锁定，正在解锁。</string>
+    <string name="lock_prompt_title">解锁 TeleDrive</string>
+    <string name="lock_screen_title">TeleDrive 已锁定</string>
+    <string name="lock_too_many_attempts">尝试次数过多，请稍后再试。</string>
+    <string name="lock_unlock">解锁</string>
+    <string name="session_broken_action">重新登录</string>
+    <string name="session_broken_message">此设备已无法读取保存的 Telegram 会话。通常在把备份恢复到其他设备或更改了屏幕锁之后会出现这种情况。你的文件在频道中是安全的，重新登录即可访问。</string>
+    <string name="session_broken_title">会话无法读取</string>
+
+    <!-- Onboarding flow -->
+    <string name="onboarding_action_continue">继续</string>
+    <string name="onboarding_continue">继续</string>
+    <string name="onboarding_continue_without">暂不设置</string>
+    <string name="onboarding_files_live_own_private">你的文件存放在你自己的 Telegram 私密频道中。你的账号、你的存储空间，由你掌控。</string>
+    <string name="onboarding_get_started">开始使用</string>
+    <string name="onboarding_got">知道了</string>
+    <string name="onboarding_opening">正在打开</string>
+    <string name="onboarding_sign">登录</string>
+    <string name="onboarding_step">onboarding-step</string>
+    <string name="onboarding_step_counter">第 %1$d 步，共 %2$d 步</string>
+    <string name="onboarding_verify">验证</string>
+
+    <!-- Onboarding: API credentials -->
+    <string name="onboarding_api_access">API 权限</string>
+    <string name="onboarding_api_hash">API hash</string>
+    <string name="onboarding_api_hash_short">API hash 看起来太短</string>
+    <string name="onboarding_api_id">API ID</string>
+    <string name="onboarding_api_id_number">API ID 必须是数字</string>
+    <string name="onboarding_choose_api_dev_tools">选择 &quot;API development tools&quot; 并创建一个应用，名称随意。</string>
+    <string name="onboarding_copy_api_keys">把 api_id 和 api_hash 复制到 TeleDrive。</string>
+    <string name="onboarding_get_api_keys">获取你的 API 密钥</string>
+    <string name="onboarding_my_telegram_org">my.telegram.org</string>
+    <string name="onboarding_one_time_setup_keys">一次性设置。你的密钥留在本机，并已加密。</string>
+    <string name="onboarding_open_dev_page">打开 Telegram 开发者页面并登录</string>
+    <string name="onboarding_set_up_proxy">设置代理</string>
+    <string name="onboarding_telegram_blocked">此网络无法访问 Telegram？</string>
+    <string name="onboarding_where_i_get_these">从哪里获取这些？</string>
+
+    <!-- Onboarding: phone and code -->
+    <string name="onboarding_choose_country">选择国家/地区</string>
+    <string name="onboarding_code">验证码</string>
+    <string name="onboarding_code_sent">验证码已发送。</string>
+    <string name="onboarding_code_via_call">你将接到拨往 %1$s 的电话，语音播报验证码。</string>
+    <string name="onboarding_code_via_email">验证码已发送至 %1$s。</string>
+    <string name="onboarding_code_via_flash_call">Telegram 正在呼叫 %1$s 并将挂断，验证码就是来电号码。</string>
+    <string name="onboarding_code_via_fragment">你的验证码正在 Fragment 上等待 %1$s，打开 fragment.com 即可查看。</string>
+    <string name="onboarding_code_via_missed_call">Telegram 正在呼叫 %1$s 并将挂断，验证码是来电号码的最后几位。</string>
+    <string name="onboarding_code_via_sms">验证码已通过短信发送至 %1$s。</string>
+    <string name="onboarding_code_via_sms_phrase">Telegram 已通过短信向 %1$s 发送一个短语，请输入该短语。</string>
+    <string name="onboarding_code_via_sms_word">Telegram 已通过短信向 %1$s 发送一个词，请输入该词。</string>
+    <string name="onboarding_code_via_telegram">Telegram 已向你的其他设备发送验证码。</string>
+    <string name="onboarding_country">国家/地区</string>
+    <string name="onboarding_email_code_title">输入邮箱验证码</string>
+    <string name="onboarding_email_continue">发送验证码</string>
+    <string name="onboarding_email_description">此账号使用邮箱地址登录，输入邮箱即可接收验证码。</string>
+    <string name="onboarding_email_label">邮箱地址</string>
+    <string name="onboarding_email_title">登录邮箱</string>
+    <string name="onboarding_enter_code">输入验证码</string>
+    <string name="onboarding_enter_password">输入你的 Telegram 密码。</string>
+    <string name="onboarding_enter_phone">输入你的手机号</string>
+    <string name="onboarding_include_country_code_like">需包含国家/地区代码，例如 +1 或 +49</string>
+    <string name="onboarding_no_account">该号码没有 Telegram 账号，请先在官方 Telegram 应用中注册。</string>
+    <string name="onboarding_no_country_match">没有匹配的国家/地区。</string>
+    <string name="onboarding_number">你的号码</string>
+    <string name="onboarding_password">密码</string>
+    <string name="onboarding_phone_number">手机号</string>
+    <string name="onboarding_phone_number_telegram_account">你的 Telegram 账号手机号，需包含国家/地区代码。</string>
+    <string name="onboarding_resend_code">重新发送验证码</string>
+    <string name="onboarding_search_country">搜索国家/地区</string>
+    <string name="onboarding_send_code">发送验证码</string>
+    <string name="onboarding_two_step_verification">两步验证</string>
+
+    <!-- Onboarding: QR sign-in -->
+    <string name="onboarding_qr_code_description">登录二维码</string>
+    <string name="onboarding_qr_confirm_instead">改为在本机确认</string>
+    <string name="onboarding_qr_description">在已登录 Telegram 的设备上打开 Telegram，然后扫描此二维码。</string>
+    <string name="onboarding_qr_open_failed">无法在此设备上打开 Telegram。</string>
+    <string name="onboarding_qr_open_telegram">在 Telegram 中确认</string>
+    <string name="onboarding_qr_same_device_description">本机已安装 Telegram，确认登录即可完成。</string>
+    <string name="onboarding_qr_scan_instead">改为从其他设备扫描</string>
+    <string name="onboarding_qr_sign_in">通过二维码登录</string>
+    <string name="onboarding_qr_step_1">在其他设备上打开 Telegram</string>
+    <string name="onboarding_qr_step_2">进入“设置”，然后选择“设备”</string>
+    <string name="onboarding_qr_step_3">点击“连接桌面设备”并扫描此二维码</string>
+    <string name="onboarding_qr_title">扫码登录</string>
+    <string name="onboarding_qr_use_phone">改用手机号</string>
+    <string name="onboarding_qr_waiting">等待扫码</string>
+
+    <!-- Onboarding: permissions -->
+    <string name="onboarding_allow_all_files">允许访问所有文件</string>
+    <string name="onboarding_allow_media">允许访问媒体文件</string>
+    <string name="onboarding_files_access_covers_documents">所有文件访问权限涵盖文档、下载和 SD 卡文件夹，没有它这些文件夹就无法备份。</string>
+    <string name="onboarding_storage_access">存储访问权限</string>
+    <string name="onboarding_teledrive_needs_media_files">TeleDrive 需要你的媒体和文件权限才能备份它们，还需要通知权限以显示传输进度。</string>
+
+    <!-- Onboarding: drive setup -->
+    <string name="onboarding_channel_files_in_channel">此频道中有 %1$d 个文件</string>
+    <string name="onboarding_choose_drive">选择一个云端硬盘</string>
+    <string name="onboarding_drive_created_desc">已在你的账号上创建一个私密频道。你备份的所有内容都存放在那里，且只有你能读取。</string>
+    <string name="onboarding_drive_ready">你的云端硬盘已就绪</string>
+    <string name="onboarding_looking_for_drives">正在查找你的云端硬盘</string>
+    <string name="onboarding_no_drive_yet">无法创建云端硬盘</string>
+    <string name="onboarding_pick_drive_desc">你的账号中已有 TeleDrive 频道，请选择要在此设备上打开的那个；你可以在设置中切换或添加更多。</string>
+    <string name="onboarding_single_drive_desc">文件将备份到你账号上的这个私密频道，之后可以在设置中添加更多云端硬盘。</string>
+
+    <!-- Onboarding: backup setup -->
+    <string name="onboarding_choose_what_back_change">选择要备份的内容，你可以随时在设置中更改。</string>
+    <string name="onboarding_section_behavior">行为</string>
+    <string name="onboarding_section_folders">文件夹</string>
+    <string name="onboarding_toggle_auto_backup">自动备份</string>
+    <string name="onboarding_toggle_camera">相机（DCIM）</string>
+    <string name="onboarding_toggle_movies">影视</string>
+    <string name="onboarding_toggle_pictures">图片</string>
+    <string name="onboarding_toggle_wifi_only">仅限 Wi-Fi</string>
+
+    <!-- Home -->
+    <string name="home_active_transfers">%1$d 个进行中的传输</string>
+    <string name="home_backing_up">正在备份…</string>
+    <string name="home_backing_up_new_files">正在备份新文件</string>
+    <string name="home_backup_all_in_telegram">所有文件都已存入 Telegram</string>
+    <string name="home_backup_at">上次备份 %1$s</string>
+    <string name="home_backup_auto_off">自动备份已关闭</string>
+    <string name="home_backup_just_now">刚刚备份</string>
+    <string name="home_backup_never">尚未备份</string>
+    <string name="home_backup_nothing_to_back_up">没有可备份的内容</string>
+    <string name="home_backup_paused">备份已暂停</string>
+    <string name="home_cancel_backup_action">取消备份</string>
+    <string name="home_cancel_backup_title">取消备份？</string>
+    <string name="home_choose_folders">选择文件夹</string>
+    <string name="home_deleted_files_kept_removal">已删除的文件会保留到被清除为止</string>
+    <string name="home_failed_count">%1$d 个失败</string>
+    <string name="home_lock_app">锁定应用</string>
+    <string name="home_not_backed_up_count">%1$d 个未备份</string>
+    <string name="home_nothing_new_to_back_up">没有新内容需要备份</string>
+    <string name="home_open_drives">切换云端硬盘</string>
+    <string name="home_queued_uploads_discarded_files">排队中的上传将被丢弃。已上传的文件仍留在 Telegram，你可以稍后重新开始备份。</string>
+    <string name="home_scan_now">立即扫描</string>
+    <string name="home_scanning">正在扫描…</string>
+    <string name="home_section_favorites">收藏</string>
+    <string name="home_section_recent">最近</string>
+    <string name="home_section_storage">存储</string>
+    <string name="home_session_progress">%1$d / %2$d 个文件</string>
+    <string name="home_status_connected">已连接</string>
+    <string name="home_status_connecting">正在连接…</string>
+    <string name="home_status_offline">离线</string>
+    <string name="home_status_rebuilding">正在重建索引…</string>
+    <string name="home_status_syncing">正在同步…</string>
+    <string name="home_storage_percent">%1$d%</string>
+    <string name="home_storage_percent_min">&lt;1%</string>
+    <string name="home_switched_drive">已切换到 %1$s</string>
+    <string name="home_transfer_history">传输记录</string>
+    <string name="home_transfer_history_subtitle">上传与下载</string>
+    <string name="home_waiting_count">%1$d 个等待中</string>
+
+    <!-- Search -->
+    <string name="search_section_files">文件</string>
+    <string name="search_open_folder">打开所在文件夹</string>
+    <string name="search_section_folders">文件夹</string>
+
+    <!-- Files -->
+    <string name="files">文件</string>
+    <string name="files_add_files">上传文件</string>
+    <string name="files_add_folder">上传文件夹</string>
+    <string name="files_archive">归档</string>
+    <string name="files_back_import_appear">你备份或导入的文件会显示在这里。</string>
+    <string name="files_copy">复制到…</string>
+    <string name="files_copy_here">复制到此处</string>
+    <string name="files_copy_to">复制到</string>
+    <string name="files_delete_local">删除本地文件</string>
+    <string name="files_delete_local_copies">删除本地副本？</string>
+    <string name="files_drop_folders_unsupported">无法上传文件夹</string>
+    <string name="files_drop_to_upload">拖放文件以上传</string>
+    <string name="files_hide">隐藏</string>
+    <string name="files_import_copied">已复制 %1$d 个 Telegram 中已有的文件</string>
+    <string name="files_import_duplicates">%1$d 个已存在于你的云端硬盘</string>
+    <string name="files_import_failed">无法导入所选文件</string>
+    <string name="files_import_preparing">正在准备上传文件…</string>
+    <string name="files_import_restored">已从回收站恢复 %1$d 个</string>
+    <string name="files_import_uploading">正在上传 %1$d 个</string>
+    <string name="files_import_uploading_copied">正在上传 %1$d 个，已复制 %2$d 个 Telegram 中已有的文件</string>
+    <string name="files_import_uploading_duplicates">正在上传 %1$d 个，%2$d 个已存在于你的云端硬盘</string>
+    <string name="files_import_uploading_failed">正在上传 %1$d 个，%2$d 个失败</string>
+    <string name="files_import_uploading_restored">正在上传 %1$d 个，已恢复 %2$d 个</string>
+    <string name="files_move">移动</string>
+    <string name="files_move_here">移动到此</string>
+    <string name="files_move_to">移动到</string>
+    <string name="files_new_folder">新建文件夹</string>
+    <string name="files_nothing_here_yet">这里还没有内容</string>
+    <string name="files_only_files_verified_telegram">只有已确认备份到 Telegram 的文件才会从本设备移除。</string>
+    <string name="files_rename_file">重命名文件</string>
+    <string name="files_rename_folder">重命名文件夹</string>
+    <string name="files_root_name">文件</string>
+    <string name="files_search">搜索</string>
+    <string name="files_share_destination_confirm">保存到此处</string>
+    <string name="files_share_destination_title">将分享的文件保存到</string>
+    <string name="files_share_needs_local">请先下载这些文件再分享</string>
+    <string name="files_show_in_file_manager">在文件管理器中显示</string>
+    <string name="files_sort">排序</string>
+    <string name="files_sort_ascending">升序</string>
+    <string name="files_sort_backup_status">备份状态</string>
+    <string name="files_sort_date_added">添加日期</string>
+    <string name="files_sort_date_modified">修改日期</string>
+    <string name="files_sort_descending">降序</string>
+    <string name="files_sort_name">名称</string>
+    <string name="files_sort_size">大小</string>
+    <string name="files_sort_type">类型</string>
+    <string name="files_unhide">取消隐藏</string>
+    <string name="files_copied_all">已复制 %1$d 个</string>
+    <string name="files_copied_partial">已复制 %1$d 个，共 %2$d 个</string>
+    <string name="files_moving_to_trash">正在将 %1$d 项移入回收站…</string>
+    <string name="files_queued_for_download">%1$d 个已排队下载</string>
+    <string name="files_queued_for_upload">%1$d 个已排队上传</string>
+    <string name="files_queued_partial">%1$d 个已排队，%2$d 个失败</string>
+    <string name="files_removed_local_copies">已移除 %1$d 个本地副本</string>
+    <string name="files_sync_result">%1$d 个新增，%2$d 个更新</string>
+
+    <!-- File and folder info -->
+    <string name="info_added">添加时间</string>
+    <string name="info_backup">备份</string>
+    <string name="info_backup_done">已备份到 Telegram</string>
+    <string name="info_backup_failed">失败</string>
+    <string name="info_backup_none">未备份</string>
+    <string name="info_backup_queued">已排队</string>
+    <string name="info_backup_uploading">正在上传</string>
+    <string name="info_contents">内容</string>
+    <string name="info_created">创建时间</string>
+    <string name="info_details">信息</string>
+    <string name="info_duration">时长</string>
+    <string name="info_encrypted">已加密</string>
+    <string name="info_extension">扩展名</string>
+    <string name="info_favorite">收藏</string>
+    <string name="info_local_copy">本地副本</string>
+    <string name="info_modified">修改时间</string>
+    <string name="info_no">否</string>
+    <string name="info_path">路径</string>
+    <string name="info_resolution">分辨率</string>
+    <string name="info_sha256">SHA-256</string>
+    <string name="info_size">大小</string>
+    <string name="info_type">类型</string>
+    <string name="info_yes">是</string>
+
+    <!-- Notes -->
+    <string name="note_body_hint">文本、链接或两者兼有</string>
+    <string name="note_bold">加粗</string>
+    <string name="note_bullet">项目符号列表</string>
+    <string name="note_code">代码</string>
+    <string name="note_edit">编辑笔记</string>
+    <string name="note_edit_action">编辑文本</string>
+    <string name="note_heading">标题</string>
+    <string name="note_italic">斜体</string>
+    <string name="note_link">链接</string>
+    <string name="note_link_text">文本</string>
+    <string name="note_link_url">https://</string>
+    <string name="note_new">新建笔记</string>
+    <string name="note_not_editable">只有文本文件可以在此编辑</string>
+    <string name="note_quote">引用</string>
+    <string name="note_save">保存</string>
+    <string name="note_saved">笔记已保存</string>
+    <string name="note_strikethrough">删除线</string>
+    <string name="note_title_hint">标题（可选）</string>
+
+    <!-- Gallery -->
+    <string name="album_not_in_folder">不在文件夹中</string>
+    <string name="gallery_albums_appear_organise_media">当你把媒体文件整理到文件夹中时，相册就会出现。</string>
+    <string name="gallery_no_albums">没有相册</string>
+    <string name="gallery_no_media">没有媒体文件</string>
+    <string name="gallery_photos_videos_appear_here">导入或备份后，照片和视频会显示在这里。</string>
+    <string name="gallery_tab_albums">相册</string>
+    <string name="gallery_tab_all">全部</string>
+    <string name="gallery_tab_photos">照片</string>
+    <string name="gallery_tab_videos">视频</string>
+    <string name="gallery_title">图库</string>
+
+    <!-- Preview -->
+    <string name="preview_add_favorites">添加到收藏</string>
+    <string name="preview_added_favorites">已添加到收藏</string>
+    <string name="preview_archive">归档</string>
+    <string name="preview_archive_failed">无法打开压缩包</string>
+    <string name="preview_archive_format_title">%1$s 压缩包</string>
+    <string name="preview_archive_packed_summary">%1$s，由 %2$s 压缩而来</string>
+    <string name="preview_archive_packed_summary_saved">%1$s，由 %2$s 压缩而来，减小 %3$d%</string>
+    <string name="preview_archived">已归档</string>
+    <string name="preview_back_10_seconds">后退 10 秒</string>
+    <string name="preview_chevron">箭头</string>
+    <string name="preview_confirm_trash_file_message">“%1$s”将被移入回收站，你可以稍后恢复。</string>
+    <string name="preview_download_view">下载后查看</string>
+    <string name="preview_extraction_supported_yet_download">暂不支持解压，请下载压缩包后再打开。</string>
+    <string name="preview_fetch_failed">无法获取文件</string>
+    <string name="preview_file_info">文件信息</string>
+    <string name="preview_forward_10_seconds">前进 10 秒</string>
+    <string name="preview_hidden">已隐藏</string>
+    <string name="preview_image_undecodable">此处无法显示该图片格式，请下载后用其他应用打开。</string>
+    <string name="preview_local_copy_removed">本地副本已移除</string>
+    <string name="preview_move_to_trash">移入回收站？</string>
+    <string name="preview_next">下一个文件</string>
+    <string name="preview_no_copy_available">没有可用的本地或远程副本</string>
+    <string name="preview_no_preview">无预览</string>
+    <string name="preview_no_preview_for_type">此文件类型无预览</string>
+    <string name="preview_nothing_to_remove">没有可移除的内容</string>
+    <string name="preview_only_zip">仅支持浏览 ZIP 压缩包。</string>
+    <string name="preview_open_link">打开链接</string>
+    <string name="preview_page_number">第 %1$d 页</string>
+    <string name="preview_pdf_open_failed">无法打开 PDF</string>
+    <string name="preview_playback_speed">播放速度</string>
+    <string name="preview_preparing">正在准备 %1$s</string>
+    <string name="preview_previous">上一个文件</string>
+    <string name="preview_progress_bytes">%1$s / %2$s</string>
+    <string name="preview_read_failed">无法读取文件</string>
+    <string name="preview_remove_favorites">从收藏中移除</string>
+    <string name="preview_removed_favorites">已从收藏中移除</string>
+    <string name="preview_requires_download">此文件大小为 %1$s，且尚未下载到本设备。</string>
+    <string name="preview_share_chooser_title">分享</string>
+    <string name="preview_share_copy">分享副本</string>
+    <string name="preview_truncated_download_view">\n预览已截断，下载后查看完整文件。</string>
+    <string name="preview_unarchive">取消归档</string>
+    <string name="preview_unarchived">已取消归档</string>
+    <string name="preview_unhidden">已取消隐藏</string>
+
+    <!-- Player -->
+    <string name="player_audio_track">音轨</string>
+    <string name="player_subtitles">字幕</string>
+    <string name="player_subtitles_off">关闭</string>
+    <string name="player_track">轨道</string>
+    <string name="player_lock_controls">锁定控制栏</string>
+    <string name="player_unlock_controls">解锁控制栏</string>
+    <string name="player_brightness">亮度</string>
+    <string name="player_volume">音量</string>
+    <string name="player_track_unsupported">此设备不支持</string>
+    <string name="player_codec_unsupported">此设备无法解码该视频，请下载后用其他应用播放。</string>
+    <string name="player_exit_full_screen">退出全屏</string>
+    <string name="player_fewer_controls">收起控制栏</string>
+    <string name="player_full_screen">全屏</string>
+    <string name="player_hide_subtitles">隐藏字幕</string>
+    <string name="player_more_controls">展开控制栏</string>
+    <string name="player_mute">静音</string>
+    <string name="player_picture_in_picture">画中画</string>
+    <string name="player_pause">暂停</string>
+    <string name="player_play">播放</string>
+    <string name="player_playback_failed">播放失败</string>
+    <string name="player_repeat_off">不循环</string>
+    <string name="player_repeat_one">单曲循环</string>
+    <string name="player_replay">重新播放</string>
+    <string name="player_scaling">画面缩放</string>
+    <string name="player_skip_back">后退 10 秒</string>
+    <string name="player_skip_forward">前进 10 秒</string>
+    <string name="player_show_subtitles">显示字幕</string>
+    <string name="player_unmute">取消静音</string>
+
+    <!-- Collections -->
+    <string name="collection_archived_empty">已归档的文件不会干扰浏览，同时保留其备份。</string>
+    <string name="collection_archived_subtitle">在主浏览器中隐藏</string>
+    <string name="collection_archived_title">已归档</string>
+    <string name="collection_empty_title">%1$s 中没有内容</string>
+    <string name="collection_favorites_empty">为文件加星标即可保留在这里。</string>
+    <string name="collection_favorites_subtitle">你加星标的文件</string>
+    <string name="collection_favorites_title">收藏</string>
+    <string name="collection_hidden_empty">隐藏的文件不会出现在文件浏览和图库中。</string>
+    <string name="collection_hidden_subtitle">只在此处可见</string>
+    <string name="collection_hidden_title">已隐藏</string>
+    <string name="collection_remove_from">从 %1$s 中移除</string>
+
+    <!-- Trash -->
+    <string name="trash">回收站</string>
+    <string name="trash_delete_permanently">永久删除？</string>
+    <string name="trash_delete_selected_message">%1$d 项（包括所选文件夹内的全部内容）将从本设备和 Telegram 中永久删除。</string>
+    <string name="trash_empty">回收站是空的</string>
+    <string name="trash_empty_trash_action">清空回收站</string>
+    <string name="trash_empty_trash_title">清空回收站？</string>
+    <string name="trash_items_permanently_deleted_device">所有项目都将从本设备和 Telegram 中永久删除，此操作无法撤销。</string>
+    <string name="trash_restores_with_folder">随文件夹一起恢复</string>
+    <string name="trash_trashed_at">于 %1$s 移入回收站</string>
+    <string name="trash_delete_partial">有 %1$d / %2$d 项无法删除</string>
+    <string name="trash_deleted_permanently">已永久删除 %1$d 项</string>
+    <string name="trash_emptying">正在清空回收站…</string>
+    <string name="trash_restored">已恢复 %1$d 项</string>
+    <string name="trash_restored_partial">已恢复 %1$d 项，%2$d 项失败</string>
+    <plurals name="trash_deleting_items"><item quantity="other">正在删除 %1$d 项…</item></plurals>
+    <plurals name="trash_restoring_items"><item quantity="other">正在恢复 %1$d 项…</item></plurals>
+
+    <!-- Transfers -->
+    <string name="transfer_stage_joining">正在合并分片</string>
+    <string name="transfer_stage_sealing">正在加密分片</string>
+    <string name="transfer_type_backup">备份</string>
+    <string name="transfer_type_download">下载</string>
+    <string name="transfer_type_restore">恢复</string>
+    <string name="transfer_type_upload">上传</string>
+    <string name="transfers">传输</string>
+    <string name="transfers_cancel">全部取消</string>
+    <string name="transfers_cancel_transfers">取消所有传输？</string>
+    <string name="transfers_clear_finished">清除已完成</string>
+    <string name="transfers_clear_finished_transfers">清除已完成的传输？</string>
+    <string name="transfers_completed_canceled_entries_removed">已完成和已取消的记录会从列表中移除，你的文件不受影响。</string>
+    <string name="transfers_failed">失败</string>
+    <string name="transfers_failed_downloads">失败的下载</string>
+    <string name="transfers_failed_transfers">失败的传输</string>
+    <string name="transfers_failed_uploads">失败的上传</string>
+    <string name="transfers_no_transfers">没有传输任务</string>
+    <string name="transfers_pause">全部暂停</string>
+    <string name="transfers_queued_running_paused_failed">排队中、进行中、已暂停和失败的传输都将被取消，已上传的文件仍留在 Telegram。</string>
+    <string name="transfers_resume">全部继续</string>
+    <string name="transfers_section_active">进行中</string>
+    <string name="transfers_section_finished">已完成</string>
+    <string name="transfers_section_paused">已暂停</string>
+    <string name="transfers_uploads_downloads_appear_here">上传和下载会显示在这里。</string>
+
+    <!-- Drives and channels -->
+    <string name="channels_channel_container">channel-container</string>
+    <string name="channels_create_one_teledrive_store">创建一个频道，TeleDrive 就会把你的文件存放在那个私密频道中。</string>
+    <string name="channels_creates_private_channel_account">在你的账号上创建一个私密频道，名称用于区分不同的云端硬盘。</string>
+    <string name="channels_creating_drive">正在创建云端硬盘</string>
+    <string name="channels_delete_confirm_hint">输入 %1$s 以确认</string>
+    <string name="channels_delete_message">该频道及其中全部 %1$d 个文件（%2$s）将从 Telegram 中永久删除，此操作无法撤销。</string>
+    <string name="channels_delete_telegram">从 Telegram 删除</string>
+    <string name="channels_delete_title">删除 %1$s？</string>
+    <string name="channels_deleting">正在删除频道</string>
+    <string name="channels_drive_actions">云端硬盘操作</string>
+    <string name="channels_drive_name">云端硬盘名称</string>
+    <string name="channels_look_drives">查找云端硬盘</string>
+    <string name="channels_looking_for_drives">正在查找云端硬盘</string>
+    <string name="channels_new_drive">新建云端硬盘</string>
+    <string name="channels_no_drives_yet">还没有云端硬盘</string>
+    <string name="channels_open_drive">打开云端硬盘</string>
+    <string name="channels_opening_drive">正在打开云端硬盘</string>
+    <string name="channels_removed_missing">已移除 %1$d 个频道不存在的云端硬盘</string>
+    <string name="channels_rename_drive">重命名云端硬盘</string>
+    <string name="channels_renames_channel_telegram_well">同时会在 Telegram 中重命名该频道。</string>
+    <string name="channels_renaming">正在重命名</string>
+
+    <!-- Settings home -->
+    <string name="settings">设置</string>
+    <string name="settings_section_about_subtitle">版本、链接与更新</string>
+    <string name="settings_section_about_title">关于</string>
+    <string name="settings_section_account_subtitle">Telegram 会话、同步、退出登录</string>
+    <string name="settings_section_account_title">账号</string>
+    <string name="settings_section_advanced_subtitle">传输、重试、代理、日志</string>
+    <string name="settings_section_advanced_title">高级</string>
+    <string name="settings_section_appearance_subtitle">主题、网格、布局</string>
+    <string name="settings_section_appearance_title">外观</string>
+    <string name="settings_section_backup_subtitle">文件夹、计划、网络</string>
+    <string name="settings_section_backup_title">备份</string>
+    <string name="settings_section_notifications_subtitle">进度与失败提醒</string>
+    <string name="settings_section_notifications_title">通知</string>
+    <string name="settings_section_permissions_subtitle">媒体访问、通知</string>
+    <string name="settings_section_permissions_title">权限</string>
+    <string name="settings_section_playback_subtitle">串流、后台播放</string>
+    <string name="settings_section_playback_title">播放</string>
+    <string name="settings_section_security_subtitle">应用锁、加密</string>
+    <string name="settings_section_security_title">安全</string>
+    <string name="settings_section_storage_subtitle">缓存、回收站自动清理</string>
+    <string name="settings_section_storage_title">存储</string>
+
+    <!-- Settings: account -->
+    <string name="settings_files_stay_telegram_channel">你的文件仍留在 Telegram 频道中。此设备会清除索引、缩略图和缓存，并在你重新登录时重建。</string>
+    <string name="settings_log">退出登录</string>
+    <string name="settings_log_telegram">退出 Telegram 登录？</string>
+    <string name="settings_reading_channel">正在读取你的存储频道</string>
+    <string name="settings_rebuild_index_telegram">从 Telegram 重建索引</string>
+    <string name="settings_removes_session_stored_api">移除会话和已保存的 API 凭据</string>
+    <string name="settings_restores_file_list">从你的存储频道恢复文件列表</string>
+    <string name="settings_shown_channels_private_owned">显示的频道都是私密频道，由你创建，且名为 TeleDrive。</string>
+    <string name="settings_state_connected">已连接</string>
+    <string name="settings_state_connecting">正在连接</string>
+    <string name="settings_state_syncing">正在同步</string>
+    <string name="settings_state_waiting_network">等待网络</string>
+    <string name="settings_switch_drives_create_another">切换云端硬盘、创建新的或删除</string>
+    <string name="settings_telegram_account">Telegram 账号</string>
+
+    <!-- Settings: backup -->
+    <string name="settings_add">添加</string>
+    <string name="settings_add_another_folder">添加其他文件夹</string>
+    <string name="settings_automatic_backup">自动备份</string>
+    <string name="settings_back_new_media_instantly">立即备份新的媒体文件</string>
+    <string name="settings_backup_folders_title">备份文件夹</string>
+    <string name="settings_backup_interval">备份间隔</string>
+    <string name="settings_folder_unreadable">无法直接读取该文件夹</string>
+    <string name="settings_no_folders_selected">未选择任何文件夹，因此文件夹备份不会执行。从“文件”手动上传不受影响。</string>
+    <string name="settings_only_charging">仅在充电时</string>
+    <string name="settings_remove_backup_folder">移除备份文件夹？</string>
+    <string name="settings_skip_files_larger_than">跳过大于以下大小的文件</string>
+    <string name="settings_uploads_photos_videos_soon">照片和视频一出现就上传</string>
+    <string name="settings_wi_fi_only">仅在 Wi-Fi 下备份</string>
+    <string name="settings_wi_fi_only_summary">自动备份会等待不计量网络</string>
+
+    <!-- Settings: storage -->
+    <string name="settings_auto_clear_trash">自动清理回收站</string>
+    <string name="settings_cache_current_size">当前 %1$s</string>
+    <string name="settings_cache_limit">缓存上限</string>
+    <string name="settings_cached_previews_thumbnails_temporary">缓存的预览、缩略图和临时文件将被移除，你的文件和备份不受影响。</string>
+    <string name="settings_clear_cache_action">清除缓存</string>
+    <string name="settings_clear_cache_title">清除缓存？</string>
+    <string name="settings_download_location">下载位置</string>
+    <string name="settings_download_location_default">Downloads/TeleDrive</string>
+    <string name="settings_download_location_reset">重置下载位置</string>
+    <string name="settings_free_up_subtitle">本机存储了 %1$s 已备份的文件</string>
+    <string name="settings_free_up_none">没有已备份的文件占用本机空间</string>
+    <string name="settings_clear_thumbnails_action">清除缩略图</string>
+    <string name="settings_clear_thumbnails_title">清除缩略图？</string>
+    <string name="settings_free_up_space_title">释放 %1$s？</string>
+    <string name="settings_delete_after_upload">备份后删除本地副本</string>
+    <string name="settings_delete_after_upload_summary">文件存入频道且哈希仍匹配后，将从本设备移除。标记为保留在本机的项目不会被移除。</string>
+    <string name="settings_gallery_previews_regenerated_browse">浏览时会重新生成图库预览，你的文件不受影响。</string>
+    <string name="settings_local_copies_files_already">已备份到 Telegram 的文件的本地副本将从本设备删除。它们仍保留在你的 Telegram 频道中，可以重新下载。</string>
+
+    <!-- Settings: security -->
+    <string name="settings_app_lock">应用锁</string>
+    <string name="settings_auto_lock">自动锁定时间</string>
+    <string name="settings_back_encryption_key">备份加密密钥</string>
+    <string name="settings_block_screenshots">禁止截屏</string>
+    <string name="settings_change_passphrase">更改恢复口令</string>
+    <string name="settings_confirm_removing_lock">关闭应用锁前请先验证身份</string>
+    <string name="settings_encrypt_thumbnails">加密缩略图</string>
+    <string name="settings_encrypt_uploads">加密上传</string>
+    <string name="settings_encryption_stays_off">在设置口令前，加密保持关闭</string>
+    <string name="settings_enter_passphrase_used_backing">请输入你在备份密钥时使用的口令。</string>
+    <string name="settings_files_sealed_leaving_device">文件在离开本设备前已封装，需要设置恢复口令。</string>
+    <string name="settings_forgot_show_hint">忘记了？显示提示</string>
+    <string name="settings_hides_app_screenshots_screen">在截屏、录屏和最近应用预览中隐藏本应用内容</string>
+    <string name="settings_hint_optional">提示（可选）</string>
+    <string name="settings_key_backup_stored">密钥备份已存储在你的 Telegram 频道中</string>
+    <string name="settings_no_key_backup_found">在你的存储频道中未找到密钥备份。</string>
+    <string name="settings_no_recovery_passphrase">未设置恢复口令</string>
+    <string name="settings_passphrase">口令</string>
+    <string name="settings_passphrase_min_length">至少 %1$d 个字符</string>
+    <string name="settings_passphrases_do_not_match">两次输入的口令不一致</string>
+    <string name="settings_protects_cached_previews_device">使用仅存于本机的密钥保护缓存预览，无需口令，但图库会变慢。</string>
+    <string name="settings_reading_hint">正在读取提示…</string>
+    <string name="settings_repeat_passphrase">重复输入口令</string>
+    <string name="settings_require_fingerprint_screen_lock">需要指纹或屏幕锁</string>
+    <string name="settings_required_before_encrypt">加密上传前必须先设置</string>
+    <string name="settings_required_encryption_key_wrapped">加密所必需。你的密钥会用此口令封装后存入你的 Telegram 频道，以便在新设备上恢复文件。Telegram 永远不会看到该口令。</string>
+    <string name="settings_restore_encryption_key">恢复加密密钥</string>
+    <string name="settings_save_backup">保存备份</string>
+    <string name="settings_set">设置</string>
+    <string name="settings_set_passphrase">设置恢复口令</string>
+    <string name="settings_stored_unencrypted_never_put">以未加密方式存储，切勿在此处填写口令。</string>
+    <string name="settings_turn_off_app_lock">关闭应用锁</string>
+    <string name="settings_unlock_files_encrypted_earlier">解锁本设备或其他设备上使用旧口令加密的文件</string>
+    <string name="settings_uploads_stay_unencrypted_set">在你设置口令前，上传内容保持未加密。本设备上已加密的文件仍可覆盖。</string>
+    <string name="settings_nothing_to_remove">没有可移除的内容</string>
+
+    <!-- Settings: appearance -->
+    <string name="settings_archived_shortcut">已归档快捷入口</string>
+    <string name="settings_compact_layout">紧凑布局</string>
+    <string name="settings_dynamic_color">动态配色</string>
+    <string name="settings_gallery_grid_columns">图库网格列数</string>
+    <string name="settings_gallery_grid_view">图库使用网格视图</string>
+    <string name="settings_grid_columns">文件网格列数</string>
+    <string name="settings_grid_view">文件使用网格视图</string>
+    <string name="settings_hidden_shortcut">已隐藏快捷入口</string>
+    <string name="settings_recent_files">最近文件</string>
+    <string name="settings_recent_files_subtitle">在首页显示最近添加的文件</string>
+    <string name="settings_shows_archived_collection_home">在首页显示“已归档”集合</string>
+    <string name="settings_shows_hidden_collection_home">在首页显示“已隐藏”集合</string>
+    <string name="settings_theme">主题</string>
+    <string name="settings_language">语言</string>
+    <string name="language_system">跟随系统</string>
+    <string name="language_english">English</string>
+    <string name="language_russian">Русский</string>
+    <string name="language_portuguese_br">Português (Brasil)</string>
+    <string name="language_chinese">简体中文</string>
+    <string name="settings_tighter_list_rows_without">更紧凑的列表行，不显示大小和日期</string>
+    <string name="settings_use_wallpaper_colors_available">可用时使用壁纸颜色</string>
+    <string name="theme_dark">深色</string>
+    <string name="theme_light">浅色</string>
+    <string name="theme_system">跟随系统</string>
+
+    <!-- Settings: playback -->
+    <string name="settings_background_playback">后台播放</string>
+    <string name="settings_play_videos_load_instead">边加载边播放视频，而不是先下载</string>
+    <string name="settings_stream_downloading">先串流再下载</string>
+
+    <!-- Settings: notifications -->
+    <string name="settings_backup_results">备份结果</string>
+    <string name="settings_failures">失败提醒</string>
+
+    <!-- Settings: advanced -->
+    <string name="settings_debug_logging">调试日志</string>
+    <string name="settings_link_previews">链接预览</string>
+    <string name="settings_link_previews_subtitle">Telegram 会获取已保存链接的标题和图片</string>
+    <string name="settings_parallel_transfers">并行传输</string>
+    <string name="settings_proxy">代理</string>
+    <string name="settings_proxy_subtitle">在 Telegram 被封锁的网络中使用</string>
+    <string name="settings_retry_attempts">重试次数</string>
+    <string name="settings_transfers_wi_fi_only">仅在 Wi-Fi 下传输</string>
+    <string name="settings_transfers_wi_fi_only_summary">适用于你手动发起的上传和下载</string>
+
+    <!-- Exclusions -->
+    <string name="exclusions_change_file">更换文件</string>
+    <string name="exclusions_change_folder">更换文件夹</string>
+    <string name="exclusions_choose_file">选择文件</string>
+    <string name="exclusions_choose_folder">选择文件夹</string>
+    <string name="exclusions_dot_names">以点开头的名称</string>
+    <string name="exclusions_size_in_bytes">大小（字节）</string>
+    <string name="exclusions_type_extension">扩展名</string>
+    <string name="exclusions_type_file">文件</string>
+    <string name="exclusions_type_folder">文件夹</string>
+    <string name="exclusions_type_hidden">隐藏文件</string>
+    <string name="exclusions_type_max_size">最大大小</string>
+    <string name="exclusions_type_mime">类型</string>
+    <string name="exclusions_type_pattern">匹配模式</string>
+    <string name="settings_add_exclusion">添加排除项</string>
+    <string name="settings_choose_folder_device">选择本设备上的任意文件夹</string>
+    <string name="settings_excluded_files_folders_skipped">自动备份会跳过被排除的文件和文件夹。</string>
+    <string name="settings_exclusion_remove_message">“%1$s”将重新纳入备份。</string>
+    <string name="settings_exclusions">排除项</string>
+    <string name="settings_files_folders_skipped_backup">备份时跳过的文件和文件夹</string>
+    <string name="settings_item_lives_app_cloud">该项目位于应用或云服务商中，没有设备路径，请改用“匹配模式”规则。</string>
+    <string name="settings_no_exclusions">没有排除项</string>
+    <string name="settings_remove">移除</string>
+    <string name="settings_remove_exclusion">移除排除项？</string>
+    <string name="settings_skips_every_file_folder">跳过名称以点开头的所有文件和文件夹，例如 .thumbnails 或 .trashed 文件。</string>
+
+    <!-- Proxy -->
+    <string name="proxy_add">添加代理</string>
+    <string name="proxy_add_one_first">请先保存一个代理再开启</string>
+    <string name="proxy_delete_action">删除</string>
+    <string name="proxy_delete_message">%1$s 将从列表中移除。</string>
+    <string name="proxy_delete_title">删除此代理？</string>
+    <string name="proxy_edit">编辑</string>
+    <string name="proxy_endpoint">%1$s \u00b7 %2$s:%3$d</string>
+    <string name="proxy_host">服务器</string>
+    <string name="proxy_import">导入</string>
+    <string name="proxy_link">代理链接</string>
+    <string name="proxy_link_imported">已保存 %1$s</string>
+    <string name="proxy_link_not_recognised">该链接不是代理链接</string>
+    <string name="proxy_name_optional">名称（可选）</string>
+    <string name="proxy_none_saved">未保存任何代理</string>
+    <string name="proxy_none_saved_summary">添加一个，或粘贴他人分享给你的链接</string>
+    <string name="proxy_password_optional">密码（可选）</string>
+    <string name="proxy_paste_link">粘贴链接</string>
+    <string name="proxy_paste_link_summary">代理通常以 tg:// 或 t.me 链接的形式分享，粘贴到这里即可自动填写。</string>
+    <string name="proxy_port">端口</string>
+    <string name="proxy_reachable">Telegram 已响应</string>
+    <string name="proxy_route_needs_one">请先保存一个服务器再开启</string>
+    <string name="proxy_route_off_summary">直接连接 Telegram</string>
+    <string name="proxy_route_on_summary">通过所选服务器连接 Telegram</string>
+    <string name="proxy_route_through">通过代理连接</string>
+    <string name="proxy_saved">已保存的服务器</string>
+    <string name="proxy_secret">密钥</string>
+    <string name="proxy_test">测试</string>
+    <string name="proxy_server_reachable">服务器可连通，登录后即可完整测试</string>
+    <string name="proxy_testing">正在测试</string>
+    <string name="proxy_title">代理</string>
+    <string name="proxy_type_http">HTTP</string>
+    <string name="proxy_type_mtproto">MTProto</string>
+    <string name="proxy_type_socks5">SOCKS5</string>
+    <string name="proxy_unreachable">通过此服务器没有响应</string>
+    <string name="proxy_username_optional">用户名（可选）</string>
+
+    <!-- Backup folders -->
+    <string name="backup">备份</string>
+    <string name="backup_folder_camera">相机（DCIM）</string>
+    <string name="backup_folder_documents">文档</string>
+    <string name="backup_folder_downloads">下载</string>
+    <string name="backup_folder_movies">影视</string>
+    <string name="backup_folder_pictures">图片</string>
+    <string name="backup_folder_remove_message">%1$s 将不再备份，已上传的文件仍留在 Telegram。</string>
+    <string name="backup_folder_subtitle">%1$s \u00b7 点击移除</string>
+    <string name="backup_interval_with_sweep">%1$s \u00b7 补漏扫描</string>
+    <string name="backup_paused">备份已暂停</string>
+
+    <!-- Permissions -->
+    <string name="permission_all_files_rationale">备份文档、下载和 SD 卡文件夹所需</string>
+    <string name="permission_all_files_title">所有文件访问权限</string>
+    <string name="permission_missing_message">未经授权，TeleDrive 无法读取你的%1$s。</string>
+    <string name="permission_not_allowed">未授权 \u00b7 %1$s</string>
+    <string name="permission_notifications_rationale">显示传输和备份进度</string>
+    <string name="permission_notifications_title">通知</string>
+    <string name="permission_photos_rationale">备份照片所需</string>
+    <string name="permission_photos_title">照片</string>
+    <string name="permission_separator"> 和 </string>
+    <string name="permission_videos_rationale">备份视频所需</string>
+    <string name="permission_videos_title">视频</string>
+    <string name="permissions_allowed">已授权</string>
+    <string name="permissions_not_allowed">未授权</string>
+    <string name="permissions_not_allowed_optional">未授权（可选）</string>
+
+    <!-- Folder Picker -->
+    <string name="picker_folder_create_failed">创建文件夹失败</string>
+    <string name="picker_folder_unreadable">无法读取文件夹内容</string>
+    <string name="picker_folder_unreadable_hint">请在设置中授予所有文件访问权限，或使用下方的系统 SAF 选择器。</string>
+    <string name="picker_internal_storage">内部存储</string>
+    <string name="picker_select_this_folder">选择此文件夹</string>
+    <string name="picker_title_select_folder">选择文件夹</string>
+    <string name="picker_use_saf">使用系统 SAF 选择器</string>
+
+    <!-- About -->
+    <string name="about_auto_check">自动检查</string>
+    <string name="about_auto_check_summary">每天检查一次新版本</string>
+    <string name="about_check_updates">检查更新</string>
+    <string name="about_check_updates_summary">将当前版本与最新版本对比</string>
+    <string name="about_checking">正在检查…</string>
+    <string name="about_donate">请我喝杯咖啡</string>
+    <string name="about_donate_summary">支持这款应用背后的开发工作</string>
+    <string name="about_no_update">你使用的已是最新版本</string>
+    <string name="about_section_project">项目</string>
+    <string name="about_section_updates">更新</string>
+    <string name="about_source_code">源代码</string>
+    <string name="about_source_code_summary">在 GitHub 上浏览项目</string>
+    <string name="about_tagline">属于你自己的云盘，存放在 Telegram 私密频道中。</string>
+    <string name="about_telegram">Telegram 频道</string>
+    <string name="about_telegram_summary">发布公告与讨论</string>
+    <string name="about_update_download">下载</string>
+    <string name="about_update_from">已安装 %1$s，可更新到 %2$s</string>
+    <string name="about_update_later">稍后</string>
+    <string name="about_update_ready">版本 %1$s 可供下载</string>
+    <string name="about_update_title">更新到 %1$s</string>
+    <string name="about_version">版本 %1$s</string>
+
+    <!-- Snackbar messages -->
+    <string name="message_backing_up_new_folder">正在备份新文件夹</string>
+    <string name="message_cache_cleared">缓存已清除</string>
+    <string name="message_created_drive">已创建 %1$s</string>
+    <string name="message_download_queued">下载已排队</string>
+    <string name="message_key_backup_saved">密钥备份已保存到 Telegram</string>
+    <string name="message_key_restored">加密密钥已恢复，正在重建索引</string>
+    <string name="message_moved_count">已移动 %1$d 项</string>
+    <string name="message_moved_to_trash">已移入回收站</string>
+    <string name="message_moved_to_trash_count">已移入回收站 %1$d 项</string>
+    <string name="message_nothing_to_download">没有可下载的内容</string>
+    <string name="message_rebuild_done">重建完成：新增 %1$d 个，更新 %2$d 个，移除 %3$d 个</string>
+    <string name="message_renamed">已重命名</string>
+    <string name="message_thumbnails_cleared">缩略图已清除</string>
+    <string name="message_trash_emptied">回收站已清空</string>
+    <string name="message_upload_queued">上传已排队</string>
+    <string name="message_wrong_passphrase">口令错误</string>
+
+    <!-- Error messages -->
+    <string name="error_authentication_failed">身份验证失败</string>
+    <string name="error_backup_running">已有备份正在进行</string>
+    <string name="error_channel_limit">你的 Telegram 账号已达到频道和群组数量上限。请先在 Telegram 中退出或删除一些，然后重试。</string>
+    <string name="error_encryption_failed">加密失败</string>
+    <string name="error_file_too_large">文件大小为 %1$s，上限为 %2$s</string>
+    <string name="error_folder_exists">已存在同名文件夹</string>
+    <string name="error_folder_into_itself">文件夹不能移动到自身内部</string>
+    <string name="error_incorrect_code">验证码错误</string>
+    <string name="error_incorrect_password">密码错误</string>
+    <string name="error_insufficient_storage">空间不足。需要 %1$s，可用 %2$s</string>
+    <string name="error_invalid_api">API ID 或 API hash 无效</string>
+    <string name="error_invalid_phone">手机号无效</string>
+    <string name="error_key_unreadable">此设备无法读取其加密密钥，请先使用密钥备份的口令恢复密钥。</string>
+    <string name="error_last_drive">这是你唯一的云端硬盘，请先创建另一个再删除它。</string>
+    <string name="error_no_internet">无网络连接</string>
+    <string name="error_no_local_copy">文件没有本地副本</string>
+    <string name="error_no_remote_copy">文件没有远程副本</string>
+    <string name="error_not_found">未找到</string>
+    <string name="error_not_supported">不支持</string>
+    <string name="error_backup_folders_unreadable">无法读取所选的备份文件夹，请在设置中授予所有文件访问权限。</string>
+    <string name="error_permission_denied">权限被拒绝</string>
+    <string name="error_rate_limited">Telegram 已限流，请 %1$d 秒后重试</string>
+    <string name="error_sign_in_required">请先登录 Telegram 以继续</string>
+    <string name="error_telegram">Telegram 错误：%1$s</string>
+    <string name="error_timed_out">操作超时</string>
+    <string name="error_transfer_incomplete">传输未完成</string>
+    <string name="error_unknown">出了点问题</string>
+
+    <!-- Settings choice labels -->
+    <string-array name="backup_interval_labels">
+        <item>每小时</item>
+        <item>每 2 小时</item>
+        <item>每 4 小时</item>
+        <item>每 6 小时</item>
+        <item>每 12 小时</item>
+        <item>每天</item>
+        <item>每 2 天</item>
+    </string-array>
+    <string-array name="backup_size_limit_labels">
+        <item>无限制</item>
+        <item>100 MB</item>
+        <item>500 MB</item>
+        <item>1 GB</item>
+        <item>2 GB</item>
+        <item>4 GB</item>
+    </string-array>
+    <string-array name="lock_timeout_labels">
+        <item>立即</item>
+        <item>1 分钟后</item>
+        <item>5 分钟后</item>
+        <item>10 分钟后</item>
+        <item>15 分钟后</item>
+        <item>30 分钟后</item>
+    </string-array>
+    <string-array name="trash_clear_labels">
+        <item>从不</item>
+        <item>1 天后</item>
+        <item>1 周后</item>
+        <item>1 个月后</item>
+        <item>3 个月后</item>
+        <item>1 年后</item>
+    </string-array>
+    <string-array name="theme_labels">
+        <item>浅色</item>
+        <item>深色</item>
+        <item>跟随系统</item>
+    </string-array>
+    <string-array name="language_labels">
+        <item>跟随系统</item>
+        <item>English</item>
+        <item>Русский</item>
+        <item>Português (Brasil)</item>
+        <item>简体中文</item>
+    </string-array>
+</resources>
