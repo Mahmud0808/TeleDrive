@@ -88,8 +88,10 @@ fun AppNavHost(
         }
         composable<Route.Files> { entry ->
             UnderBottomBar {
-                val isRoot = entry.toRoute<Route.Files>().folderId == null
+                val filesRoute = entry.toRoute<Route.Files>()
+                val isRoot = filesRoute.folderId == null
                 FilesScreen(
+                    focusFileId = filesRoute.focusFileId,
                     onOpenFolder = { navController.navigateOnce(Route.Files(it)) },
                     onOpenCrumb = { folderId ->
                         val route = Route.Files(folderId)
@@ -160,7 +162,9 @@ fun AppNavHost(
                 onOpenFile = { id, sequence ->
                     navController.navigateOnce(sequence.routeFor(id))
                 },
-                onOpenFolder = { navController.navigateOnce(Route.Files(it)) }
+                onOpenFolder = { folderId, fileId ->
+                    navController.navigateOnce(Route.Files(folderId, fileId))
+                }
             )
         }
         composable<Route.Collection> {

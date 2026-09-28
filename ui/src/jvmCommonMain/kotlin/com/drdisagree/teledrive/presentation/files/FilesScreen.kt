@@ -1,5 +1,15 @@
 package com.drdisagree.teledrive.presentation.files
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.paging.LoadState
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.background
+import androidx.compose.ui.graphics.Color
+import androidx.compose.runtime.snapshotFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.delay
 import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.CleaningServices
@@ -199,6 +209,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(
     ExperimentalMaterial3Api::class,
@@ -207,6 +218,7 @@ import org.koin.compose.viewmodel.koinViewModel
 )
 @Composable
 fun FilesScreen(
+    focusFileId: String? = null,
     onOpenFolder: (String) -> Unit,
     onOpenCrumb: (String?) -> Unit,
     onOpenFile: (String, PreviewSequence) -> Unit,
@@ -282,6 +294,33 @@ fun FilesScreen(
         }
     }
     val lifted by rememberToolbarLift(gridState)
+
+    var highlightedFileId by remember(focusFileId) { mutableStateOf<String?>(null) }
+    LaunchedEffect(focusFileId) {
+        val target = focusFileId ?: return@LaunchedEffect
+        // The effect starts before paging has anything, so wait for the first
+        // page rather than giving up on an empty list.
+        snapshotFlow { files.itemCount to files.loadState.refresh }
+            .first { (count, refresh) -> count > 0 && refresh !is LoadState.Loading }
+
+        var rounds = 0
+        while (rounds++ < FOCUS_PAGE_LIMIT) {
+            val index = (0 until files.itemCount)
+                .firstOrNull { files.peek(it)?.id == target }
+            if (index != null) {
+                gridState.animateScrollToItem(state.folders.size + index)
+                highlightedFileId = target
+                delay(FOCUS_HIGHLIGHT_MS.milliseconds)
+                highlightedFileId = null
+                return@LaunchedEffect
+            }
+            if (files.loadState.append.endOfPaginationReached) return@LaunchedEffect
+            val loaded = files.itemCount
+            gridState.scrollToItem(state.folders.size + loaded - 1)
+            snapshotFlow { files.itemCount to files.loadState.append.endOfPaginationReached }
+                .first { (count, ended) -> count > loaded || ended }
+        }
+    }
 
     val density = LocalDensity.current
     var snackbarHeight by remember { mutableStateOf(0.dp) }
@@ -648,6 +687,7 @@ fun FilesScreen(
                             )
                         } else {
                             FilesContent(
+                                highlightedFileId = highlightedFileId,
                                 gridState = gridState,
                                 state = state,
                                 files = files,
@@ -882,6 +922,7 @@ private const val INLINE_CRUMBS = 3
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun FilesContent(
+    highlightedFileId: String?,
     gridState: LazyGridState,
     state: FilesUiState,
     files: LazyPagingItems<DriveFile>,
@@ -960,6 +1001,7 @@ private fun FilesContent(
         ) { index ->
             val file = files[index] ?: return@items
             val selected = file.id in state.selection
+            val highlighted = file.id == highlightedFileId
             if (state.viewMode == ViewMode.GRID) {
                 FileGridItem(
                     file = file,
@@ -977,7 +1019,7 @@ private fun FilesContent(
                         )
                     },
                     onLongClick = { viewModel.toggleSelection(file.id) },
-                    modifier = Modifier.animateItem()
+                    modifier = Modifier.animateItem().focusHighlight(highlighted)
                 )
             } else {
                 FileListItem(
@@ -997,7 +1039,7 @@ private fun FilesContent(
                         )
                     },
                     onLongClick = { viewModel.toggleSelection(file.id) },
-                    modifier = Modifier.animateItem()
+                    modifier = Modifier.animateItem().focusHighlight(highlighted)
                 )
             }
         }
@@ -1128,3 +1170,32 @@ private const val ROOT_KEY = "__root__"
 private const val FAB_SCROLL_THRESHOLD = 6f
 
 private val SORT_ICON_SIZE = 18.dp
+
+/**
+ * Brief tint so a file reached from search is findable in a long list. Both
+ * item shapes paint their own background, so this draws over them rather than
+ * behind, where it would never be seen.
+ */
+@Composable
+private fun Modifier.focusHighlight(active: Boolean): Modifier {
+    val alpha by animateFloatAsState(
+        targetValue = if (active) FOCUS_TINT_ALPHA else 0f,
+        label = "focusHighlight"
+    )
+    val tint = MaterialTheme.colorScheme.secondary
+    return drawWithContent {
+        drawContent()
+        if (alpha > 0f) {
+            drawRoundRect(
+                color = tint,
+                alpha = alpha,
+                cornerRadius = CornerRadius(FOCUS_TINT_RADIUS.toPx())
+            )
+        }
+    }
+}
+
+private const val FOCUS_PAGE_LIMIT = 10
+private const val FOCUS_HIGHLIGHT_MS = 1_800L
+private const val FOCUS_TINT_ALPHA = 0.3f
+private val FOCUS_TINT_RADIUS = 18.dp

@@ -11,7 +11,10 @@ sealed interface Route {
     data object Home : Route
 
     @Serializable
-    data class Files(val folderId: String? = null) : Route
+    data class Files(
+        val folderId: String? = null,
+        val focusFileId: String? = null
+    ) : Route
 
     @Serializable
     data object Gallery : Route
