@@ -1,0 +1,74 @@
+<resources>
+    <!-- App-wide -->
+    <string name="app_name">TeleDrive</string>
+    <string name="app_already_running">TeleDrive 已在运行。</string>
+
+    <!-- Navigation -->
+    <string name="nav_files">文件</string>
+    <string name="nav_gallery">图库</string>
+    <string name="nav_transfers">传输</string>
+    <string name="nav_trash">回收站</string>
+    <string name="nav_channels">云端硬盘</string>
+    <string name="nav_proxy">代理</string>
+
+    <!-- Sign in -->
+    <string name="auth_credentials_prompt">请输入你在 my.telegram.org 获取的 Telegram API 凭据</string>
+    <string name="auth_api_id">API ID</string>
+    <string name="auth_api_hash">API hash</string>
+    <string name="auth_continue">继续</string>
+    <string name="auth_connecting">正在连接 Telegram</string>
+    <string name="auth_phone_number">手机号</string>
+    <string name="auth_send_code">发送验证码</string>
+    <string name="auth_code_sent_to">请输入发送至 %1$s 的验证码</string>
+    <string name="auth_code">验证码</string>
+    <string name="auth_verify">验证</string>
+    <string name="auth_email_address">邮箱地址</string>
+    <string name="auth_password">密码</string>
+    <string name="auth_password_prompt">两步验证密码</string>
+    <string name="auth_password_hint">两步验证密码（提示：%1$s）</string>
+    <string name="auth_sign_in">登录</string>
+    <string name="auth_confirm_other_device">在其他设备上确认</string>
+    <string name="auth_registration_required">该号码没有 Telegram 账号，请先在手机上注册。</string>
+    <string name="auth_signed_in_as">已登录为 %1$s</string>
+    <string name="auth_signing_out">正在退出登录</string>
+    <string name="auth_session_closed">会话已关闭，请重启应用。</string>
+    <string name="auth_failed">登录失败：%1$s</string>
+    <string name="auth_your_account">你的账号</string>
+    <string name="auth_sign_out">退出登录</string>
+
+    <!-- Drive -->
+    <string name="drive_loading">正在加载你的云端硬盘</string>
+    <string name="drive_pick_title">选择一个云端硬盘</string>
+    <string name="drive_pick_subtitle">文件存放在一个 Telegram 私密频道中</string>
+    <string name="drive_create">创建新云端硬盘</string>
+    <string name="drive_open">打开</string>
+    <string name="drive_file_count">%1$d 个文件</string>
+    <string name="drive_syncing">正在与 Telegram 同步</string>
+    <string name="drive_empty">此云端硬盘中还没有文件</string>
+    <string name="drive_sync">同步</string>
+    <string name="drive_upload">上传</string>
+    <string name="drive_download">下载</string>
+    <string name="drive_downloaded">已下载</string>
+    <string name="drive_queued">已排队</string>
+    <string name="drive_upload_chooser_title">选择要上传的文件</string>
+
+    <!-- Preview -->
+    <string name="preview_open_externally">使用系统应用打开</string>
+    <string name="preview_stream">在系统播放器中播放</string>
+    <string name="preview_open_failed">无法使用系统应用打开该文件</string>
+
+    <!-- Transfer errors -->
+    <string name="transfer_error_key_missing">缺少加密密钥，请在设置中恢复。</string>
+    <string name="transfer_error_no_file_reference">传输没有关联的文件</string>
+    <string name="transfer_error_file_record_missing">文件记录缺失</string>
+    <string name="transfer_error_no_local_copy">没有可上传的本地副本</string>
+    <string name="transfer_error_local_file_gone">本地文件已不存在</string>
+    <string name="transfer_error_upload_ended">上传意外中断</string>
+    <string name="transfer_error_upload_stalled">上传无响应</string>
+    <string name="transfer_error_download_ended">下载意外中断</string>
+    <string name="transfer_error_download_stalled">下载无响应</string>
+    <string name="transfer_error_downloaded_missing">已下载的文件缺失</string>
+    <string name="transfer_error_no_remote_copy">文件没有远程副本</string>
+    <string name="transfer_error_decryption_failed">解密失败</string>
+    <string name="transfer_error_save_failed">无法保存下载的文件</string>
+</resources>
