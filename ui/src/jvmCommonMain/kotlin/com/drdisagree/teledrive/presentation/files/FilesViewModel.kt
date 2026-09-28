@@ -48,6 +48,7 @@ import com.drdisagree.teledrive.resources.files_moving_to_trash
 import com.drdisagree.teledrive.resources.files_queued_for_download
 import com.drdisagree.teledrive.resources.files_queued_for_upload
 import com.drdisagree.teledrive.resources.files_queued_partial
+import com.drdisagree.teledrive.resources.files_kept_pinned_copies
 import com.drdisagree.teledrive.resources.files_removed_local_copies
 import com.drdisagree.teledrive.resources.files_root_name
 import com.drdisagree.teledrive.resources.files_share_needs_local
@@ -598,11 +599,16 @@ class FilesViewModel(
                         _deleteConsentRequests.tryEmit(consent)
                     } else {
                         pendingLocalCopyIds = emptyList()
+                        val kept = result.value.keptPinned
                         _messages.tryEmit(
-                            UiText.Resource(
-                                Res.string.files_removed_local_copies,
-                                result.value.deletedCount
-                            )
+                            if (kept > 0 && result.value.deletedCount == 0) {
+                                UiText.Resource(Res.string.files_kept_pinned_copies, kept)
+                            } else {
+                                UiText.Resource(
+                                    Res.string.files_removed_local_copies,
+                                    result.value.deletedCount
+                                )
+                            }
                         )
                     }
                 }

@@ -2,5 +2,6 @@ package com.drdisagree.teledrive.core.files
 
 data class LocalCleanup(
     val deletedCount: Int,
-    val consentRequest: DeleteConsentRequest? = null
+    val consentRequest: DeleteConsentRequest? = null,
+    val keptPinned: Int = 0
 )

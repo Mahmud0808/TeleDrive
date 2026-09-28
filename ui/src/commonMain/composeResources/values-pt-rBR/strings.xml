@@ -339,6 +339,7 @@
     <string name="files_queued_for_upload">%1$d na fila para envio</string>
     <string name="files_queued_partial">%1$d na fila, %2$d com falha</string>
     <string name="files_removed_local_copies">%1$d cópias locais removidas</string>
+    <string name="files_kept_pinned_copies">Mantidos %1$d arquivo(s) que você mantém no dispositivo</string>
     <string name="files_sync_result">%1$d novos, %2$d atualizados</string>
 
     <!-- File and folder info -->

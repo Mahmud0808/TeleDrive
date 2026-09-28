@@ -655,12 +655,15 @@ class FileRepositoryImpl(
     }
 
     override suspend fun deleteLocalCopy(ids: List<String>): AppResult<LocalCleanup> {
-        val candidates = fileDao.byIds(ids).filter { entity ->
+        val kept = fileDao.keptOfflineIds(ids).toSet()
+        val candidates = fileDao.byIds(ids - kept).filter { entity ->
             entity.localPath != null &&
                     entity.messageId != null &&
                     entity.backupState == BackupState.BACKED_UP
         }
-        if (candidates.isEmpty()) return AppResult.Success(LocalCleanup(0))
+        if (candidates.isEmpty()) {
+            return AppResult.Success(LocalCleanup(0, keptPinned = kept.size))
+        }
 
         val cleanup = localCopyDeleter.delete(candidates.mapNotNull { it.localPath })
         if (cleanup.consentRequest != null) return AppResult.Success(cleanup)
@@ -673,7 +676,7 @@ class FileRepositoryImpl(
                 cleared++
             }
         }
-        return AppResult.Success(LocalCleanup(cleared))
+        return AppResult.Success(LocalCleanup(cleared, keptPinned = kept.size))
     }
 
     companion object {

@@ -339,6 +339,7 @@
     <string name="files_queued_for_upload">%1$d queued for upload</string>
     <string name="files_queued_partial">%1$d queued, %2$d failed</string>
     <string name="files_removed_local_copies">Removed %1$d local copies</string>
+    <string name="files_kept_pinned_copies">Kept %1$d file(s) you keep on device</string>
     <string name="files_sync_result">%1$d new, %2$d updated</string>
 
     <!-- File and folder info -->

@@ -361,6 +361,7 @@
     <string name="files_queued_for_upload">В очереди на загрузку: %1$d</string>
     <string name="files_queued_partial">В очереди: %1$d, ошибок: %2$d</string>
     <string name="files_removed_local_copies">Удалено локальных копий: %1$d</string>
+    <string name="files_kept_pinned_copies">Сохранено файлов на устройстве: %1$d</string>
     <string name="files_sync_result">Новых: %1$d, обновлено: %2$d</string>
 
     <!-- File and folder info -->

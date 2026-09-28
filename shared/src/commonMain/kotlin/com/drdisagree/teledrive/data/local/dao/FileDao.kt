@@ -190,6 +190,21 @@ interface FileDao {
     )
     suspend fun isKeptOffline(id: String): Boolean
 
+    @Query(
+        """WITH RECURSIVE pinned_folders(id) AS (
+               SELECT id FROM folders WHERE isPinned = 1
+               UNION
+               SELECT folders.id FROM folders
+               JOIN pinned_folders ON folders.parentId = pinned_folders.id
+           )
+           SELECT id FROM files
+           WHERE id IN (:ids)
+             AND (isPinned = 1
+                  OR (folderId IS NOT NULL
+                      AND folderId IN (SELECT id FROM pinned_folders)))"""
+    )
+    suspend fun keptOfflineIds(ids: List<String>): List<String>
+
     @Query("UPDATE files SET contentHash = :contentHash WHERE id = :id")
     suspend fun setContentHash(id: String, contentHash: String)
 
