@@ -727,7 +727,8 @@ fun FilesScreen(
             confirmLabel = stringResource(
                 if (moving) Res.string.files_move_here else Res.string.files_copy_here
             ),
-            viewModel = viewModel,
+            loadChildren = viewModel::childFolders,
+            createFolder = viewModel::createFolderIn,
             excludedFolderIds = state.folderSelection,
             onConfirm = { target ->
                 showMovePicker = false
@@ -811,7 +812,8 @@ fun FilesScreen(
         FolderPickerHost(
             title = stringResource(Res.string.files_share_destination_title),
             confirmLabel = stringResource(Res.string.files_share_destination_confirm),
-            viewModel = viewModel,
+            loadChildren = viewModel::childFolders,
+            createFolder = viewModel::createFolderIn,
             onConfirm = { target -> viewModel.acceptShare(sharedUris, target) },
             onDismiss = viewModel::dismissShare
         )
@@ -1111,10 +1113,11 @@ private fun SortMenu(
  * repository by caching each level as it is browsed.
  */
 @Composable
-private fun FolderPickerHost(
+internal fun FolderPickerHost(
     title: String,
     confirmLabel: String,
-    viewModel: FilesViewModel,
+    loadChildren: suspend (String?) -> List<DriveFolder>,
+    createFolder: suspend (String?, String) -> Boolean,
     onConfirm: (String?) -> Unit,
     onDismiss: () -> Unit,
     excludedFolderIds: Set<String> = emptySet()
@@ -1129,7 +1132,7 @@ private fun FolderPickerHost(
     LaunchedEffect(requestedLevel, reloadToken) {
         val level = requestedLevel ?: return@LaunchedEffect
         val parentId = level.takeIf { it != ROOT_KEY }
-        val folders = viewModel.childFolders(parentId)
+        val folders = loadChildren(parentId)
         childrenCache[level] = folders
         folders.forEach { folder ->
             namesCache[folder.id] = folder.name
@@ -1152,8 +1155,7 @@ private fun FolderPickerHost(
         excludedFolderIds = excludedFolderIds,
         onCreateFolder = { parentId, name ->
             scope.launch {
-                if (viewModel.createFolderIn(parentId, name)) {
-                    /* Drop the cached level so the new folder shows up. */
+                if (createFolder(parentId, name)) {
                     childrenCache.remove(parentId ?: ROOT_KEY)
                     requestedLevel = parentId ?: ROOT_KEY
                     reloadToken++

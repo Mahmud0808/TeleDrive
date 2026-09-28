@@ -1,5 +1,8 @@
 package com.drdisagree.teledrive.presentation.gallery
 
+import com.drdisagree.teledrive.presentation.files.FolderPickerHost
+import com.drdisagree.teledrive.resources.files_move_to
+import com.drdisagree.teledrive.resources.files_move_here
 import com.drdisagree.teledrive.presentation.common.AppBackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -214,7 +217,22 @@ fun GalleryScreen(
     val refreshing by viewModel.refreshing.collectAsStateWithLifecycle()
     var confirmTrash by remember { mutableStateOf(false) }
     var showSelectionOverflow by remember { mutableStateOf(false) }
+    var showMovePicker by remember { mutableStateOf(false) }
     val renameTarget by viewModel.renameTarget.collectAsStateWithLifecycle()
+
+    if (showMovePicker) {
+        FolderPickerHost(
+            title = stringResource(Res.string.files_move_to),
+            confirmLabel = stringResource(Res.string.files_move_here),
+            loadChildren = viewModel::childFolders,
+            createFolder = viewModel::createFolderIn,
+            onConfirm = { target ->
+                showMovePicker = false
+                viewModel.moveSelected(target)
+            },
+            onDismiss = { showMovePicker = false }
+        )
+    }
 
     if (confirmTrash) {
         ConfirmDialog(
@@ -336,6 +354,13 @@ fun GalleryScreen(
                                     onClick = {
                                         showSelectionOverflow = false
                                         viewModel.requestRenameSelected()
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(Res.string.files_move_to)) },
+                                    onClick = {
+                                        showSelectionOverflow = false
+                                        showMovePicker = true
                                     }
                                 )
                                 DropdownMenuItem(

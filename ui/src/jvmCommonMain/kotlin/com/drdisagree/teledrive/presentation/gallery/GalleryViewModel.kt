@@ -1,5 +1,7 @@
 package com.drdisagree.teledrive.presentation.gallery
 
+import com.drdisagree.teledrive.domain.model.DriveFolder
+import com.drdisagree.teledrive.core.common.AppResult
 import org.jetbrains.compose.resources.StringResource
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -298,6 +300,19 @@ class GalleryViewModel(
 
     fun endRangeSelection() {
         rangeBase = null
+    }
+
+    suspend fun childFolders(parentId: String?): List<DriveFolder> =
+        fileRepository.observeFolders(parentId, showHidden = true, showArchived = true).first()
+
+    suspend fun createFolderIn(parentId: String?, name: String): Boolean =
+        fileRepository.createFolder(parentId, name) is AppResult.Success
+
+    fun moveSelected(targetFolderId: String?) {
+        val ids = selection.value.toList()
+        clearSelection()
+        if (ids.isEmpty()) return
+        viewModelScope.launch { fileRepository.moveFiles(ids, targetFolderId) }
     }
 
     fun trashSelected() {
