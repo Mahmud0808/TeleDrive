@@ -1,5 +1,10 @@
 package com.drdisagree.teledrive.presentation.gallery
 
+import com.drdisagree.teledrive.core.common.AppError
+import com.drdisagree.teledrive.presentation.common.UiText
+import com.drdisagree.teledrive.presentation.common.toUiText
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import com.drdisagree.teledrive.domain.model.DriveFolder
 import com.drdisagree.teledrive.core.common.AppResult
 import org.jetbrains.compose.resources.StringResource
@@ -90,6 +95,17 @@ class GalleryViewModel(
     private val settingsRepository: SettingsRepository,
     private val syncRepository: SyncRepository
 ) : ViewModel() {
+
+    private val _messages = MutableSharedFlow<UiText>(extraBufferCapacity = 8)
+    val messages = _messages.asSharedFlow()
+
+    private fun report(error: AppError) {
+        _messages.tryEmit(error.toUiText())
+    }
+
+    private fun AppResult<*>.reportFailure() {
+        if (this is AppResult.Failure) report(error)
+    }
 
     private val route: Route.GalleryAlbum? = runCatching {
         savedStateHandle.toRoute<Route.GalleryAlbum>()
@@ -306,31 +322,41 @@ class GalleryViewModel(
         fileRepository.observeFolders(parentId, showHidden = true, showArchived = true).first()
 
     suspend fun createFolderIn(parentId: String?, name: String): Boolean =
-        fileRepository.createFolder(parentId, name) is AppResult.Success
+        when (val result = fileRepository.createFolder(parentId, name)) {
+            is AppResult.Success -> true
+            is AppResult.Failure -> {
+                report(result.error)
+                false
+            }
+        }
 
     fun moveSelected(targetFolderId: String?) {
         val ids = selection.value.toList()
         clearSelection()
         if (ids.isEmpty()) return
-        viewModelScope.launch { fileRepository.moveFiles(ids, targetFolderId) }
+        viewModelScope.launch { fileRepository.moveFiles(ids, targetFolderId).reportFailure() }
     }
 
     fun trashSelected() {
         val ids = selection.value.toList()
         clearSelection()
-        viewModelScope.launch { trashRepository.moveFilesToTrash(ids) }
+        viewModelScope.launch { trashRepository.moveFilesToTrash(ids).reportFailure() }
     }
 
     fun downloadSelected() {
         val ids = selection.value.toList()
         clearSelection()
-        viewModelScope.launch { ids.forEach { transferRepository.enqueueDownload(it) } }
+        viewModelScope.launch {
+            ids.forEach { transferRepository.enqueueDownload(it).reportFailure() }
+        }
     }
 
     fun uploadSelected() {
         val ids = selection.value.toList()
         clearSelection()
-        viewModelScope.launch { ids.forEach { transferRepository.enqueueUpload(it) } }
+        viewModelScope.launch {
+            ids.forEach { transferRepository.enqueueUpload(it).reportFailure() }
+        }
     }
 
     private val _renameTarget = MutableStateFlow<DriveFile?>(null)
@@ -349,7 +375,7 @@ class GalleryViewModel(
         val target = _renameTarget.value ?: return
         _renameTarget.value = null
         clearSelection()
-        viewModelScope.launch { fileRepository.renameFile(target.id, newName) }
+        viewModelScope.launch { fileRepository.renameFile(target.id, newName).reportFailure() }
     }
 
     fun favoriteSelected() {

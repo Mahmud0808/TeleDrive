@@ -1,5 +1,8 @@
 package com.drdisagree.teledrive.presentation.gallery
 
+import androidx.compose.material3.SnackbarHostState
+import com.drdisagree.teledrive.presentation.common.CollectSnackbarMessages
+import com.drdisagree.teledrive.presentation.components.BottomBarSnackbarHost
 import com.drdisagree.teledrive.presentation.files.FolderPickerHost
 import com.drdisagree.teledrive.resources.files_move_to
 import com.drdisagree.teledrive.resources.files_move_here
@@ -218,7 +221,10 @@ fun GalleryScreen(
     var confirmTrash by remember { mutableStateOf(false) }
     var showSelectionOverflow by remember { mutableStateOf(false) }
     var showMovePicker by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
     val renameTarget by viewModel.renameTarget.collectAsStateWithLifecycle()
+
+    CollectSnackbarMessages(viewModel.messages, snackbarHostState)
 
     if (showMovePicker) {
         FolderPickerHost(
@@ -280,6 +286,12 @@ fun GalleryScreen(
     val lifted by rememberToolbarLift(scrolled)
 
     Scaffold(
+        snackbarHost = {
+            BottomBarSnackbarHost(
+                hostState = snackbarHostState,
+                applyInset = !state.selectionMode
+            )
+        },
         topBar = {
             if (state.selectionMode) {
                 TopAppBar(
