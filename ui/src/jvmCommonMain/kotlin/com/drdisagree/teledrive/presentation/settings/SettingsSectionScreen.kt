@@ -1,5 +1,6 @@
 package com.drdisagree.teledrive.presentation.settings
 
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -667,7 +668,13 @@ private fun StorageSection(
                 } else {
                     stringResource(Res.string.settings_free_up_none)
                 },
-                onClick = { if (reclaimable > 0) confirmFreeUpSpace = true }
+                onClick = {
+                    if (reclaimable > 0) {
+                        confirmFreeUpSpace = true
+                    } else {
+                        viewModel.reportNothingToFree()
+                    }
+                }
             )
         }
         add {

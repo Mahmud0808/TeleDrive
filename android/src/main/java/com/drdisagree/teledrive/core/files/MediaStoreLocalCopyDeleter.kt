@@ -48,7 +48,7 @@ class MediaStoreLocalCopyDeleter(
             if (removed) return true
         }
         val file = File(path)
-        if (!file.exists()) return true
+        if (!file.exists()) return file.parentFile?.canRead() == true
         return runCatching { file.delete() }.getOrDefault(false).also { success ->
             if (!success) SafeLog.d(TAG, "Local copy could not be removed")
         }

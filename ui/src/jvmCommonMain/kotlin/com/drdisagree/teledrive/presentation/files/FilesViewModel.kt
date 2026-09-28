@@ -476,14 +476,14 @@ class FilesViewModel(
     }
 
     /**
-     * Pinning promises an offline copy, so anything missing one is queued.
-     * Paths are reconciled first because a copy deleted outside the app still
-     * reads as present until something looks.
+     * Pinning promises an offline copy, so a file with none is queued. It does
+     * not reconcile first: that decides "missing" from File.exists(), which is
+     * false for any path this process cannot see, and would re-download copies
+     * that are sitting on the device already.
      */
     private suspend fun fetchForOffline(fileIds: List<String>) {
         val ids = fileIds.distinct()
         if (ids.isEmpty()) return
-        fileRepository.reconcileLocalCopies(ids)
         val missing = fileRepository.filesByIds(ids)
             .filter { it.hasRemoteCopy && !it.hasLocalCopy }
         if (missing.isEmpty()) return

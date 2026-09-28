@@ -2,6 +2,7 @@ package com.drdisagree.teledrive.presentation.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.drdisagree.teledrive.resources.settings_free_up_none
 import com.drdisagree.teledrive.resources.files_removed_local_copies
 import com.drdisagree.teledrive.resources.settings_nothing_to_remove
 import com.drdisagree.teledrive.resources.Res
@@ -285,6 +286,10 @@ class SettingsViewModel(
     /** Files indexed so far, so a long rebuild shows movement. */
     val indexedSoFar: StateFlow<Int> = syncRepository.indexedSoFar
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
+
+    fun reportNothingToFree() {
+        _messages.tryEmit(UiText.Resource(Res.string.settings_free_up_none))
+    }
 
     fun freeUpSpace() {
         viewModelScope.launch {

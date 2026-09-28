@@ -575,8 +575,8 @@ class TransferExecutor(
         ) {
             return
         }
-        localCopyDeleter.delete(listOf(localPath))
-        if (localCopyDeleter.isGone(localPath)) fileDao.setLocalPath(entity.id, null)
+        val cleanup = localCopyDeleter.delete(listOf(localPath))
+        if (cleanup.deletedCount > 0) fileDao.setLocalPath(entity.id, null)
     }
 
     private suspend fun checkControl(transferId: String) {
