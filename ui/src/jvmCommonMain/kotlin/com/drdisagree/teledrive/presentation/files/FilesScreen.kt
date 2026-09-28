@@ -1,5 +1,7 @@
 package com.drdisagree.teledrive.presentation.files
 
+import androidx.compose.ui.graphics.drawscope.Stroke
+import kotlinx.coroutines.withTimeoutOrNull
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
@@ -315,10 +317,14 @@ fun FilesScreen(
                 return@LaunchedEffect
             }
             if (files.loadState.append.endOfPaginationReached) return@LaunchedEffect
+
             val loaded = files.itemCount
-            gridState.scrollToItem(state.folders.size + loaded - 1)
-            snapshotFlow { files.itemCount to files.loadState.append.endOfPaginationReached }
-                .first { (count, ended) -> count > loaded || ended }
+            files[loaded - 1]
+            val grew = withTimeoutOrNull(FOCUS_PAGE_WAIT_MS.milliseconds) {
+                snapshotFlow { files.itemCount to files.loadState.append.endOfPaginationReached }
+                    .first { (count, ended) -> count > loaded || ended }
+            }
+            if (grew == null) return@LaunchedEffect
         }
     }
 
@@ -1187,17 +1193,24 @@ private fun Modifier.focusHighlight(active: Boolean): Modifier {
     val tint = MaterialTheme.colorScheme.secondary
     return drawWithContent {
         drawContent()
-        if (alpha > 0f) {
-            drawRoundRect(
-                color = tint,
-                alpha = alpha,
-                cornerRadius = CornerRadius(FOCUS_TINT_RADIUS.toPx())
-            )
-        }
+        if (alpha <= 0f) return@drawWithContent
+        val corners = CornerRadius(FOCUS_TINT_RADIUS.toPx())
+        drawRoundRect(color = tint, alpha = alpha * FOCUS_FILL_SCALE, cornerRadius = corners)
+        // A tint alone disappears against a bright thumbnail, so the outline
+        // carries the signal and the fill only softens it.
+        drawRoundRect(
+            color = tint,
+            alpha = alpha,
+            cornerRadius = corners,
+            style = Stroke(width = FOCUS_OUTLINE_WIDTH.toPx())
+        )
     }
 }
 
 private const val FOCUS_PAGE_LIMIT = 10
+private const val FOCUS_PAGE_WAIT_MS = 5_000L
 private const val FOCUS_HIGHLIGHT_MS = 1_800L
-private const val FOCUS_TINT_ALPHA = 0.3f
+private const val FOCUS_TINT_ALPHA = 0.9f
+private const val FOCUS_FILL_SCALE = 0.25f
+private val FOCUS_OUTLINE_WIDTH = 3.dp
 private val FOCUS_TINT_RADIUS = 18.dp
