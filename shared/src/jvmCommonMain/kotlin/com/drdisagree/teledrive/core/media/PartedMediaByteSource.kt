@@ -150,7 +150,7 @@ class PartedMediaByteSource(
         val info = telegramClient.getFileInfo(fileId)
         if (covers(info, readPosition, count)) return
 
-        val downloading = info.isDownloadingCompleted || info.downloadedPrefixSize > 0
+        val downloading = info.isDownloadingCompleted || info.isDownloadingActive
         if (!downloading ||
             readPosition < info.downloadOffset ||
             readPosition > info.downloadOffset + info.downloadedPrefixSize

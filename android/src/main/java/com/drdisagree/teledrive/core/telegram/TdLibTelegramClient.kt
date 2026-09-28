@@ -1179,6 +1179,7 @@ class TdLibTelegramClient(
         sizeBytes = size.takeIf { it > 0 } ?: expectedSize,
         localPath = local?.path?.takeIf { it.isNotEmpty() },
         isDownloadingCompleted = local?.isDownloadingCompleted == true,
+        isDownloadingActive = local?.isDownloadingActive == true,
         downloadOffset = local?.downloadOffset ?: 0,
         downloadedPrefixSize = local?.downloadedPrefixSize ?: 0
     )

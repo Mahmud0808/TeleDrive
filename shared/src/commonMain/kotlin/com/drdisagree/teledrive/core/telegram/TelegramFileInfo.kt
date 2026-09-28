@@ -9,6 +9,7 @@ data class TelegramFileInfo(
     val sizeBytes: Long,
     val localPath: String?,
     val isDownloadingCompleted: Boolean,
+    val isDownloadingActive: Boolean,
     val downloadOffset: Long,
     val downloadedPrefixSize: Long
 )
