@@ -13,12 +13,19 @@ import com.drdisagree.teledrive.domain.model.SortDirection
  */
 object FileQueryBuilder {
 
-    private const val FAVORITE_FOLDER_TREE =
-        "WITH RECURSIVE favorite_folders(id) AS (" +
-                "SELECT id FROM folders WHERE isFavorite = 1 " +
+    private fun coveringColumn(spec: FileQuerySpec): String? = when {
+        spec.favoritesOnly -> "isFavorite"
+        spec.archivedOnly -> "isArchived"
+        spec.hiddenOnly -> "isHidden"
+        else -> null
+    }
+
+    private fun folderTree(column: String): String =
+        "WITH RECURSIVE covering_folders(id) AS (" +
+                "SELECT id FROM folders WHERE $column = 1 " +
                 "UNION " +
                 "SELECT folders.id FROM folders " +
-                "JOIN favorite_folders ON folders.parentId = favorite_folders.id) "
+                "JOIN covering_folders ON folders.parentId = covering_folders.id) "
 
     fun build(spec: FileQuerySpec): RoomRawQuery = query("*", spec)
 
@@ -74,15 +81,15 @@ object FileQueryBuilder {
         }
         if (spec.backedUpOnly) where.append(" AND backupState = 'BACKED_UP'")
         if (spec.notBackedUpOnly) where.append(" AND backupState != 'BACKED_UP'")
-        if (spec.favoritesOnly) {
-            where.append(" AND isFavorite = 1")
-            where.append(
-                " AND (folderId IS NULL OR folderId NOT IN" +
-                        " (SELECT id FROM favorite_folders))"
-            )
-        }
+        if (spec.favoritesOnly) where.append(" AND isFavorite = 1")
         if (spec.hiddenOnly) where.append(" AND isHidden = 1")
         if (spec.archivedOnly) where.append(" AND isArchived = 1")
+        if (coveringColumn(spec) != null) {
+            where.append(
+                " AND (folderId IS NULL OR folderId NOT IN" +
+                        " (SELECT id FROM covering_folders))"
+            )
+        }
         if (!spec.showHidden) where.append(" AND isHidden = 0")
         if (!spec.showArchived) where.append(" AND isArchived = 0")
 
@@ -99,7 +106,7 @@ object FileQueryBuilder {
             SortDirection.DESCENDING -> "DESC"
         }
 
-        val prefix = if (spec.favoritesOnly) FAVORITE_FOLDER_TREE else ""
+        val prefix = coveringColumn(spec)?.let(::folderTree).orEmpty()
         val sql = prefix + "SELECT $projection FROM files WHERE $where " +
                 "ORDER BY $orderColumn $direction, id ASC"
         return RoomRawQuery(sql) { statement ->

@@ -429,20 +429,18 @@ fun FilesScreen(
                                                 icon = Icons.Filled.PushPin
                                             ) { viewModel.pinSelected(!state.allSelectedPinned) }
                                         )
-                                        if (filesOnly) {
-                                            add(
-                                                MenuAction(
-                                                    label = stringResource(Res.string.files_hide),
-                                                    icon = Icons.Filled.VisibilityOff
-                                                ) { viewModel.hideSelected(true) }
-                                            )
-                                            add(
-                                                MenuAction(
-                                                    label = stringResource(Res.string.files_archive),
-                                                    icon = Icons.Filled.Archive
-                                                ) { viewModel.archiveSelected(true) }
-                                            )
-                                        }
+                                        add(
+                                            MenuAction(
+                                                label = stringResource(Res.string.files_hide),
+                                                icon = Icons.Filled.VisibilityOff
+                                            ) { viewModel.hideSelected(true) }
+                                        )
+                                        add(
+                                            MenuAction(
+                                                label = stringResource(Res.string.files_archive),
+                                                icon = Icons.Filled.Archive
+                                            ) { viewModel.archiveSelected(true) }
+                                        )
                                     }
 
                                     val storage = buildList {
@@ -962,7 +960,10 @@ private fun FilesContent(
                 if (index < state.folders.size) {
                     folderIds += state.folders[index].id
                 } else {
-                    files.peek(index - state.folders.size)?.let { fileIds += it.id }
+                    val fileIndex = index - state.folders.size
+                    if (fileIndex < files.itemCount) {
+                        files.peek(fileIndex)?.let { fileIds += it.id }
+                    }
                 }
             }
             viewModel.extendRangeSelection(fileIds, folderIds)

@@ -34,7 +34,7 @@ data class UserPreferences(
     val galleryGridSize: Int = 3,
     val albumGridSize: Int = 3,
     val layoutDensity: LayoutDensity = LayoutDensity.COMFORTABLE,
-    val showHiddenFiles: Boolean = false,
+    val showHiddenFiles: Boolean = true,
     val showArchivedFiles: Boolean = true,
     val showRecentFiles: Boolean = true,
     val linkPreviews: Boolean = true,

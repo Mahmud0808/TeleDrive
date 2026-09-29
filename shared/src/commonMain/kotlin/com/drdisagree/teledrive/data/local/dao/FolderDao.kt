@@ -91,18 +91,60 @@ interface FolderDao {
     suspend fun childrenOf(parentId: String?, chatId: Long?): List<FolderEntity>
 
     @Query(
-        """SELECT folders.*,
+        """WITH RECURSIVE covering_folders(id) AS (
+               SELECT id FROM folders WHERE isFavorite = 1
+               UNION
+               SELECT folders.id FROM folders
+               JOIN covering_folders ON folders.parentId = covering_folders.id
+           )
+           SELECT folders.*,
                   (SELECT COUNT(*) FROM files
                     WHERE files.folderId = folders.id AND files.trashedAt IS NULL
                       AND files.isHidden = 0 AND files.isArchived = 0) AS fileCount,
                   (SELECT COUNT(*) FROM folders AS child
-                    WHERE child.parentId = folders.id AND child.trashedAt IS NULL
-                      AND child.isHidden = 0 AND child.isArchived = 0) AS folderCount
+                    WHERE child.parentId = folders.id AND child.trashedAt IS NULL) AS folderCount
              FROM folders
             WHERE trashedAt IS NULL AND isFavorite = 1 AND chatId IS :chatId
+              AND (parentId IS NULL OR parentId NOT IN (SELECT id FROM covering_folders))
             ORDER BY name COLLATE NOCASE ASC"""
     )
     fun observeFavorites(chatId: Long?): Flow<List<FolderWithCount>>
+    @Query(
+        """WITH RECURSIVE covering_folders(id) AS (
+               SELECT id FROM folders WHERE isArchived = 1
+               UNION
+               SELECT folders.id FROM folders
+               JOIN covering_folders ON folders.parentId = covering_folders.id
+           )
+           SELECT folders.*,
+                  (SELECT COUNT(*) FROM files
+                    WHERE files.folderId = folders.id AND files.trashedAt IS NULL) AS fileCount,
+                  (SELECT COUNT(*) FROM folders AS child
+                    WHERE child.parentId = folders.id AND child.trashedAt IS NULL) AS folderCount
+             FROM folders
+            WHERE trashedAt IS NULL AND isArchived = 1 AND chatId IS :chatId
+              AND (parentId IS NULL OR parentId NOT IN (SELECT id FROM covering_folders))
+            ORDER BY name COLLATE NOCASE ASC"""
+    )
+    fun observeArchived(chatId: Long?): Flow<List<FolderWithCount>>
+    @Query(
+        """WITH RECURSIVE covering_folders(id) AS (
+               SELECT id FROM folders WHERE isHidden = 1
+               UNION
+               SELECT folders.id FROM folders
+               JOIN covering_folders ON folders.parentId = covering_folders.id
+           )
+           SELECT folders.*,
+                  (SELECT COUNT(*) FROM files
+                    WHERE files.folderId = folders.id AND files.trashedAt IS NULL) AS fileCount,
+                  (SELECT COUNT(*) FROM folders AS child
+                    WHERE child.parentId = folders.id AND child.trashedAt IS NULL) AS folderCount
+             FROM folders
+            WHERE trashedAt IS NULL AND isHidden = 1 AND chatId IS :chatId
+              AND (parentId IS NULL OR parentId NOT IN (SELECT id FROM covering_folders))
+            ORDER BY name COLLATE NOCASE ASC"""
+    )
+    fun observeHidden(chatId: Long?): Flow<List<FolderWithCount>>
 
     @Query(
         """SELECT name FROM folders

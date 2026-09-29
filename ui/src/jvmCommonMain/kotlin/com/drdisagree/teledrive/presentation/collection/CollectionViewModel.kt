@@ -41,12 +41,11 @@ class CollectionViewModel(
     private val _folderSelection = MutableStateFlow<Set<String>>(emptySet())
     val folderSelection: StateFlow<Set<String>> = _folderSelection.asStateFlow()
 
-    val folders: StateFlow<List<DriveFolder>> =
-        if (type == CollectionType.FAVORITES) {
-            fileRepository.observeFavoriteFolders()
-        } else {
-            flowOf(emptyList())
-        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    val folders: StateFlow<List<DriveFolder>> = when (type) {
+        CollectionType.FAVORITES -> fileRepository.observeFavoriteFolders()
+        CollectionType.ARCHIVED -> fileRepository.observeArchivedFolders()
+        CollectionType.HIDDEN -> fileRepository.observeHiddenFolders()
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     private val _allSelected = MutableStateFlow(false)
     val allSelected: StateFlow<Boolean> = _allSelected.asStateFlow()
@@ -126,8 +125,15 @@ class CollectionViewModel(
                     folderIds.forEach { fileRepository.setFolderFavorite(it, false) }
                 }
 
-                CollectionType.ARCHIVED -> fileRepository.setFilesArchived(ids, false)
-                CollectionType.HIDDEN -> fileRepository.setFilesHidden(ids, false)
+                CollectionType.ARCHIVED -> {
+                    if (ids.isNotEmpty()) fileRepository.setFilesArchived(ids, false)
+                    folderIds.forEach { fileRepository.setFolderArchived(it, false) }
+                }
+
+                CollectionType.HIDDEN -> {
+                    if (ids.isNotEmpty()) fileRepository.setFilesHidden(ids, false)
+                    folderIds.forEach { fileRepository.setFolderHidden(it, false) }
+                }
             }
         }
     }

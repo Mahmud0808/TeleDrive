@@ -207,6 +207,16 @@ class FileRepositoryImpl(
             folderDao.observeFavorites(chatId).map { list -> list.map { it.toDomain() } }
         }
 
+    override fun observeArchivedFolders(): Flow<List<DriveFolder>> =
+        activeChannel.observe().flatMapLatest { chatId ->
+            folderDao.observeArchived(chatId).map { list -> list.map { it.toDomain() } }
+        }
+
+    override fun observeHiddenFolders(): Flow<List<DriveFolder>> =
+        activeChannel.observe().flatMapLatest { chatId ->
+            folderDao.observeHidden(chatId).map { list -> list.map { it.toDomain() } }
+        }
+
     override suspend fun createFolder(parentId: String?, name: String): AppResult<DriveFolder> {
         val sanitized = FileNameUtils.sanitize(name)
         val siblings = folderDao.namesIn(parentId, activeChannel.id())
@@ -470,6 +480,16 @@ class FileRepositoryImpl(
 
     override suspend fun setFolderFavorite(id: String, favorite: Boolean) {
         folderDao.setFavorite(id, favorite)
+        markFolderStateDirty()
+    }
+
+    override suspend fun setFolderHidden(id: String, hidden: Boolean) {
+        folderDao.setHidden(id, hidden)
+        markFolderStateDirty()
+    }
+
+    override suspend fun setFolderArchived(id: String, archived: Boolean) {
+        folderDao.setArchived(id, archived)
         markFolderStateDirty()
     }
 

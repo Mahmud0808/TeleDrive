@@ -59,6 +59,10 @@ interface FileRepository {
 
     fun observeFavoriteFolders(): Flow<List<DriveFolder>>
 
+    fun observeArchivedFolders(): Flow<List<DriveFolder>>
+
+    fun observeHiddenFolders(): Flow<List<DriveFolder>>
+
     suspend fun createFolder(parentId: String?, name: String): AppResult<DriveFolder>
 
     suspend fun renameFile(id: String, newName: String): AppResult<Unit>
@@ -85,6 +89,10 @@ interface FileRepository {
     suspend fun setFilesArchived(ids: List<String>, archived: Boolean)
 
     suspend fun setFolderFavorite(id: String, favorite: Boolean)
+
+    suspend fun setFolderHidden(id: String, hidden: Boolean)
+
+    suspend fun setFolderArchived(id: String, archived: Boolean)
 
     suspend fun setFolderPinned(id: String, pinned: Boolean)
 

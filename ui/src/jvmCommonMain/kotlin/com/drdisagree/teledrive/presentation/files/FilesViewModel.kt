@@ -195,18 +195,19 @@ class FilesViewModel(
         }
     }
 
-    private val querySpec: Flow<FileQuerySpec> = settingsRepository.preferences
-        .map { prefs ->
+    private val currentFolder: Flow<DriveFolder?> = folderFlow()
+
+    private val querySpec: Flow<FileQuerySpec> =
+        combine(settingsRepository.preferences, currentFolder) { prefs, folder ->
             FileQuerySpec(
                 folderId = folderId,
                 filterByFolder = true,
-                showHidden = false,
-                showArchived = false,
+                showHidden = folder?.isHidden == true,
+                showArchived = folder?.isArchived == true,
                 sortField = prefs.sortField,
                 sortDirection = prefs.sortDirection
             )
-        }
-        .distinctUntilChanged()
+        }.distinctUntilChanged()
 
     val pagedFiles: Flow<PagingData<DriveFile>> = querySpec
         .flatMapLatest { fileRepository.pagedFiles(it) }
@@ -236,12 +237,14 @@ class FilesViewModel(
         settingsRepository.preferences,
         selectionCapabilities,
         folderSelection,
-        folderFlow(),
-        settingsRepository.preferences.flatMapLatest { prefs ->
+        currentFolder,
+        combine(settingsRepository.preferences, currentFolder) { prefs, folder ->
+            prefs to folder
+        }.flatMapLatest { (prefs, folder) ->
             fileRepository.observeFolders(
                 parentId = folderId,
-                showHidden = false,
-                showArchived = false,
+                showHidden = folder?.isHidden == true,
+                showArchived = folder?.isArchived == true,
                 sortField = prefs.sortField,
                 sortDirection = prefs.sortDirection
             )
@@ -510,14 +513,22 @@ class FilesViewModel(
 
     fun hideSelected(hidden: Boolean) {
         val ids = selection.value.toList()
+        val folderIds = folderSelection.value.toList()
         clearSelection()
-        viewModelScope.launch { fileRepository.setFilesHidden(ids, hidden) }
+        viewModelScope.launch {
+            if (ids.isNotEmpty()) fileRepository.setFilesHidden(ids, hidden)
+            folderIds.forEach { fileRepository.setFolderHidden(it, hidden) }
+        }
     }
 
     fun archiveSelected(archived: Boolean) {
         val ids = selection.value.toList()
+        val folderIds = folderSelection.value.toList()
         clearSelection()
-        viewModelScope.launch { fileRepository.setFilesArchived(ids, archived) }
+        viewModelScope.launch {
+            if (ids.isNotEmpty()) fileRepository.setFilesArchived(ids, archived)
+            folderIds.forEach { fileRepository.setFolderArchived(it, archived) }
+        }
     }
 
     fun moveSelected(targetFolderId: String?) {
