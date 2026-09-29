@@ -113,6 +113,11 @@ data class FilesUiState(
         get() = selectionMode &&
                 !capabilities.anyUnpinned &&
                 folders.filter { it.id in folderSelection }.all { it.isPinned }
+
+    val allSelectedFavorite: Boolean
+        get() = selectionMode &&
+                !capabilities.anyUnfavorited &&
+                folders.filter { it.id in folderSelection }.all { it.isFavorite }
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)

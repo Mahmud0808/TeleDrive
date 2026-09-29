@@ -1,5 +1,7 @@
 package com.drdisagree.teledrive.presentation.files
 
+import androidx.compose.material.icons.filled.Star
+import com.drdisagree.teledrive.resources.preview_remove_favorites
 import androidx.compose.ui.graphics.drawscope.Stroke
 import kotlinx.coroutines.withTimeoutOrNull
 import androidx.compose.animation.core.animateFloatAsState
@@ -401,9 +403,19 @@ fun FilesScreen(
                                     val organize = buildList {
                                         add(
                                             MenuAction(
-                                                label = stringResource(Res.string.common_add_favorites),
-                                                icon = Icons.Filled.StarOutline
-                                            ) { viewModel.favoriteSelected(true) }
+                                                label = stringResource(
+                                                    if (state.allSelectedFavorite) {
+                                                        Res.string.preview_remove_favorites
+                                                    } else {
+                                                        Res.string.common_add_favorites
+                                                    }
+                                                ),
+                                                icon = if (state.allSelectedFavorite) {
+                                                    Icons.Filled.Star
+                                                } else {
+                                                    Icons.Filled.StarOutline
+                                                }
+                                            ) { viewModel.favoriteSelected(!state.allSelectedFavorite) }
                                         )
                                         add(
                                             MenuAction(
