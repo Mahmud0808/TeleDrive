@@ -8,6 +8,7 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * Reads a file split across several Telegram messages as though it were one.
@@ -158,7 +159,11 @@ class PartedMediaByteSource(
             telegramClient.requestFileRange(fileId, readPosition, 0)
         }
         withTimeout(BUFFER_TIMEOUT_MS.milliseconds) {
-            telegramClient.fileUpdates(fileId).first { covers(it, readPosition, count) }
+            while (!covers(telegramClient.getFileInfo(fileId), readPosition, count)) {
+                withTimeoutOrNull(RECHECK_INTERVAL_MS.milliseconds) {
+                    telegramClient.fileUpdates(fileId).first { covers(it, readPosition, count) }
+                }
+            }
         }
     }
 
@@ -181,6 +186,7 @@ class PartedMediaByteSource(
 
     private companion object {
         const val BUFFER_TIMEOUT_MS = 30_000L
+        const val RECHECK_INTERVAL_MS = 500L
         const val PRELOAD_MARGIN = 8L * 1024 * 1024
     }
 }

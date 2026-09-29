@@ -1,5 +1,7 @@
 package com.drdisagree.teledrive.presentation.preview
 
+import androidx.compose.material3.Button
+import com.drdisagree.teledrive.resources.common_retry
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.net.Uri
@@ -23,6 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.outlined.ErrorOutline
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
@@ -258,7 +261,11 @@ fun MediaPlayer(
         else -> MaterialTheme.colorScheme.surfaceContainerLowest
     }
 
-    Box(modifier = modifier.fillMaxSize().background(stageColor)) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(stageColor)
+    ) {
         if (audioOnly && player != null) {
             AudioStage(
                 player = player,
@@ -329,12 +336,25 @@ fun MediaPlayer(
                     textAlign = TextAlign.Center,
                     color = MaterialTheme.colorScheme.onSurface
                 )
+                if (playbackFailed && player != null) {
+                    Button(
+                        onClick = {
+                            playbackFailed = false
+                            player.prepare()
+                            player.play()
+                        },
+                        modifier = Modifier.padding(top = 20.dp),
+                        shapes = ButtonDefaults.shapes()
+                    ) {
+                        Text(stringResource(Res.string.common_retry))
+                    }
+                }
             }
         }
         if (!inPipMode) {
             PlayerGestureArea(
                 onTap = {
-                    if (locked && !inPipMode) {
+                    if (locked) {
                         lockHintVisible = !lockHintVisible
                     } else {
                         notifyControls(!visibleControls)
@@ -349,7 +369,11 @@ fun MediaPlayer(
         if (player != null) {
             PlayerControls(
                 player = player,
-                visible = controlsVisible && !locked && !inPipMode,
+                visible = controlsVisible &&
+                        !locked &&
+                        !inPipMode &&
+                        !decoderFailed &&
+                        !playbackFailed,
                 audioOnly = audioOnly,
                 resizeMode = resizeMode,
                 onCycleResizeMode = { resizeMode = resizeMode.next() },
