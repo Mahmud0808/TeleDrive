@@ -92,6 +92,7 @@ class SearchViewModel(
                         backedUpOnly = filterValues.backedUpOnly,
                         notBackedUpOnly = filterValues.notBackedUpOnly,
                         minSizeBytes = filterValues.minSizeMb?.let { it.toLong() * 1024 * 1024 },
+                        showArchived = true,
                         sortField = filterValues.sortField,
                         sortDirection = filterValues.sortDirection
                     )
@@ -114,7 +115,7 @@ class SearchViewModel(
             if (text.isBlank() || fileOnlyFilterActive) {
                 flowOf(emptyList())
             } else {
-                fileRepository.searchFolders(text)
+                fileRepository.searchFolders(text, showArchived = true)
             }
         }
 

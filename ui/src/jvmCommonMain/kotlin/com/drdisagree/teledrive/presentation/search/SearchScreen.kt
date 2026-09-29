@@ -264,7 +264,7 @@ private fun SearchSelectionBar(
     val selectedFile = state.selectedFiles.singleOrNull()
     val folderId = selectedFile?.folderId
     val actions = buildList {
-        if (folderId != null) {
+        if (folderId != null && selectedFile?.isArchived != true) {
             add(
                 MenuAction(
                     label = stringResource(Res.string.search_open_folder),
