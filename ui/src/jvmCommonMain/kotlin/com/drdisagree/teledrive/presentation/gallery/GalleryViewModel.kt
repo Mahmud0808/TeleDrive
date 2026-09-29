@@ -84,6 +84,8 @@ data class GalleryUiState(
     val selection: Set<String> = emptySet()
 ) {
     val selectionMode: Boolean get() = selection.isNotEmpty()
+    val allSelectedFavorite: Boolean get() = selectionMode && !capabilities.anyUnfavorited
+    val allSelectedPinned: Boolean get() = selectionMode && !capabilities.anyUnpinned
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -378,10 +380,28 @@ class GalleryViewModel(
         viewModelScope.launch { fileRepository.renameFile(target.id, newName).reportFailure() }
     }
 
-    fun favoriteSelected() {
+    fun favoriteSelected(favorite: Boolean) {
         val ids = selection.value.toList()
         clearSelection()
-        viewModelScope.launch { fileRepository.setFilesFavorite(ids, true) }
+        viewModelScope.launch { fileRepository.setFilesFavorite(ids, favorite) }
+    }
+
+    fun pinSelected(pinned: Boolean) {
+        val ids = selection.value.toList()
+        clearSelection()
+        viewModelScope.launch { fileRepository.setFilesPinned(ids, pinned) }
+    }
+
+    fun hideSelected(hidden: Boolean) {
+        val ids = selection.value.toList()
+        clearSelection()
+        viewModelScope.launch { fileRepository.setFilesHidden(ids, hidden) }
+    }
+
+    fun archiveSelected(archived: Boolean) {
+        val ids = selection.value.toList()
+        clearSelection()
+        viewModelScope.launch { fileRepository.setFilesArchived(ids, archived) }
     }
 
     companion object {
