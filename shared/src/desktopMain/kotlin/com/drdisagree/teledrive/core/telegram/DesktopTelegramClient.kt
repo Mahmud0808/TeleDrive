@@ -1020,7 +1020,24 @@ class DesktopTelegramClient(
                 }
             }
 
+            val resumer = launch {
+                while (true) {
+                    delay(DOWNLOAD_RESUME_INTERVAL_MS)
+                    val current = runCatching { send<TdApi.File>(TdApi.GetFile(fileId)) }.getOrNull()
+                        ?: continue
+                    if (current.local?.isDownloadingCompleted == true) break
+                    if (current.local?.isDownloadingActive != true) {
+                        runCatching {
+                            send<TdApi.File>(
+                                TdApi.DownloadFile(fileId, DOWNLOAD_PRIORITY, 0, 0, false)
+                            )
+                        }
+                    }
+                }
+            }
+
             awaitClose {
+                resumer.cancel()
                 job.cancel()
                 client?.send(TdApi.CancelDownloadFile(fileId, true)) { }
             }
@@ -1280,6 +1297,7 @@ class DesktopTelegramClient(
         private const val COPY_TIMEOUT_MS = 30_000L
         private const val CLIENT_WAIT_STEP_MS = 10L
         private const val DOWNLOAD_PRIORITY = 16
+        const val DOWNLOAD_RESUME_INTERVAL_MS = 15_000L
         private const val THUMBNAIL_PRIORITY = 24
         private const val THUMBNAIL_EDGE = 320
         private const val DELETE_BATCH = 100
