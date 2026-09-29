@@ -22,17 +22,32 @@ class FileQueryBuilderTest {
     @Test
     fun `folder filter distinguishes root from unfiltered`() {
         val unfiltered = FileQueryBuilder.build(FileQuerySpec(filterByFolder = false)).sql
-        assertFalse(unfiltered.contains("folderId"))
+        assertFalse(unfiltered.contains("AND folderId IS NULL"))
+        assertFalse(unfiltered.contains("folderId = ?"))
 
         val root = FileQueryBuilder.build(
             FileQuerySpec(filterByFolder = true, folderId = null)
         ).sql
-        assertTrue(root.contains("folderId IS NULL"))
+        assertTrue(root.contains("AND folderId IS NULL"))
 
         val specific = FileQueryBuilder.build(
             FileQuerySpec(filterByFolder = true, folderId = "abc")
         ).sql
         assertTrue(specific.contains("folderId = ?"))
+    }
+
+    @Test
+    fun `contents of hidden and archived folders are excluded unless shown`() {
+        val sql = FileQueryBuilder.build(FileQuerySpec()).sql
+        assertTrue(sql.startsWith("WITH RECURSIVE"))
+        assertTrue(sql.contains("folderId NOT IN (SELECT id FROM hidden_folders)"))
+        assertTrue(sql.contains("folderId NOT IN (SELECT id FROM archived_folders)"))
+
+        val shown = FileQueryBuilder.build(
+            FileQuerySpec(showHidden = true, showArchived = true)
+        ).sql
+        assertFalse(shown.contains("hidden_folders"))
+        assertFalse(shown.contains("archived_folders"))
     }
 
     @Test
