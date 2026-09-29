@@ -91,11 +91,18 @@ interface FolderDao {
     suspend fun childrenOf(parentId: String?, chatId: Long?): List<FolderEntity>
 
     @Query(
-        """SELECT * FROM folders
-           WHERE trashedAt IS NULL AND isFavorite = 1 AND chatId IS :chatId
-           ORDER BY name COLLATE NOCASE ASC"""
+        """SELECT folders.*,
+                  (SELECT COUNT(*) FROM files
+                    WHERE files.folderId = folders.id AND files.trashedAt IS NULL
+                      AND files.isHidden = 0 AND files.isArchived = 0) AS fileCount,
+                  (SELECT COUNT(*) FROM folders AS child
+                    WHERE child.parentId = folders.id AND child.trashedAt IS NULL
+                      AND child.isHidden = 0 AND child.isArchived = 0) AS folderCount
+             FROM folders
+            WHERE trashedAt IS NULL AND isFavorite = 1 AND chatId IS :chatId
+            ORDER BY name COLLATE NOCASE ASC"""
     )
-    fun observeFavorites(chatId: Long?): Flow<List<FolderEntity>>
+    fun observeFavorites(chatId: Long?): Flow<List<FolderWithCount>>
 
     @Query(
         """SELECT name FROM folders

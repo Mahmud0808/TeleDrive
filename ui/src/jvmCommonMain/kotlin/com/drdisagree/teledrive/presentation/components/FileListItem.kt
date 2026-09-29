@@ -42,7 +42,8 @@ fun FileListItem(
     selectionMode: Boolean,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    showFavorite: Boolean = true
 ) {
     val compact = LocalCompactLayout.current
     val background = if (selected) {
@@ -87,26 +88,6 @@ fun FileListItem(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f, fill = false)
                 )
-                if (file.isFavorite) {
-                    Spacer(Modifier.width(6.dp))
-                    Icon(
-                        imageVector = Icons.Filled.Star,
-                        contentDescription = stringResource(Res.string.common_content_description_favorite),
-                        modifier = Modifier.size(14.dp),
-                        tint = MaterialTheme.colorScheme.tertiary
-                    )
-                }
-                if (file.isPinned) {
-                    Spacer(Modifier.width(6.dp))
-                    Icon(
-                        imageVector = Icons.Filled.PushPin,
-                        contentDescription = stringResource(
-                            Res.string.common_content_description_pinned
-                        ),
-                        modifier = Modifier.size(14.dp),
-                        tint = MaterialTheme.colorScheme.secondary
-                    )
-                }
             }
             if (!compact) {
                 Text(
@@ -119,6 +100,26 @@ fun FileListItem(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+        }
+        if (file.isFavorite && showFavorite) {
+            Spacer(Modifier.width(6.dp))
+            Icon(
+                imageVector = Icons.Filled.Star,
+                contentDescription = stringResource(Res.string.common_content_description_favorite),
+                modifier = Modifier.size(14.dp),
+                tint = MaterialTheme.colorScheme.tertiary
+            )
+        }
+        if (file.isPinned) {
+            Spacer(Modifier.width(6.dp))
+            Icon(
+                imageVector = Icons.Filled.PushPin,
+                contentDescription = stringResource(
+                    Res.string.common_content_description_pinned
+                ),
+                modifier = Modifier.size(14.dp),
+                tint = MaterialTheme.colorScheme.secondary
+            )
         }
         Spacer(Modifier.width(8.dp))
         BackupStateBadge(file = file)

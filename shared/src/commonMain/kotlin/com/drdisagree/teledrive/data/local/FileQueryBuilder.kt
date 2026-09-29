@@ -12,6 +12,14 @@ import com.drdisagree.teledrive.domain.model.SortDirection
  * compile-time queries without an explosion of variants, hence raw queries.
  */
 object FileQueryBuilder {
+
+    private const val FAVORITE_FOLDER_TREE =
+        "WITH RECURSIVE favorite_folders(id) AS (" +
+                "SELECT id FROM folders WHERE isFavorite = 1 " +
+                "UNION " +
+                "SELECT folders.id FROM folders " +
+                "JOIN favorite_folders ON folders.parentId = favorite_folders.id) "
+
     fun build(spec: FileQuerySpec): RoomRawQuery = query("*", spec)
 
     /** Same filter and order as [build], reading only the ids of every match. */
@@ -66,7 +74,13 @@ object FileQueryBuilder {
         }
         if (spec.backedUpOnly) where.append(" AND backupState = 'BACKED_UP'")
         if (spec.notBackedUpOnly) where.append(" AND backupState != 'BACKED_UP'")
-        if (spec.favoritesOnly) where.append(" AND isFavorite = 1")
+        if (spec.favoritesOnly) {
+            where.append(" AND isFavorite = 1")
+            where.append(
+                " AND (folderId IS NULL OR folderId NOT IN" +
+                        " (SELECT id FROM favorite_folders))"
+            )
+        }
         if (spec.hiddenOnly) where.append(" AND isHidden = 1")
         if (spec.archivedOnly) where.append(" AND isArchived = 1")
         if (!spec.showHidden) where.append(" AND isHidden = 0")
@@ -85,7 +99,8 @@ object FileQueryBuilder {
             SortDirection.DESCENDING -> "DESC"
         }
 
-        val sql = "SELECT $projection FROM files WHERE $where " +
+        val prefix = if (spec.favoritesOnly) FAVORITE_FOLDER_TREE else ""
+        val sql = prefix + "SELECT $projection FROM files WHERE $where " +
                 "ORDER BY $orderColumn $direction, id ASC"
         return RoomRawQuery(sql) { statement ->
             args.forEachIndexed { index, value ->

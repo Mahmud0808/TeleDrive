@@ -1,5 +1,9 @@
 package com.drdisagree.teledrive.presentation.collection
 
+import com.drdisagree.teledrive.domain.model.DriveFolder
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.stateIn
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -34,10 +38,20 @@ class CollectionViewModel(
     private val _selection = MutableStateFlow<Set<String>>(emptySet())
     val selection: StateFlow<Set<String>> = _selection.asStateFlow()
 
+    private val _folderSelection = MutableStateFlow<Set<String>>(emptySet())
+    val folderSelection: StateFlow<Set<String>> = _folderSelection.asStateFlow()
+
+    val folders: StateFlow<List<DriveFolder>> =
+        if (type == CollectionType.FAVORITES) {
+            fileRepository.observeFavoriteFolders()
+        } else {
+            flowOf(emptyList())
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
     private val _allSelected = MutableStateFlow(false)
     val allSelected: StateFlow<Boolean> = _allSelected.asStateFlow()
 
-    private var rangeBase: Set<String>? = null
+    private var rangeBase: Pair<Set<String>, Set<String>>? = null
 
     private val spec = FileQuerySpec(
         favoritesOnly = type == CollectionType.FAVORITES,
@@ -65,28 +79,36 @@ class CollectionViewModel(
         _selection.update { if (id in it) it - id else it + id }
     }
 
+    fun toggleFolderSelection(id: String) {
+        _allSelected.update { false }
+        _folderSelection.update { if (id in it) it - id else it + id }
+    }
+
     fun clearSelection() {
         _allSelected.update { false }
         _selection.update { emptySet() }
+        _folderSelection.update { emptySet() }
     }
 
     /** Selects every file in this collection, including pages not loaded yet. */
     fun selectAll() {
         viewModelScope.launch {
             _selection.update { fileRepository.fileIds(spec).toSet() }
+            _folderSelection.update { folders.value.map { folder -> folder.id }.toSet() }
             _allSelected.update { true }
         }
     }
 
     /** Removes the property that puts files in this collection. */
     fun startRangeSelection() {
-        rangeBase = _selection.value
+        rangeBase = _selection.value to _folderSelection.value
     }
 
-    fun extendRangeSelection(ids: List<String>) {
+    fun extendRangeSelection(fileIds: List<String>, folderIds: List<String>) {
         val base = rangeBase ?: return
         _allSelected.update { false }
-        _selection.update { base + ids }
+        _selection.update { base.first + fileIds }
+        _folderSelection.update { base.second + folderIds }
     }
 
     fun endRangeSelection() {
@@ -95,10 +117,15 @@ class CollectionViewModel(
 
     fun removeFromCollection() {
         val ids = _selection.value.toList()
+        val folderIds = _folderSelection.value.toList()
         clearSelection()
         viewModelScope.launch {
             when (type) {
-                CollectionType.FAVORITES -> fileRepository.setFilesFavorite(ids, false)
+                CollectionType.FAVORITES -> {
+                    if (ids.isNotEmpty()) fileRepository.setFilesFavorite(ids, false)
+                    folderIds.forEach { fileRepository.setFolderFavorite(it, false) }
+                }
+
                 CollectionType.ARCHIVED -> fileRepository.setFilesArchived(ids, false)
                 CollectionType.HIDDEN -> fileRepository.setFilesHidden(ids, false)
             }
@@ -107,7 +134,11 @@ class CollectionViewModel(
 
     fun trashSelected() {
         val ids = _selection.value.toList()
+        val folderIds = _folderSelection.value.toList()
         clearSelection()
-        viewModelScope.launch { trashRepository.moveFilesToTrash(ids) }
+        viewModelScope.launch {
+            if (ids.isNotEmpty()) trashRepository.moveFilesToTrash(ids)
+            folderIds.forEach { trashRepository.moveFolderToTrash(it) }
+        }
     }
 }

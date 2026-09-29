@@ -1,5 +1,7 @@
 package com.drdisagree.teledrive.presentation.components
 
+import androidx.compose.material.icons.filled.Star
+import com.drdisagree.teledrive.resources.common_content_description_favorite
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -38,6 +40,7 @@ import com.drdisagree.teledrive.presentation.common.Formatters
 fun FileGridItem(
     file: DriveFile,
     selected: Boolean,
+    showFavorite: Boolean = true,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -90,6 +93,17 @@ fun FileGridItem(
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f)
                     )
+                    if (file.isFavorite && showFavorite) {
+                        Spacer(Modifier.width(4.dp))
+                        Icon(
+                            imageVector = Icons.Filled.Star,
+                            contentDescription = stringResource(
+                                Res.string.common_content_description_favorite
+                            ),
+                            modifier = Modifier.size(14.dp),
+                            tint = MaterialTheme.colorScheme.tertiary
+                        )
+                    }
                     if (file.isPinned) {
                         Spacer(Modifier.width(4.dp))
                         Icon(

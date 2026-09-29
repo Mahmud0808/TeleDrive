@@ -172,7 +172,8 @@ fun AppNavHost(
                 onBack = { navController.popBackStackOnce() },
                 onOpenFile = { id, sequence ->
                     navController.navigateOnce(sequence.routeFor(id))
-                }
+                },
+                onOpenFolder = { navController.navigateOnce(Route.Files(it)) }
             )
         }
         composable<Route.NoteEditor> {

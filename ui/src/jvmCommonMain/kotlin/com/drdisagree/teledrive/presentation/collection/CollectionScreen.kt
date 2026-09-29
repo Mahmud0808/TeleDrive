@@ -1,5 +1,7 @@
 package com.drdisagree.teledrive.presentation.collection
 
+import com.drdisagree.teledrive.presentation.components.FolderRow
+import androidx.compose.foundation.lazy.items
 import com.drdisagree.teledrive.presentation.common.AppBackHandler
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -58,11 +60,15 @@ import com.drdisagree.teledrive.presentation.preview.PreviewSequence
 fun CollectionScreen(
     onBack: () -> Unit,
     onOpenFile: (String, PreviewSequence) -> Unit,
+    onOpenFolder: (String) -> Unit,
     viewModel: CollectionViewModel = koinViewModel()
 ) {
     val files = viewModel.files.collectAsLazyPagingItems()
+    val folders by viewModel.folders.collectAsStateWithLifecycle()
     val selection by viewModel.selection.collectAsStateWithLifecycle()
-    val selectionMode = selection.isNotEmpty()
+    val folderSelection by viewModel.folderSelection.collectAsStateWithLifecycle()
+    val selectionMode = selection.isNotEmpty() || folderSelection.isNotEmpty()
+    val selectionCount = selection.size + folderSelection.size
     val allSelected by viewModel.allSelected.collectAsStateWithLifecycle()
     var confirmTrash by remember { mutableStateOf(false) }
 
@@ -70,7 +76,7 @@ fun CollectionScreen(
 
     if (confirmTrash) {
         ConfirmDialog(
-            title = stringResource(Res.string.common_confirm_trash_count_title, selection.size),
+            title = stringResource(Res.string.common_confirm_trash_count_title, selectionCount),
             message = stringResource(Res.string.common_restore_trash_emptied),
             confirmLabel = stringResource(Res.string.common_move_trash),
             destructive = true,
@@ -92,7 +98,7 @@ fun CollectionScreen(
                 title = {
                     Text(
                         text = if (selectionMode) {
-                            stringResource(Res.string.common_selection_count, selection.size)
+                            stringResource(Res.string.common_selection_count, selectionCount)
                         } else {
                             stringResource(viewModel.type.titleRes)
                         },
@@ -160,7 +166,7 @@ fun CollectionScreen(
             LoadingState()
             return@Scaffold
         }
-        if (files.itemCount == 0) {
+        if (files.itemCount == 0 && folders.isEmpty()) {
             EmptyState(
                 icon = viewModel.type.icon,
                 title = stringResource(
@@ -176,9 +182,19 @@ fun CollectionScreen(
             listState = listState,
             onStart = viewModel::startRangeSelection,
             onRange = { range ->
-                viewModel.extendRangeSelection(
-                    range.mapNotNull { index -> files.peek(index)?.id }
-                )
+                val folderIds = mutableListOf<String>()
+                val fileIds = mutableListOf<String>()
+                for (index in range) {
+                    if (index < folders.size) {
+                        folderIds += folders[index].id
+                    } else {
+                        val fileIndex = index - folders.size
+                        if (fileIndex < files.itemCount) {
+                            files.peek(fileIndex)?.let { fileIds += it.id }
+                        }
+                    }
+                }
+                viewModel.extendRangeSelection(fileIds, folderIds)
             },
             onEnd = viewModel::endRangeSelection
         )
@@ -195,6 +211,19 @@ fun CollectionScreen(
                 bottom = 8.dp + padding.calculateBottomPadding()
             )
         ) {
+            items(folders, key = { "folder-${it.id}" }) { folder ->
+                FolderRow(
+                    folder = folder,
+                    selected = folder.id in folderSelection,
+                    showFavorite = viewModel.type != CollectionType.FAVORITES,
+                    onClick = {
+                        if (selectionMode) viewModel.toggleFolderSelection(folder.id)
+                        else onOpenFolder(folder.id)
+                    },
+                    onLongClick = { viewModel.toggleFolderSelection(folder.id) },
+                    modifier = Modifier.animateItem()
+                )
+            }
             items(
                 count = files.itemCount,
                 key = files.itemKey { it.id }
@@ -209,6 +238,7 @@ fun CollectionScreen(
                         else onOpenFile(file.id, viewModel.previewSequence)
                     },
                     onLongClick = { viewModel.toggleSelection(file.id) },
+                    showFavorite = viewModel.type != CollectionType.FAVORITES,
                     modifier = Modifier.animateItem()
                 )
             }

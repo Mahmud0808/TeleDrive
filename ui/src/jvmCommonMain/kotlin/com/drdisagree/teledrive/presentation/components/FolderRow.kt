@@ -1,5 +1,6 @@
 package com.drdisagree.teledrive.presentation.components
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
@@ -35,8 +36,10 @@ fun FolderRow(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     selected: Boolean = false,
+    showFavorite: Boolean = true,
     onLongClick: () -> Unit = {}
 ) {
+    val compact = LocalCompactLayout.current
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -46,15 +49,23 @@ fun FolderRow(
                 else Color.Transparent
             )
             .combinedClickable(onClick = onClick, onLongClick = onLongClick)
-            .padding(horizontal = 12.dp, vertical = 12.dp),
+            .padding(horizontal = 12.dp, vertical = if (compact) 4.dp else 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            imageVector = Icons.Filled.Folder,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary
-        )
-        Spacer(Modifier.width(14.dp))
+        Box(
+            modifier = Modifier
+                .size(if (compact) 38.dp else 48.dp)
+                .clip(MaterialTheme.shapes.medium)
+                .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Folder,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
+        Spacer(Modifier.width(if (compact) 10.dp else 14.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = folder.name,
@@ -70,7 +81,7 @@ fun FolderRow(
                 overflow = TextOverflow.Ellipsis
             )
         }
-        if (folder.isFavorite) {
+        if (folder.isFavorite && showFavorite) {
             Icon(
                 imageVector = Icons.Filled.Star,
                 contentDescription = stringResource(Res.string.common_content_description_favorite),
