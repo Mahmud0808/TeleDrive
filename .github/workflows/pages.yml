@@ -1,0 +1,72 @@
+name: Pages
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - website/**
+      - .github/workflows/pages.yml
+  release:
+    types: [published, deleted]
+  schedule:
+    - cron: "23 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: website
+
+      - name: Snapshot release data
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          mkdir -p website/data
+          gh api --paginate "repos/$REPO/releases?per_page=100" --jq '
+            .[] | select(.draft | not) | {
+              tag: .tag_name,
+              name: .name,
+              published: .published_at,
+              prerelease: .prerelease,
+              url: .html_url,
+              assets: [.assets[] | {name, size, downloads: .download_count, url: .browser_download_url}]
+            }' > "$RUNNER_TEMP/releases.ndjson"
+          gh api "repos/$REPO" --jq '{stars: .stargazers_count, forks: .forks_count}' > "$RUNNER_TEMP/repo.json"
+          jq -n \
+            --slurpfile releases "$RUNNER_TEMP/releases.ndjson" \
+            --slurpfile repo "$RUNNER_TEMP/repo.json" \
+            '{generatedAt: (now | todate), repo: $repo[0], releases: $releases}' \
+            > website/data/releases.json
+
+      - name: Stamp the latest version
+        run: |
+          VERSION=$(jq -r '[.releases[] | select(.prerelease | not)] | sort_by(.published) | last | .tag // empty' website/data/releases.json)
+          if [ -n "$VERSION" ]; then
+            sed -i -E "s/(\"softwareVersion\": \")[^\"]*/\1${VERSION#v}/" website/index.html
+          fi
+
+      - uses: actions/configure-pages@v6
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: website
+
+      - id: deployment
+        uses: actions/deploy-pages@v5

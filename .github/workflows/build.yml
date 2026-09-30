@@ -8,12 +8,14 @@ on:
       - "**.yml"
       - LICENSE
       - .github/screenshots/**
+      - website/**
   pull_request:
     paths-ignore:
       - "**.md"
       - "**.yml"
       - LICENSE
       - .github/screenshots/**
+      - website/**
   workflow_dispatch:
 
 concurrency:
