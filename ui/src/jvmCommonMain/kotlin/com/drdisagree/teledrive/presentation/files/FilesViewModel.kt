@@ -23,6 +23,7 @@ import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.repository.SyncRepository
 import com.drdisagree.teledrive.domain.repository.TransferRepository
 import com.drdisagree.teledrive.domain.repository.TrashRepository
+import com.drdisagree.teledrive.domain.usecase.KeepOnDeviceUseCase
 import com.drdisagree.teledrive.presentation.common.ListPosition
 import com.drdisagree.teledrive.presentation.common.UiText
 import com.drdisagree.teledrive.presentation.common.toUiText
@@ -129,7 +130,8 @@ class FilesViewModel(
     private val settingsRepository: SettingsRepository,
     private val syncRepository: SyncRepository,
     private val fileImporter: FileImporter,
-    private val pendingShare: PendingShare
+    private val pendingShare: PendingShare,
+    private val keepOnDevice: KeepOnDeviceUseCase
 ) : ViewModel() {
 
     private val folderId: String? = savedStateHandle.toRoute<Route.Files>().folderId
@@ -477,28 +479,11 @@ class FilesViewModel(
         val folderIds = folderSelection.value.toList()
         clearSelection()
         viewModelScope.launch {
-            if (ids.isNotEmpty()) fileRepository.setFilesPinned(ids, pinned)
-            folderIds.forEach { fileRepository.setFolderPinned(it, pinned) }
-            if (pinned) fetchForOffline(ids + folderIds.flatMap { fileRepository.fileIdsInTree(it) })
+            val queued = keepOnDevice(ids, folderIds, pinned)
+            if (queued > 0) {
+                _messages.tryEmit(UiText.Resource(Res.string.files_queued_for_download, queued))
+            }
         }
-    }
-
-    /**
-     * Pinning promises an offline copy, so a file with none is queued. It does
-     * not reconcile first: that decides "missing" from File.exists(), which is
-     * false for any path this process cannot see, and would re-download copies
-     * that are sitting on the device already.
-     */
-    private suspend fun fetchForOffline(fileIds: List<String>) {
-        val ids = fileIds.distinct()
-        if (ids.isEmpty()) return
-        val missing = fileRepository.filesByIds(ids)
-            .filter { it.hasRemoteCopy && !it.hasLocalCopy }
-        if (missing.isEmpty()) return
-        missing.forEach { transferRepository.enqueueDownload(it.id) }
-        _messages.tryEmit(
-            UiText.Resource(Res.string.files_queued_for_download, missing.size)
-        )
     }
 
     fun favoriteSelected(favorite: Boolean) {

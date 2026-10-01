@@ -6,6 +6,7 @@ import org.koin.dsl.module
 val useCaseModule = module {
     factoryOf(::DecideBackupActionUseCase)
     factoryOf(::EvaluateExclusionsUseCase)
+    factoryOf(::KeepOnDeviceUseCase)
     factoryOf(::TrashExpiryCalculator)
     factoryOf(::ValidateUploadUseCase)
 }

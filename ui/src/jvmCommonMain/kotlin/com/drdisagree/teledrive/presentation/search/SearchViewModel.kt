@@ -11,6 +11,7 @@ import com.drdisagree.teledrive.domain.model.SortDirection
 import com.drdisagree.teledrive.domain.repository.FileRepository
 import com.drdisagree.teledrive.domain.repository.TransferRepository
 import com.drdisagree.teledrive.domain.repository.TrashRepository
+import com.drdisagree.teledrive.domain.usecase.KeepOnDeviceUseCase
 import com.drdisagree.teledrive.presentation.components.SelectionCapabilities
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -64,7 +65,8 @@ data class SearchUiState(
 class SearchViewModel(
     private val fileRepository: FileRepository,
     private val trashRepository: TrashRepository,
-    private val transferRepository: TransferRepository
+    private val transferRepository: TransferRepository,
+    private val keepOnDevice: KeepOnDeviceUseCase
 ) : ViewModel() {
 
     private val selection = MutableStateFlow<Set<String>>(emptySet())
@@ -166,7 +168,7 @@ class SearchViewModel(
     fun pinSelected(pinned: Boolean) {
         val ids = selection.value.toList()
         clearSelection()
-        viewModelScope.launch { fileRepository.setFilesPinned(ids, pinned) }
+        viewModelScope.launch { keepOnDevice(ids, pinned = pinned) }
     }
 
     fun trashSelected() {
