@@ -1,5 +1,7 @@
 package com.drdisagree.teledrive.core.transfer
 
+import com.drdisagree.teledrive.data.remote.telegram.RemoteFileManifest
+
 /** Sizing and naming rules shared by everything that handles a split file. */
 object FileParts {
 
@@ -28,4 +30,15 @@ object FileParts {
         name + "." + (partIndex + 1).toString().padStart(3, '0')
 
     fun splits(sizeBytes: Long, limitBytes: Long): Boolean = sizeBytes > limitBytes
+
+    fun asFirstPart(
+        manifest: RemoteFileManifest,
+        partCount: Int = countFor(manifest.sizeBytes)
+    ): RemoteFileManifest = manifest.copy(
+        version = RemoteFileManifest.PART_VERSION,
+        partCount = partCount,
+        partIndex = 0,
+        partOffset = offsetOf(0),
+        partSize = sizeOf(0, manifest.sizeBytes)
+    )
 }

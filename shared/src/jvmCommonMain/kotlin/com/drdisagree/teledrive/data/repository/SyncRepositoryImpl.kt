@@ -10,6 +10,7 @@ import com.drdisagree.teledrive.core.files.MimeTypes
 import com.drdisagree.teledrive.core.telegram.RemoteDocument
 import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.core.telegram.TelegramException
+import com.drdisagree.teledrive.core.transfer.FileParts
 import com.drdisagree.teledrive.data.local.dao.FileDao
 import com.drdisagree.teledrive.data.local.dao.FilePartDao
 import com.drdisagree.teledrive.data.local.dao.FolderDao
@@ -61,6 +62,7 @@ class SyncRepositoryImpl(
     private val _indexedSoFar = MutableStateFlow(0)
     override val indexedSoFar: Flow<Int> = _indexedSoFar
     private val syncMutex = Mutex()
+    private val captionRepairsQueued = mutableSetOf<String>()
 
     override suspend fun fullResync(): AppResult<SyncRepository.SyncStats> =
         runSync(incremental = false)
@@ -116,6 +118,7 @@ class SyncRepositoryImpl(
         var inserted = 0
         var updated = 0
         var locked = 0
+        val repairsBefore = captionRepairsQueued.size
         val seenMessageIds = mutableSetOf<Long>()
         var fromMessageId = 0L
         var pages = 0
@@ -161,6 +164,7 @@ class SyncRepositoryImpl(
                 }
             }
             if (reachedKnown) {
+                if (captionRepairsQueued.size > repairsBefore) publishScheduler.kick()
                 return finishSync(
                     chatId, seenMessageIds, inserted, updated, locked, partial = true
                 )
@@ -169,6 +173,7 @@ class SyncRepositoryImpl(
             fromMessageId = page.nextFromMessageId
         }
 
+        if (captionRepairsQueued.size > repairsBefore) publishScheduler.kick()
         return finishSync(
             chatId, seenMessageIds, inserted, updated, locked, partial = incremental
         )
@@ -236,13 +241,51 @@ class SyncRepositoryImpl(
                 entity.remoteUniqueId?.let { it to entity }
             }.toMap()
         }
-        return KnownRows(manifests, byId, byUniqueId)
+        val parts = if (fileIds.isEmpty()) emptyList() else filePartDao.partsOfAll(fileIds)
+        return KnownRows(
+            manifests = manifests,
+            byId = byId,
+            byUniqueId = byUniqueId,
+            splitCounts = splitCounts(manifests.values, byId, parts),
+            firstPartStored = parts.filter { it.partIndex == 0 }.map { it.fileId }.toSet()
+        )
+    }
+
+    private fun splitCounts(
+        manifests: Collection<RemoteFileManifest?>,
+        byId: Map<String, FileEntity>,
+        parts: List<FilePartEntity>
+    ): Map<String, Int> {
+        val counts = mutableMapOf<String, Int>()
+        fun note(fileId: String, count: Int) {
+            if (count > 1) counts[fileId] = maxOf(counts[fileId] ?: 0, count)
+        }
+        manifests.forEach { manifest ->
+            if (manifest?.isPart == true) note(manifest.fileId, manifest.partCount)
+        }
+        byId.values.forEach { entity -> note(entity.id, entity.partCount) }
+        parts.groupBy { it.fileId }
+            .forEach { (fileId, stored) -> note(fileId, stored.maxOf { it.partIndex } + 1) }
+        return counts
+    }
+
+    /**
+     * A part 0 caption can lack its part fields and read as a whole file. Its
+     * siblings, a stored part row or a recorded count still prove the file is
+     * split, and this returns that count so the row and caption can be restored.
+     */
+    private fun splitCountOfDamagedFirstPart(document: RemoteDocument, known: KnownRows): Int? {
+        val manifest = known.manifests[document] ?: return null
+        if (manifest.isPart) return null
+        return known.splitCounts[manifest.fileId]
     }
 
     private data class KnownRows(
         val manifests: Map<RemoteDocument, RemoteFileManifest?>,
         val byId: Map<String, FileEntity>,
-        val byUniqueId: Map<String, FileEntity>
+        val byUniqueId: Map<String, FileEntity>,
+        val splitCounts: Map<String, Int>,
+        val firstPartStored: Set<String>
     )
 
     /**
@@ -280,15 +323,29 @@ class SyncRepositoryImpl(
         val existing = manifest?.let { known.byId[it.fileId] }
             ?: known.byUniqueId[document.uniqueFileId]
 
+        val damagedSplitCount = splitCountOfDamagedFirstPart(document, known)
         if (manifest != null && manifest.isPart) {
             recordPart(document, manifest)
+        } else if (manifest != null && damagedSplitCount != null &&
+            manifest.fileId !in known.firstPartStored
+        ) {
+            recordPart(document, FileParts.asFirstPart(manifest, damagedSplitCount))
         }
+        val queueCaptionRepair = manifest != null && damagedSplitCount != null &&
+                existing?.pendingPublish != true && captionRepairsQueued.add(manifest.fileId)
+
+        val laterPart = manifest != null && manifest.isPart && manifest.partIndex != 0
+        if (laterPart && existing != null) return ReconcileResult.UNCHANGED
 
         val local = existing?.takeIf {
             it.pendingPublish && (manifest == null || it.modifiedAt >= manifest.modifiedAt)
         }
 
-        val remoteFolderId = manifest?.let { resolveFolder(it, folderCache) } ?: existing?.folderId
+        val remoteFolderId = when {
+            manifest == null -> existing?.folderId
+            laterPart -> manifest.folderId?.takeIf { folderPathResolver.exists(it) }
+            else -> resolveFolder(manifest, folderCache)
+        }
         val folderId = if (local != null) {
             local.folderId ?: local.preTrashFolderId
         } else {
@@ -337,30 +394,26 @@ class SyncRepositoryImpl(
             } else {
                 existing?.preTrashFolderId
             },
-            pendingPublish = existing?.pendingPublish == true,
+            pendingPublish = existing?.pendingPublish == true || queueCaptionRepair,
             createdAt = manifest?.createdAt ?: existing?.createdAt
             ?: (document.dateSeconds * 1000L),
             modifiedAt = local?.modifiedAt ?: manifest?.modifiedAt ?: existing?.modifiedAt
             ?: (document.dateSeconds * 1000L),
             addedAt = existing?.addedAt ?: now,
-            partCount = manifest?.partCount ?: existing?.partCount ?: 0,
+            partCount = damagedSplitCount ?: manifest?.partCount ?: existing?.partCount ?: 0,
             iconFileId = manifest?.iconFileId ?: existing?.iconFileId
         )
 
-        if (manifest != null && manifest.isPart && manifest.partIndex != 0) {
-            return if (existing == null) {
-                fileDao.upsert(
-                    entity.copy(
-                        chatId = null,
-                        messageId = null,
-                        remoteFileId = null,
-                        remoteUniqueId = null
-                    )
+        if (laterPart) {
+            fileDao.upsert(
+                entity.copy(
+                    chatId = null,
+                    messageId = null,
+                    remoteFileId = null,
+                    remoteUniqueId = null
                 )
-                ReconcileResult.INSERTED
-            } else {
-                ReconcileResult.UNCHANGED
-            }
+            )
+            return ReconcileResult.INSERTED
         }
 
         return when {
