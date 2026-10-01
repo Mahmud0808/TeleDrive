@@ -20,6 +20,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -77,6 +78,7 @@ class TdLibTelegramClient(
         extraBufferCapacity = 4096,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
+    private val ownWrites = OwnWrites()
 
     override suspend fun start(credentials: TelegramCredentials) {
         clientMutex.withLock {
@@ -105,6 +107,9 @@ class TdLibTelegramClient(
     }
 
     private fun handleUpdate(generation: Int, update: TdApi.Object) {
+        if (update is TdApi.UpdateMessageSendSucceeded) {
+            ownWrites.wroteCaption(update.message.id, update.message.content.captionText().orEmpty())
+        }
         updates.tryEmit(update)
         when (update) {
             is TdApi.UpdateAuthorizationState ->
@@ -1149,6 +1154,7 @@ class TdLibTelegramClient(
             .getOrNull()
 
     override suspend fun editCaption(chatId: Long, messageId: Long, caption: String) {
+        ownWrites.wroteCaption(messageId, caption)
         paced {
             send(
                 TdApi.EditMessageCaption(
@@ -1164,9 +1170,56 @@ class TdLibTelegramClient(
 
     override suspend fun deleteMessages(chatId: Long, messageIds: List<Long>) {
         if (messageIds.isEmpty()) return
+        ownWrites.deleted(messageIds)
         messageIds.chunked(DELETE_BATCH).forEach { batch ->
             paced { send(TdApi.DeleteMessages(chatId, batch.toLongArray(), true)) }
         }
+    }
+
+    override fun messageChanges(chatId: Long): Flow<MessageChange> = updates.mapNotNull { update ->
+        when (update) {
+            is TdApi.UpdateNewMessage -> update.message
+                .takeIf { it.chatId == chatId && it.sendingState == null }
+                ?.takeUnless { ownWrites.isOwnContent(it.id, it.content.captionText()) }
+                ?.let { MessageChange.Updated(it.id) }
+
+            is TdApi.UpdateMessageContent ->
+                if (update.chatId == chatId &&
+                    !ownWrites.isOwnContent(update.messageId, update.newContent.captionText())
+                ) {
+                    MessageChange.Updated(update.messageId)
+                } else {
+                    null
+                }
+
+            is TdApi.UpdateDeleteMessages ->
+                if (update.chatId == chatId && update.isPermanent && !update.fromCache) {
+                    ownWrites.deletedElsewhere(update.messageIds.toList())
+                        .takeIf { it.isNotEmpty() }
+                        ?.let { MessageChange.Deleted(it) }
+                } else {
+                    null
+                }
+
+            else -> null
+        }
+    }
+
+    override suspend fun openChat(chatId: Long) {
+        send<TdApi.Ok>(TdApi.OpenChat(chatId))
+    }
+
+    override suspend fun closeChat(chatId: Long) {
+        send<TdApi.Ok>(TdApi.CloseChat(chatId))
+    }
+
+    private fun TdApi.MessageContent.captionText(): String? = when (this) {
+        is TdApi.MessageDocument -> caption?.text
+        is TdApi.MessageAudio -> caption?.text
+        is TdApi.MessageVideo -> caption?.text
+        is TdApi.MessagePhoto -> caption?.text
+        is TdApi.MessageAnimation -> caption?.text
+        else -> null
     }
 
     /**

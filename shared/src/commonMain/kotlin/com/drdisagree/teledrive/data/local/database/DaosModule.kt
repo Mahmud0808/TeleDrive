@@ -14,4 +14,5 @@ val daosModule = module {
     single { get<TeleDriveDatabase>().pendingDeleteDao() }
     single { get<TeleDriveDatabase>().filePartDao() }
     single { get<TeleDriveDatabase>().proxyDao() }
+    single { get<TeleDriveDatabase>().folderTombstoneDao() }
 }

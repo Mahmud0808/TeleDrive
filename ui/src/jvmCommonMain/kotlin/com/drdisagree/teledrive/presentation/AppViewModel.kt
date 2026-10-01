@@ -12,6 +12,7 @@ import com.drdisagree.teledrive.domain.repository.ChannelRepository
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.repository.SyncRepository
 import com.drdisagree.teledrive.domain.repository.TelegramAuthRepository
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -67,6 +68,7 @@ class AppViewModel(
 
     @Volatile
     private var driveReady = false
+    private var following: Job? = null
 
     val uiState: StateFlow<AppUiState> = combine(
         settingsRepository.preferences,
@@ -96,7 +98,12 @@ class AppViewModel(
             uiState.map { it.onboardingComplete }
         ) { ready, onboarded -> ready && onboarded }
             .distinctUntilChanged()
-            .onEach { ready -> if (!ready) driveReady = false }
+            .onEach { ready ->
+                if (!ready) {
+                    driveReady = false
+                    stopFollowing()
+                }
+            }
             .filter { it }
             .onEach {
                 channelRepository.refreshKnown()
@@ -108,6 +115,7 @@ class AppViewModel(
                 syncRepository.syncOnStart()
                 catchUpBackup()
                 viewModelScope.launch { syncRepository.catchUpWithRemote() }
+                startFollowing()
             }
             .launchIn(viewModelScope)
     }
@@ -119,11 +127,27 @@ class AppViewModel(
         backupRepository.startBackup(BackupTrigger.SCHEDULED)
     }
 
-    fun onAppStopped() = appLockManager.onAppStopped()
+    fun onAppStopped() {
+        appLockManager.onAppStopped()
+        stopFollowing()
+    }
 
     fun onAppStarted() {
         viewModelScope.launch { appLockManager.onAppStarted() }
-        if (driveReady) viewModelScope.launch { syncRepository.catchUpWithRemote() }
+        if (driveReady) {
+            viewModelScope.launch { syncRepository.catchUpWithRemote() }
+            startFollowing()
+        }
+    }
+
+    private fun startFollowing() {
+        if (following?.isActive == true) return
+        following = viewModelScope.launch { syncRepository.followRemoteChanges() }
+    }
+
+    private fun stopFollowing() {
+        following?.cancel()
+        following = null
     }
 
     /**

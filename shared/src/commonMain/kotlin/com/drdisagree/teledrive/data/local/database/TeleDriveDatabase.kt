@@ -10,6 +10,7 @@ import com.drdisagree.teledrive.data.local.dao.FileDao
 import com.drdisagree.teledrive.data.local.dao.FilePartDao
 import com.drdisagree.teledrive.data.local.dao.ProxyDao
 import com.drdisagree.teledrive.data.local.dao.FolderDao
+import com.drdisagree.teledrive.data.local.dao.FolderTombstoneDao
 import com.drdisagree.teledrive.data.local.dao.PendingDeleteDao
 import com.drdisagree.teledrive.data.local.dao.StorageChannelDao
 import com.drdisagree.teledrive.data.local.dao.ThumbnailDao
@@ -22,6 +23,7 @@ import com.drdisagree.teledrive.data.local.entity.FileEntity
 import com.drdisagree.teledrive.data.local.entity.FilePartEntity
 import com.drdisagree.teledrive.data.local.entity.ProxyEntity
 import com.drdisagree.teledrive.data.local.entity.FolderEntity
+import com.drdisagree.teledrive.data.local.entity.FolderTombstoneEntity
 import com.drdisagree.teledrive.data.local.entity.PendingDeleteEntity
 import com.drdisagree.teledrive.data.local.entity.StorageChannelEntity
 import com.drdisagree.teledrive.data.local.entity.ThumbnailEntity
@@ -40,9 +42,10 @@ import com.drdisagree.teledrive.data.local.entity.TransferEntity
         StorageChannelEntity::class,
         PendingDeleteEntity::class,
         FilePartEntity::class,
-        ProxyEntity::class
+        ProxyEntity::class,
+        FolderTombstoneEntity::class
     ],
-    version = 12,
+    version = 13,
     exportSchema = true
 )
 @ConstructedBy(TeleDriveDatabaseConstructor::class)
@@ -58,6 +61,7 @@ abstract class TeleDriveDatabase : RoomDatabase() {
     abstract fun pendingDeleteDao(): PendingDeleteDao
     abstract fun filePartDao(): FilePartDao
     abstract fun proxyDao(): ProxyDao
+    abstract fun folderTombstoneDao(): FolderTombstoneDao
 
     companion object {
         const val NAME = "teledrive.db"

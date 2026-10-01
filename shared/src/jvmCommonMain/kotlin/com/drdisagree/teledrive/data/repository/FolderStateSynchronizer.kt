@@ -11,7 +11,9 @@ import com.drdisagree.teledrive.core.telegram.TelegramDownloadEvent
 import com.drdisagree.teledrive.core.telegram.TelegramException
 import com.drdisagree.teledrive.core.telegram.TelegramUploadEvent
 import com.drdisagree.teledrive.data.local.dao.FolderDao
+import com.drdisagree.teledrive.data.local.dao.FolderTombstoneDao
 import com.drdisagree.teledrive.data.local.entity.FolderEntity
+import com.drdisagree.teledrive.data.local.entity.FolderTombstoneEntity
 import com.drdisagree.teledrive.data.remote.telegram.RemoteFolderState
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.first
@@ -31,35 +33,37 @@ class FolderStateSynchronizer(
     private val storagePaths: AppStoragePaths,
     private val telegramClient: TelegramClient,
     private val folderDao: FolderDao,
+    private val tombstoneDao: FolderTombstoneDao,
     private val settingsRepository: SettingsRepository,
     private val streamCrypto: StreamCrypto,
     private val wrappedKeyRepository: WrappedKeyRepository
 ) {
 
     private val json = Json { ignoreUnknownKeys = true; encodeDefaults = false }
-    private val pushMutex = Mutex()
+    private val mutex = Mutex()
 
-    suspend fun push() = pushMutex.withLock {
+    /**
+     * Uploads this device's tree merged with the one already in the channel,
+     * and keeps the merge locally too. A document that exists but cannot be
+     * read without the content key is replaced, as it always was, because
+     * waiting for a key that may never come would block every folder change.
+     */
+    suspend fun push() = mutex.withLock {
         val chatId = storageChatId()
-        val state = RemoteFolderState(
-            folders = folderDao.allFolders(chatId).map { folder ->
-                RemoteFolderState.Entry(
-                    id = folder.id,
-                    parentId = folder.parentId,
-                    name = folder.name,
-                    hidden = folder.isHidden,
-                    archived = folder.isArchived,
-                    favorite = folder.isFavorite,
-                    trashedAt = folder.trashedAt,
-                    preTrashParentId = folder.preTrashParentId,
-                    createdAt = folder.createdAt,
-                    modifiedAt = folder.modifiedAt,
-                    changedAt = folder.changedAt
-                )
-            }
-        )
-
         val existing = findStateDocument(chatId)
+        val remote = existing?.let { document ->
+            when (val read = read(document)) {
+                is RemoteRead.Ok -> read.state
+                RemoteRead.Unreadable -> {
+                    SafeLog.w(TAG, "Folder state unreadable, replacing it")
+                    null
+                }
+                RemoteRead.Unavailable -> error("Folder state download failed")
+            }
+        }
+        val state = merged(chatId, remote)
+        applyLocally(chatId, state)
+
         val staging = File(storagePaths.cacheDir, RemoteFolderState.FILE_NAME)
         val payload = json.encodeToString(RemoteFolderState.serializer(), state)
             .toByteArray(Charsets.UTF_8)
@@ -81,6 +85,7 @@ class FolderStateSynchronizer(
         } finally {
             staging.delete()
         }
+        tombstoneDao.deleteOlderThan(deletionCutoff())
     }
 
     /**
@@ -107,49 +112,127 @@ class FolderStateSynchronizer(
     }
 
     /**
-     * Restores folder rows from Telegram. Local rows win only when newer.
-     * Skipped while local changes wait to publish, so callers should kick
-     * the publisher first or a stalled outbox blocks pulling forever.
+     * Brings other devices' folder changes into the local tree without ever
+     * publishing anything, so applying them cannot echo back. Skipped while
+     * local changes wait to publish, since [push] merges those itself.
      */
-    suspend fun pull(): Int {
-        if (folderDao.pendingPublishCount() > 0) return 0
+    suspend fun pull(): Int = mutex.withLock {
+        if (folderDao.pendingPublishCount() > 0) return@withLock 0
         val chatId = storageChatId()
-        val document = findStateDocument(chatId) ?: return 0
+        val document = findStateDocument(chatId) ?: return@withLock 0
+        val remote = (read(document) as? RemoteRead.Ok)?.state ?: return@withLock 0
+        applyLocally(chatId, merged(chatId, remote))
+    }
+
+    private suspend fun read(document: RemoteDocument): RemoteRead {
         var localPath: String? = null
         telegramClient.downloadDocument(document.remoteFileId).collect { event ->
             if (event is TelegramDownloadEvent.Completed) localPath = event.localPath
         }
-        val blob = localPath?.let(::File)?.takeIf { it.exists() }?.readBytes() ?: return 0
-        val payload = unseal(blob) ?: return 0
-        val state = runCatching {
-            json.decodeFromString(RemoteFolderState.serializer(), payload)
-        }.getOrNull() ?: return 0
+        val blob = localPath?.let(::File)?.takeIf { it.exists() }?.readBytes()
+            ?: return RemoteRead.Unavailable
+        val payload = unseal(blob) ?: return RemoteRead.Unreadable
+        return runCatching { json.decodeFromString(RemoteFolderState.serializer(), payload) }
+            .fold({ RemoteRead.Ok(it) }, { RemoteRead.Unreadable })
+    }
 
-        var restored = 0
+    private suspend fun merged(chatId: Long, remote: RemoteFolderState?): RemoteFolderState =
+        FolderStateMerge.merge(
+            local = folderDao.allFolders(chatId).map { it.toEntry() },
+            localDeleted = tombstoneDao.inChat(chatId).map {
+                RemoteFolderState.Tombstone(it.id, it.deletedAt)
+            },
+            remote = remote,
+            keepDeletionsSince = deletionCutoff()
+        )
+
+    /**
+     * Existing rows are updated rather than replaced: a REPLACE deletes the
+     * row first, and the folder foreign keys would take its children and
+     * the folder of every file inside with it.
+     */
+    private suspend fun applyLocally(chatId: Long, state: RemoteFolderState): Int {
+        var changed = 0
         for (entry in state.folders.sortedBy { depthOf(it, state.folders) }) {
             val existing = folderDao.byId(entry.id)
-            if (existing != null && existing.changedAt >= entry.clock) continue
-            folderDao.upsert(
-                FolderEntity(
-                    id = entry.id,
-                    chatId = chatId,
-                    parentId = entry.parentId,
-                    name = entry.name,
-                    isHidden = entry.hidden,
-                    isArchived = entry.archived,
-                    isFavorite = entry.favorite,
-                    isPinned = existing?.isPinned == true,
-                    trashedAt = entry.trashedAt,
-                    preTrashParentId = entry.preTrashParentId,
-                    pendingPublish = existing?.pendingPublish == true,
-                    createdAt = entry.createdAt,
-                    modifiedAt = entry.modifiedAt,
-                    changedAt = entry.clock
-                )
+            if (existing != null && existing.changedAt >= entry.clock &&
+                existing.parentId == entry.parentId
+            ) continue
+            if (existing != null && existing.changedAt >= entry.clock) {
+                folderDao.update(existing.copy(parentId = entry.parentId))
+                changed++
+                continue
+            }
+            val row = FolderEntity(
+                id = entry.id,
+                chatId = chatId,
+                parentId = entry.parentId,
+                name = entry.name,
+                isHidden = entry.hidden,
+                isArchived = entry.archived,
+                isFavorite = entry.favorite,
+                isPinned = existing?.isPinned == true,
+                trashedAt = entry.trashedAt,
+                preTrashParentId = entry.preTrashParentId,
+                pendingPublish = existing?.pendingPublish == true,
+                createdAt = entry.createdAt,
+                modifiedAt = entry.modifiedAt,
+                changedAt = entry.clock
             )
-            restored++
+            if (existing == null) folderDao.upsert(row) else folderDao.update(row)
+            changed++
         }
-        return restored
+
+        tombstoneDao.deleteExcept(chatId, state.deleted.map { it.id })
+        tombstoneDao.upsert(
+            state.deleted.map { FolderTombstoneEntity(it.id, chatId, it.deletedAt) }
+        )
+        val all = folderDao.allFolders(chatId)
+        for (deletion in state.deleted) {
+            val folder = all.firstOrNull { it.id == deletion.id } ?: continue
+            if (folder.changedAt > deletion.deletedAt) continue
+            if (hasNewerDescendant(folder.id, deletion.deletedAt, all)) continue
+            folderDao.delete(folder.id)
+            changed++
+        }
+        return changed
+    }
+
+    private fun hasNewerDescendant(
+        folderId: String,
+        deletedAt: Long,
+        all: List<FolderEntity>
+    ): Boolean {
+        var frontier = listOf(folderId)
+        var guard = 0
+        while (frontier.isNotEmpty() && guard++ < MAX_DEPTH) {
+            val children = all.filter { it.parentId in frontier || it.preTrashParentId in frontier }
+            if (children.any { it.changedAt > deletedAt }) return true
+            frontier = children.map { it.id }
+        }
+        return false
+    }
+
+    private fun deletionCutoff(): Long = System.currentTimeMillis() - DELETION_RETENTION_MS
+
+    private fun FolderEntity.toEntry() = RemoteFolderState.Entry(
+        id = id,
+        parentId = parentId,
+        name = name,
+        hidden = isHidden,
+        archived = isArchived,
+        favorite = isFavorite,
+        trashedAt = trashedAt,
+        preTrashParentId = preTrashParentId,
+        createdAt = createdAt,
+        modifiedAt = modifiedAt,
+        changedAt = changedAt
+    )
+
+    private sealed interface RemoteRead {
+        data class Ok(val state: RemoteFolderState) : RemoteRead
+        data object Unreadable : RemoteRead
+        data object Unavailable : RemoteRead
     }
 
     private fun depthOf(
@@ -201,5 +284,6 @@ class FolderStateSynchronizer(
         private const val PAGE_SIZE = 100
         private const val MAX_PAGES = 200
         private const val MAX_DEPTH = 64
+        private const val DELETION_RETENTION_MS = 180L * 24 * 60 * 60 * 1000
     }
 }

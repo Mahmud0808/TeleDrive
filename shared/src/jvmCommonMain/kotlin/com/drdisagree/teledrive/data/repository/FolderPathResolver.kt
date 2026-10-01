@@ -1,6 +1,7 @@
 package com.drdisagree.teledrive.data.repository
 
 import com.drdisagree.teledrive.data.local.dao.FolderDao
+import com.drdisagree.teledrive.data.local.dao.FolderTombstoneDao
 import com.drdisagree.teledrive.data.local.entity.FolderEntity
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -13,7 +14,8 @@ import java.util.UUID
  */
 class FolderPathResolver(
     private val folderDao: FolderDao,
-    private val activeChannel: ActiveChannel
+    private val activeChannel: ActiveChannel,
+    private val tombstoneDao: FolderTombstoneDao
 ) {
 
     private val creationMutex = Mutex()
@@ -51,7 +53,9 @@ class FolderPathResolver(
     /**
      * Resolves a path, creating missing folders. Empty path means root. A
      * created leaf takes [leafId] so it keeps the identity the other device
-     * gave it, or the folder state document later adds an empty twin.
+     * gave it, or the folder state document later adds an empty twin. A leaf
+     * id deleted for good is not reused, or its deletion would remove the
+     * folder again on the next merge.
      */
     suspend fun resolveOrCreate(
         path: String,
@@ -59,6 +63,7 @@ class FolderPathResolver(
         startParentId: String? = null
     ): String? {
         if (path.isBlank()) return startParentId
+        val reusableLeafId = leafId?.takeIf { tombstoneDao.idIfDeleted(it) == null }
         return creationMutex.withLock {
             var parentId: String? = startParentId
             val segments = path.split('/').filter { it.isNotBlank() }.take(MAX_DEPTH)
@@ -68,7 +73,7 @@ class FolderPathResolver(
                 parentId = existing?.id ?: run {
                     val now = System.currentTimeMillis()
                     val folder = FolderEntity(
-                        id = leafId.takeIf { index == segments.lastIndex }
+                        id = reusableLeafId.takeIf { index == segments.lastIndex }
                             ?: UUID.randomUUID().toString(),
                         chatId = activeChannel.id(),
                         parentId = parentId,

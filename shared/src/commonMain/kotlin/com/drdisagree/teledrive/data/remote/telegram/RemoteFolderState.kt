@@ -11,7 +11,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class RemoteFolderState(
     @SerialName("v") val version: Int = VERSION,
-    @SerialName("f") val folders: List<Entry> = emptyList()
+    @SerialName("f") val folders: List<Entry> = emptyList(),
+    @SerialName("d") val deleted: List<Tombstone> = emptyList()
 ) {
 
     @Serializable
@@ -28,8 +29,14 @@ data class RemoteFolderState(
         @SerialName("mt") val modifiedAt: Long,
         @SerialName("ca") val changedAt: Long? = null
     ) {
-        val clock: Long get() = changedAt?.takeIf { it > 0 } ?: modifiedAt
+        val clock: Long get() = changedAt ?: modifiedAt
     }
+
+    @Serializable
+    data class Tombstone(
+        @SerialName("id") val id: String,
+        @SerialName("at") val deletedAt: Long
+    )
 
     companion object {
         const val VERSION = 1

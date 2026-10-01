@@ -4,6 +4,7 @@ import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import androidx.sqlite.execSQL
 import com.drdisagree.teledrive.data.local.database.MIGRATION_11_12
+import com.drdisagree.teledrive.data.local.database.MIGRATION_12_13
 import com.drdisagree.teledrive.data.local.database.TeleDriveDatabase
 import java.io.File
 import kotlinx.coroutines.Dispatchers
@@ -25,7 +26,7 @@ class FolderClockMigrationTest {
         createVersion11(file)
 
         val database = Room.databaseBuilder<TeleDriveDatabase>(name = file.absolutePath)
-            .addMigrations(MIGRATION_11_12)
+            .addMigrations(MIGRATION_11_12, MIGRATION_12_13)
             .setDriver(BundledSQLiteDriver())
             .setQueryCoroutineContext(Dispatchers.IO)
             .build()
@@ -41,6 +42,8 @@ class FolderClockMigrationTest {
             assertEquals("report.pdf", row.name)
             assertEquals("folder-1", row.folderId)
             assertEquals(42L, row.messageId)
+
+            assertTrue(database.folderTombstoneDao().inChat(7L).isEmpty())
         } finally {
             database.close()
             file.delete()
@@ -51,7 +54,7 @@ class FolderClockMigrationTest {
         val schema = Json.parseToJsonElement(schemaFile(11).readText())
             .jsonObject.getValue("database").jsonObject
         val connection = BundledSQLiteDriver().open(file.absolutePath)
-        try {
+        connection.use { connection ->
             schema.getValue("entities").jsonArray.forEach { entity ->
                 val table = entity.jsonObject.getValue("tableName").jsonPrimitive.content
                 connection.execSQL(
@@ -70,23 +73,21 @@ class FolderClockMigrationTest {
             }
             connection.execSQL(
                 """INSERT INTO folders (id, chatId, parentId, name, isHidden, isArchived,
-                   isFavorite, isPinned, trashedAt, preTrashParentId, pendingPublish,
-                   createdAt, modifiedAt)
-                   VALUES ('folder-1', 7, NULL, 'Work', 1, 0, 0, 1, NULL, NULL, 0, 1000, 1234)"""
+                       isFavorite, isPinned, trashedAt, preTrashParentId, pendingPublish,
+                       createdAt, modifiedAt)
+                       VALUES ('folder-1', 7, NULL, 'Work', 1, 0, 0, 1, NULL, NULL, 0, 1000, 1234)"""
             )
             connection.execSQL(
                 """INSERT INTO files (id, folderId, name, sizeBytes, mimeType, category,
-                   localPath, contentHash, chatId, messageId, remoteFileId, remoteUniqueId,
-                   backupState, isHidden, isArchived, isFavorite, isPinned, isEncrypted,
-                   width, height, durationMs, trashedAt, preTrashFolderId, pendingPublish,
-                   partCount, iconFileId, createdAt, modifiedAt, addedAt)
-                   VALUES ('file-1', 'folder-1', 'report.pdf', 10, 'application/pdf',
-                   'DOCUMENT', NULL, NULL, 7, 42, 'remote', 'unique', 'BACKED_UP',
-                   0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, 0, 0, NULL, 1, 1, 1)"""
+                       localPath, contentHash, chatId, messageId, remoteFileId, remoteUniqueId,
+                       backupState, isHidden, isArchived, isFavorite, isPinned, isEncrypted,
+                       width, height, durationMs, trashedAt, preTrashFolderId, pendingPublish,
+                       partCount, iconFileId, createdAt, modifiedAt, addedAt)
+                       VALUES ('file-1', 'folder-1', 'report.pdf', 10, 'application/pdf',
+                       'DOCUMENT', NULL, NULL, 7, 42, 'remote', 'unique', 'BACKED_UP',
+                       0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, 0, 0, NULL, 1, 1, 1)"""
             )
             connection.execSQL("PRAGMA user_version = 11")
-        } finally {
-            connection.close()
         }
     }
 

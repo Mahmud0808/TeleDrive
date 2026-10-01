@@ -12,9 +12,11 @@ import com.drdisagree.teledrive.data.local.dao.BackupDao
 import com.drdisagree.teledrive.data.local.dao.FileDao
 import com.drdisagree.teledrive.data.local.dao.FilePartDao
 import com.drdisagree.teledrive.data.local.dao.FolderDao
+import com.drdisagree.teledrive.data.local.dao.FolderTombstoneDao
 import com.drdisagree.teledrive.data.local.dao.PendingDeleteDao
 import com.drdisagree.teledrive.data.local.dao.ThumbnailDao
 import com.drdisagree.teledrive.data.local.entity.PendingDeleteEntity
+import com.drdisagree.teledrive.data.local.entity.FolderTombstoneEntity
 import com.drdisagree.teledrive.data.mapper.toDomain
 import com.drdisagree.teledrive.domain.model.TrashItem
 import com.drdisagree.teledrive.domain.repository.TransferRepository
@@ -38,7 +40,8 @@ class TrashRepositoryImpl(
     private val pendingDeleteDao: PendingDeleteDao,
     private val filePartDao: FilePartDao,
     private val activeChannel: ActiveChannel,
-    private val transferRepository: TransferRepository
+    private val transferRepository: TransferRepository,
+    private val tombstoneDao: FolderTombstoneDao
 ) : TrashRepository {
 
     override fun observeTrash(): Flow<List<TrashItem>> =
@@ -217,9 +220,17 @@ class TrashRepositoryImpl(
         val fileIds = fileDao.trashedInFolders(folderIds).map { it.id }
         val result = deleteFilesPermanently(fileIds)
         if (result is AppResult.Failure) return result
+        recordDeleted(folderIds)
         folderIds.reversed().forEach { folderDao.delete(it) }
         markFolderStateDirty()
         return AppResult.Success(Unit)
+    }
+
+    private suspend fun recordDeleted(folderIds: List<String>) {
+        if (folderIds.isEmpty()) return
+        val chatId = activeChannel.id()
+        val deletedAt = System.currentTimeMillis()
+        tombstoneDao.upsert(folderIds.map { FolderTombstoneEntity(it, chatId, deletedAt) })
     }
 
     /**
@@ -243,6 +254,7 @@ class TrashRepositoryImpl(
         }
         if (failure != null) return failure
         val folders = folderDao.trashOlderThan(Long.MAX_VALUE)
+        recordDeleted(folders.map { it.id })
         folders.forEach { folderDao.delete(it.id) }
         if (folders.isNotEmpty()) markFolderStateDirty()
         return AppResult.Success(Unit)
@@ -255,6 +267,7 @@ class TrashRepositoryImpl(
         val result = deleteFilesPermanently(files.map { it.id })
         if (result is AppResult.Failure) return result
         val folders = folderDao.trashOlderThan(threshold)
+        recordDeleted(folders.map { it.id })
         folders.forEach { folderDao.delete(it.id) }
         if (folders.isNotEmpty()) markFolderStateDirty()
         return AppResult.Success(files.size + folders.size)

@@ -25,12 +25,16 @@ import com.drdisagree.teledrive.domain.model.BackupState
 import com.drdisagree.teledrive.domain.model.FileCategory
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.repository.SyncRepository
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import java.util.UUID
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -228,22 +232,85 @@ class SyncRepositoryImpl(
                 messageId != null && entity.chatId == chatId && messageId !in seenMessageIds &&
                         mappedBeforeScan[entity.id] == messageId
             }
-            if (stale.isNotEmpty()) {
-                database.inImmediateTransaction {
-                    val (orphaned, localOnly) = stale.partition { it.localPath == null }
-                    if (orphaned.isNotEmpty()) {
-                        fileDao.deleteByIds(orphaned.map { it.id })
-                    }
-                    localOnly.forEach { entity -> fileDao.detachRemote(entity.id) }
-                }
-                detached = stale.size
-            }
+            detached = detach(stale)
         }
         SafeLog.d(TAG, "Sync done: +$inserted ~$updated -$detached, $locked locked")
         return AppResult.Success(
             SyncRepository.SyncStats(inserted, updated, detached, locked)
         )
     }
+
+    /** Rows whose message is gone: kept as local-only when a copy is on the device. */
+    private suspend fun detach(stale: List<FileEntity>): Int {
+        if (stale.isEmpty()) return 0
+        database.inImmediateTransaction {
+            val (orphaned, localOnly) = stale.partition { it.localPath == null }
+            if (orphaned.isNotEmpty()) {
+                fileDao.deleteByIds(orphaned.map { it.id })
+            }
+            localOnly.forEach { entity -> fileDao.detachRemote(entity.id) }
+        }
+        return stale.size
+    }
+
+    override suspend fun followRemoteChanges() {
+        activeChannel.observe().filterNotNull().collectLatest { chatId ->
+            runCatching { telegramClient.openChat(chatId) }
+            try {
+                ChangeBatcher(LIVE_BATCH_MS).run(telegramClient.messageChanges(chatId)) { updated, deleted ->
+                    applyRemoteChanges(chatId, updated, deleted)
+                }
+            } finally {
+                withContext(NonCancellable) { runCatching { telegramClient.closeChat(chatId) } }
+            }
+        }
+    }
+
+    /**
+     * Runs the reconcile a full pass would, for just the messages that changed.
+     * It only writes the local database, so applying another device's edit
+     * never publishes it back.
+     */
+    internal suspend fun applyRemoteChanges(
+        chatId: Long,
+        updated: Set<Long>,
+        deleted: Set<Long>
+    ) = syncMutex.withLock {
+        try {
+            val pendingDeletes = pendingDeleteDao.messageIdsIn(chatId).toSet()
+            val documents = updated.sortedDescending()
+                .filter { it !in pendingDeletes }
+                .mapNotNull { telegramClient.getDocument(chatId, it) }
+
+            if (documents.any { it.isFolderState() }) {
+                runCatching { folderStateSynchronizer.pull() }
+                    .onFailure { SafeLog.w(TAG, "Folder state pull failed", it) }
+            }
+
+            val files = documents.filter {
+                !isInternalDocument(it) && !manifestCodec.isLocked(it.caption)
+            }
+            if (files.isNotEmpty()) {
+                val repairsBefore = captionRepairsQueued.size
+                val known = existingForPage(files)
+                val folderCache = mutableMapOf<String, String?>()
+                database.inImmediateTransaction {
+                    files.forEach { reconcile(it, folderCache, known) }
+                }
+                if (captionRepairsQueued.size > repairsBefore) publishScheduler.kick()
+            }
+
+            val gone = deleted - pendingDeletes
+            if (gone.isNotEmpty()) {
+                detach(fileDao.filesWithRemote().filter { it.chatId == chatId && it.messageId in gone })
+            }
+        } catch (e: TelegramException) {
+            SafeLog.w(TAG, "Applying remote changes failed: ${e.code}")
+        }
+    }
+
+    private fun RemoteDocument.isFolderState(): Boolean =
+        fileName == RemoteFolderState.FILE_NAME || caption.startsWith(RemoteFolderState.MARKER)
 
     /** App-managed bookkeeping documents must never surface as user files. */
     private fun isInternalDocument(document: RemoteDocument): Boolean =
@@ -496,5 +563,6 @@ class SyncRepositoryImpl(
         private const val PAGE_SIZE = 100
         private const val MAX_PAGES = 2000
         private const val CATCH_UP_INTERVAL_MS = 60_000L
+        private const val LIVE_BATCH_MS = 2_000L
     }
 }

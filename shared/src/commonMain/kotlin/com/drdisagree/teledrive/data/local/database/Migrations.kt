@@ -4,6 +4,16 @@ import androidx.room.migration.Migration
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
 
+/** Adds the record of folders deleted for good, so other devices drop them too. */
+val MIGRATION_12_13 = object : Migration(12, 13) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL(
+            "CREATE TABLE IF NOT EXISTS `folder_tombstones` (`id` TEXT NOT NULL, " +
+                    "`chatId` INTEGER, `deletedAt` INTEGER NOT NULL, PRIMARY KEY(`id`))"
+        )
+    }
+}
+
 /** Adds the clock folder sync compares, since modifiedAt only moves on a rename or a move. */
 val MIGRATION_11_12 = object : Migration(11, 12) {
     override fun migrate(connection: SQLiteConnection) {

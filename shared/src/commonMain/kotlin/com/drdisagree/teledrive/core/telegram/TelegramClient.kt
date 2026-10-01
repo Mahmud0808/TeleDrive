@@ -169,4 +169,16 @@ interface TelegramClient {
     suspend fun editCaption(chatId: Long, messageId: Long, caption: String)
 
     suspend fun deleteMessages(chatId: Long, messageIds: List<Long>)
+
+    /**
+     * Changes to [chatId] made by other sessions. Updates caused by this
+     * session's own sends, caption edits and deletions are left out, as are
+     * messages still being sent and deletions that only cleared a cache.
+     */
+    fun messageChanges(chatId: Long): Flow<MessageChange>
+
+    /** Telegram only pushes a channel's changes reliably while it is open. */
+    suspend fun openChat(chatId: Long)
+
+    suspend fun closeChat(chatId: Long)
 }

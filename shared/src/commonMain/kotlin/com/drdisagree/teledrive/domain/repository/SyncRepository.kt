@@ -37,6 +37,13 @@ interface SyncRepository {
      */
     suspend fun catchUpWithRemote(): AppResult<SyncStats>?
 
+    /**
+     * Applies changes other devices make to the active drive as they happen,
+     * until canceled. Meant to run while the app is in the foreground, with
+     * [catchUpWithRemote] covering whatever arrived while it was not.
+     */
+    suspend fun followRemoteChanges()
+
     data class SyncStats(
         val inserted: Int,
         val updated: Int,

@@ -6,10 +6,12 @@ import com.drdisagree.teledrive.core.crypto.StreamCrypto
 import com.drdisagree.teledrive.core.crypto.WrappedKeyRepository
 import com.drdisagree.teledrive.core.files.AppStoragePaths
 import com.drdisagree.teledrive.core.publish.PublishScheduler
+import com.drdisagree.teledrive.core.telegram.MessageChange
 import com.drdisagree.teledrive.core.telegram.RemoteDocument
 import com.drdisagree.teledrive.core.telegram.RemoteDocumentPage
 import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.core.telegram.TelegramDownloadEvent
+import com.drdisagree.teledrive.core.telegram.TelegramUploadEvent
 import com.drdisagree.teledrive.data.local.database.TeleDriveDatabase
 import com.drdisagree.teledrive.data.remote.telegram.ManifestCodec
 import com.drdisagree.teledrive.data.remote.telegram.RemoteFileManifest
@@ -20,6 +22,7 @@ import java.io.File
 import java.lang.reflect.Proxy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.serialization.json.Json
@@ -38,11 +41,17 @@ internal class SyncHarness : AutoCloseable {
     val scheduler = CountingScheduler()
     val codec = ManifestCodec(StreamCrypto(), unused<WrappedKeyRepository>())
     val activeChannel = ActiveChannel(settings)
-    val folderPaths = FolderPathResolver(database.folderDao(), activeChannel)
+    val folderPaths = FolderPathResolver(
+        database.folderDao(),
+        activeChannel,
+        database.folderTombstoneDao()
+    )
+    val storagePaths = FakeStoragePaths()
     val folderState = FolderStateSynchronizer(
-        unused<AppStoragePaths>(),
+        storagePaths,
         telegram,
         database.folderDao(),
+        database.folderTombstoneDao(),
         settings,
         StreamCrypto(),
         unused<WrappedKeyRepository>()
@@ -74,6 +83,7 @@ internal class SyncHarness : AutoCloseable {
         database.close()
         dbFile.delete()
         telegram.cleanUp()
+        storagePaths.cacheDir.deleteRecursively()
     }
 }
 
@@ -110,6 +120,13 @@ internal fun document(messageId: Long, caption: String, size: Long = 4_000_000) 
 internal class FakeTelegram : TelegramClient by unused() {
     var documents: List<RemoteDocument> = emptyList()
     val editedCaptions = mutableMapOf<Long, String>()
+    val uploads = mutableListOf<Pair<String, String>>()
+    val deletedMessages = mutableListOf<Long>()
+    var failDownloads = false
+    val changes = MutableSharedFlow<MessageChange>(extraBufferCapacity = 1_000)
+    var openedChats = 0
+    var closedChats = 0
+    private var nextMessageId = 2_000_000L
     var onFetch: suspend (fromMessageId: Long) -> Unit = {}
     private val stateFiles = mutableListOf<File>()
     private var folderStateDocument: RemoteDocument? = null
@@ -155,7 +172,62 @@ internal class FakeTelegram : TelegramClient by unused() {
         )
     }
 
+    fun uploadedFolderState(): RemoteFolderState = Json { ignoreUnknownKeys = true }
+        .decodeFromString(
+            RemoteFolderState.serializer(),
+            uploads.last { it.first == RemoteFolderState.FILE_NAME }.second
+        )
+
+    override fun uploadDocument(
+        chatId: Long,
+        localPath: String,
+        fileName: String,
+        mimeType: String,
+        caption: String,
+        thumbnailPath: String?
+    ): Flow<TelegramUploadEvent> {
+        val content = File(localPath).readText()
+        uploads += fileName to content
+        val messageId = nextMessageId++
+        if (fileName == RemoteFolderState.FILE_NAME) {
+            publishRawFolderState(content, messageId)
+        }
+        return flowOf(
+            TelegramUploadEvent.Completed(
+                RemoteDocument(
+                    chatId = chatId,
+                    messageId = messageId,
+                    remoteFileId = "uploaded-$messageId",
+                    uniqueFileId = "uploaded-unique-$messageId",
+                    fileName = fileName,
+                    mimeType = mimeType,
+                    sizeBytes = content.length.toLong(),
+                    caption = caption,
+                    dateSeconds = 100
+                )
+            )
+        )
+    }
+
+    override suspend fun deleteMessages(chatId: Long, messageIds: List<Long>) {
+        deletedMessages += messageIds
+    }
+
+    override suspend fun getDocument(chatId: Long, messageId: Long): RemoteDocument? =
+        (documents + listOfNotNull(folderStateDocument)).firstOrNull { it.messageId == messageId }
+
+    override fun messageChanges(chatId: Long): Flow<MessageChange> = changes
+
+    override suspend fun openChat(chatId: Long) {
+        openedChats++
+    }
+
+    override suspend fun closeChat(chatId: Long) {
+        closedChats++
+    }
+
     override fun downloadDocument(remoteFileId: String): Flow<TelegramDownloadEvent> {
+        if (failDownloads) return flowOf()
         val file = folderStateFile ?: return flowOf()
         return flowOf(TelegramDownloadEvent.Completed(file.absolutePath, file.length()))
     }
@@ -167,6 +239,14 @@ internal class FakeTelegram : TelegramClient by unused() {
     fun cleanUp() {
         stateFiles.forEach { it.delete() }
     }
+}
+
+internal class FakeStoragePaths : AppStoragePaths by unused() {
+    private val root = File.createTempFile("teledrive-paths", "").also {
+        it.delete()
+        it.mkdirs()
+    }
+    override val cacheDir: File = File(root, "cache").also { it.mkdirs() }
 }
 
 internal class FakeSettings(initial: UserPreferences) : SettingsRepository by unused() {
