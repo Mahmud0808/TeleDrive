@@ -35,6 +35,7 @@ sealed interface Route {
         val nameQuery: String? = null,
         val categories: String? = null,
         val favoritesOnly: Boolean = false,
+        val availableOfflineOnly: Boolean = false,
         val hiddenOnly: Boolean = false,
         val archivedOnly: Boolean = false,
         val sortField: String? = null,

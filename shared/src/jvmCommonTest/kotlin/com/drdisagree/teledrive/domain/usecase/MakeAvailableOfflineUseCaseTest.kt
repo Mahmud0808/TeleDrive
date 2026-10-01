@@ -8,7 +8,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-class KeepOnDeviceUseCaseTest {
+class MakeAvailableOfflineUseCaseTest {
 
     private val remoteOnly = file("remote", local = false, remote = true)
     private val alreadyLocal = file("local", local = true, remote = true)
@@ -20,40 +20,40 @@ class KeepOnDeviceUseCaseTest {
         tree = mapOf("folder" to listOf("nested", "local"))
     )
     private val transfers = FakeTransferRepository()
-    private val keepOnDevice = KeepOnDeviceUseCase(files, transfers)
+    private val makeAvailableOffline = MakeAvailableOfflineUseCase(files, transfers)
 
     @Test
-    fun `pinning queues only files without a local copy`() = runBlocking {
-        val queued = keepOnDevice(listOf("remote", "local", "staged"), pinned = true)
+    fun `making files available offline queues only those without a local copy`() = runBlocking {
+        val queued = makeAvailableOffline(listOf("remote", "local", "staged"), available = true)
 
         assertEquals(1, queued)
         assertEquals(listOf("remote"), transfers.downloads)
-        assertEquals(listOf("remote", "local", "staged"), files.pinnedFiles)
+        assertEquals(listOf("remote", "local", "staged"), files.offlineFiles)
     }
 
     @Test
-    fun `pinning a folder fetches what is missing inside it`() = runBlocking {
-        val queued = keepOnDevice(emptyList(), listOf("folder"), pinned = true)
+    fun `making a folder available offline fetches what is missing inside it`() = runBlocking {
+        val queued = makeAvailableOffline(emptyList(), listOf("folder"), available = true)
 
         assertEquals(1, queued)
         assertEquals(listOf("nested"), transfers.downloads)
-        assertEquals(listOf("folder"), files.pinnedFolders)
+        assertEquals(listOf("folder"), files.offlineFolders)
     }
 
     @Test
     fun `a file picked directly and through its folder is queued once`() = runBlocking {
-        keepOnDevice(listOf("nested"), listOf("folder"), pinned = true)
+        makeAvailableOffline(listOf("nested"), listOf("folder"), available = true)
 
         assertEquals(listOf("nested"), transfers.downloads)
     }
 
     @Test
-    fun `unpinning never downloads`() = runBlocking {
-        val queued = keepOnDevice(listOf("remote"), listOf("folder"), pinned = false)
+    fun `removing from offline never downloads`() = runBlocking {
+        val queued = makeAvailableOffline(listOf("remote"), listOf("folder"), available = false)
 
         assertEquals(0, queued)
         assertTrue(transfers.downloads.isEmpty())
-        assertEquals(listOf("remote"), files.unpinnedFiles)
+        assertEquals(listOf("remote"), files.onlineOnlyFiles)
     }
 
     private fun file(id: String, local: Boolean, remote: Boolean) = DriveFile(

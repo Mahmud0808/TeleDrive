@@ -22,7 +22,7 @@ import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.DriveFileRenameOutline
 import androidx.compose.material.icons.filled.FolderOpen
-import androidx.compose.material.icons.filled.PushPin
+import androidx.compose.material.icons.filled.OfflinePin
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.StarOutline
 import androidx.compose.material.icons.filled.Storage
@@ -163,9 +163,9 @@ import com.drdisagree.teledrive.resources.common_confirm_trash_count_title
 import com.drdisagree.teledrive.resources.common_create
 import com.drdisagree.teledrive.resources.common_deselect_all
 import com.drdisagree.teledrive.resources.common_download
-import com.drdisagree.teledrive.resources.common_keep_on_device
+import com.drdisagree.teledrive.resources.common_make_available_offline
 import com.drdisagree.teledrive.resources.common_free_space
-import com.drdisagree.teledrive.resources.common_stop_keeping_on_device
+import com.drdisagree.teledrive.resources.common_remove_from_offline
 import com.drdisagree.teledrive.resources.common_move_trash
 import com.drdisagree.teledrive.resources.common_rename
 import com.drdisagree.teledrive.resources.common_restore_trash_emptied
@@ -420,14 +420,14 @@ fun FilesScreen(
                                         add(
                                             MenuAction(
                                                 label = stringResource(
-                                                    if (state.allSelectedPinned) {
-                                                        Res.string.common_stop_keeping_on_device
+                                                    if (state.allSelectedAvailableOffline) {
+                                                        Res.string.common_remove_from_offline
                                                     } else {
-                                                        Res.string.common_keep_on_device
+                                                        Res.string.common_make_available_offline
                                                     }
                                                 ),
-                                                icon = Icons.Filled.PushPin
-                                            ) { viewModel.pinSelected(!state.allSelectedPinned) }
+                                                icon = Icons.Filled.OfflinePin
+                                            ) { viewModel.setSelectedAvailableOffline(!state.allSelectedAvailableOffline) }
                                         )
                                         add(
                                             MenuAction(

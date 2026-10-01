@@ -103,11 +103,11 @@
     <string name="common_collapse">Свернуть</string>
     <string name="common_confirm_trash_count_title">Переместить %1$d в корзину?</string>
     <string name="common_content_description_favorite">Избранное</string>
-    <string name="common_keep_on_device">Хранить на устройстве</string>
+    <string name="common_make_available_offline">Сделать доступным офлайн</string>
     <string name="common_organize">Упорядочить</string>
     <string name="common_storage_actions">Хранилище</string>
-    <string name="common_stop_keeping_on_device">Не хранить на устройстве</string>
-    <string name="common_content_description_pinned">Хранится на устройстве</string>
+    <string name="common_remove_from_offline">Убрать из офлайн-доступа</string>
+    <string name="common_content_description_available_offline">Доступно офлайн</string>
     <string name="common_content_description_selected">Выбрано</string>
     <string name="common_create">Создать</string>
     <string name="common_delete_forever">Удалить навсегда</string>
@@ -363,7 +363,7 @@
     <string name="files_queued_for_upload">В очереди на загрузку: %1$d</string>
     <string name="files_queued_partial">В очереди: %1$d, ошибок: %2$d</string>
     <string name="files_removed_local_copies">Удалено локальных копий: %1$d</string>
-    <string name="files_kept_pinned_copies">Сохранено файлов на устройстве: %1$d</string>
+    <string name="files_kept_offline_copies">Сохранено файлов, доступных офлайн: %1$d</string>
     <string name="files_sync_result">Новых: %1$d, обновлено: %2$d</string>
 
     <!-- File and folder info -->
@@ -509,6 +509,13 @@
     <string name="collection_hidden_empty">Скрытые файлы не отображаются в общем списке и галерее.</string>
     <string name="collection_hidden_subtitle">Видны только в этом разделе</string>
     <string name="collection_hidden_title">Скрытые</string>
+    <string name="collection_offline_title">Офлайн-файлы</string>
+    <string name="collection_offline_subtitle">Открываются без интернета</string>
+    <string name="collection_offline_empty">Сделайте файл или папку доступными офлайн, чтобы открывать их без интернета.</string>
+    <string name="collection_offline_on_device">%1$s на этом устройстве</string>
+    <string name="collection_offline_downloading">Загрузка</string>
+    <string name="collection_offline_not_downloaded">Ещё не скачано</string>
+    <string name="collection_offline_download_missing">Скачать недостающие файлы</string>
     <string name="collection_remove_from">Убрать из %1$s</string>
 
     <!-- Trash -->
@@ -649,7 +656,7 @@
     <string name="settings_clear_thumbnails_title">Очистить миниатюры?</string>
     <string name="settings_free_up_space_title">Освободить %1$s?</string>
     <string name="settings_delete_after_upload">Удалять локальную копию после бэкапа</string>
-    <string name="settings_delete_after_upload_summary">Удаляет файл с этого устройства, когда он сохранён в канале и его хеш совпадает. Файлы, хранящиеся на устройстве, не удаляются.</string>
+    <string name="settings_delete_after_upload_summary">Удаляет файл с этого устройства, когда он сохранён в канале и его хеш совпадает. Файлы, доступные офлайн, не удаляются.</string>
     <string name="settings_gallery_previews_regenerated_browse">Превью в галерее будут пересозданы по мере просмотра. Ваши файлы не затронуты.</string>
     <string name="settings_local_copies_files_already">Локальные копии файлов, уже загруженных в Telegram, будут удалены с устройства. Они остаются в вашем канале Telegram и могут быть скачаны снова.</string>
 

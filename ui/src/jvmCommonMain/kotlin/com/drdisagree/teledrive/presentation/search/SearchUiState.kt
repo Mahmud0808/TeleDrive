@@ -16,6 +16,6 @@ data class SearchUiState(
     val selectionMode: Boolean get() = selection.isNotEmpty()
     val selectedFiles: List<DriveFile> get() = results.filter { it.id in selection }
     val capabilities: SelectionCapabilities get() = SelectionCapabilities.of(selectedFiles)
-    val allSelectedPinned: Boolean get() = selectionMode && !capabilities.anyUnpinned
+    val allSelectedAvailableOffline: Boolean get() = selectionMode && !capabilities.anyNotAvailableOffline
     val soleFolderId: String? get() = selectedFiles.singleOrNull()?.folderId
 }

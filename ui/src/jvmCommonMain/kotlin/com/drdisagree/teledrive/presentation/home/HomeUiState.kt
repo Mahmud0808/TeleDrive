@@ -30,6 +30,7 @@ data class HomeUiState(
     val rebuilding: Boolean = false,
     val appLockEnabled: Boolean = false,
     val activeTransferCount: Int = 0,
+    val offlineBytes: Long = 0,
     val backupHold: BackupHold? = null,
     val activeChannel: DriveChannel? = null,
     val storage: List<StorageSlice> = emptyList(),

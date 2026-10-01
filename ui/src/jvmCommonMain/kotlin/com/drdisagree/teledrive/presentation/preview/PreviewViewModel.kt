@@ -94,6 +94,7 @@ class PreviewViewModel(
                     categories = categories,
                     nameQuery = route.nameQuery,
                     favoritesOnly = route.favoritesOnly,
+                    availableOfflineOnly = route.availableOfflineOnly,
                     hiddenOnly = route.hiddenOnly,
                     archivedOnly = route.archivedOnly,
                     showHidden = route.hiddenOnly || target.isHidden,

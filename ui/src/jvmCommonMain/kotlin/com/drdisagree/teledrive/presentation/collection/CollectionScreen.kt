@@ -1,16 +1,20 @@
 package com.drdisagree.teledrive.presentation.collection
 
-import com.drdisagree.teledrive.presentation.components.FolderRow
-import androidx.compose.foundation.lazy.items
-import com.drdisagree.teledrive.presentation.common.AppBackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Deselect
 import androidx.compose.material.icons.filled.RemoveCircleOutline
@@ -27,15 +31,25 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import org.koin.compose.viewmodel.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
+import com.drdisagree.teledrive.presentation.common.AppBackHandler
+import com.drdisagree.teledrive.presentation.common.isInitialLoad
+import com.drdisagree.teledrive.presentation.components.ConfirmDialog
+import com.drdisagree.teledrive.presentation.components.EmptyState
+import com.drdisagree.teledrive.presentation.components.FileListItem
+import com.drdisagree.teledrive.presentation.components.FolderRow
+import com.drdisagree.teledrive.presentation.components.LoadingState
+import com.drdisagree.teledrive.presentation.components.liftedTopAppBarColors
+import com.drdisagree.teledrive.presentation.components.rememberDragSelect
+import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
+import com.drdisagree.teledrive.presentation.preview.PreviewSequence
 import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.collection_empty_title
+import com.drdisagree.teledrive.resources.collection_offline_download_missing
 import com.drdisagree.teledrive.resources.collection_remove_from
 import com.drdisagree.teledrive.resources.common_back
 import com.drdisagree.teledrive.resources.common_clear_selection
@@ -45,15 +59,8 @@ import com.drdisagree.teledrive.resources.common_move_trash
 import com.drdisagree.teledrive.resources.common_restore_trash_emptied
 import com.drdisagree.teledrive.resources.common_select_all
 import com.drdisagree.teledrive.resources.common_selection_count
-import com.drdisagree.teledrive.presentation.common.isInitialLoad
-import com.drdisagree.teledrive.presentation.components.ConfirmDialog
-import com.drdisagree.teledrive.presentation.components.EmptyState
-import com.drdisagree.teledrive.presentation.components.FileListItem
-import com.drdisagree.teledrive.presentation.components.LoadingState
-import com.drdisagree.teledrive.presentation.components.liftedTopAppBarColors
-import com.drdisagree.teledrive.presentation.components.rememberDragSelect
-import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
-import com.drdisagree.teledrive.presentation.preview.PreviewSequence
+import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,6 +77,9 @@ fun CollectionScreen(
     val selectionMode = selection.isNotEmpty() || folderSelection.isNotEmpty()
     val selectionCount = selection.size + folderSelection.size
     val allSelected by viewModel.allSelected.collectAsStateWithLifecycle()
+    val downloads by viewModel.downloads.collectAsStateWithLifecycle()
+    val missingCount by viewModel.missingCount.collectAsStateWithLifecycle()
+    val offline = viewModel.type == CollectionType.AVAILABLE_OFFLINE
     var confirmTrash by remember { mutableStateOf(false) }
 
     AppBackHandler(enabled = selectionMode) { viewModel.clearSelection() }
@@ -123,6 +133,20 @@ fun CollectionScreen(
                     }
                 },
                 actions = {
+                    AnimatedVisibility(
+                        visible = !selectionMode && missingCount > 0,
+                        enter = fadeIn() + scaleIn(),
+                        exit = fadeOut() + scaleOut()
+                    ) {
+                        IconButton(onClick = viewModel::downloadMissing) {
+                            Icon(
+                                Icons.Filled.CloudDownload,
+                                contentDescription = stringResource(
+                                    Res.string.collection_offline_download_missing
+                                )
+                            )
+                        }
+                    }
                     if (selectionMode) {
                         IconButton(
                             onClick = {
@@ -216,6 +240,7 @@ fun CollectionScreen(
                     folder = folder,
                     selected = folder.id in folderSelection,
                     showFavorite = viewModel.type != CollectionType.FAVORITES,
+                    showAvailableOffline = !offline,
                     onClick = {
                         if (selectionMode) viewModel.toggleFolderSelection(folder.id)
                         else onOpenFolder(folder.id)
@@ -239,6 +264,18 @@ fun CollectionScreen(
                     },
                     onLongClick = { viewModel.toggleSelection(file.id) },
                     showFavorite = viewModel.type != CollectionType.FAVORITES,
+                    showAvailableOffline = !offline,
+                    status = if (offline) {
+                        {
+                            OfflineFileStatus(
+                                onDevice = file.hasLocalCopy,
+                                downloading = file.id in downloads,
+                                progress = downloads[file.id]
+                            )
+                        }
+                    } else {
+                        null
+                    },
                     modifier = Modifier.animateItem()
                 )
             }

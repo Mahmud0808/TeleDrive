@@ -46,6 +46,7 @@ import com.drdisagree.teledrive.core.update.UpdateChecker
 import com.drdisagree.teledrive.data.local.database.MIGRATION_10_11
 import com.drdisagree.teledrive.data.local.database.MIGRATION_11_12
 import com.drdisagree.teledrive.data.local.database.MIGRATION_12_13
+import com.drdisagree.teledrive.data.local.database.MIGRATION_13_14
 import com.drdisagree.teledrive.data.local.database.MIGRATION_1_2
 import com.drdisagree.teledrive.data.local.database.MIGRATION_2_3
 import com.drdisagree.teledrive.data.local.database.MIGRATION_3_4
@@ -170,7 +171,8 @@ val desktopModule = module {
                 MIGRATION_9_10,
                 MIGRATION_10_11,
                 MIGRATION_11_12,
-                MIGRATION_12_13
+                MIGRATION_12_13,
+                MIGRATION_13_14
             )
             .setDriver(BundledSQLiteDriver())
             .setQueryCoroutineContext(Dispatchers.IO)

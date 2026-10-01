@@ -7,7 +7,7 @@ data class SelectionCapabilities(
     val canUpload: Boolean = false,
     val canDownload: Boolean = false,
     val canFreeUpSpace: Boolean = false,
-    val anyUnpinned: Boolean = false,
+    val anyNotAvailableOffline: Boolean = false,
     val anyUnfavorited: Boolean = false,
     val canEditNote: Boolean = false,
     val soleLocalPath: String? = null
@@ -17,7 +17,7 @@ data class SelectionCapabilities(
             canUpload = files.any { !it.hasRemoteCopy },
             canDownload = files.any { it.hasRemoteCopy && !it.hasLocalCopy },
             canFreeUpSpace = files.any { it.hasRemoteCopy && it.hasLocalCopy },
-            anyUnpinned = files.any { !it.isPinned },
+            anyNotAvailableOffline = files.any { !it.isAvailableOffline },
             anyUnfavorited = files.any { !it.isFavorite },
             canEditNote = files.singleOrNull()?.let { MimeTypes.isText(it.mimeType) } == true,
             soleLocalPath = files.singleOrNull()?.localPath

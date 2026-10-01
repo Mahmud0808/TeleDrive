@@ -466,7 +466,7 @@ class SyncRepositoryImpl(
             isHidden = local?.isHidden ?: manifest?.hidden ?: existing?.isHidden ?: false,
             isArchived = local?.isArchived ?: manifest?.archived ?: existing?.isArchived ?: false,
             isFavorite = local?.isFavorite ?: manifest?.favorite ?: existing?.isFavorite ?: false,
-            isPinned = existing?.isPinned == true,
+            isAvailableOffline = existing?.isAvailableOffline == true,
             isEncrypted = manifest?.encrypted
                 ?: manifestCodec.isEncryptedManifest(document.caption),
             width = manifest?.width ?: existing?.width,

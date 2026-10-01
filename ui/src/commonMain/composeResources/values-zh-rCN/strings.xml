@@ -70,11 +70,11 @@
     <string name="common_collapse">收起</string>
     <string name="common_confirm_trash_count_title">将 %1$d 项移入回收站？</string>
     <string name="common_content_description_favorite">收藏</string>
-    <string name="common_keep_on_device">保留在本机</string>
+    <string name="common_make_available_offline">设为离线可用</string>
     <string name="common_organize">整理</string>
     <string name="common_storage_actions">存储</string>
-    <string name="common_stop_keeping_on_device">取消保留在本机</string>
-    <string name="common_content_description_pinned">已保留在本机</string>
+    <string name="common_remove_from_offline">取消离线可用</string>
+    <string name="common_content_description_available_offline">离线可用</string>
     <string name="common_content_description_selected">已选中</string>
     <string name="common_create">创建</string>
     <string name="common_delete_forever">永久删除</string>
@@ -330,6 +330,7 @@
     <string name="files_queued_for_upload">%1$d 个已排队上传</string>
     <string name="files_queued_partial">%1$d 个已排队，%2$d 个失败</string>
     <string name="files_removed_local_copies">已移除 %1$d 个本地副本</string>
+    <string name="files_kept_offline_copies">已保留 %1$d 个离线可用的文件</string>
     <string name="files_sync_result">%1$d 个新增，%2$d 个更新</string>
 
     <!-- File and folder info -->
@@ -475,6 +476,13 @@
     <string name="collection_hidden_empty">隐藏的文件不会出现在文件浏览和图库中。</string>
     <string name="collection_hidden_subtitle">只在此处可见</string>
     <string name="collection_hidden_title">已隐藏</string>
+    <string name="collection_offline_title">离线文件</string>
+    <string name="collection_offline_subtitle">无需联网即可打开</string>
+    <string name="collection_offline_empty">将文件或文件夹设为离线可用后，无需联网即可打开。</string>
+    <string name="collection_offline_on_device">本设备上 %1$s</string>
+    <string name="collection_offline_downloading">正在下载</string>
+    <string name="collection_offline_not_downloaded">尚未下载</string>
+    <string name="collection_offline_download_missing">下载缺失的文件</string>
     <string name="collection_remove_from">从 %1$s 中移除</string>
 
     <!-- Trash -->
@@ -615,7 +623,7 @@
     <string name="settings_clear_thumbnails_title">清除缩略图？</string>
     <string name="settings_free_up_space_title">释放 %1$s？</string>
     <string name="settings_delete_after_upload">备份后删除本地副本</string>
-    <string name="settings_delete_after_upload_summary">文件存入频道且哈希仍匹配后，将从本设备移除。标记为保留在本机的项目不会被移除。</string>
+    <string name="settings_delete_after_upload_summary">文件存入频道且哈希仍匹配后，将从本设备移除。离线可用的文件不会被移除。</string>
     <string name="settings_gallery_previews_regenerated_browse">浏览时会重新生成图库预览，你的文件不受影响。</string>
     <string name="settings_local_copies_files_already">已备份到 Telegram 的文件的本地副本将从本设备删除。它们仍保留在你的 Telegram 频道中，可以重新下载。</string>
 

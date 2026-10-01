@@ -207,6 +207,16 @@ class FileRepositoryImpl(
             folderDao.observeFavorites(chatId).map { list -> list.map { it.toDomain() } }
         }
 
+    override fun observeAvailableOfflineFolders(): Flow<List<DriveFolder>> =
+        activeChannel.observe().flatMapLatest { chatId ->
+            folderDao.observeAvailableOffline(chatId).map { list -> list.map { it.toDomain() } }
+        }
+
+    override fun observeAvailableOfflineMissingIds(): Flow<List<String>> =
+        activeChannel.observe().flatMapLatest { chatId ->
+            fileDao.observeAvailableOfflineMissingIds(chatId)
+        }
+
     override fun observeArchivedFolders(): Flow<List<DriveFolder>> =
         activeChannel.observe().flatMapLatest { chatId ->
             folderDao.observeArchived(chatId).map { list -> list.map { it.toDomain() } }
@@ -455,12 +465,12 @@ class FileRepositoryImpl(
         publishScheduler.kick()
     }
 
-    override suspend fun setFilesPinned(ids: List<String>, pinned: Boolean) {
-        fileDao.setPinned(ids, pinned)
+    override suspend fun setFilesAvailableOffline(ids: List<String>, available: Boolean) {
+        fileDao.setAvailableOffline(ids, available)
     }
 
-    override suspend fun setFolderPinned(id: String, pinned: Boolean) {
-        folderDao.setPinned(id, pinned)
+    override suspend fun setFolderAvailableOffline(id: String, available: Boolean) {
+        folderDao.setAvailableOffline(id, available)
     }
 
     override suspend fun setFilesFavorite(ids: List<String>, favorite: Boolean) {
@@ -678,7 +688,7 @@ class FileRepositoryImpl(
                     entity.backupState == BackupState.BACKED_UP
         }
         if (candidates.isEmpty()) {
-            return AppResult.Success(LocalCleanup(0, keptPinned = kept.size))
+            return AppResult.Success(LocalCleanup(0, keptOffline = kept.size))
         }
 
         val cleanup = localCopyDeleter.delete(candidates.mapNotNull { it.localPath })
@@ -692,7 +702,7 @@ class FileRepositoryImpl(
                 cleared++
             }
         }
-        return AppResult.Success(LocalCleanup(cleared, keptPinned = kept.size))
+        return AppResult.Success(LocalCleanup(cleared, keptOffline = kept.size))
     }
 
     companion object {

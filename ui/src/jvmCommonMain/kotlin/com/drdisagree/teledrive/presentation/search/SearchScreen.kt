@@ -20,7 +20,7 @@ import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.PushPin
+import androidx.compose.material.icons.filled.OfflinePin
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.StarOutline
 import androidx.compose.material.icons.outlined.Search
@@ -66,10 +66,10 @@ import com.drdisagree.teledrive.resources.common_add_favorites
 import com.drdisagree.teledrive.resources.common_back
 import com.drdisagree.teledrive.resources.common_clear
 import com.drdisagree.teledrive.resources.common_download
-import com.drdisagree.teledrive.resources.common_keep_on_device
+import com.drdisagree.teledrive.resources.common_make_available_offline
 import com.drdisagree.teledrive.resources.common_move_trash
 import com.drdisagree.teledrive.resources.common_select_all
-import com.drdisagree.teledrive.resources.common_stop_keeping_on_device
+import com.drdisagree.teledrive.resources.common_remove_from_offline
 import com.drdisagree.teledrive.resources.search_open_folder
 import com.drdisagree.teledrive.resources.search_section_files
 import com.drdisagree.teledrive.resources.search_section_folders
@@ -292,14 +292,14 @@ private fun SearchSelectionBar(
         add(
             MenuAction(
                 label = stringResource(
-                    if (state.allSelectedPinned) {
-                        Res.string.common_stop_keeping_on_device
+                    if (state.allSelectedAvailableOffline) {
+                        Res.string.common_remove_from_offline
                     } else {
-                        Res.string.common_keep_on_device
+                        Res.string.common_make_available_offline
                     }
                 ),
-                icon = Icons.Filled.PushPin
-            ) { viewModel.pinSelected(!state.allSelectedPinned) }
+                icon = Icons.Filled.OfflinePin
+            ) { viewModel.setSelectedAvailableOffline(!state.allSelectedAvailableOffline) }
         )
         add(
             MenuAction(

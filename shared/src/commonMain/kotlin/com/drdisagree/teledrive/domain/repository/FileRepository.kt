@@ -56,6 +56,11 @@ interface FileRepository {
 
     fun observeFavoriteFolders(): Flow<List<DriveFolder>>
 
+    fun observeAvailableOfflineFolders(): Flow<List<DriveFolder>>
+
+    /** Files available offline, directly or through a folder, with no copy on this device. */
+    fun observeAvailableOfflineMissingIds(): Flow<List<String>>
+
     fun observeArchivedFolders(): Flow<List<DriveFolder>>
 
     fun observeHiddenFolders(): Flow<List<DriveFolder>>
@@ -78,7 +83,7 @@ interface FileRepository {
 
     suspend fun setFilesFavorite(ids: List<String>, favorite: Boolean)
 
-    suspend fun setFilesPinned(ids: List<String>, pinned: Boolean)
+    suspend fun setFilesAvailableOffline(ids: List<String>, available: Boolean)
 
     suspend fun setFilesHidden(ids: List<String>, hidden: Boolean)
 
@@ -90,7 +95,7 @@ interface FileRepository {
 
     suspend fun setFolderArchived(id: String, archived: Boolean)
 
-    suspend fun setFolderPinned(id: String, pinned: Boolean)
+    suspend fun setFolderAvailableOffline(id: String, available: Boolean)
 
     suspend fun importLocalFile(
         localPath: String,

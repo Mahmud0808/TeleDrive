@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PushPin
+import androidx.compose.material.icons.filled.OfflinePin
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -28,7 +28,7 @@ import androidx.compose.ui.draw.clip
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.drdisagree.teledrive.resources.common_content_description_pinned
+import com.drdisagree.teledrive.resources.common_content_description_available_offline
 import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.common_content_description_selected
 import com.drdisagree.teledrive.domain.model.BackupState
@@ -104,12 +104,12 @@ fun FileGridItem(
                             tint = MaterialTheme.colorScheme.tertiary
                         )
                     }
-                    if (file.isPinned) {
+                    if (file.isAvailableOffline) {
                         Spacer(Modifier.width(4.dp))
                         Icon(
-                            imageVector = Icons.Filled.PushPin,
+                            imageVector = Icons.Filled.OfflinePin,
                             contentDescription = stringResource(
-                                Res.string.common_content_description_pinned
+                                Res.string.common_content_description_available_offline
                             ),
                             modifier = Modifier.size(14.dp),
                             tint = MaterialTheme.colorScheme.secondary

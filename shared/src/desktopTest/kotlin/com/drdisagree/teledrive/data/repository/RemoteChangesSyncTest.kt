@@ -113,10 +113,10 @@ class RemoteChangesSyncTest {
     }
 
     @Test
-    fun `a folder flag changed on another device is applied and the local pin survives`() =
+    fun `a folder flag changed on another device is applied and local offline access survives`() =
         runBlocking {
             database.folderDao().upsert(
-                localFolder("x", "Work", modifiedAt = 5_000, changedAt = 5_000).copy(isPinned = true)
+                localFolder("x", "Work", modifiedAt = 5_000, changedAt = 5_000).copy(isAvailableOffline = true)
             )
             telegram.publishFolderState(
                 RemoteFolderState(
@@ -130,7 +130,7 @@ class RemoteChangesSyncTest {
 
             val row = database.folderDao().byId("x")!!
             assertTrue(row.isHidden)
-            assertTrue(row.isPinned)
+            assertTrue(row.isAvailableOffline)
             assertEquals(5_000L, row.modifiedAt)
             assertEquals(6_000L, row.changedAt)
         }
@@ -199,7 +199,7 @@ class RemoteChangesSyncTest {
         assertEquals(7_000L, dao.byId("x")!!.changedAt)
         assertEquals(7_000L, dao.byId("x")!!.modifiedAt)
 
-        dao.setPinned("x", true)
+        dao.setAvailableOffline("x", true)
         assertEquals(7_000L, dao.byId("x")!!.changedAt)
     }
 

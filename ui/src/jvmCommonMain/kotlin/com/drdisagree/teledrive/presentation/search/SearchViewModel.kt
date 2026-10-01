@@ -9,7 +9,7 @@ import com.drdisagree.teledrive.domain.model.SortDirection
 import com.drdisagree.teledrive.domain.repository.FileRepository
 import com.drdisagree.teledrive.domain.repository.TransferRepository
 import com.drdisagree.teledrive.domain.repository.TrashRepository
-import com.drdisagree.teledrive.domain.usecase.KeepOnDeviceUseCase
+import com.drdisagree.teledrive.domain.usecase.MakeAvailableOfflineUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.NonCancellable
@@ -35,7 +35,7 @@ class SearchViewModel(
     private val fileRepository: FileRepository,
     private val trashRepository: TrashRepository,
     private val transferRepository: TransferRepository,
-    private val keepOnDevice: KeepOnDeviceUseCase
+    private val makeAvailableOffline: MakeAvailableOfflineUseCase
 ) : ViewModel() {
 
     private val selection = MutableStateFlow<Set<String>>(emptySet())
@@ -134,10 +134,10 @@ class SearchViewModel(
         viewModelScope.launch { fileRepository.setFilesFavorite(ids, true) }
     }
 
-    fun pinSelected(pinned: Boolean) {
+    fun setSelectedAvailableOffline(available: Boolean) {
         val ids = selection.value.toList()
         clearSelection()
-        viewModelScope.launch { keepOnDevice(ids, pinned = pinned) }
+        viewModelScope.launch { makeAvailableOffline(ids, available = available) }
     }
 
     fun trashSelected() {

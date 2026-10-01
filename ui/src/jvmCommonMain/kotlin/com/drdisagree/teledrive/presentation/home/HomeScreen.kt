@@ -105,6 +105,7 @@ import com.drdisagree.teledrive.resources.app_name
 import com.drdisagree.teledrive.resources.backup_age_days
 import com.drdisagree.teledrive.resources.backup_age_hours
 import com.drdisagree.teledrive.resources.backup_age_minutes
+import com.drdisagree.teledrive.resources.collection_offline_on_device
 import com.drdisagree.teledrive.resources.common_cancel
 import com.drdisagree.teledrive.resources.common_pause
 import com.drdisagree.teledrive.resources.common_resume
@@ -382,6 +383,7 @@ fun HomeScreen(
                     showArchived = state.showArchivedSection,
                     showHidden = state.showHiddenSection,
                     activeTransferCount = state.activeTransferCount,
+                    offlineBytes = state.offlineBytes,
                     onOpenCollection = onOpenCollection,
                     onOpenTransfers = onOpenTransfers,
                     onOpenTrash = onOpenTrash
@@ -396,6 +398,7 @@ private fun CollectionLinks(
     showArchived: Boolean,
     showHidden: Boolean,
     activeTransferCount: Int,
+    offlineBytes: Long,
     onOpenCollection: (CollectionType) -> Unit,
     onOpenTransfers: () -> Unit,
     onOpenTrash: () -> Unit
@@ -411,7 +414,16 @@ private fun CollectionLinks(
                 CollectionRow(
                     icon = collection.icon,
                     title = stringResource(collection.titleRes),
-                    subtitle = stringResource(collection.subtitleRes),
+                    subtitle = if (
+                        collection == CollectionType.AVAILABLE_OFFLINE && offlineBytes > 0
+                    ) {
+                        stringResource(
+                            Res.string.collection_offline_on_device,
+                            Formatters.bytes(offlineBytes)
+                        )
+                    } else {
+                        stringResource(collection.subtitleRes)
+                    },
                     onClick = { onOpenCollection(collection) }
                 )
             }

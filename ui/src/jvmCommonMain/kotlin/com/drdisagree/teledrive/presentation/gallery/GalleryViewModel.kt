@@ -28,7 +28,7 @@ import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.repository.SyncRepository
 import com.drdisagree.teledrive.domain.repository.TransferRepository
 import com.drdisagree.teledrive.domain.repository.TrashRepository
-import com.drdisagree.teledrive.domain.usecase.KeepOnDeviceUseCase
+import com.drdisagree.teledrive.domain.usecase.MakeAvailableOfflineUseCase
 import com.drdisagree.teledrive.presentation.common.Formatters
 import com.drdisagree.teledrive.presentation.common.ListPosition
 import com.drdisagree.teledrive.presentation.components.GridZoomLevel
@@ -66,7 +66,7 @@ class GalleryViewModel(
     private val transferRepository: TransferRepository,
     private val settingsRepository: SettingsRepository,
     private val syncRepository: SyncRepository,
-    private val keepOnDevice: KeepOnDeviceUseCase
+    private val makeAvailableOffline: MakeAvailableOfflineUseCase
 ) : ViewModel() {
 
     private val _messages = MutableSharedFlow<UiText>(extraBufferCapacity = 8)
@@ -355,11 +355,11 @@ class GalleryViewModel(
         viewModelScope.launch { fileRepository.setFilesFavorite(ids, favorite) }
     }
 
-    fun pinSelected(pinned: Boolean) {
+    fun setSelectedAvailableOffline(available: Boolean) {
         val ids = selection.value.toList()
         clearSelection()
         viewModelScope.launch {
-            val queued = keepOnDevice(ids, pinned = pinned)
+            val queued = makeAvailableOffline(ids, available = available)
             if (queued > 0) {
                 _messages.tryEmit(UiText.Resource(Res.string.files_queued_for_download, queued))
             }

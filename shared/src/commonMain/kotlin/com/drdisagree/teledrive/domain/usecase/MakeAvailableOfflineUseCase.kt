@@ -1,9 +1,11 @@
 package com.drdisagree.teledrive.domain.usecase
 
+import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.domain.repository.FileRepository
 import com.drdisagree.teledrive.domain.repository.TransferRepository
+import kotlinx.coroutines.flow.first
 
-class KeepOnDeviceUseCase(
+class MakeAvailableOfflineUseCase(
     private val fileRepository: FileRepository,
     private val transferRepository: TransferRepository
 ) {
@@ -15,11 +17,11 @@ class KeepOnDeviceUseCase(
     suspend operator fun invoke(
         fileIds: List<String>,
         folderIds: List<String> = emptyList(),
-        pinned: Boolean
+        available: Boolean
     ): Int {
-        if (fileIds.isNotEmpty()) fileRepository.setFilesPinned(fileIds, pinned)
-        folderIds.forEach { fileRepository.setFolderPinned(it, pinned) }
-        if (!pinned) return 0
+        if (fileIds.isNotEmpty()) fileRepository.setFilesAvailableOffline(fileIds, available)
+        folderIds.forEach { fileRepository.setFolderAvailableOffline(it, available) }
+        if (!available) return 0
 
         val ids = (fileIds + folderIds.flatMap { fileRepository.fileIdsInTree(it) }).distinct()
         if (ids.isEmpty()) return 0
@@ -28,4 +30,8 @@ class KeepOnDeviceUseCase(
         missing.forEach { transferRepository.enqueueDownload(it.id) }
         return missing.size
     }
+
+    suspend fun downloadMissing(): Int =
+        fileRepository.observeAvailableOfflineMissingIds().first()
+            .count { transferRepository.enqueueDownload(it) is AppResult.Success }
 }

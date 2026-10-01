@@ -22,5 +22,5 @@ data class GalleryUiState(
 ) {
     val selectionMode: Boolean get() = selection.isNotEmpty()
     val allSelectedFavorite: Boolean get() = selectionMode && !capabilities.anyUnfavorited
-    val allSelectedPinned: Boolean get() = selectionMode && !capabilities.anyUnpinned
+    val allSelectedAvailableOffline: Boolean get() = selectionMode && !capabilities.anyNotAvailableOffline
 }

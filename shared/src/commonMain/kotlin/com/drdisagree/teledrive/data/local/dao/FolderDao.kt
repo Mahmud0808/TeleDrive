@@ -109,6 +109,26 @@ interface FolderDao {
             ORDER BY name COLLATE NOCASE ASC"""
     )
     fun observeFavorites(chatId: Long?): Flow<List<FolderWithCount>>
+
+    @Query(
+        """WITH RECURSIVE covering_folders(id) AS (
+               SELECT id FROM folders WHERE isAvailableOffline = 1
+               UNION
+               SELECT folders.id FROM folders
+               JOIN covering_folders ON folders.parentId = covering_folders.id
+           )
+           SELECT folders.*,
+                  (SELECT COUNT(*) FROM files
+                    WHERE files.folderId = folders.id AND files.trashedAt IS NULL
+                      AND files.isHidden = 0 AND files.isArchived = 0) AS fileCount,
+                  (SELECT COUNT(*) FROM folders AS child
+                    WHERE child.parentId = folders.id AND child.trashedAt IS NULL) AS folderCount
+             FROM folders
+            WHERE trashedAt IS NULL AND isAvailableOffline = 1 AND chatId IS :chatId
+              AND (parentId IS NULL OR parentId NOT IN (SELECT id FROM covering_folders))
+            ORDER BY name COLLATE NOCASE ASC"""
+    )
+    fun observeAvailableOffline(chatId: Long?): Flow<List<FolderWithCount>>
     @Query(
         """WITH RECURSIVE covering_folders(id) AS (
                SELECT id FROM folders WHERE isArchived = 1
@@ -177,8 +197,8 @@ interface FolderDao {
     @Query("UPDATE folders SET isFavorite = :favorite, changedAt = :changedAt WHERE id = :id")
     suspend fun setFavorite(id: String, favorite: Boolean, changedAt: Long)
 
-    @Query("UPDATE folders SET isPinned = :pinned WHERE id = :id")
-    suspend fun setPinned(id: String, pinned: Boolean)
+    @Query("UPDATE folders SET isAvailableOffline = :available WHERE id = :id")
+    suspend fun setAvailableOffline(id: String, available: Boolean)
 
     @Query("UPDATE folders SET isHidden = :hidden, changedAt = :changedAt WHERE id = :id")
     suspend fun setHidden(id: String, hidden: Boolean, changedAt: Long)

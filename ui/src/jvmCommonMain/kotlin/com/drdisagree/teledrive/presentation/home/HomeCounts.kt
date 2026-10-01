@@ -6,5 +6,6 @@ internal data class HomeCounts(
     val backedUp: Int,
     val pending: Int,
     val failed: Int,
-    val localOnly: Int = 0
+    val localOnly: Int = 0,
+    val offlineBytes: Long = 0
 )

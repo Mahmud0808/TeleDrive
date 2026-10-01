@@ -1,34 +1,41 @@
 package com.drdisagree.teledrive.presentation.collection
 
-import com.drdisagree.teledrive.domain.model.DriveFolder
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.stateIn
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.drdisagree.teledrive.domain.model.FileQuerySpec
 import com.drdisagree.teledrive.domain.model.DriveFile
+import com.drdisagree.teledrive.domain.model.DriveFolder
+import com.drdisagree.teledrive.domain.model.FileQuerySpec
 import com.drdisagree.teledrive.domain.model.FileSortField
 import com.drdisagree.teledrive.domain.model.SortDirection
+import com.drdisagree.teledrive.domain.model.TransferState
 import com.drdisagree.teledrive.domain.repository.FileRepository
+import com.drdisagree.teledrive.domain.repository.TransferRepository
 import com.drdisagree.teledrive.domain.repository.TrashRepository
+import com.drdisagree.teledrive.domain.usecase.MakeAvailableOfflineUseCase
 import com.drdisagree.teledrive.presentation.navigation.Route
 import com.drdisagree.teledrive.presentation.preview.PreviewSequence
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class CollectionViewModel(
     savedStateHandle: SavedStateHandle,
     private val fileRepository: FileRepository,
-    private val trashRepository: TrashRepository
+    private val trashRepository: TrashRepository,
+    private val transferRepository: TransferRepository,
+    private val makeAvailableOffline: MakeAvailableOfflineUseCase
 ) : ViewModel() {
 
     val type: CollectionType = runCatching {
@@ -43,6 +50,7 @@ class CollectionViewModel(
 
     val folders: StateFlow<List<DriveFolder>> = when (type) {
         CollectionType.FAVORITES -> fileRepository.observeFavoriteFolders()
+        CollectionType.AVAILABLE_OFFLINE -> fileRepository.observeAvailableOfflineFolders()
         CollectionType.ARCHIVED -> fileRepository.observeArchivedFolders()
         CollectionType.HIDDEN -> fileRepository.observeHiddenFolders()
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
@@ -54,6 +62,7 @@ class CollectionViewModel(
 
     private val spec = FileQuerySpec(
         favoritesOnly = type == CollectionType.FAVORITES,
+        availableOfflineOnly = type == CollectionType.AVAILABLE_OFFLINE,
         hiddenOnly = type == CollectionType.HIDDEN,
         archivedOnly = type == CollectionType.ARCHIVED,
         showHidden = type == CollectionType.HIDDEN,
@@ -64,6 +73,7 @@ class CollectionViewModel(
 
     val previewSequence = PreviewSequence(
         favoritesOnly = type == CollectionType.FAVORITES,
+        availableOfflineOnly = type == CollectionType.AVAILABLE_OFFLINE,
         hiddenOnly = type == CollectionType.HIDDEN,
         archivedOnly = type == CollectionType.ARCHIVED,
         sortField = FileSortField.DATE_ADDED,
@@ -72,6 +82,33 @@ class CollectionViewModel(
 
     val files: Flow<PagingData<DriveFile>> = fileRepository.pagedFiles(spec)
         .cachedIn(viewModelScope)
+
+    /** Files on their way down, keyed by id; a null progress means not started yet. */
+    val downloads: StateFlow<Map<String, Float?>> =
+        if (type == CollectionType.AVAILABLE_OFFLINE) {
+            transferRepository.observeActiveDownloads().map { tasks ->
+                tasks.associate { task ->
+                    task.fileId.orEmpty() to task.progress.takeIf {
+                        task.state == TransferState.RUNNING && it > 0f
+                    }
+                }
+            }
+        } else {
+            flowOf(emptyMap())
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
+
+    val missingCount: StateFlow<Int> =
+        if (type == CollectionType.AVAILABLE_OFFLINE) {
+            combine(fileRepository.observeAvailableOfflineMissingIds(), downloads) { ids, active ->
+                ids.count { it !in active }
+            }
+        } else {
+            flowOf(0)
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
+
+    fun downloadMissing() {
+        viewModelScope.launch { makeAvailableOffline.downloadMissing() }
+    }
 
     fun toggleSelection(id: String) {
         _allSelected.update { false }
@@ -123,6 +160,9 @@ class CollectionViewModel(
                     if (ids.isNotEmpty()) fileRepository.setFilesFavorite(ids, false)
                     folderIds.forEach { fileRepository.setFolderFavorite(it, false) }
                 }
+
+                CollectionType.AVAILABLE_OFFLINE ->
+                    makeAvailableOffline(ids, folderIds, available = false)
 
                 CollectionType.ARCHIVED -> {
                     if (ids.isNotEmpty()) fileRepository.setFilesArchived(ids, false)

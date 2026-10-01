@@ -6,5 +6,6 @@ data class HomeAggregates(
     val backedUp: Int,
     val queued: Int,
     val failed: Int,
-    val localOnly: Int
+    val localOnly: Int,
+    val offlineBytes: Long
 )

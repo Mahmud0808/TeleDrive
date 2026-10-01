@@ -90,6 +90,12 @@ interface TransferDao {
     @Query("SELECT COUNT(*) FROM transfers WHERE state IN ('QUEUED', 'RUNNING')")
     fun observeActiveCount(): Flow<Int>
 
+    @Query(
+        """SELECT * FROM transfers
+           WHERE type = 'DOWNLOAD' AND fileId IS NOT NULL AND state IN ('QUEUED', 'RUNNING')"""
+    )
+    fun observeActiveDownloads(): Flow<List<TransferEntity>>
+
     @Query("UPDATE transfers SET stage = :stage, updatedAt = :updatedAt WHERE id = :id")
     suspend fun setStage(id: String, stage: TransferStage?, updatedAt: Long)
 

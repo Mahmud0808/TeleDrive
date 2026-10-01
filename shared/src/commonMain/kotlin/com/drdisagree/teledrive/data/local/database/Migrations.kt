@@ -4,6 +4,114 @@ import androidx.room.migration.Migration
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
 
+/**
+ * Rebuilds the tables since SQLite has RENAME COLUMN only from 3.25 (API 30). Room turns
+ * foreign keys on after migrating, so dropping the old tables cascades nothing.
+ */
+val MIGRATION_13_14 = object : Migration(13, 14) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL(
+            "CREATE TABLE IF NOT EXISTS `folders_new` (`id` TEXT NOT NULL, `chatId` " +
+                    "INTEGER, `parentId` TEXT, `name` TEXT NOT NULL, `isHidden` INTEGER NOT " +
+                    "NULL, `isArchived` INTEGER NOT NULL, `isFavorite` INTEGER NOT NULL, " +
+                    "`isAvailableOffline` INTEGER NOT NULL, `trashedAt` INTEGER, " +
+                    "`preTrashParentId` TEXT, `pendingPublish` INTEGER NOT NULL, `createdAt` " +
+                    "INTEGER NOT NULL, `modifiedAt` INTEGER NOT NULL, `changedAt` INTEGER NOT " +
+                    "NULL, PRIMARY KEY(`id`), FOREIGN KEY(`parentId`) REFERENCES " +
+                    "`folders`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )"
+        )
+        connection.execSQL(
+            "INSERT INTO `folders_new` (`id`, `chatId`, `parentId`, `name`, " +
+                    "`isHidden`, `isArchived`, `isFavorite`, `isAvailableOffline`, " +
+                    "`trashedAt`, `preTrashParentId`, `pendingPublish`, `createdAt`, " +
+                    "`modifiedAt`, `changedAt`) SELECT `id`, `chatId`, `parentId`, `name`, " +
+                    "`isHidden`, `isArchived`, `isFavorite`, `isPinned`, `trashedAt`, " +
+                    "`preTrashParentId`, `pendingPublish`, `createdAt`, `modifiedAt`, " +
+                    "`changedAt` FROM `folders`"
+        )
+        connection.execSQL("DROP TABLE `folders`")
+        connection.execSQL("ALTER TABLE `folders_new` RENAME TO `folders`")
+        connection.execSQL(
+            "CREATE INDEX IF NOT EXISTS `index_folders_parentId` ON `folders` " +
+                    "(`parentId`)"
+        )
+        connection.execSQL(
+            "CREATE INDEX IF NOT EXISTS `index_folders_name` ON `folders` (`name`)"
+        )
+        connection.execSQL(
+            "CREATE INDEX IF NOT EXISTS `index_folders_chatId` ON `folders` " +
+                    "(`chatId`)"
+        )
+        connection.execSQL(
+            "CREATE TABLE IF NOT EXISTS `files_new` (`id` TEXT NOT NULL, `folderId` " +
+                    "TEXT, `name` TEXT NOT NULL, `sizeBytes` INTEGER NOT NULL, `mimeType` " +
+                    "TEXT NOT NULL, `category` TEXT NOT NULL, `localPath` TEXT, `contentHash` " +
+                    "TEXT, `chatId` INTEGER, `messageId` INTEGER, `remoteFileId` TEXT, " +
+                    "`remoteUniqueId` TEXT, `backupState` TEXT NOT NULL, `isHidden` INTEGER " +
+                    "NOT NULL, `isArchived` INTEGER NOT NULL, `isFavorite` INTEGER NOT NULL, " +
+                    "`isAvailableOffline` INTEGER NOT NULL, `isEncrypted` INTEGER NOT NULL, " +
+                    "`width` INTEGER, `height` INTEGER, `durationMs` INTEGER, `trashedAt` " +
+                    "INTEGER, `preTrashFolderId` TEXT, `pendingPublish` INTEGER NOT NULL, " +
+                    "`partCount` INTEGER NOT NULL, `iconFileId` TEXT, `createdAt` INTEGER NOT " +
+                    "NULL, `modifiedAt` INTEGER NOT NULL, `addedAt` INTEGER NOT NULL, PRIMARY " +
+                    "KEY(`id`), FOREIGN KEY(`folderId`) REFERENCES `folders`(`id`) ON UPDATE " +
+                    "NO ACTION ON DELETE SET NULL )"
+        )
+        connection.execSQL(
+            "INSERT INTO `files_new` (`id`, `folderId`, `name`, `sizeBytes`, " +
+                    "`mimeType`, `category`, `localPath`, `contentHash`, `chatId`, " +
+                    "`messageId`, `remoteFileId`, `remoteUniqueId`, `backupState`, " +
+                    "`isHidden`, `isArchived`, `isFavorite`, `isAvailableOffline`, " +
+                    "`isEncrypted`, `width`, `height`, `durationMs`, `trashedAt`, " +
+                    "`preTrashFolderId`, `pendingPublish`, `partCount`, `iconFileId`, " +
+                    "`createdAt`, `modifiedAt`, `addedAt`) SELECT `id`, `folderId`, `name`, " +
+                    "`sizeBytes`, `mimeType`, `category`, `localPath`, `contentHash`, " +
+                    "`chatId`, `messageId`, `remoteFileId`, `remoteUniqueId`, `backupState`, " +
+                    "`isHidden`, `isArchived`, `isFavorite`, `isPinned`, `isEncrypted`, " +
+                    "`width`, `height`, `durationMs`, `trashedAt`, `preTrashFolderId`, " +
+                    "`pendingPublish`, `partCount`, `iconFileId`, `createdAt`, `modifiedAt`, " +
+                    "`addedAt` FROM `files`"
+        )
+        connection.execSQL("DROP TABLE `files`")
+        connection.execSQL("ALTER TABLE `files_new` RENAME TO `files`")
+        connection.execSQL(
+            "CREATE INDEX IF NOT EXISTS `index_files_folderId` ON `files` " +
+                    "(`folderId`)"
+        )
+        connection.execSQL(
+            "CREATE INDEX IF NOT EXISTS `index_files_name` ON `files` (`name`)"
+        )
+        connection.execSQL(
+            "CREATE INDEX IF NOT EXISTS `index_files_category` ON `files` " +
+                    "(`category`)"
+        )
+        connection.execSQL(
+            "CREATE INDEX IF NOT EXISTS `index_files_backupState` ON `files` " +
+                    "(`backupState`)"
+        )
+        connection.execSQL(
+            "CREATE INDEX IF NOT EXISTS `index_files_trashedAt` ON `files` " +
+                    "(`trashedAt`)"
+        )
+        connection.execSQL(
+            "CREATE INDEX IF NOT EXISTS `index_files_remoteUniqueId` ON `files` " +
+                    "(`remoteUniqueId`)"
+        )
+        connection.execSQL(
+            "CREATE INDEX IF NOT EXISTS `index_files_localPath` ON `files` " +
+                    "(`localPath`)"
+        )
+        connection.execSQL(
+            "CREATE INDEX IF NOT EXISTS `index_files_contentHash` ON `files` " +
+                    "(`contentHash`)"
+        )
+        connection.execSQL(
+            "CREATE INDEX IF NOT EXISTS `index_files_pendingPublish` ON `files` " +
+                    "(`pendingPublish`)"
+        )
+    }
+}
+
 val MIGRATION_12_13 = object : Migration(12, 13) {
     override fun migrate(connection: SQLiteConnection) {
         connection.execSQL(

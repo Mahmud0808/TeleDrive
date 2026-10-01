@@ -16,6 +16,8 @@ interface TransferRepository {
 
     fun observeActiveForFile(fileId: String): Flow<TransferTask?>
 
+    fun observeActiveDownloads(): Flow<List<TransferTask>>
+
     suspend fun enqueueUpload(fileId: String, priority: Int = 0): AppResult<String>
 
     suspend fun enqueuePendingUploads(): AppResult<Int>

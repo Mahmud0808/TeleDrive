@@ -162,7 +162,7 @@ class FolderStateSynchronizer(
                 isHidden = entry.hidden,
                 isArchived = entry.archived,
                 isFavorite = entry.favorite,
-                isPinned = existing?.isPinned == true,
+                isAvailableOffline = existing?.isAvailableOffline == true,
                 trashedAt = entry.trashedAt,
                 preTrashParentId = entry.preTrashParentId,
                 pendingPublish = existing?.pendingPublish == true,

@@ -111,7 +111,8 @@ class HomeViewModel(
                     backedUp = aggregates.backedUp,
                     pending = aggregates.queued,
                     failed = aggregates.failed,
-                    localOnly = aggregates.localOnly
+                    localOnly = aggregates.localOnly,
+                    offlineBytes = aggregates.offlineBytes
                 )
             }
     }
@@ -187,6 +188,7 @@ class HomeViewModel(
             showHiddenSection = showHidden,
             showRecentSection = misc.showRecentSection,
             activeTransferCount = activeTransfers,
+            offlineBytes = counts.offlineBytes,
             backupHold = misc.backupHold
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())

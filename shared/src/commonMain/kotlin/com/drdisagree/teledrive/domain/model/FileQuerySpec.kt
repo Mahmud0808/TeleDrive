@@ -14,6 +14,7 @@ data class FileQuerySpec(
     val backedUpOnly: Boolean = false,
     val notBackedUpOnly: Boolean = false,
     val favoritesOnly: Boolean = false,
+    val availableOfflineOnly: Boolean = false,
     val hiddenOnly: Boolean = false,
     val archivedOnly: Boolean = false,
     val showHidden: Boolean = false,

@@ -81,11 +81,11 @@
     <string name="common_collapse">Recolher</string>
     <string name="common_confirm_trash_count_title">Mover %1$d para a lixeira?</string>
     <string name="common_content_description_favorite">Favorito</string>
-    <string name="common_keep_on_device">Manter no dispositivo</string>
+    <string name="common_make_available_offline">Disponibilizar off-line</string>
     <string name="common_organize">Organizar</string>
     <string name="common_storage_actions">Armazenamento</string>
-    <string name="common_stop_keeping_on_device">Parar de manter no dispositivo</string>
-    <string name="common_content_description_pinned">Mantido no dispositivo</string>
+    <string name="common_remove_from_offline">Remover do off-line</string>
+    <string name="common_content_description_available_offline">Disponível off-line</string>
     <string name="common_content_description_selected">Selecionado</string>
     <string name="common_create">Criar</string>
     <string name="common_delete_forever">Excluir permanentemente</string>
@@ -341,7 +341,7 @@
     <string name="files_queued_for_upload">%1$d na fila para envio</string>
     <string name="files_queued_partial">%1$d na fila, %2$d com falha</string>
     <string name="files_removed_local_copies">%1$d cópias locais removidas</string>
-    <string name="files_kept_pinned_copies">Mantidos %1$d arquivo(s) que você mantém no dispositivo</string>
+    <string name="files_kept_offline_copies">Mantidos %1$d arquivo(s) disponíveis off-line</string>
     <string name="files_sync_result">%1$d novos, %2$d atualizados</string>
 
     <!-- File and folder info -->
@@ -487,6 +487,13 @@
     <string name="collection_hidden_empty">Arquivos ocultos são excluídos da navegação e da galeria.</string>
     <string name="collection_hidden_subtitle">Visíveis apenas aqui</string>
     <string name="collection_hidden_title">Ocultos</string>
+    <string name="collection_offline_title">Arquivos off-line</string>
+    <string name="collection_offline_subtitle">Abra sem internet</string>
+    <string name="collection_offline_empty">Disponibilize um arquivo ou pasta off-line para abri-lo sem internet.</string>
+    <string name="collection_offline_on_device">%1$s neste dispositivo</string>
+    <string name="collection_offline_downloading">Baixando</string>
+    <string name="collection_offline_not_downloaded">Ainda não baixado</string>
+    <string name="collection_offline_download_missing">Baixar arquivos ausentes</string>
     <string name="collection_remove_from">Remover de %1$s</string>
 
     <!-- Trash -->
@@ -627,7 +634,7 @@
     <string name="settings_clear_thumbnails_title">Limpar miniaturas?</string>
     <string name="settings_free_up_space_title">Liberar %1$s?</string>
     <string name="settings_delete_after_upload">Excluir cópia local após o backup</string>
-    <string name="settings_delete_after_upload_summary">Remove o arquivo deste dispositivo assim que ele estiver armazenado no canal e o hash ainda corresponder. Itens mantidos no dispositivo nunca são removidos.</string>
+    <string name="settings_delete_after_upload_summary">Remove o arquivo deste dispositivo assim que ele estiver armazenado no canal e o hash ainda corresponder. Arquivos disponíveis off-line nunca são removidos.</string>
     <string name="settings_gallery_previews_regenerated_browse">As pré-visualizações da galeria serão geradas novamente conforme você navega. Seus arquivos não serão afetados.</string>
     <string name="settings_local_copies_files_already">As cópias locais dos arquivos que já estão salvos em backup no Telegram serão excluídas deste dispositivo. Elas permanecem no seu canal do Telegram e podem ser baixadas novamente.</string>
 

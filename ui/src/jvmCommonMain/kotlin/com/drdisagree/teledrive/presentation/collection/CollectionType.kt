@@ -1,8 +1,8 @@
 package com.drdisagree.teledrive.presentation.collection
 
-import org.jetbrains.compose.resources.StringResource
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Archive
+import androidx.compose.material.icons.filled.OfflinePin
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -16,6 +16,10 @@ import com.drdisagree.teledrive.resources.collection_favorites_title
 import com.drdisagree.teledrive.resources.collection_hidden_empty
 import com.drdisagree.teledrive.resources.collection_hidden_subtitle
 import com.drdisagree.teledrive.resources.collection_hidden_title
+import com.drdisagree.teledrive.resources.collection_offline_empty
+import com.drdisagree.teledrive.resources.collection_offline_subtitle
+import com.drdisagree.teledrive.resources.collection_offline_title
+import org.jetbrains.compose.resources.StringResource
 
 enum class CollectionType(
     val titleRes: StringResource,
@@ -28,6 +32,12 @@ enum class CollectionType(
         subtitleRes = Res.string.collection_favorites_subtitle,
         icon = Icons.Filled.Star,
         emptyMessageRes = Res.string.collection_favorites_empty
+    ),
+    AVAILABLE_OFFLINE(
+        titleRes = Res.string.collection_offline_title,
+        subtitleRes = Res.string.collection_offline_subtitle,
+        icon = Icons.Filled.OfflinePin,
+        emptyMessageRes = Res.string.collection_offline_empty
     ),
     ARCHIVED(
         titleRes = Res.string.collection_archived_title,

@@ -46,7 +46,7 @@ data class FileEntity(
     val isHidden: Boolean = false,
     val isArchived: Boolean = false,
     val isFavorite: Boolean = false,
-    val isPinned: Boolean = false,
+    val isAvailableOffline: Boolean = false,
     val isEncrypted: Boolean = false,
     val width: Int? = null,
     val height: Int? = null,

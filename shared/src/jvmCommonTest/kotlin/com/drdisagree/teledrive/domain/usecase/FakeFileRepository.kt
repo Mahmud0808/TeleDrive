@@ -8,16 +8,16 @@ internal class FakeFileRepository(
     private val all: List<DriveFile>,
     private val tree: Map<String, List<String>>
 ) : FileRepository by unused() {
-    val pinnedFiles = mutableListOf<String>()
-    val unpinnedFiles = mutableListOf<String>()
-    val pinnedFolders = mutableListOf<String>()
+    val offlineFiles = mutableListOf<String>()
+    val onlineOnlyFiles = mutableListOf<String>()
+    val offlineFolders = mutableListOf<String>()
 
-    override suspend fun setFilesPinned(ids: List<String>, pinned: Boolean) {
-        (if (pinned) pinnedFiles else unpinnedFiles) += ids
+    override suspend fun setFilesAvailableOffline(ids: List<String>, available: Boolean) {
+        (if (available) offlineFiles else onlineOnlyFiles) += ids
     }
 
-    override suspend fun setFolderPinned(id: String, pinned: Boolean) {
-        if (pinned) pinnedFolders += id
+    override suspend fun setFolderAvailableOffline(id: String, available: Boolean) {
+        if (available) offlineFolders += id
     }
 
     override suspend fun fileIdsInTree(folderId: String) = tree[folderId].orEmpty()

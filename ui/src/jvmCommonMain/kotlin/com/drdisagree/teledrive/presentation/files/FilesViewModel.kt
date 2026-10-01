@@ -22,7 +22,7 @@ import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.repository.SyncRepository
 import com.drdisagree.teledrive.domain.repository.TransferRepository
 import com.drdisagree.teledrive.domain.repository.TrashRepository
-import com.drdisagree.teledrive.domain.usecase.KeepOnDeviceUseCase
+import com.drdisagree.teledrive.domain.usecase.MakeAvailableOfflineUseCase
 import com.drdisagree.teledrive.presentation.common.ListPosition
 import com.drdisagree.teledrive.presentation.common.UiText
 import com.drdisagree.teledrive.presentation.common.toUiText
@@ -48,7 +48,7 @@ import com.drdisagree.teledrive.resources.files_moving_to_trash
 import com.drdisagree.teledrive.resources.files_queued_for_download
 import com.drdisagree.teledrive.resources.files_queued_for_upload
 import com.drdisagree.teledrive.resources.files_queued_partial
-import com.drdisagree.teledrive.resources.files_kept_pinned_copies
+import com.drdisagree.teledrive.resources.files_kept_offline_copies
 import com.drdisagree.teledrive.resources.files_removed_local_copies
 import com.drdisagree.teledrive.resources.files_root_name
 import com.drdisagree.teledrive.resources.files_share_needs_local
@@ -94,7 +94,7 @@ class FilesViewModel(
     private val syncRepository: SyncRepository,
     private val fileImporter: FileImporter,
     private val pendingShare: PendingShare,
-    private val keepOnDevice: KeepOnDeviceUseCase
+    private val makeAvailableOffline: MakeAvailableOfflineUseCase
 ) : ViewModel() {
 
     private val folderId: String? = savedStateHandle.toRoute<Route.Files>().folderId
@@ -432,12 +432,12 @@ class FilesViewModel(
         }
     }
 
-    fun pinSelected(pinned: Boolean) {
+    fun setSelectedAvailableOffline(available: Boolean) {
         val ids = selection.value.toList()
         val folderIds = folderSelection.value.toList()
         clearSelection()
         viewModelScope.launch {
-            val queued = keepOnDevice(ids, folderIds, pinned)
+            val queued = makeAvailableOffline(ids, folderIds, available)
             if (queued > 0) {
                 _messages.tryEmit(UiText.Resource(Res.string.files_queued_for_download, queued))
             }
@@ -557,10 +557,10 @@ class FilesViewModel(
                         _deleteConsentRequests.tryEmit(consent)
                     } else {
                         pendingLocalCopyIds = emptyList()
-                        val kept = result.value.keptPinned
+                        val kept = result.value.keptOffline
                         _messages.tryEmit(
                             if (kept > 0 && result.value.deletedCount == 0) {
-                                UiText.Resource(Res.string.files_kept_pinned_copies, kept)
+                                UiText.Resource(Res.string.files_kept_offline_copies, kept)
                             } else {
                                 UiText.Resource(
                                     Res.string.files_removed_local_copies,

@@ -26,10 +26,10 @@ data class FilesUiState(
     val selectionCount: Int get() = selection.size + folderSelection.size
     val folderInSelection: Boolean get() = folderSelection.isNotEmpty()
 
-    val allSelectedPinned: Boolean
+    val allSelectedAvailableOffline: Boolean
         get() = selectionMode &&
-                !capabilities.anyUnpinned &&
-                folders.filter { it.id in folderSelection }.all { it.isPinned }
+                !capabilities.anyNotAvailableOffline &&
+                folders.filter { it.id in folderSelection }.all { it.isAvailableOffline }
 
     val allSelectedFavorite: Boolean
         get() = selectionMode &&

@@ -81,11 +81,11 @@
     <string name="common_collapse">Collapse</string>
     <string name="common_confirm_trash_count_title">Move %1$d to trash?</string>
     <string name="common_content_description_favorite">Favorite</string>
-    <string name="common_keep_on_device">Keep on device</string>
+    <string name="common_make_available_offline">Make available offline</string>
     <string name="common_organize">Organize</string>
     <string name="common_storage_actions">Storage</string>
-    <string name="common_stop_keeping_on_device">Stop keeping on device</string>
-    <string name="common_content_description_pinned">Kept on device</string>
+    <string name="common_remove_from_offline">Remove from offline</string>
+    <string name="common_content_description_available_offline">Available offline</string>
     <string name="common_content_description_selected">Selected</string>
     <string name="common_create">Create</string>
     <string name="common_delete_forever">Delete forever</string>
@@ -341,7 +341,7 @@
     <string name="files_queued_for_upload">%1$d queued for upload</string>
     <string name="files_queued_partial">%1$d queued, %2$d failed</string>
     <string name="files_removed_local_copies">Removed %1$d local copies</string>
-    <string name="files_kept_pinned_copies">Kept %1$d file(s) you keep on device</string>
+    <string name="files_kept_offline_copies">Kept %1$d file(s) that are available offline</string>
     <string name="files_sync_result">%1$d new, %2$d updated</string>
 
     <!-- File and folder info -->
@@ -487,6 +487,13 @@
     <string name="collection_hidden_empty">Hidden files are excluded from browsing and the gallery.</string>
     <string name="collection_hidden_subtitle">Only visible here</string>
     <string name="collection_hidden_title">Hidden</string>
+    <string name="collection_offline_title">Offline files</string>
+    <string name="collection_offline_subtitle">Open without internet</string>
+    <string name="collection_offline_empty">Make a file or folder available offline to open it without internet.</string>
+    <string name="collection_offline_on_device">%1$s on this device</string>
+    <string name="collection_offline_downloading">Downloading</string>
+    <string name="collection_offline_not_downloaded">Not downloaded yet</string>
+    <string name="collection_offline_download_missing">Download missing files</string>
     <string name="collection_remove_from">Remove from %1$s</string>
 
     <!-- Trash -->
@@ -627,7 +634,7 @@
     <string name="settings_clear_thumbnails_title">Clear thumbnails?</string>
     <string name="settings_free_up_space_title">Free up %1$s?</string>
     <string name="settings_delete_after_upload">Delete local copy after backup</string>
-    <string name="settings_delete_after_upload_summary">Removes the file from this device once it is stored in the channel and its hash still matches. Items kept on device are never removed.</string>
+    <string name="settings_delete_after_upload_summary">Removes the file from this device once it is stored in the channel and its hash still matches. Files available offline are never removed.</string>
     <string name="settings_gallery_previews_regenerated_browse">Gallery previews will be regenerated as you browse. Your files are not affected.</string>
     <string name="settings_local_copies_files_already">Local copies of files already backed up to Telegram will be deleted from this device. They stay in your Telegram channel and can be downloaded again.</string>
 

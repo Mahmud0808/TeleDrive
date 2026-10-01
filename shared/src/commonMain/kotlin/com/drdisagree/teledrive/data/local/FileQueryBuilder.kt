@@ -11,6 +11,7 @@ object FileQueryBuilder {
 
     private fun coveringColumn(spec: FileQuerySpec): String? = when {
         spec.favoritesOnly -> "isFavorite"
+        spec.availableOfflineOnly -> "isAvailableOffline"
         spec.archivedOnly -> "isArchived"
         spec.hiddenOnly -> "isHidden"
         else -> null
@@ -81,6 +82,7 @@ object FileQueryBuilder {
         if (spec.backedUpOnly) where.append(" AND backupState = 'BACKED_UP'")
         if (spec.notBackedUpOnly) where.append(" AND backupState != 'BACKED_UP'")
         if (spec.favoritesOnly) where.append(" AND isFavorite = 1")
+        if (spec.availableOfflineOnly) where.append(" AND isAvailableOffline = 1")
         if (spec.hiddenOnly) where.append(" AND isHidden = 1")
         if (spec.archivedOnly) where.append(" AND isArchived = 1")
         coveringColumn(spec)?.let { column ->
