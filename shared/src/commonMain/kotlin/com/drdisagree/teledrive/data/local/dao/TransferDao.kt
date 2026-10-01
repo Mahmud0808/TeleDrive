@@ -108,7 +108,6 @@ interface TransferDao {
         completed: TransferState = TransferState.COMPLETED
     )
 
-    /** Recovers transfers that were RUNNING when the process died. */
     @Query("UPDATE transfers SET state = 'QUEUED', telegramFileId = NULL WHERE state = 'RUNNING'")
     suspend fun requeueRunning()
 

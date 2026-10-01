@@ -30,12 +30,6 @@ import com.drdisagree.teledrive.domain.model.DriveFile
 import com.drdisagree.teledrive.domain.model.FileCategory
 import com.drdisagree.teledrive.presentation.common.Formatters
 
-/**
- * Thumbnail with an icon fallback. Image, video and text files attempt
- * thumbnail loading; everything else renders its category icon on a tonal
- * background.
- * Videos carry a play badge so they are distinguishable from stills.
- */
 @Composable
 fun FileThumbnail(
     file: DriveFile,

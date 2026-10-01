@@ -3,7 +3,6 @@ package com.drdisagree.teledrive.presentation.preview
 import org.jetbrains.compose.resources.StringResource
 import com.drdisagree.teledrive.core.media.MediaPart
 
-/** Resolved, displayable content for one file in the fullscreen viewer. */
 sealed interface PreviewContent {
 
     data object Loading : PreviewContent
@@ -13,10 +12,8 @@ sealed interface PreviewContent {
     /** [model] is a file path or a ByteArray, both renderable by Coil. */
     data class Image(val model: Any) : PreviewContent
 
-    /** Local playback from a file on disk. */
     data class LocalMedia(val path: String, val isAudio: Boolean) : PreviewContent
 
-    /** Progressive streaming straight from Telegram. */
     data class StreamedMedia(
         val remoteFileId: String,
         val isAudio: Boolean,
@@ -30,14 +27,6 @@ sealed interface PreviewContent {
 
     data class Archive(val entries: List<ArchiveEntry>, val format: String) : PreviewContent
 
-    data class ArchiveEntry(
-        val name: String,
-        val sizeBytes: Long,
-        val compressedBytes: Long,
-        val isDirectory: Boolean
-    )
-
-    /** Too large to fetch inline; user must download explicitly. */
     data class RequiresDownload(val sizeBytes: Long) : PreviewContent
 
     data class Unsupported(val reasonRes: StringResource) : PreviewContent

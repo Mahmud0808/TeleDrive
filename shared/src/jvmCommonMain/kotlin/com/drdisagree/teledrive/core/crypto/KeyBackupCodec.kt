@@ -4,23 +4,13 @@ import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 
 /**
- * Serializes the content key wrapped with a passphrase-derived key so it can
- * be stored in the Telegram storage channel. A leak of the backup blob alone
- * reveals nothing without the owner's passphrase.
- *
- * The optional hint is stored in plaintext (like Telegram's own 2FA hint) and
- * is shown before the passphrase prompt during restore. UI must warn the user
- * not to put the passphrase itself into the hint.
- *
- * Layout: MAGIC(4) VERSION(1) iterations(4) salt(16) hintLength(2) hint(utf-8)
- * then AES-GCM blob (nonce || ciphertext+tag) from [StreamCrypto.encryptBytes].
+ * Layout: MAGIC(4) VERSION(1) iterations(4) salt(16) hintLength(2) hint(utf-8), then the AES-GCM
+ * blob. The hint is plaintext, so the UI must warn against putting the passphrase in it.
  */
 class KeyBackupCodec(
     private val passphraseKdf: PassphraseKdf,
     private val streamCrypto: StreamCrypto
 ) {
-
-    data class BackupInfo(val hint: String?)
 
     fun encode(contentKey: ByteArray, passphrase: CharArray, hint: String?): ByteArray {
         val salt = passphraseKdf.newSalt()
@@ -40,12 +30,11 @@ class KeyBackupCodec(
             .array()
     }
 
-    /** Reads the plaintext hint without needing the passphrase. */
-    fun readInfo(blob: ByteArray): BackupInfo? = runCatching {
+    fun readInfo(blob: ByteArray): KeyBackupInfo? = runCatching {
         val buffer = header(blob)
         val hintLength = buffer.short.toInt()
         val hintBytes = ByteArray(hintLength).also(buffer::get)
-        BackupInfo(
+        KeyBackupInfo(
             hint = String(hintBytes, StandardCharsets.UTF_8).takeIf { it.isNotEmpty() }
         )
     }.getOrNull()

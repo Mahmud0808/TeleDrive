@@ -26,25 +26,6 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-class GroupedListScope {
-
-    internal val items = mutableListOf<GroupedListItem>()
-
-    fun add(visible: Boolean = true, content: @Composable () -> Unit) {
-        items += GroupedListItem(visible, content)
-    }
-}
-
-internal data class GroupedListItem(
-    val visible: Boolean,
-    val content: @Composable () -> Unit
-)
-
-/**
- * Rows rendered as one grouped container: outer corners rounded, inner corners
- * tightened, hairline gaps between rows. Hidden rows animate out and the
- * neighbouring corners morph to become the new group edge.
- */
 @Composable
 fun GroupedList(
     modifier: Modifier = Modifier,

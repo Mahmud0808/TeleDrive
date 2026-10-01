@@ -65,11 +65,8 @@ class TransferRepositoryImpl(
         enqueue(fileId, TransferType.UPLOAD, priority)
 
     /**
-     * A file can be left marked queued with no transfer behind it when the
-     * process dies between the two writes, or when its staged copy is deleted
-     * before the upload starts. Orphans whose bytes still exist are queued
-     * again; ones with nothing left on disk and nothing in Telegram are
-     * phantoms no upload can ever satisfy, so their records are dropped.
+     * Orphans whose bytes exist are queued again; ones with nothing on disk or in Telegram are
+     * dropped.
      */
     override suspend fun enqueuePendingUploads(): AppResult<Int> {
         val chatId = settingsRepository.preferences.first().storageChatId
@@ -348,10 +345,7 @@ class TransferRepositoryImpl(
         kickWorker()
     }
 
-    /**
-     * A file's backup state only means something while a transfer backs it up.
-     * Once those rows are gone the file is simply not backed up.
-     */
+    /** A backup state only means something while a transfer backs the file up. */
     private suspend fun syncFileStates() {
         fileDao.repairBackedUpStates()
         fileDao.clearStaleQueuedStates()

@@ -1,12 +1,11 @@
 package com.drdisagree.teledrive.data.repository
 
-import com.drdisagree.teledrive.data.local.database.inImmediateTransaction
 import com.drdisagree.teledrive.core.common.AppError
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.core.common.SafeLog
-import com.drdisagree.teledrive.core.publish.PublishScheduler
 import com.drdisagree.teledrive.core.crypto.KeyBackupCodec
 import com.drdisagree.teledrive.core.files.MimeTypes
+import com.drdisagree.teledrive.core.publish.PublishScheduler
 import com.drdisagree.teledrive.core.telegram.RemoteDocument
 import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.core.telegram.TelegramException
@@ -16,6 +15,7 @@ import com.drdisagree.teledrive.data.local.dao.FilePartDao
 import com.drdisagree.teledrive.data.local.dao.FolderDao
 import com.drdisagree.teledrive.data.local.dao.PendingDeleteDao
 import com.drdisagree.teledrive.data.local.database.TeleDriveDatabase
+import com.drdisagree.teledrive.data.local.database.inImmediateTransaction
 import com.drdisagree.teledrive.data.local.entity.FileEntity
 import com.drdisagree.teledrive.data.local.entity.FilePartEntity
 import com.drdisagree.teledrive.data.remote.telegram.ManifestCodec
@@ -25,6 +25,9 @@ import com.drdisagree.teledrive.domain.model.BackupState
 import com.drdisagree.teledrive.domain.model.FileCategory
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.repository.SyncRepository
+import com.drdisagree.teledrive.domain.repository.SyncStats
+import java.util.UUID
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -35,14 +38,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import java.util.UUID
-import kotlin.time.Duration.Companion.milliseconds
 
 /**
- * Reconciles local metadata with the storage chat. The chat is the source of
- * truth for remote-backed files: caption manifests are decoded and upserted,
- * and local rows pointing at deleted messages are detached. After a complete
- * local wipe this rebuilds the whole drive, including the folder tree.
+ * The chat is the source of truth for remote-backed files; after a local wipe this rebuilds the
+ * whole drive.
  */
 class SyncRepositoryImpl(
     private val telegramClient: TelegramClient,
@@ -71,18 +70,18 @@ class SyncRepositoryImpl(
     @Volatile
     private var lastFullSyncAt = 0L
 
-    override suspend fun fullResync(): AppResult<SyncRepository.SyncStats> =
+    override suspend fun fullResync(): AppResult<SyncStats> =
         runSync(incremental = false)
 
-    override suspend fun incrementalSync(): AppResult<SyncRepository.SyncStats> =
+    override suspend fun incrementalSync(): AppResult<SyncStats> =
         runSync(incremental = true)
 
-    override suspend fun syncOnStart(): AppResult<SyncRepository.SyncStats> {
+    override suspend fun syncOnStart(): AppResult<SyncStats> {
         fileDao.repairBackedUpStates()
         return runSync(incremental = fileDao.fileCount(activeChannel.id()) > 0)
     }
 
-    override suspend fun catchUpWithRemote(): AppResult<SyncRepository.SyncStats>? {
+    override suspend fun catchUpWithRemote(): AppResult<SyncStats>? {
         if (syncMutex.isLocked) return null
         val since = System.currentTimeMillis() - lastFullSyncAt
         if (since in 0 until CATCH_UP_INTERVAL_MS) return null
@@ -92,7 +91,7 @@ class SyncRepositoryImpl(
     private suspend fun runSync(
         incremental: Boolean,
         quiet: Boolean = false
-    ): AppResult<SyncRepository.SyncStats> =
+    ): AppResult<SyncStats> =
         syncMutex.withLock {
             if (!quiet) {
                 _syncing.value = true
@@ -123,7 +122,7 @@ class SyncRepositoryImpl(
     private suspend fun doSync(
         incremental: Boolean,
         quiet: Boolean
-    ): AppResult<SyncRepository.SyncStats> {
+    ): AppResult<SyncStats> {
         val prefs = settingsRepository.preferences.first()
         val chatId = telegramClient.ensureStorageChat(prefs.storageChatId)
         channelOwnership.claimUnowned(chatId)
@@ -220,12 +219,10 @@ class SyncRepositoryImpl(
         updated: Int,
         locked: Int,
         partial: Boolean
-    ): AppResult<SyncRepository.SyncStats> {
+    ): AppResult<SyncStats> {
         var detached = 0
-        /* Locked files still register as seen, so they cannot be mistaken for
-           missing ones and a restored key backup is not required to prune.
-           Only rows mapped before the scan are judged: an upload that finished
-           while it ran sits above the pages already read. */
+        // Locked files count as seen, so pruning needs no restored key. Uploads that finish
+        // mid-scan are newer than the pages read.
         if (!partial) {
             val stale = fileDao.filesWithRemote().filter { entity ->
                 val messageId = entity.messageId
@@ -236,11 +233,10 @@ class SyncRepositoryImpl(
         }
         SafeLog.d(TAG, "Sync done: +$inserted ~$updated -$detached, $locked locked")
         return AppResult.Success(
-            SyncRepository.SyncStats(inserted, updated, detached, locked)
+            SyncStats(inserted, updated, detached, locked)
         )
     }
 
-    /** Rows whose message is gone: kept as local-only when a copy is on the device. */
     private suspend fun detach(stale: List<FileEntity>): Int {
         if (stale.isEmpty()) return 0
         database.inImmediateTransaction {
@@ -267,9 +263,7 @@ class SyncRepositoryImpl(
     }
 
     /**
-     * Runs the reconcile a full pass would, for just the messages that changed.
-     * It only writes the local database, so applying another device's edit
-     * never publishes it back.
+     * Only writes the local database, so applying another device's edit never publishes it back.
      */
     internal suspend fun applyRemoteChanges(
         chatId: Long,
@@ -370,9 +364,8 @@ class SyncRepositoryImpl(
     }
 
     /**
-     * A part 0 caption can lack its part fields and read as a whole file. Its
-     * siblings, a stored part row or a recorded count still prove the file is
-     * split, and this returns that count so the row and caption can be restored.
+     * A part 0 caption can lose its part fields; its siblings, part rows or recorded count still
+     * prove the split.
      */
     private fun splitCountOfDamagedFirstPart(document: RemoteDocument, known: KnownRows): Int? {
         val manifest = known.manifests[document] ?: return null
@@ -380,18 +373,9 @@ class SyncRepositoryImpl(
         return known.splitCounts[manifest.fileId]
     }
 
-    private data class KnownRows(
-        val manifests: Map<RemoteDocument, RemoteFileManifest?>,
-        val byId: Map<String, FileEntity>,
-        val byUniqueId: Map<String, FileEntity>,
-        val splitCounts: Map<String, Int>,
-        val firstPartStored: Set<String>
-    )
-
     /**
-     * Folder identity comes from the manifest id when it is known locally.
-     * Paths are only a fallback, because two folders can share a name, and a
-     * trashed file must never recreate the folder it was deleted from.
+     * Paths are only a fallback: two folders can share a name, and a trashed file must not recreate
+     * its folder.
      */
     private suspend fun resolveFolder(
         manifest: RemoteFileManifest,
@@ -553,8 +537,6 @@ class SyncRepositoryImpl(
             )
         )
     }
-
-    private enum class ReconcileResult { INSERTED, UPDATED, UNCHANGED }
 
     companion object {
         private const val TAG = "SyncRepository"

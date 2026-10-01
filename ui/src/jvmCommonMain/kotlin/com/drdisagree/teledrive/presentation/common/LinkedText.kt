@@ -17,13 +17,10 @@ private val URL_PATTERN = Urls.PATTERN
 
 const val URL_TAG = "url"
 
-/** Every link found in [text], in the order they appear. */
 fun urlsIn(text: String): List<String> = Urls.all(text)
 
-/** The single link a body consists of, or null when it holds anything else. */
 fun soleUrlOf(text: String): String? = Urls.sole(text)
 
-/** Renders [text] with its links underlined and clickable. */
 @Composable
 fun LinkedText(
     text: String,
@@ -61,5 +58,4 @@ private fun annotateLinks(text: String, linkColor: Color): AnnotatedString = bui
     append(text.substring(cursor))
 }
 
-/** A bare "www." link needs a scheme before anything will open it. */
 fun normalizeUrl(url: String): String = Urls.normalize(url)

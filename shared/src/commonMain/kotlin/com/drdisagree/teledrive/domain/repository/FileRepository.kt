@@ -19,7 +19,6 @@ interface FileRepository {
 
     fun observeFiles(spec: FileQuerySpec): Flow<List<DriveFile>>
 
-    /** Ids of every file inside [folderId] and all of its subfolders. */
     suspend fun fileIdsInTree(folderId: String): List<String>
 
     /** Ids of every file matching [spec], including pages not loaded yet. */
@@ -43,14 +42,12 @@ interface FileRepository {
         sortDirection: SortDirection = SortDirection.ASCENDING
     ): Flow<List<DriveFolder>>
 
-    /** Folders whose name contains [nameQuery], across the whole active drive. */
     fun searchFolders(
         nameQuery: String,
         showHidden: Boolean = false,
         showArchived: Boolean = false
     ): Flow<List<DriveFolder>>
 
-    /** Storage taken by each file category in the active drive, largest first. */
     fun observeStorageByCategory(): Flow<List<StorageSlice>>
 
     fun observeFolder(id: String): Flow<DriveFolder?>
@@ -72,9 +69,8 @@ interface FileRepository {
     suspend fun moveFiles(ids: List<String>, targetFolderId: String?): AppResult<Unit>
 
     /**
-     * Duplicates files into [targetFolderId]. Backed-up files are copied
-     * server-side without re-uploading; local-only files are copied on disk.
-     * Returns how many copies were created.
+     * Backed-up files are copied server side without uploading again; returns how many copies were
+     * made.
      */
     suspend fun copyFiles(ids: List<String>, targetFolderId: String?): AppResult<Int>
 
@@ -96,27 +92,22 @@ interface FileRepository {
 
     suspend fun setFolderPinned(id: String, pinned: Boolean)
 
-    /** Registers a local file into the drive without uploading it. */
     suspend fun importLocalFile(
         localPath: String,
         folderId: String?,
         displayName: String? = null
     ): AppResult<DriveFile>
 
-    /** Live view of specific files, so open menus follow row changes. */
     fun observeFilesByIds(ids: List<String>): Flow<List<DriveFile>>
 
     suspend fun filesByIds(ids: List<String>): List<DriveFile>
 
-    /**
-     * Clears local paths whose file has vanished from storage, so a copy the
-     * user deleted outside the app stops looking downloaded.
-     */
+    /** So a copy deleted outside the app stops looking downloaded. */
     suspend fun reconcileLocalCopies(ids: List<String>)
 
     /**
-     * Writes a note as a Markdown file. Editing replaces the stored copy and
-     * its message, so the upload path keeps owning encryption and manifests.
+     * Editing replaces the stored copy and its message, so the upload path keeps owning encryption
+     * and manifests.
      */
     suspend fun saveNote(
         fileId: String?,
@@ -127,15 +118,12 @@ interface FileRepository {
 
     suspend fun readNote(fileId: String): AppResult<String>
 
-    /** Link metadata for a saved URL, or null when previews are off. */
     suspend fun linkPreview(url: String): LinkMetadata?
 
     suspend fun findDuplicate(localPath: String): DriveFile?
 
-    /** Deletes import staging copies that no file references anymore. */
     suspend fun sweepImportOrphans()
 
-    /** Creates [relativePath] under [parentId], reusing folders that exist. */
     suspend fun resolveImportFolder(relativePath: String, parentId: String?): String?
 
     suspend fun reviveTrashedCopy(localPath: String, folderId: String?): DriveFile?
@@ -143,9 +131,7 @@ interface FileRepository {
     /** Removes only the local copy; remote copy must be verified first. */
     suspend fun deleteLocalCopy(ids: List<String>): AppResult<LocalCleanup>
 
-    /** Local bytes held by files that are confirmed backed up. */
     fun observeReclaimableBytes(): Flow<Long>
 
-    /** Deletes every local copy that has a verified Telegram backup. */
     suspend fun freeUpSpace(): AppResult<LocalCleanup>
 }

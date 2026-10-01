@@ -42,7 +42,6 @@ import com.drdisagree.teledrive.domain.model.DriveFile
 import com.drdisagree.teledrive.presentation.common.Formatters
 import java.util.Locale
 
-/** Detailed metadata sheet available from the browser, gallery, and preview. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FileInfoSheet(

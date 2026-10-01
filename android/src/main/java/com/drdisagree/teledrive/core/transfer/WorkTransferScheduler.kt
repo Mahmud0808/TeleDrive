@@ -14,11 +14,8 @@ class WorkTransferScheduler(
 ) : TransferScheduler {
 
     /**
-     * Ensures the queue worker is scheduled. A request carries its constraints
-     * for life, so work enqueued under Wi-Fi only keeps waiting for Wi-Fi even
-     * after the user allows mobile data. Anything not already running is
-     * therefore replaced rather than kept, which also clears work restored from
-     * another device with constraints this one never chose.
+     * A request keeps its constraints for life, so anything not running is replaced, or Wi-Fi only
+     * work would keep waiting after mobile data is allowed.
      */
     override fun kick(allowMetered: Boolean) {
         val workManager = WorkManager.getInstance(context)
@@ -39,7 +36,6 @@ class WorkTransferScheduler(
         )
     }
 
-    /** Restarts the worker so a waiting queue reacts to a settings change now. */
     override fun rekick(allowMetered: Boolean) {
         enqueue(allowMetered, ExistingWorkPolicy.REPLACE, expedited = false)
     }

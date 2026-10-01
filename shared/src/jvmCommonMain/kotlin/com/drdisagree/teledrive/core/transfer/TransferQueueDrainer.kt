@@ -21,13 +21,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 
-/**
- * Drains the transfer queue with bounded concurrency. Transient failures are
- * retried with exponential backoff up to the configured retry count; rate
- * limits honor the server-provided delay. Platform schedulers wrap this and
- * add whatever their environment needs, like a foreground service or
- * failure notifications.
- */
+/** Transient failures retry with exponential backoff; rate limits wait the server-given delay. */
 class TransferQueueDrainer(
     private val transferDao: TransferDao,
     private val fileDao: FileDao,
@@ -81,10 +75,8 @@ class TransferQueueDrainer(
         prefs.transferConcurrency.coerceIn(1, MAX_CONCURRENCY)
 
     /**
-     * Parks a slot the current setting has no room for. Raising the setting
-     * wakes it immediately, so a change applies to the backup already running
-     * instead of only to the next one. Returns false once the queue has
-     * drained, which lets a parked slot finish rather than hold the drain open.
+     * Raising the setting wakes a parked slot at once; returns false once the queue drains so the
+     * slot can finish.
      */
     private suspend fun awaitSlot(slot: Int): Boolean {
         val widened = withTimeoutOrNull(SLOT_WAIT_MS.milliseconds) {
@@ -93,11 +85,7 @@ class TransferQueueDrainer(
         return widened != null || transferDao.nextQueued(1).isNotEmpty()
     }
 
-    /**
-     * Marks one queued transfer as running before releasing the lock, so every
-     * slot in the pool picks a different row and starts as soon as it is free
-     * instead of waiting for the rest of a batch to finish.
-     */
+    /** Marked running before the lock is released, so every slot picks a different row. */
     private suspend fun claimNextQueued(): String? {
         val next = transferDao.nextQueued(1).firstOrNull() ?: return null
         transferDao.setState(next.id, TransferState.RUNNING, System.currentTimeMillis())
@@ -115,23 +103,23 @@ class TransferQueueDrainer(
             if (current.state != TransferState.RUNNING) return
 
             when (val outcome = transferExecutor.execute(current)) {
-                is TransferExecutor.Outcome.Completed -> {
+                is TransferOutcome.Completed -> {
                     refreshSession(current.backupSessionId)
                     return
                 }
 
-                is TransferExecutor.Outcome.Paused -> {
+                is TransferOutcome.Paused -> {
                     markState(transferId, TransferState.PAUSED)
                     return
                 }
 
-                is TransferExecutor.Outcome.Canceled -> {
+                is TransferOutcome.Canceled -> {
                     markState(transferId, TransferState.CANCELLED)
                     refreshSession(current.backupSessionId)
                     return
                 }
 
-                is TransferExecutor.Outcome.Failed -> {
+                is TransferOutcome.Failed -> {
                     attempt++
                     if (attempt > maxRetries) {
                         withContext(NonCancellable) {

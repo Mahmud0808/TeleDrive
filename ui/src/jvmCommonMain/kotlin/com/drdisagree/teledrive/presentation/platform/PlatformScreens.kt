@@ -3,7 +3,6 @@ package com.drdisagree.teledrive.presentation.platform
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
 
-/** Screens whose implementation differs per platform, slotted into the nav host. */
 interface PlatformScreens {
 
     @Composable

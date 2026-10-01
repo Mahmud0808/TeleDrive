@@ -145,7 +145,6 @@ import com.drdisagree.teledrive.resources.home_transfer_history_subtitle
 import com.drdisagree.teledrive.resources.home_waiting_count
 import com.drdisagree.teledrive.resources.trash
 import kotlinx.coroutines.delay
-import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -692,16 +691,7 @@ private fun BackupCard(
     }
 }
 
-/** Connection state worth showing, or null while everything is normal. */
-private data class ConnectionStatus(
-    val indicator: ConnectionIndicator,
-    val labelRes: StringResource
-)
-
-/**
- * Connectivity is only surfaced when it needs attention. A recovery shows
- * briefly so the change is acknowledged, then the row disappears again.
- */
+/** Only shown when connectivity needs attention; a recovery shows briefly, then the row goes. */
 @Composable
 private fun rememberConnectionStatus(
     offline: Boolean,
@@ -747,7 +737,6 @@ private fun rememberConnectionStatus(
     }
 }
 
-
 @Composable
 private fun StorageCard(slices: List<StorageSlice>, modifier: Modifier = Modifier) {
     val totalBytes = remember(slices) { slices.sumOf { it.totalBytes } }
@@ -780,7 +769,7 @@ private fun StorageCard(slices: List<StorageSlice>, modifier: Modifier = Modifie
     }
 }
 
-/** Proportional bar. Every slice keeps a sliver so nothing vanishes entirely. */
+/** Every slice keeps a sliver, so nothing vanishes entirely. */
 @Composable
 private fun StorageBar(slices: List<StorageSlice>, totalBytes: Long) {
     Row(
@@ -863,11 +852,8 @@ private fun StorageLegend(slices: List<StorageSlice>, totalBytes: Long) {
     }
 }
 
-
 /**
- * The backup card answers whether the drive is current, which the storage
- * card cannot say. A stale timestamp means nothing while nothing is
- * scheduled, so a disabled schedule outranks it.
+ * A disabled schedule outranks a stale timestamp, which means nothing while nothing is scheduled.
  */
 @Composable
 private fun backupFreshnessLabel(
@@ -906,7 +892,6 @@ private fun backupFreshnessLabel(
         )
     }
 }
-
 
 private val AVATAR_SIZE = 32.dp
 private const val RECOVERED_VISIBLE_MS = 2_000L

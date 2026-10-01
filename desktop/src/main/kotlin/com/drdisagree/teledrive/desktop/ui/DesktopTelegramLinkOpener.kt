@@ -6,10 +6,8 @@ import java.awt.Desktop
 import java.net.URI
 
 /**
- * Windows registers the tg: protocol in the registry when a Telegram app is
- * installed; Linux registers it as an x-scheme-handler desktop entry. The
- * one-time probe answers whether a login link can be confirmed on this machine
- * without launching anything.
+ * Windows registers tg: in the registry and Linux as an x-scheme-handler, so the probe launches
+ * nothing.
  */
 class DesktopTelegramLinkOpener : TelegramLinkOpener {
 

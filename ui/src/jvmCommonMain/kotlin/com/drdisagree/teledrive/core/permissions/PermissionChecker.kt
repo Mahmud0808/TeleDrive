@@ -1,6 +1,5 @@
 package com.drdisagree.teledrive.core.permissions
 
-/** Answers which of the app's permissions are currently granted. */
 interface PermissionChecker {
 
     fun isGranted(permission: AppPermission): Boolean

@@ -15,16 +15,12 @@ interface TelegramAuthRepository {
 
     val connectionState: StateFlow<TelegramConnectionState>
 
-    /** True once credentials are stored, regardless of session state. */
     fun hasCredentials(): Flow<Boolean>
 
-    /** Stores credentials and starts the client. */
     suspend fun configure(credentials: TelegramCredentials): AppResult<Unit>
 
-    /** Starts the client from stored credentials, e.g. on app launch. */
     suspend fun startFromStoredCredentials(): AppResult<Boolean>
 
-    /** Dialling codes for the picker, with the one Telegram infers for us. */
     suspend fun countries(): AppResult<CountryList>
 
     suspend fun submitPhoneNumber(phoneNumber: String): AppResult<Unit>

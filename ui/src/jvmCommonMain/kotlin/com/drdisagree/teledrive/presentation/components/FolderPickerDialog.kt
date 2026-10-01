@@ -46,10 +46,7 @@ import com.drdisagree.teledrive.resources.common_one_level
 import com.drdisagree.teledrive.resources.files_new_folder
 import com.drdisagree.teledrive.domain.model.DriveFolder
 
-/**
- * Browsable folder chooser. Navigating into a folder does not select it; the
- * confirm button always targets the folder currently being shown.
- */
+/** Navigating into a folder does not select it; confirming targets the folder being shown. */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun FolderPickerDialog(

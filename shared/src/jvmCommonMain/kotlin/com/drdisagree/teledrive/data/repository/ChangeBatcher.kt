@@ -8,12 +8,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
-/**
- * Renaming a folder rewrites the caption of every file inside it, so changes
- * arrive in bursts. Waiting a moment after the first one turns a burst into
- * a single pass. A message both updated and deleted in one batch counts as
- * deleted.
- */
+/** Folder renames rewrite every caption inside, so a short wait turns a burst into one pass. */
 internal class ChangeBatcher(private val windowMs: Long) {
 
     suspend fun run(

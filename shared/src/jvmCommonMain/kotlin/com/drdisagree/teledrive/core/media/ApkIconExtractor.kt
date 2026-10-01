@@ -9,9 +9,8 @@ internal expect fun platformApkIconBytes(file: File): ByteArray?
 object ApkIconExtractor {
 
     /**
-     * Extracts the launcher icon bytes from an APK. The platform's package
-     * manager renders the true adaptive icon where one exists; elsewhere the
-     * best-scoring image entry inside the archive stands in.
+     * The platform renders the true adaptive icon where it can; elsewhere the best-scoring image in
+     * the archive stands in.
      */
     fun extractIconBytes(file: File): ByteArray? {
         if (!file.exists() || !file.isFile) return null

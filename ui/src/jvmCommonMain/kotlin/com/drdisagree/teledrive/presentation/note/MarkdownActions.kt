@@ -3,13 +3,6 @@ package com.drdisagree.teledrive.presentation.note
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 
-/** Markup a toolbar button applies around or before the current selection. */
-sealed interface MarkdownAction {
-    data class Wrap(val prefix: String, val suffix: String = prefix) : MarkdownAction
-    data class LinePrefix(val prefix: String) : MarkdownAction
-    data object Link : MarkdownAction
-}
-
 fun TextFieldValue.apply(action: MarkdownAction, placeholder: String, url: String): TextFieldValue =
     when (action) {
         is MarkdownAction.Wrap -> wrap(action.prefix, action.suffix, placeholder)

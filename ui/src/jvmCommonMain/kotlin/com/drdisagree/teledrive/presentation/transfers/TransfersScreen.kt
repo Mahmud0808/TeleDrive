@@ -284,7 +284,6 @@ private fun LazyListScope.section(
     }
 }
 
-/** Names the direction so a failure never reads as a vague "transfer". */
 @Composable
 private fun failedSectionTitle(failed: List<TransferTask>): String {
     val uploads = failed.count {

@@ -8,44 +8,15 @@ import java.net.InetSocketAddress
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.Executors
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 /**
- * Serves the file being streamed to the system's media player over loopback.
- * Bytes come straight from Telegram through a [MediaByteSource], so playback
- * starts while the file is still arriving and nothing lands in Downloads.
- *
- * Players probe with several parallel connections, so one source is shared by
- * them all and reads are serialized: separate sources would fight over the one
- * ranged download TDLib runs per file. Reads run inside the stream's own scope,
- * so switching files cancels every read still waiting on the old download
- * instead of leaving connections blocked until their buffering deadline.
+ * Players probe with parallel connections, so one source is shared and reads serialized; separate
+ * sources would fight over TDLib's single ranged download.
  */
 class MediaStreamServer {
-
-    private class ActiveStream(
-        val source: MediaByteSource,
-        val mimeType: String
-    ) {
-        val readLock = Mutex()
-        val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-
-        @Volatile
-        var closed = false
-
-        fun shutdown() {
-            closed = true
-            scope.cancel()
-            runCatching { source.close() }
-        }
-    }
 
     private var server: HttpServer? = null
     private var active: ActiveStream? = null

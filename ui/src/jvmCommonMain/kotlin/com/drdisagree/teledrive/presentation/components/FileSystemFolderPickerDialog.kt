@@ -71,12 +71,6 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
 
-private data class QuickFolderChip(
-    val label: String,
-    val path: String,
-    val isHome: Boolean = false
-)
-
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun FileSystemFolderPickerDialog(

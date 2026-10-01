@@ -12,9 +12,8 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.SavedStateHandle
 
 /**
- * Where a list was left. Held in saved state rather than in composition: a
- * device that destroys the activity behind the player, which some do while a
- * video decodes, otherwise comes back to the top of the list.
+ * Held in saved state: some devices destroy the activity behind the player, which would reset the
+ * list to the top.
  */
 class ListPosition(private val state: SavedStateHandle) {
 
@@ -33,9 +32,8 @@ class ListPosition(private val state: SavedStateHandle) {
 }
 
 /**
- * Paged rows arrive a page at a time, so a deep position is only reachable once
- * enough of them exist. Each new page is another chance to get there, and
- * scrolling to the end asks Paging for the next one.
+ * Each new page is another chance to reach a deep position, and scrolling to the end asks Paging
+ * for the next one.
  */
 @Composable
 fun LazyGridState.rememberPosition(position: ListPosition, itemCount: Int) {

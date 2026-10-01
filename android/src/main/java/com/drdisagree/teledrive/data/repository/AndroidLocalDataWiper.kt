@@ -7,11 +7,8 @@ import com.drdisagree.teledrive.domain.repository.CacheRepository
 import java.io.File
 
 /**
- * Drops everything this device knows about the signed-in drive. Logging out
- * has to leave no index behind: rows point at message ids in a channel the
- * next account cannot read, and a stale index would be merged with whatever
- * the new account has. Files in Telegram are untouched, and signing back in
- * rebuilds the index from the channel.
+ * Rows point at messages in a channel the next account cannot read, so logging out leaves no index;
+ * Telegram files stay untouched.
  */
 class AndroidLocalDataWiper(
     private val context: Context,

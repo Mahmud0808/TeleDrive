@@ -6,7 +6,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
-/** The storage channel every query and every new row belongs to right now. */
 class ActiveChannel(
     private val settingsRepository: SettingsRepository
 ) {

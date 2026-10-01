@@ -6,13 +6,6 @@ import uk.co.caprica.vlcj.media.TrackInfo
 import uk.co.caprica.vlcj.player.base.MediaPlayer
 import java.util.Locale
 
-internal data class VlcTrack(
-    val id: Int,
-    val label: String,
-    val language: String,
-    val selected: Boolean
-)
-
 internal const val VLC_TRACK_DISABLED = -1
 
 internal fun MediaPlayer.audioTracks(fallbackPrefix: String): List<VlcTrack> {

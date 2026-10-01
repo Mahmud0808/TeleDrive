@@ -3,12 +3,7 @@ package com.drdisagree.teledrive.core.crypto
 import java.io.File
 import java.security.SecureRandom
 
-/**
- * Best-effort secure deletion: overwrite once with random data, then delete.
- * On flash storage with wear leveling this cannot guarantee physical erasure;
- * that limitation is documented in SECURITY.md. Encrypted-at-rest files are
- * already unreadable once their key is discarded.
- */
+/** Best effort: wear leveling on flash storage can keep the old bytes physically. */
 class SecureFileDeleter {
 
     private val secureRandom = SecureRandom()

@@ -9,8 +9,8 @@ import com.drdisagree.teledrive.core.files.ImportedFile
 import java.io.File
 
 /**
- * Desktop references are plain paths the app can already read, so imports use
- * the original file directly and never stage a copy.
+ * Desktop references are plain readable paths, so imports use the original file and never stage a
+ * copy.
  */
 class DesktopFileImporter(
     private val storagePaths: AppStoragePaths

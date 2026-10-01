@@ -1,9 +1,5 @@
 package com.drdisagree.teledrive.core.telegram
 
-/**
- * Reads the links proxies are shared as: `tg://proxy`, `tg://socks` and the
- * `t.me` forms of both. Typing host and port by hand still works.
- */
 object ProxyLink {
 
     fun parse(link: String): TelegramProxy? {

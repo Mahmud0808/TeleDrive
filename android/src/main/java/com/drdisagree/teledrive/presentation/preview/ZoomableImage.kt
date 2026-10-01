@@ -21,9 +21,8 @@ import me.saket.telephoto.zoomable.rememberZoomableState
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * Pinch and double-tap zoomable image. Tiles are decoded from the file at the
- * current zoom level, so a photo stays sharp well past the point where a single
- * screen-sized bitmap would blur, without holding the whole image in memory.
+ * Tiles are decoded at the current zoom, so a photo stays sharp without holding the whole image in
+ * memory.
  */
 @Composable
 fun ZoomableImage(

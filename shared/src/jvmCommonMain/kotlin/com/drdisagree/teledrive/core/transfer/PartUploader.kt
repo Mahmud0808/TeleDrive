@@ -1,12 +1,12 @@
 package com.drdisagree.teledrive.core.transfer
 
-import com.drdisagree.teledrive.core.files.Hashing
-import com.drdisagree.teledrive.core.files.AppStoragePaths
 import com.drdisagree.teledrive.core.common.SafeLog
 import com.drdisagree.teledrive.core.crypto.CryptoKeys
 import com.drdisagree.teledrive.core.crypto.StreamCrypto
 import com.drdisagree.teledrive.core.crypto.WrappedKeyRepository
 import com.drdisagree.teledrive.core.dispatchers.DispatcherProvider
+import com.drdisagree.teledrive.core.files.AppStoragePaths
+import com.drdisagree.teledrive.core.files.HashAccumulator
 import com.drdisagree.teledrive.core.media.ThumbnailStore
 import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.core.telegram.TelegramUploadEvent
@@ -15,22 +15,16 @@ import com.drdisagree.teledrive.data.local.entity.FileEntity
 import com.drdisagree.teledrive.data.local.entity.FilePartEntity
 import com.drdisagree.teledrive.data.remote.telegram.ManifestCodec
 import com.drdisagree.teledrive.data.remote.telegram.RemoteFileManifest
-import com.drdisagree.teledrive.core.files.MimeTypes
-import kotlinx.coroutines.flow.first
+import java.io.File
+import java.io.InputStream
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
-import java.io.File
-import java.io.InputStream
 
 /**
- * Uploads a file Telegram will not take whole, one part at a time.
- *
- * Each part is written to scratch space, sent, then deleted before the next is
- * built, so an encrypted upload never needs room for a second copy of the whole
- * file. Parts already recorded are skipped, which is what makes a paused or
- * interrupted upload continue from the part it stopped on rather than the start.
+ * Each part is sent and deleted before the next is built, so encryption never needs room for a
+ * second copy, and recorded parts are skipped, so an interrupted upload resumes.
  */
 class PartUploader(
     private val storagePaths: AppStoragePaths,
@@ -44,23 +38,13 @@ class PartUploader(
     private val apkIconUploader: ApkIconUploader
 ) {
 
-    sealed interface Event {
-        data class Progress(val transferredBytes: Long) : Event
-        data class PartDone(val partIndex: Int, val partCount: Int) : Event
-        data class Sealing(val partIndex: Int) : Event
-        data class Completed(
-            val parts: List<FilePartEntity>,
-            val contentHash: String?
-        ) : Event
-    }
-
     fun upload(
         entity: FileEntity,
         source: File,
         chatId: Long,
         manifest: RemoteFileManifest,
         encrypt: Boolean
-    ): Flow<Event> = flow {
+    ): Flow<PartUploadEvent> = flow {
         val totalSize = source.length()
         val partCount = FileParts.countFor(totalSize)
         val done = filePartDao.partsOf(entity.id)
@@ -69,9 +53,9 @@ class PartUploader(
             .toMutableMap()
 
         var uploadedBefore = done.values.sumOf { it.plainSize }
-        emit(Event.Progress(uploadedBefore))
+        emit(PartUploadEvent.Progress(uploadedBefore))
 
-        val hasher = if (done.isEmpty()) Hashing.Accumulator() else null
+        val hasher = if (done.isEmpty()) HashAccumulator() else null
 
         for (index in 0 until partCount) {
             if (done.containsKey(index)) continue
@@ -81,11 +65,11 @@ class PartUploader(
             val scratch = File(scratchDir(), "${entity.id}.${index}.part")
 
             try {
-                if (encrypt) emit(Event.Sealing(index))
+                if (encrypt) emit(PartUploadEvent.Sealing(index))
                 withContext(dispatchers.io) {
                     writePart(source, plainOffset, plainSize, scratch, encrypt, hasher)
                 }
-                if (encrypt) emit(Event.PartDone(index, partCount))
+                if (encrypt) emit(PartUploadEvent.PartDone(index, partCount))
 
                 val iconFileId = if (index == 0) {
                     apkIconUploader.uploadIconIfApk(entity, chatId, encrypt)
@@ -120,7 +104,7 @@ class PartUploader(
                         is TelegramUploadEvent.Progress -> {
                             val within = event.transferredBytes
                                 .coerceAtMost(plainSize)
-                            emit(Event.Progress(alreadySent + within))
+                            emit(PartUploadEvent.Progress(alreadySent + within))
                         }
 
                         is TelegramUploadEvent.Completed -> {
@@ -145,17 +129,16 @@ class PartUploader(
                 filePartDao.upsert(part)
                 done[index] = part
                 uploadedBefore += plainSize
-                emit(Event.Progress(uploadedBefore))
-                emit(Event.PartDone(index, partCount))
+                emit(PartUploadEvent.Progress(uploadedBefore))
+                emit(PartUploadEvent.PartDone(index, partCount))
             } finally {
                 withContext(NonCancellable + dispatchers.io) { scratch.delete() }
             }
         }
 
-        emit(Event.Completed(done.values.sortedBy { it.partIndex }, hasher?.result()))
+        emit(PartUploadEvent.Completed(done.values.sortedBy { it.partIndex }, hasher?.result()))
     }
 
-    /** Removes whatever reached Telegram, for a canceled or deleted upload. */
     suspend fun discardParts(fileId: String) {
         val parts = filePartDao.partsOf(fileId)
         for ((chatId, group) in parts.groupBy { it.chatId }) {
@@ -174,7 +157,7 @@ class PartUploader(
         plainSize: Long,
         target: File,
         encrypt: Boolean,
-        hasher: Hashing.Accumulator?
+        hasher: HashAccumulator?
     ) {
         target.parentFile?.mkdirs()
         source.inputStream().use { input ->
@@ -212,30 +195,4 @@ class PartUploader(
         const val SCRATCH_DIR = "parts"
         const val OCTET_STREAM = "application/octet-stream"
     }
-}
-
-/** Reads at most [limit] bytes, so one part cannot run into the next. */
-private class RangeInputStream(
-    private val delegate: InputStream,
-    private val limit: Long
-) : InputStream() {
-
-    private var read = 0L
-
-    override fun read(): Int {
-        if (read >= limit) return -1
-        val value = delegate.read()
-        if (value != -1) read++
-        return value
-    }
-
-    override fun read(buffer: ByteArray, offset: Int, length: Int): Int {
-        if (read >= limit) return -1
-        val allowed = minOf(length.toLong(), limit - read).toInt()
-        val count = delegate.read(buffer, offset, allowed)
-        if (count > 0) read += count
-        return count
-    }
-
-    override fun available(): Int = minOf(delegate.available().toLong(), limit - read).toInt()
 }

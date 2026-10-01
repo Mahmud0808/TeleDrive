@@ -50,13 +50,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-data class PreviewUiState(
-    val files: List<DriveFile> = emptyList(),
-    val initialIndex: Int = 0,
-    val ready: Boolean = false,
-    val closed: Boolean = false
-)
-
 @OptIn(ExperimentalCoroutinesApi::class)
 class PreviewViewModel(
     savedStateHandle: SavedStateHandle,
@@ -168,9 +161,8 @@ class PreviewViewModel(
     }
 
     /**
-     * Follows the row and the transfer queue rather than resolving once, so a
-     * download the user starts reports progress and the viewer switches to the
-     * file the moment it lands. Freeing the local copy falls back the same way.
+     * Follows the row and transfer queue, so a started download shows progress and the viewer
+     * switches when it lands.
      */
     fun contentFor(file: DriveFile): StateFlow<PreviewContent> =
         contentCache.getOrPut(file.id) {
@@ -201,7 +193,6 @@ class PreviewViewModel(
                 )
         }
 
-    /** Live file for the info sheet and rename updates. */
     fun observeFile(fileId: String): Flow<DriveFile?> = fileRepository.observeFile(fileId)
 
     fun download(file: DriveFile) {
@@ -330,7 +321,6 @@ class PreviewViewModel(
         }
     }
 
-    /** Pinch sizing is a reading preference, so it outlives the screen. */
     val textScale: StateFlow<Float> = settingsRepository.preferences
         .map { it.textPreviewScale }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 1f)
@@ -343,7 +333,6 @@ class PreviewViewModel(
 
     private val linkCache = mutableMapOf<String, LinkMetadata?>()
 
-    /** Metadata is fetched once per link and reused for this screen. */
     suspend fun linkPreview(url: String): LinkMetadata? =
         linkCache.getOrPut(url) { fileRepository.linkPreview(url) }
 

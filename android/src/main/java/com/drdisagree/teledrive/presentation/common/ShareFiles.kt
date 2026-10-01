@@ -6,8 +6,8 @@ import androidx.core.content.FileProvider
 import java.io.File
 
 /**
- * Hands local copies to another app. Files still only in Telegram cannot be
- * shared, so callers filter first and tell the user what is missing.
+ * Files only in Telegram cannot be shared, so callers filter first and tell the user what is
+ * missing.
  */
 fun shareLocalFiles(
     context: Context,

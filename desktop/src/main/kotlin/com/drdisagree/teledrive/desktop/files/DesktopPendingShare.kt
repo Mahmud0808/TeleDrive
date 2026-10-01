@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-/** Desktop has no share sheet, so this only ever holds what the app puts in. */
+/** Desktop has no share sheet, so this only holds what the app puts in. */
 class DesktopPendingShare : PendingShare {
 
     private val _uris = MutableStateFlow<List<String>>(emptyList())

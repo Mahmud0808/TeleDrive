@@ -1,11 +1,8 @@
 package com.drdisagree.teledrive.core.telegram
 
 /**
- * Remembers what this session wrote to the channel, so the updates Telegram
- * sends back for those writes are not taken for changes made on another
- * device and applied again. A caption only counts as this session's when it
- * matches exactly, so another device editing the same message still gets
- * through.
+ * A caption counts as this session's only when it matches exactly, so another device's edit still
+ * gets through.
  */
 class OwnWrites(private val capacity: Int = DEFAULT_CAPACITY) {
 

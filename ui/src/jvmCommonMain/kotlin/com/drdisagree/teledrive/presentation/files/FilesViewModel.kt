@@ -17,7 +17,6 @@ import com.drdisagree.teledrive.domain.model.FileQuerySpec
 import com.drdisagree.teledrive.domain.model.FileSortField
 import com.drdisagree.teledrive.domain.model.SortDirection
 import com.drdisagree.teledrive.domain.model.UserPreferences
-import com.drdisagree.teledrive.domain.model.ViewMode
 import com.drdisagree.teledrive.domain.repository.FileRepository
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.repository.SyncRepository
@@ -85,42 +84,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.time.Duration.Companion.milliseconds
 
-data class RenameTarget(
-    val id: String,
-    val name: String,
-    val isFolder: Boolean
-)
-
-data class FilesUiState(
-    val folderId: String? = null,
-    val folderName: UiText = UiText.Plain(""),
-    val breadcrumbs: List<FolderCrumb> = emptyList(),
-    val folders: List<DriveFolder> = emptyList(),
-    val selection: Set<String> = emptySet(),
-    val folderSelection: Set<String> = emptySet(),
-    val viewMode: ViewMode = ViewMode.GRID,
-    val gridSize: Int = 3,
-    val sortField: FileSortField = FileSortField.NAME,
-    val sortDirection: SortDirection = SortDirection.ASCENDING,
-    val showHidden: Boolean = false,
-    val loaded: Boolean = false,
-    val capabilities: SelectionCapabilities = SelectionCapabilities()
-) {
-    val selectionMode: Boolean get() = selection.isNotEmpty() || folderSelection.isNotEmpty()
-    val selectionCount: Int get() = selection.size + folderSelection.size
-    val folderInSelection: Boolean get() = folderSelection.isNotEmpty()
-
-    val allSelectedPinned: Boolean
-        get() = selectionMode &&
-                !capabilities.anyUnpinned &&
-                folders.filter { it.id in folderSelection }.all { it.isPinned }
-
-    val allSelectedFavorite: Boolean
-        get() = selectionMode &&
-                !capabilities.anyUnfavorited &&
-                folders.filter { it.id in folderSelection }.all { it.isFavorite }
-}
-
 @OptIn(ExperimentalCoroutinesApi::class)
 class FilesViewModel(
     savedStateHandle: SavedStateHandle,
@@ -169,7 +132,6 @@ class FilesViewModel(
     private val _refreshing = MutableStateFlow(false)
     val refreshing: StateFlow<Boolean> = _refreshing.asStateFlow()
 
-    /** Reconciles the local index with the channel, edits and deletions included. */
     fun refresh() {
         if (_refreshing.value) return
         _refreshing.update { true }
@@ -216,9 +178,8 @@ class FilesViewModel(
         .cachedIn(viewModelScope)
 
     /**
-     * Follows the selected rows rather than sampling them once, so an action
-     * taken from the menu updates the menu that is still open. Paths whose
-     * file was deleted outside the app are cleared first.
+     * Follows the selected rows, so an action taken from the menu updates the menu that is still
+     * open.
      */
     private val selectionCapabilities: Flow<Pair<Set<String>, SelectionCapabilities>> = selection
         .flatMapLatest { ids ->
@@ -307,7 +268,6 @@ class FilesViewModel(
         folderSelection.update { emptySet() }
     }
 
-    /** Selects every folder and file under the current folder, loaded or not. */
     fun selectAll() {
         viewModelScope.launch {
             val ids = fileRepository.fileIds(querySpec.first())
@@ -341,11 +301,9 @@ class FilesViewModel(
         prefs.copy(viewMode = next.viewMode, gridSize = next.gridSize)
     }
 
-
     fun setSort(field: FileSortField, direction: SortDirection) =
         updatePrefs { it.copy(sortField = field, sortDirection = direction) }
 
-    /** Creates a folder and reports whether it landed, for callers that refresh. */
     suspend fun createFolderIn(parentId: String?, name: String): Boolean =
         when (val result = fileRepository.createFolder(parentId, name)) {
             is AppResult.Success -> true
@@ -565,7 +523,6 @@ class FilesViewModel(
         }
     }
 
-    /** Folder tree access for the move/copy picker. */
     suspend fun childFolders(parentId: String?): List<DriveFolder> =
         fileRepository.observeFolders(parentId, showHidden = true, showArchived = true).first()
 
@@ -619,10 +576,8 @@ class FilesViewModel(
         }
     }
 
-    /** Imports picked documents into the drive and queues them for upload. */
     val sharedUris: StateFlow<List<String>> = pendingShare.uris
 
-    /** Takes files handed over by another app into [target]. */
     fun acceptShare(uris: List<String>, target: String?) {
         pendingShare.clear()
         importAndUpload(uris, target)
@@ -725,7 +680,6 @@ class FilesViewModel(
         else -> UiText.Resource(Res.string.files_import_uploading_failed, imported, failed)
     }
 
-    /** Opens the selected text file in the note editor. */
     fun editSelectedNote() {
         val fileId = selection.value.singleOrNull() ?: return
         clearSelection()
@@ -741,7 +695,6 @@ class FilesViewModel(
         }
     }
 
-    /** Only files with a local copy can leave the app, so the rest are reported. */
     fun shareSelected() {
         val ids = selection.value.toList()
         if (ids.isEmpty()) return
@@ -763,7 +716,6 @@ class FilesViewModel(
 
     fun showInfo(file: DriveFile) = _infoTarget.update { file }
 
-    /** Opens details for whichever single item is selected. */
     fun showInfoForSelection() {
         val fileId = selection.value.singleOrNull()
         val folderId = folderSelection.value.singleOrNull()
@@ -796,9 +748,3 @@ class FilesViewModel(
         private const val MAX_BREADCRUMB_DEPTH = 64
     }
 }
-
-/** Local copies bound for another app. */
-data class ShareRequest(val paths: List<String>, val mimeType: String)
-
-/** A text file bound for the note editor. */
-data class EditNoteRequest(val fileId: String, val title: String)

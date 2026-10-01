@@ -26,10 +26,6 @@ fun FileCategory.label(): String = stringResource(
     }
 )
 
-/**
- * Chart color per category. Authored hues keep the categories apart; the
- * harmonization step keeps them in the theme's palette.
- */
 @Composable
 fun FileCategory.chartColor(): Color = when (this) {
     FileCategory.IMAGE -> ChartPalette.Blue

@@ -1,6 +1,5 @@
 package com.drdisagree.teledrive.domain.model
 
-/** A Telegram channel this account uses as a drive. */
 data class DriveChannel(
     val chatId: Long,
     val title: String,
@@ -18,7 +17,6 @@ data class DriveChannel(
     val label: String
         get() = title.removePrefix(DRIVE_PREFIX).trim()
 
-    /** What to show in lists, falling back to the bare drive name. */
     val displayName: String
         get() = label.ifEmpty { DRIVE_PREFIX }
 

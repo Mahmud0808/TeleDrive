@@ -5,10 +5,6 @@ import com.drdisagree.teledrive.core.files.AppStoragePaths
 import java.io.File
 import java.security.SecureRandom
 
-/**
- * Persists random raw keys wrapped by the platform's credential cipher. Raw
- * keys never touch disk unencrypted; unwrapped copies are cached in memory only.
- */
 class FileWrappedKeyRepository(
     private val storagePaths: AppStoragePaths,
     private val cipher: CredentialCipher
@@ -19,10 +15,8 @@ class FileWrappedKeyRepository(
     private val secureRandom = SecureRandom()
 
     /**
-     * The Keystore refuses to unwrap a key it did not create, which is what a
-     * file-level restore onto another device produces. Keys guarding disposable
-     * data are minted again; the content key never is, because a fresh one
-     * would quietly make every encrypted upload unreadable.
+     * The Keystore cannot unwrap keys of a restored copy; disposable keys are minted again, the
+     * content key never is.
      */
     @Synchronized
     override fun getOrCreate(name: String, sizeBytes: Int): ByteArray {
@@ -51,8 +45,7 @@ class FileWrappedKeyRepository(
     override fun wasRecreated(name: String): Boolean = name in recreated
 
     /**
-     * Reads a key without ever creating one. Decryption paths must use this:
-     * minting a fresh key there would silently make existing data unreadable.
+     * Never creates a key: minting one on a decryption path would make existing data unreadable.
      */
     @Synchronized
     override fun get(name: String): ByteArray? {
@@ -65,9 +58,6 @@ class FileWrappedKeyRepository(
             ?.also { cache[name] = it }
     }
 
-    /**
-     * Whether the key is present and this device can actually unwrap it.
-     */
     @Synchronized
     override fun exists(name: String): Boolean = get(name) != null
 

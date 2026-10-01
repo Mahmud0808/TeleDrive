@@ -19,11 +19,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 /**
- * Saved routes to Telegram, for networks where it is blocked.
- *
- * The list lives here rather than in TDLib because the session database is
- * deleted on an auth reset, and a user who reaches Telegram only through a
- * proxy would otherwise lose the way back in.
+ * Kept here, not in TDLib: an auth reset deletes the session database along with the only working
+ * route.
  */
 class ProxyRepositoryImpl(
     private val proxyDao: ProxyDao,

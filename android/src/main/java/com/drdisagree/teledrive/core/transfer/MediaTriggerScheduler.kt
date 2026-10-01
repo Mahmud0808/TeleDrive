@@ -8,10 +8,8 @@ import android.provider.MediaStore
 import com.drdisagree.teledrive.core.common.SafeLog
 
 /**
- * Arms the MediaStore content trigger under one fixed job id, so re-arming
- * replaces the previous job instead of leaving orphans behind. The job carries
- * no network or charging requirement: noticing a new photo has to happen even
- * on mobile data, and the upload it queues applies those preferences itself.
+ * One fixed job id, so re-arming replaces the previous job; no network or charging requirement,
+ * since the upload applies those itself.
  */
 class MediaTriggerScheduler(
     private val context: Context

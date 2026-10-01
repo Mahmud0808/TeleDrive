@@ -7,10 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.drdisagree.teledrive.presentation.platform.LocalPlatformCapabilities
 
-/**
- * Pull to refresh where the platform has touch, a plain container elsewhere:
- * the drag gesture fights mouse wheel scrolling on desktop.
- */
+/** A plain container without touch: the drag gesture fights mouse wheel scrolling on desktop. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RefreshableContent(

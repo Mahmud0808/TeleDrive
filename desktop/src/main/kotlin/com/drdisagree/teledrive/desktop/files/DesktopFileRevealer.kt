@@ -7,11 +7,8 @@ import java.awt.Desktop
 import java.io.File
 
 /**
- * Selects the file in the platform's file manager. Explorer takes the file
- * through /select; elsewhere the JDK API or the parent folder stands in. AWT's
- * Desktop API is not guaranteed on every Linux session, so the whole reveal is
- * guarded and reported as a controlled failure instead of an uncaught
- * exception.
+ * AWT's Desktop API is not guaranteed on every Linux session, so the reveal is guarded and fails in
+ * a controlled way.
  */
 class DesktopFileRevealer : FileRevealer {
 

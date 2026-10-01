@@ -13,10 +13,7 @@ class WorkPublishScheduler(
     private val context: Context
 ) : PublishScheduler {
 
-    /**
-     * Queues a drain of the publish outbox. Appending rather than keeping means
-     * a row marked while the worker is already draining still gets a pass.
-     */
+    /** Appends rather than keeps, so a row marked during a drain still gets a pass. */
     override fun kick() {
         val request = OneTimeWorkRequestBuilder<PublishOutboxWorker>()
             .setConstraints(

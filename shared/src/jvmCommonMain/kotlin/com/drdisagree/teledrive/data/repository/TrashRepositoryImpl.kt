@@ -233,11 +233,7 @@ class TrashRepositoryImpl(
         tombstoneDao.upsert(folderIds.map { FolderTombstoneEntity(it, chatId, deletedAt) })
     }
 
-    /**
-     * Import staging copies live in app storage and only exist to feed the
-     * uploader, so a permanent delete removes them. Files the user keeps
-     * elsewhere on the device are never touched here.
-     */
+    /** Only staging copies the app made are removed; the user's own files are never touched. */
     private fun deleteStagedCopy(file: File) {
         val staging = File(storagePaths.filesDir, IMPORT_DIR)
         if (!file.absolutePath.startsWith(staging.absolutePath + File.separator)) return
@@ -273,11 +269,7 @@ class TrashRepositoryImpl(
         return AppResult.Success(files.size + folders.size)
     }
 
-    /**
-     * Brings back every trashed folder above the restored item so it lands
-     * where it came from. A folder whose parent row is gone for good falls back
-     * to the drive root, because there is nothing left to describe it.
-     */
+    /** A folder whose parent row is gone for good falls back to the drive root. */
     private suspend fun restoreAncestors(folderId: String?) {
         var cursor = folderId
         var guard = 0

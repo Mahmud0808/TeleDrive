@@ -10,10 +10,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * Shared between the player, which knows what is on screen, and the activity,
- * which owns the window. The system renders a FLAG_SECURE window as a black
- * rectangle in the picture-in-picture frame, so app lock and screenshot
- * blocking withdraw the feature rather than letting it fail silently.
+ * A FLAG_SECURE window shows as black in picture-in-picture, so app lock and screenshot blocking
+ * withdraw the feature.
  */
 class PipController(context: Context) {
 
@@ -30,11 +28,7 @@ class PipController(context: Context) {
     private var owner: Any? = null
     private var secureWindow = false
 
-    /**
-     * The pager keeps neighbouring pages composed, so several players publish
-     * here. Only whoever set the current ratio may clear it, otherwise a page
-     * scrolling out of view withdraws the one that just scrolled in.
-     */
+    /** Several composed pages publish here, so only the owner of the current ratio may clear it. */
     fun offerVideo(owner: Any, ratio: Rational?) {
         if (ratio == null) {
             if (this.owner != owner) return

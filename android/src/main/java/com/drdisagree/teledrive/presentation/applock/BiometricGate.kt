@@ -5,10 +5,7 @@ import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 
-/**
- * Asks for the device owner before a sensitive change. Falls through when the
- * device has no secure lock, otherwise there would be no way to recover.
- */
+/** Falls through without a secure lock, or there would be no way to recover. */
 fun requireDeviceOwner(
     activity: FragmentActivity?,
     title: String,

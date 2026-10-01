@@ -10,13 +10,11 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 
-/** True once the attached list has scrolled away from its start. */
 @Composable
 fun rememberToolbarLift(scrollState: ScrollableState): State<Boolean> = remember(scrollState) {
     derivedStateOf { scrollState.canScrollBackward }
 }
 
-/** Toolbar colors that pick up a container tint once content scrolls under them. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun liftedTopAppBarColors(lifted: Boolean): TopAppBarColors = TopAppBarDefaults.topAppBarColors(

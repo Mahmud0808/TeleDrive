@@ -5,17 +5,12 @@ import androidx.lifecycle.viewModelScope
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.core.network.NetworkMonitor
 import com.drdisagree.teledrive.core.network.NetworkStatus
-import com.drdisagree.teledrive.core.permissions.AppPermission
 import com.drdisagree.teledrive.core.permissions.PermissionChecker
 import com.drdisagree.teledrive.core.security.AppLockManager
-import com.drdisagree.teledrive.core.telegram.TelegramConnectionState
 import com.drdisagree.teledrive.data.local.dao.FileDao
 import com.drdisagree.teledrive.data.repository.ActiveChannel
-import com.drdisagree.teledrive.domain.model.BackupSession
 import com.drdisagree.teledrive.domain.model.BackupTrigger
 import com.drdisagree.teledrive.domain.model.DriveChannel
-import com.drdisagree.teledrive.domain.model.DriveFile
-import com.drdisagree.teledrive.domain.model.DriveFolder
 import com.drdisagree.teledrive.domain.model.StorageSlice
 import com.drdisagree.teledrive.domain.repository.BackupRepository
 import com.drdisagree.teledrive.domain.repository.ChannelRepository
@@ -51,33 +46,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 
-data class HomeUiState(
-    val loading: Boolean = true,
-    val connection: TelegramConnectionState = TelegramConnectionState.CONNECTING,
-    val offline: Boolean = false,
-    val totalFiles: Int = 0,
-    val remoteBytes: Long = 0,
-    val backedUpCount: Int = 0,
-    val pendingCount: Int = 0,
-    val localOnlyCount: Int = 0,
-    val failedCount: Int = 0,
-    val recentFiles: List<DriveFile> = emptyList(),
-    val favoriteFolders: List<DriveFolder> = emptyList(),
-    val activeBackup: BackupSession? = null,
-    val missingPermissions: List<AppPermission> = emptyList(),
-    val backupFoldersSelected: Boolean = true,
-    val showArchivedSection: Boolean = false,
-    val showHiddenSection: Boolean = false,
-    val showRecentSection: Boolean = true,
-    val rebuilding: Boolean = false,
-    val appLockEnabled: Boolean = false,
-    val activeTransferCount: Int = 0,
-    val activeChannel: DriveChannel? = null,
-    val storage: List<StorageSlice> = emptyList(),
-    val autoBackupEnabled: Boolean = false,
-    val lastBackupAt: Long? = null
-)
-
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModel(
     private val fileRepository: FileRepository,
@@ -101,7 +69,6 @@ class HomeViewModel(
     val scanning: StateFlow<Boolean> = _scanning.asStateFlow()
     val messages: SharedFlow<UiText> = _messages.asSharedFlow()
 
-    /** The drive that is open right now, which owns its own folder selection. */
     private val activeDrive: Flow<DriveChannel?> = activeChannel.observe()
         .flatMapLatest { chatId ->
             channelRepository.observeChannels().map { channels ->
@@ -217,10 +184,7 @@ class HomeViewModel(
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
 
-    /**
-     * Queues the files sitting on this device alone, which a folder scan never
-     * reaches: anything added by hand, or canceled or failed on its way up.
-     */
+    /** A folder scan never reaches files added by hand, or canceled or failed on their way up. */
     fun backUpPending() {
         if (_scanning.value) return
         viewModelScope.launch {
@@ -278,29 +242,6 @@ class HomeViewModel(
     fun refreshPermissions() {
         missingPermissions.value = permissionChecker.missingCritical()
     }
-
-    private data class HomeMisc(
-        val syncing: Boolean,
-        val session: BackupSession?,
-        val connection: TelegramConnectionState,
-        val network: NetworkStatus,
-        val missing: List<AppPermission>,
-        val activeDrive: DriveChannel?,
-        val autoBackupEnabled: Boolean,
-        val appLockEnabled: Boolean,
-        val showArchivedSection: Boolean,
-        val showHiddenSection: Boolean,
-        val showRecentSection: Boolean
-    )
-
-    private data class HomeCounts(
-        val total: Int,
-        val remoteBytes: Long,
-        val backedUp: Int,
-        val pending: Int,
-        val failed: Int,
-        val localOnly: Int = 0
-    )
 
     private companion object {
         const val COUNTS_DEBOUNCE_MS = 300L

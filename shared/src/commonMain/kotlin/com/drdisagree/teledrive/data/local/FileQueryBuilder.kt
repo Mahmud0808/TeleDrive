@@ -6,11 +6,7 @@ import com.drdisagree.teledrive.domain.model.FileQuerySpec
 import com.drdisagree.teledrive.domain.model.FileSortField
 import com.drdisagree.teledrive.domain.model.SortDirection
 
-/**
- * Builds parameterized queries against the `files` table for the browser,
- * gallery, and search screens. Sorting cannot be expressed with Room's
- * compile-time queries without an explosion of variants, hence raw queries.
- */
+/** Raw queries, because Room's compile-time queries cannot express every sort option. */
 object FileQueryBuilder {
 
     private fun coveringColumn(spec: FileQuerySpec): String? = when {
@@ -32,7 +28,6 @@ object FileQueryBuilder {
 
     fun build(spec: FileQuerySpec): RoomRawQuery = query("*", spec)
 
-    /** Same filter and order as [build], reading only the ids of every match. */
     fun buildIds(spec: FileQuerySpec): RoomRawQuery = query("id", spec)
 
     private fun query(projection: String, spec: FileQuerySpec): RoomRawQuery {

@@ -31,7 +31,6 @@ import com.drdisagree.teledrive.resources.common_content_description_favorite
 import com.drdisagree.teledrive.resources.common_content_description_pinned
 import com.drdisagree.teledrive.domain.model.DriveFolder
 
-/** Folder tile matching [FileGridItem] so grid view stays visually uniform. */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FolderGridItem(

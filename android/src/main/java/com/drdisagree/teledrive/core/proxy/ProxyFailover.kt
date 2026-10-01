@@ -14,10 +14,8 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 /**
- * A blocked proxy looks exactly like a slow one: Telegram simply never
- * connects. When the connection stays down long enough to rule out a slow
- * start, the next saved proxy is tried, and then the one after that, until
- * either one answers or the list runs out.
+ * A blocked proxy looks like a slow one, so once the connection stays down long enough the next
+ * saved proxy is tried.
  */
 class ProxyFailover(
     private val authRepository: TelegramAuthRepository,

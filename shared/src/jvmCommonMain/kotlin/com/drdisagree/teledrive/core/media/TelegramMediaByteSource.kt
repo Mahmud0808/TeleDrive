@@ -8,11 +8,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
 
-/**
- * Reads a single Telegram file through TDLib's ranged download. Bytes become
- * readable as soon as the requested range is buffered instead of after the
- * whole file lands.
- */
 class TelegramMediaByteSource(
     private val telegramClient: TelegramClient,
     private val remoteFileId: String

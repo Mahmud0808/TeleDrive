@@ -9,9 +9,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
- * Adds fixed spacing on top of Scaffold inset padding so scrollable content
- * can use it as contentPadding and draw edge to edge behind the system bars
- * without the first or last items being cut off.
+ * So content can draw edge to edge behind the system bars without its first or last items being cut
+ * off.
  */
 @Composable
 fun PaddingValues.add(

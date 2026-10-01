@@ -1,10 +1,8 @@
 package com.drdisagree.teledrive.domain.model
 
 enum class ExclusionType {
-    /** Absolute path of a single file. */
     FILE_PATH,
 
-    /** Absolute path of a folder; excludes everything below it. */
     FOLDER_PATH,
 
     /** File extension without the dot, e.g. "tmp". */

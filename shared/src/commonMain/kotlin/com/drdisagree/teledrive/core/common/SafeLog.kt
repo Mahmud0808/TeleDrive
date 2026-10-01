@@ -1,9 +1,6 @@
 package com.drdisagree.teledrive.core.common
 
-/**
- * Logging facade. Debug logs are stripped in release builds and messages must
- * never contain phone numbers, API credentials, or file contents.
- */
+/** Messages must never contain phone numbers, API credentials or file contents. */
 object SafeLog {
 
     var verbose: Boolean = false

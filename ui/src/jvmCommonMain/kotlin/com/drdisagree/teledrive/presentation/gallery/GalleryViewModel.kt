@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import com.drdisagree.teledrive.domain.model.DriveFolder
 import com.drdisagree.teledrive.core.common.AppResult
-import org.jetbrains.compose.resources.StringResource
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -18,17 +17,12 @@ import androidx.paging.insertSeparators
 import androidx.paging.map
 import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.files_queued_for_download
-import com.drdisagree.teledrive.resources.gallery_tab_albums
-import com.drdisagree.teledrive.resources.gallery_tab_all
-import com.drdisagree.teledrive.resources.gallery_tab_photos
-import com.drdisagree.teledrive.resources.gallery_tab_videos
 import com.drdisagree.teledrive.domain.model.DriveFile
 import com.drdisagree.teledrive.domain.model.FileCategory
 import com.drdisagree.teledrive.domain.model.FileQuerySpec
 import com.drdisagree.teledrive.domain.model.FileSortField
 import com.drdisagree.teledrive.domain.model.MediaAlbum
 import com.drdisagree.teledrive.domain.model.SortDirection
-import com.drdisagree.teledrive.domain.model.ViewMode
 import com.drdisagree.teledrive.domain.repository.FileRepository
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.repository.SyncRepository
@@ -63,32 +57,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
-
-enum class GalleryTab(val labelRes: StringResource) {
-    ALL(Res.string.gallery_tab_all),
-    PHOTOS(Res.string.gallery_tab_photos),
-    VIDEOS(Res.string.gallery_tab_videos),
-    ALBUMS(Res.string.gallery_tab_albums)
-}
-
-data class GalleryUiState(
-    val tab: GalleryTab = GalleryTab.ALL,
-    val albums: List<MediaAlbum> = emptyList(),
-    val albumTitle: String? = null,
-    val viewMode: ViewMode = ViewMode.GRID,
-    val isAlbumView: Boolean = false,
-    val gridSize: Int = 3,
-    val albumGridSize: Int = 3,
-    val loaded: Boolean = false,
-    val capabilities: SelectionCapabilities = SelectionCapabilities(),
-    val sortField: FileSortField = FileSortField.DATE_MODIFIED,
-    val sortDirection: SortDirection = SortDirection.DESCENDING,
-    val selection: Set<String> = emptySet()
-) {
-    val selectionMode: Boolean get() = selection.isNotEmpty()
-    val allSelectedFavorite: Boolean get() = selectionMode && !capabilities.anyUnfavorited
-    val allSelectedPinned: Boolean get() = selectionMode && !capabilities.anyUnpinned
-}
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class GalleryViewModel(
@@ -254,7 +222,6 @@ class GalleryViewModel(
         }
     }
 
-
     fun setTab(value: GalleryTab) {
         clearSelection()
         tab.update { value }
@@ -301,7 +268,6 @@ class GalleryViewModel(
         selection.update { emptySet() }
     }
 
-    /** Selects every media file the current tab shows, loaded or not. */
     fun selectAll() {
         viewModelScope.launch {
             selection.update { fileRepository.fileIds(spec.first()).toSet() }

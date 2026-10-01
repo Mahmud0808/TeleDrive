@@ -11,10 +11,7 @@ import com.drdisagree.teledrive.resources.permission_videos_rationale
 import com.drdisagree.teledrive.resources.permission_videos_title
 import org.jetbrains.compose.resources.StringResource
 
-/**
- * Permissions the app can ask for, with the reason shown to the user.
- * [critical] marks the ones without which automatic backup cannot work.
- */
+/** [critical] marks the permissions automatic backup cannot work without. */
 enum class AppPermission(
     val titleRes: StringResource,
     val rationaleRes: StringResource,
@@ -41,6 +38,5 @@ enum class AppPermission(
         critical = true
     );
 
-    /** Special access granted from a system settings screen, not a dialog. */
     val isSpecialAccess: Boolean get() = this == ALL_FILES
 }

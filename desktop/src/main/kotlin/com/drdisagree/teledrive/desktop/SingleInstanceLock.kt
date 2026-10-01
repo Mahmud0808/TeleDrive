@@ -5,9 +5,8 @@ import java.nio.channels.FileChannel
 import java.nio.file.StandardOpenOption
 
 /**
- * Two instances sharing one database and TDLib session deadlock the second
- * before its window appears, so the app refuses to start twice. The lock
- * releases with the process, surviving crashes that a marker file would not.
+ * Two instances sharing the database and TDLib session deadlock; the lock releases with the
+ * process, even after a crash.
  */
 class SingleInstanceLock(private val directory: File) {
 

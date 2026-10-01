@@ -7,8 +7,7 @@ import android.graphics.drawable.BitmapDrawable
 import java.io.ByteArrayOutputStream
 import java.io.File
 
-/* ActivityThread is hidden API, so the application context is reached through
-   reflection: this extractor runs from shared code with no context to inject. */
+// ActivityThread is hidden API: this runs from shared code with no context to inject.
 @Suppress("DiscouragedPrivateApi")
 internal actual fun platformApkIconBytes(file: File): ByteArray? = runCatching {
     val context = Class.forName("android.app.ActivityThread")

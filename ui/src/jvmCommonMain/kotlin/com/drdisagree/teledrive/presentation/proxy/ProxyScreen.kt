@@ -281,10 +281,6 @@ fun ProxyScreen(
     }
 }
 
-/**
- * The one switch that decides whether Telegram is reached directly or through
- * the chosen route, kept above the list because it outranks every row below it.
- */
 @Composable
 private fun RoutingCard(
     enabled: Boolean,
@@ -756,9 +752,8 @@ private val ColorSpec = tween<Color>(durationMillis = 250, easing = FastOutSlowI
 private val InsetSpec = tween<Dp>(durationMillis = 250, easing = FastOutSlowInEasing)
 
 /**
- * Only the top inset is left to the sheet. The bottom one is applied by
- * [sheetBottomPadding] instead, so the keyboard cannot resize the sheet in a
- * single frame.
+ * The bottom inset comes from [sheetBottomPadding], so the keyboard cannot resize the sheet in one
+ * frame.
  */
 private val SheetTopInset: WindowInsets
     @Composable get() = WindowInsets.safeDrawing.only(WindowInsetsSides.Top)

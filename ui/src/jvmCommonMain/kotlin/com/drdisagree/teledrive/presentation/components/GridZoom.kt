@@ -12,8 +12,6 @@ import com.drdisagree.teledrive.domain.model.ViewMode
 const val MIN_GRID_COLUMNS = 2
 const val MAX_GRID_COLUMNS = 6
 
-data class GridZoomLevel(val viewMode: ViewMode, val gridSize: Int)
-
 fun GridZoomLevel.zoomedIn(): GridZoomLevel = when {
     viewMode == ViewMode.LIST -> GridZoomLevel(ViewMode.GRID, MAX_GRID_COLUMNS)
     else -> GridZoomLevel(ViewMode.GRID, (gridSize - 1).coerceAtLeast(MIN_GRID_COLUMNS))
@@ -53,7 +51,6 @@ fun Modifier.pinchZoom(onZoomIn: () -> Unit, onZoomOut: () -> Unit): Modifier =
         }
     }
 
-/** Ctrl plus mouse wheel steps the grid the way a pinch does. */
 private fun Modifier.wheelZoom(onZoomIn: () -> Unit, onZoomOut: () -> Unit): Modifier =
     pointerInput(onZoomIn, onZoomOut) {
         awaitPointerEventScope {

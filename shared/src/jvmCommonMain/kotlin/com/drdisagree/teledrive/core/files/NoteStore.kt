@@ -2,7 +2,6 @@ package com.drdisagree.teledrive.core.files
 
 import java.io.File
 
-/** Local copies of notes, kept beside the app's other staged files. */
 class NoteStore(
     private val storagePaths: AppStoragePaths
 ) {

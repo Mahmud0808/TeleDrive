@@ -15,9 +15,8 @@ import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
- * Backs up whatever is new after MediaStore reports a change. The trigger and
- * its re-arming belong to MediaTriggerService; this only scans, so a run can
- * never cancel the work that woke it.
+ * Only scans; the trigger belongs to MediaTriggerService, so a run can never cancel the work that
+ * woke it.
  */
 class MediaWatchWorker(
     appContext: Context,

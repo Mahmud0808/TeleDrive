@@ -5,10 +5,7 @@ import com.drdisagree.teledrive.domain.model.FileSortField
 import com.drdisagree.teledrive.domain.model.SortDirection
 import com.drdisagree.teledrive.presentation.navigation.Route
 
-/**
- * The list a grid is showing, handed to the viewer so paging sideways walks
- * the same files in the same order instead of a freshly guessed query.
- */
+/** So paging sideways walks the same files in the same order, not a freshly guessed query. */
 data class PreviewSequence(
     val folderId: String? = null,
     val filterByFolder: Boolean = false,

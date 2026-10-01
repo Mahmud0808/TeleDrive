@@ -9,9 +9,8 @@ import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.first
 
 /**
- * Looks for a release while the app is closed. Only the notification comes from
- * here: tapping it opens the app, which checks again and shows the dialog, so
- * the release notes are never served from a stale copy.
+ * Only notifies; tapping opens the app, which checks again, so release notes never come from a
+ * stale copy.
  */
 class UpdateCheckWorker(
     appContext: Context,

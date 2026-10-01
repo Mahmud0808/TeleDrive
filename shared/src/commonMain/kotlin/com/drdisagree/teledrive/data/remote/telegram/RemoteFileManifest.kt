@@ -4,9 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
- * Metadata embedded in every uploaded document's caption. Keys are shortened
- * to fit Telegram's caption limit. This makes the storage chat self-describing
- * so the local database can be rebuilt from Telegram alone after a data wipe.
+ * Keys are shortened to fit the caption limit; the captions alone can rebuild the local database.
  */
 @Serializable
 data class RemoteFileManifest(

@@ -9,10 +9,7 @@ import com.drdisagree.teledrive.core.telegram.TelegramClient
 import java.io.IOException
 import kotlinx.coroutines.runBlocking
 
-/**
- * Media3 DataSource over the shared Telegram byte source. Media3 calls these
- * methods on its own IO thread, so blocking on TDLib here is safe.
- */
+/** Media3 calls these on its own IO thread, so blocking on TDLib is safe. */
 @UnstableApi
 class TelegramDataSource(
     telegramClient: TelegramClient,

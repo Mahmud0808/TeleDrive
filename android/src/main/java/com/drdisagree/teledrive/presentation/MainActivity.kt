@@ -31,10 +31,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 
-/**
- * Extends FragmentActivity because androidx BiometricPrompt requires it for
- * the app lock flow.
- */
+/** BiometricPrompt requires a FragmentActivity. */
 class MainActivity : FragmentActivity() {
 
     private val settingsRepository: SettingsRepository by inject()
@@ -42,9 +39,8 @@ class MainActivity : FragmentActivity() {
 
 
     /**
-     * The launch theme can only name a static color, so the splash lands on
-     * the closest system tone. Repainting the window with the very color the
-     * Compose theme uses removes the seam between splash and first frame.
+     * The launch theme can only name a static color, so the window is repainted with the theme's
+     * color to hide the seam.
      */
     private fun applyWindowBackground() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
@@ -98,7 +94,6 @@ class MainActivity : FragmentActivity() {
         handleIntent(intent)
     }
 
-    /** A share lands on the files screen, where the destination is chosen. */
     private fun handleIntent(intent: Intent?) {
         val shared = sharedUris(intent)
         val sharedText = intent?.takeIf { it.action == Intent.ACTION_SEND }
@@ -112,7 +107,6 @@ class MainActivity : FragmentActivity() {
         }
     }
 
-    /** Files another app handed over through the system share sheet. */
     private fun sharedUris(intent: Intent?): List<Uri> = when (intent?.action) {
         Intent.ACTION_SEND ->
             listOfNotNull(

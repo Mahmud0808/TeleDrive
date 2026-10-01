@@ -14,10 +14,8 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 
 /**
- * Drains the publish outbox: organizational state is written to the database
- * first so the app stays responsive, and this drain mirrors it into Telegram
- * afterward. Rows keep their flag until the caption is accepted, so a failed
- * edit is retried instead of being reverted by the next sync.
+ * Rows keep their flag until the caption is accepted, so a failed edit is retried rather than
+ * reverted by the next sync.
  */
 class PublishOutboxDrainer(
     private val fileDao: FileDao,
@@ -69,9 +67,8 @@ class PublishOutboxDrainer(
     }
 
     /**
-     * Finishes permanent deletes that were interrupted or rejected. Removing a
-     * message that is already gone is accepted by Telegram, so replaying after
-     * a crash costs nothing.
+     * Deleting a message that is already gone is accepted, so replaying after a crash costs
+     * nothing.
      */
     private suspend fun replayDeletes(isStopped: () -> Boolean): Boolean {
         while (true) {

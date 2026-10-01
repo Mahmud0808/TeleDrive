@@ -1,16 +1,11 @@
 package com.drdisagree.teledrive.desktop.media.player
 
 import com.drdisagree.teledrive.core.common.SafeLog
-import com.sun.jna.Library
-import com.sun.jna.Native
 import com.sun.jna.Platform
 
 /**
- * Holds off the screen blanker while a video plays, the desktop counterpart to
- * the keep-screen-on flag on Android. Windows takes a thread execution state,
- * macOS and Linux hold a child process for as long as the inhibit should last,
- * because both expose the request through a command rather than a plain C call.
- * Every platform is best effort: playback still works when the request fails.
+ * Windows takes a thread execution state; macOS and Linux hold a child process while the inhibit
+ * lasts. Best effort everywhere.
  */
 object ScreenAwake {
 
@@ -61,16 +56,6 @@ object ScreenAwake {
         }
         inhibitor?.destroy()
         inhibitor = null
-    }
-
-    private interface Kernel32Power : Library {
-        fun SetThreadExecutionState(flags: Int): Int
-
-        companion object {
-            val INSTANCE: Kernel32Power by lazy {
-                Native.load("kernel32", Kernel32Power::class.java)
-            }
-        }
     }
 
     private const val ES_SYSTEM_REQUIRED = 0x00000001

@@ -1,8 +1,7 @@
 package com.drdisagree.teledrive.core.common
 
 /**
- * Typed error model shared by all layers. Telegram-specific failures are mapped
- * into these types at the data layer so the UI never sees raw TDLib errors.
+ * Telegram failures are mapped to these in the data layer, so the UI never sees raw TDLib errors.
  */
 sealed interface AppError {
 

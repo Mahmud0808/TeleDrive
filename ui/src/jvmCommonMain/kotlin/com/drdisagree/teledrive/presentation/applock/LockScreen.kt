@@ -35,11 +35,7 @@ import com.drdisagree.teledrive.resources.lock_prompt_title
 import com.drdisagree.teledrive.resources.lock_screen_title
 import com.drdisagree.teledrive.resources.lock_unlock
 
-/**
- * Fullscreen gate shown while the app is locked. Launches the biometric
- * prompt immediately and again on demand. Falls back to device credentials
- * when biometrics are unavailable or locked out.
- */
+/** Falls back to the device credential when biometrics are unavailable or locked out. */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun LockScreen(onUnlocked: () -> Unit) {

@@ -11,18 +11,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-data class TransfersUiState(
-    val active: List<TransferTask> = emptyList(),
-    val paused: List<TransferTask> = emptyList(),
-    val failed: List<TransferTask> = emptyList(),
-    val completed: List<TransferTask> = emptyList(),
-    val activeTotal: Int = 0,
-    val pausedTotal: Int = 0,
-    val failedTotal: Int = 0,
-    val completedTotal: Int = 0,
-    val loading: Boolean = true
-)
-
 class TransfersViewModel(
     private val transferRepository: TransferRepository
 ) : ViewModel() {
@@ -88,20 +76,18 @@ class TransfersViewModel(
 
     private companion object {
         /**
-         * A backup can queue tens of thousands of rows. Reading them all into
-         * one cursor overflows its window while the workers are still writing
-         * progress into the same table, so each section is capped.
+         * Capped: reading tens of thousands of rows into one cursor overflows it while workers
+         * write progress to the table.
          */
         const val SECTION_LIMIT = 200
 
         /**
-         * One order for every section, so a bulk pause, resume or cancel only
-         * moves rows between sections instead of reshuffling them.
+         * One order for every section, so bulk actions move rows between sections without
+         * reshuffling them.
          */
         val TRANSFER_ORDER: Comparator<TransferTask> =
             compareByDescending<TransferTask> { it.progress }.thenBy { it.createdAt }
 
-        /** Finished transfers read as a history, so the latest one sits on top. */
         val FINISHED_ORDER: Comparator<TransferTask> =
             compareByDescending<TransferTask> { it.completedAt ?: it.updatedAt }
     }

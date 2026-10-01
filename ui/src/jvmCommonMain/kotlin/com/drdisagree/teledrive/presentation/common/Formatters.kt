@@ -79,7 +79,6 @@ object Formatters {
     private const val MAX_BADGE_COUNT = 99
     private const val DAY_MILLIS = 24L * 60 * 60 * 1000
 
-    /** Coarse age buckets, in the units a person would actually say. */
     fun relativeAge(epochMillis: Long, now: Long = System.currentTimeMillis()): AgeBucket {
         val elapsed = (now - epochMillis).coerceAtLeast(0L)
         val minutes = elapsed / 60_000L
@@ -93,21 +92,4 @@ object Formatters {
             else -> AgeBucket.Longer(epochMillis)
         }
     }
-}
-
-/** Result of [Formatters.relativeAge], resolved to text by the caller. */
-sealed interface AgeBucket {
-    data object JustNow : AgeBucket
-    data class Minutes(val value: Int) : AgeBucket
-    data class Hours(val value: Int) : AgeBucket
-    data class Days(val value: Int) : AgeBucket
-    data class Longer(val epochMillis: Long) : AgeBucket
-}
-
-/** Result of [Formatters.dayBucket], resolved to text by the caller. */
-sealed interface DayBucket {
-    data object Today : DayBucket
-    data object Yesterday : DayBucket
-    data class DaysAgo(val days: Int) : DayBucket
-    data class Absolute(val text: String) : DayBucket
 }

@@ -30,17 +30,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-data class TrashUiState(
-    val items: List<TrashItem> = emptyList(),
-    val rows: List<TrashRow> = emptyList(),
-    val selection: Set<String> = emptySet(),
-    val autoClearDays: Int = 30,
-    val working: UiText? = null,
-    val loading: Boolean = true
-) {
-    val selectionMode: Boolean get() = selection.isNotEmpty()
-}
-
 class TrashViewModel(
     private val trashRepository: TrashRepository,
     private val settingsRepository: SettingsRepository
@@ -106,7 +95,6 @@ class TrashViewModel(
         }
     }
 
-    /** Collapsing a folder collapses whatever was open inside it. */
     private fun descendantFolderIds(folderId: String): Set<String> {
         val result = mutableSetOf<String>()
         var frontier = listOf(folderId)
@@ -162,7 +150,6 @@ class TrashViewModel(
 
     fun clearSelection() = selection.update { emptySet() }
 
-    /** Selects every row currently in the tree, including expanded children. */
     fun selectAll() = selection.update {
         uiState.value.rows.filter { row -> row.selectable }.map { row -> row.item.id }.toSet()
     }
@@ -266,11 +253,6 @@ class TrashViewModel(
             .filter { it in selected }
         return fileIds to folderIds
     }
-
-    private data class TrashTreeCache(
-        val children: Map<String, List<TrashItem>> = emptyMap(),
-        val counts: Map<String, Int> = emptyMap()
-    )
 
     private companion object {
         const val MAX_TREE_DEPTH = 64

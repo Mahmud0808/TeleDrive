@@ -19,12 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 
-enum class ConnectionIndicator { CONNECTED, WORKING, OFFLINE }
-
-/**
- * Status light for the Telegram connection. It keeps pulsing while the client
- * is still working so a slow connect never reads as a frozen screen.
- */
+/** Keeps pulsing while the client works, so a slow connect never reads as frozen. */
 @Composable
 fun ConnectionDot(
     status: ConnectionIndicator,

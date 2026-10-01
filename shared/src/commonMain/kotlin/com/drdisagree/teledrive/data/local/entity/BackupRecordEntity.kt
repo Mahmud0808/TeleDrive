@@ -4,10 +4,6 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
-/**
- * One row per source path that has ever been backed up. Used for incremental
- * backup decisions: a file is re-uploaded only when size or hash changed.
- */
 @Entity(
     tableName = "backup_records",
     indices = [Index(value = ["sourcePath"], unique = true), Index("contentHash")]

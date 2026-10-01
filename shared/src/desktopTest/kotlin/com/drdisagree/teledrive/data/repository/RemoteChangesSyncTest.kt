@@ -2,6 +2,7 @@ package com.drdisagree.teledrive.data.repository
 
 import com.drdisagree.teledrive.data.local.entity.FileEntity
 import com.drdisagree.teledrive.data.local.entity.FolderEntity
+import com.drdisagree.teledrive.data.remote.telegram.RemoteFolderEntry
 import com.drdisagree.teledrive.data.remote.telegram.RemoteFolderState
 import com.drdisagree.teledrive.domain.model.BackupState
 import com.drdisagree.teledrive.domain.model.FileCategory
@@ -207,7 +208,7 @@ class RemoteChangesSyncTest {
         name: String,
         modifiedAt: Long = 1_000,
         changedAt: Long? = null
-    ) = RemoteFolderState.Entry(
+    ) = RemoteFolderEntry(
         id = id,
         name = name,
         createdAt = 500,

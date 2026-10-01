@@ -40,17 +40,7 @@ import com.drdisagree.teledrive.domain.model.LinkMetadata
 import com.drdisagree.teledrive.presentation.common.scaledBy
 import java.io.File
 
-private sealed interface LinkState {
-    data object Loading : LinkState
-    data object Bare : LinkState
-    data class Article(val metadata: LinkMetadata) : LinkState
-}
-
-/**
- * A saved link. Telegram supplies the article, so the device never calls the
- * site itself. A link with nothing to show stays a plain open action rather
- * than an empty card.
- */
+/** A link with nothing to show stays a plain open action rather than an empty card. */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SavedLink(

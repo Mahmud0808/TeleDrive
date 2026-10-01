@@ -5,11 +5,7 @@ import java.awt.Desktop
 import java.io.File
 import java.net.URI
 
-/**
- * Hands a stream URL to a real media player when one is installed, because
- * players buffer and seek far better than a browser tab. The browser is the
- * fallback every system still has.
- */
+/** Real players buffer and seek far better than a browser tab, which stays the fallback. */
 class ExternalMediaPlayer {
 
     fun play(url: String): Boolean {

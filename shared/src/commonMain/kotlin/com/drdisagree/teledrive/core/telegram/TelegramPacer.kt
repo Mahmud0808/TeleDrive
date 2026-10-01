@@ -7,10 +7,8 @@ import kotlinx.coroutines.sync.withLock
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
- * Paces every call that creates or edits a message. Telegram answers too many
- * of those with a flood wait, and a flood wait applies to the account rather
- * than to one request, so the wait is held here and every caller respects it
- * instead of the other workers carrying on regardless.
+ * A flood wait applies to the whole account, so every message-creating call waits here,
+ * not just the one that hit it.
  */
 class TelegramPacer {
 
@@ -21,7 +19,6 @@ class TelegramPacer {
     @Volatile
     private var floodUntil = 0L
 
-    /** Seconds left of an account-wide flood wait, or zero when clear. */
     val floodWaitSeconds: Int
         get() = ((floodUntil - System.currentTimeMillis()) / 1000L)
             .coerceAtLeast(0L)
@@ -39,7 +36,6 @@ class TelegramPacer {
         }
     }
 
-    /** Holds every caller until the flood wait passes and a token is free. */
     private suspend fun awaitClearance() {
         while (true) {
             val remaining = floodUntil - System.currentTimeMillis()
@@ -53,7 +49,6 @@ class TelegramPacer {
         }
     }
 
-    /** Returns how long to wait for the next token, or zero when one was taken. */
     private fun takeToken(): Long {
         val now = System.currentTimeMillis()
         val elapsed = (now - lastRefillAt).coerceAtLeast(0)

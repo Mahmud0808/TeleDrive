@@ -11,14 +11,8 @@ import androidx.compose.ui.unit.dp
 import com.drdisagree.teledrive.presentation.navigation.LocalBottomBarInset
 
 /**
- * Snackbar host that clears the floating navigation bar. The bar is drawn over
- * the screen rather than inside its Scaffold, so a plain host would sit behind
- * it; child screens have no bar and get no extra padding.
- *
- * [applyInset] is false while an action button already lifts the snackbar,
- * since Scaffold stacks it above that button. The value animates rather than
- * switching, because swapping the host itself would tear the snackbar down and
- * rebuild it mid-flight.
+ * The bar is drawn over the screen, so a plain host would sit behind it. The inset animates,
+ * because swapping the host would rebuild the snackbar mid-flight.
  */
 @Composable
 fun BottomBarSnackbarHost(

@@ -4,11 +4,6 @@ import java.security.SecureRandom
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
 
-/**
- * Derives a key-encryption key from a user passphrase with PBKDF2-HMAC-SHA256.
- * Used only for the optional cloud key backup, so losing the device does not
- * mean losing access to encrypted backups.
- */
 class PassphraseKdf {
 
     private val secureRandom = SecureRandom()

@@ -98,7 +98,6 @@ class CollectionViewModel(
         }
     }
 
-    /** Removes the property that puts files in this collection. */
     fun startRangeSelection() {
         rangeBase = _selection.value to _folderSelection.value
     }

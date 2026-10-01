@@ -8,11 +8,7 @@ interface ExclusionRepository {
 
     fun observeAll(): Flow<List<Exclusion>>
 
-    /**
-     * Adds the rules every new drive starts with, currently skipping dot files
-     * and dot folders. Only runs when a drive has none of a given rule, so a
-     * user who removes one does not get it back.
-     */
+    /** Only adds a rule the drive has none of, so a rule the user removed stays removed. */
     suspend fun ensureDefaults(chatId: Long)
 
     suspend fun getEnabled(): List<Exclusion>

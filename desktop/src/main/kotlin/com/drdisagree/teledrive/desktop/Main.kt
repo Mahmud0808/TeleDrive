@@ -1,36 +1,29 @@
 package com.drdisagree.teledrive.desktop
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.dp
-import java.awt.Dimension
+import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.WindowPlacement
+import androidx.compose.ui.window.application
+import androidx.compose.ui.window.rememberWindowState
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.key.Keyer
 import coil3.request.Options
 import coil3.request.crossfade
-import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.application
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.window.WindowPlacement
-import androidx.compose.ui.window.rememberWindowState
 import com.drdisagree.teledrive.core.common.SafeLog
 import com.drdisagree.teledrive.core.files.AppStoragePaths
-import com.drdisagree.teledrive.desktop.window.WindowsTitleBar
-import com.drdisagree.teledrive.domain.model.AppTheme
-import com.drdisagree.teledrive.core.publish.PublishScheduler
-import com.drdisagree.teledrive.domain.repository.FileRepository
-import com.drdisagree.teledrive.domain.repository.SettingsRepository
-import com.drdisagree.teledrive.domain.repository.TransferRepository
-import com.drdisagree.teledrive.domain.repository.TrashRepository
 import com.drdisagree.teledrive.core.files.PendingShare
-import com.drdisagree.teledrive.core.media.ThumbnailFetcher
+import com.drdisagree.teledrive.core.media.ThumbnailFetcherFactory
 import com.drdisagree.teledrive.core.media.ThumbnailModel
 import com.drdisagree.teledrive.core.media.ThumbnailStore
 import com.drdisagree.teledrive.core.media.thumbnailCacheKey
+import com.drdisagree.teledrive.core.publish.PublishScheduler
 import com.drdisagree.teledrive.desktop.di.desktopModule
 import com.drdisagree.teledrive.desktop.resources.Res
 import com.drdisagree.teledrive.desktop.resources.Res as DesktopRes
@@ -39,21 +32,28 @@ import com.drdisagree.teledrive.desktop.resources.app_icon
 import com.drdisagree.teledrive.desktop.ui.FullscreenController
 import com.drdisagree.teledrive.desktop.ui.LocalFullscreenController
 import com.drdisagree.teledrive.desktop.ui.ProvideDesktopPlatformActions
+import com.drdisagree.teledrive.desktop.window.WindowsTitleBar
+import com.drdisagree.teledrive.domain.model.AppTheme
+import com.drdisagree.teledrive.domain.repository.FileRepository
+import com.drdisagree.teledrive.domain.repository.SettingsRepository
+import com.drdisagree.teledrive.domain.repository.TransferRepository
+import com.drdisagree.teledrive.domain.repository.TrashRepository
 import com.drdisagree.teledrive.presentation.TeleDriveApp
 import com.drdisagree.teledrive.resources.Res as SharedRes
 import com.drdisagree.teledrive.resources.app_name
-import org.jetbrains.compose.resources.getString
-import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.resources.stringResource
+import java.awt.Dimension
 import javax.swing.JOptionPane
 import kotlin.system.exitProcess
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.flow.map
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.core.context.startKoin
 import org.koin.java.KoinJavaComponent.getKoin
 
@@ -103,7 +103,7 @@ fun main() {
             setSingletonImageLoaderFactory { context ->
                 ImageLoader.Builder(context)
                     .components {
-                        add(ThumbnailFetcher.Factory(getKoin().get<ThumbnailStore>()))
+                        add(ThumbnailFetcherFactory(getKoin().get<ThumbnailStore>()))
                         add(Keyer<ThumbnailModel> { data, _: Options ->
                             thumbnailCacheKey(data.fileId)
                         })

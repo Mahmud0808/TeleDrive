@@ -22,11 +22,7 @@ import java.io.File
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.withTimeoutOrNull
 
-/**
- * Keeps the list of drives this account owns. Rows in files and folders carry
- * the channel that owns them, so switching is only a matter of pointing the
- * app at another chat id; nothing is deleted and nothing is re-downloaded.
- */
+/** Switching only points the app at another chat id; nothing is deleted or downloaded again. */
 class ChannelRepositoryImpl(
     private val channelDao: StorageChannelDao,
     private val telegramClient: TelegramClient,
@@ -89,9 +85,8 @@ class ChannelRepositoryImpl(
     }
 
     /**
-     * Right after sign-in TDLib has not loaded the chat list yet, so a pass
-     * can miss drives the account has. Discovery retries until a pass covers
-     * every locally known drive before it is believed.
+     * Right after sign in TDLib has not loaded the chat list, so discovery retries until every
+     * known drive is found.
      */
     private suspend fun discoverChannels(): List<StorageChannel>? {
         val knownIds = channelDao.all().map { it.chatId }
@@ -204,9 +199,8 @@ class ChannelRepositoryImpl(
     }
 
     /**
-     * Folder selection used to live in the device preferences. The first drive
-     * to ask adopts whatever was configured there, so an upgrade keeps backing
-     * up the folders the user already picked.
+     * The first drive to ask adopts folders configured in the device preferences, so an upgrade
+     * keeps them.
      */
     override suspend fun backupFolders(chatId: Long): Set<String> {
         val row = channelDao.byId(chatId) ?: return emptySet()
@@ -225,9 +219,7 @@ class ChannelRepositoryImpl(
     }
 
     /**
-     * Channel pictures make drives recognizable at a glance in the picker.
-     * The picture is fetched on every refresh so a changed one propagates;
-     * a failed fetch keeps the last known picture.
+     * Fetched on every refresh so a changed picture propagates; a failed fetch keeps the last one.
      */
     private suspend fun refreshPhoto(chatId: Long) {
         val current = runCatching { telegramClient.fetchChannelPhoto(chatId) }

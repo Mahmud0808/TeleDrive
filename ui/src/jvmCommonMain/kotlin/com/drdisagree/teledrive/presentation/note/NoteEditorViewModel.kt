@@ -20,14 +20,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-data class NoteEditorUiState(
-    val title: String = "",
-    val body: String = "",
-    val loading: Boolean = true,
-    val saving: Boolean = false,
-    val isNew: Boolean = true
-)
-
 class NoteEditorViewModel(
     private val fileRepository: FileRepository,
     private val transferRepository: TransferRepository,

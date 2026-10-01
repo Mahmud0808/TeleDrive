@@ -38,9 +38,8 @@ import com.drdisagree.teledrive.core.permissions.AppPermission
 import com.drdisagree.teledrive.core.permissions.PermissionChecker
 
 /**
- * Lists every permission with its current state. Tapping a denied entry asks
- * again; once the system stops showing the dialog it falls back to the app's
- * settings page, which is the only way back from a permanent denial.
+ * Falls back to the app's settings page once the system stops showing the dialog, the only way back
+ * from a permanent denial.
  */
 @Composable
 fun PermissionsSection(permissionChecker: PermissionChecker) {

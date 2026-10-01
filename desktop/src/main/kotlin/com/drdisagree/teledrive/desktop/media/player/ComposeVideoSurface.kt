@@ -15,11 +15,7 @@ import uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormatCall
 import uk.co.caprica.vlcj.player.embedded.videosurface.callback.RenderCallback
 import uk.co.caprica.vlcj.player.embedded.videosurface.callback.format.RV32BufferFormat
 
-/**
- * Receives decoded frames from libVLC and turns each into an [ImageBitmap]
- * the composable draws. Frames arrive as BGRA which matches Skia's layout,
- * so a frame is one buffer copy, no per-pixel conversion.
- */
+/** Frames arrive as BGRA, matching Skia's layout, so each frame is one buffer copy. */
 internal fun composeVideoSurface(onFrame: (ImageBitmap) -> Unit): CallbackVideoSurface {
     var width = 0
     var height = 0

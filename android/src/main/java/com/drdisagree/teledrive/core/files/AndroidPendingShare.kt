@@ -5,11 +5,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-/**
- * Files handed to the app from another app's share sheet, waiting for the user
- * to choose where they land. Held outside the back stack so the hand-off
- * survives the navigation that follows the intent.
- */
+/** Held outside the back stack so the hand-off survives the navigation that follows the intent. */
 class AndroidPendingShare : PendingShare {
 
     private val _uris = MutableStateFlow<List<String>>(emptyList())

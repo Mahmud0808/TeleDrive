@@ -1,8 +1,6 @@
 package com.drdisagree.teledrive.core.telegram
 
-/**
- * Wraps a TDLib error. [retryAfterSeconds] is set for FLOOD_WAIT (429) errors.
- */
+/** [retryAfterSeconds] is set for FLOOD_WAIT (429) errors. */
 class TelegramException(
     val code: Int,
     override val message: String,

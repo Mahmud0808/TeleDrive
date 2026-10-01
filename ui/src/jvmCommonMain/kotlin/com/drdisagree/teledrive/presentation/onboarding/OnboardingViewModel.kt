@@ -55,8 +55,7 @@ class OnboardingViewModel(
     private fun onAuthStateChanged(state: TelegramAuthState) {
         _uiState.update { current ->
             when (state) {
-                /* Falling back here from a QR wait means the token died, so the
-                   cached link is dropped and a fresh one can be asked for. */
+                // Falling back from a QR wait means the token died, so the cached link is dropped.
                 is TelegramAuthState.WaitingForPhoneNumber -> when {
                     current.step == OnboardingStep.API_CREDENTIALS && current.working ->
                         current.copy(step = OnboardingStep.PHONE, working = false, error = null)
@@ -73,8 +72,6 @@ class OnboardingViewModel(
                     codeChannel = state.channel,
                     codeLength = state.codeLength
                 )
-                /* Signing in by QR is a different face of the phone step, not
-                   a step of its own, so this only carries the link across. */
                 is TelegramAuthState.WaitingForQrScan -> current.copy(
                     working = false,
                     qrLink = state.link
@@ -165,9 +162,8 @@ class OnboardingViewModel(
     }
 
     /**
-     * Dialling codes come from Telegram so they stay current and localized.
-     * A failure is not surfaced: the field still accepts a full number, and
-     * anything that stops this call will stop the login too.
+     * A failure is not surfaced: the field still takes a full number, and whatever broke this
+     * breaks login too.
      */
     fun loadCountries() {
         if (_uiState.value.countries.isNotEmpty()) return
@@ -213,10 +209,9 @@ class OnboardingViewModel(
         runAction { telegramAuthRepository.submitPhoneNumber(phone.trim()) }
     }
 
-    /** Telegram keeps the link fresh by re-emitting the state, so one call is enough. */
     /**
-     * TDLib stays in the QR state once asked, and repeating the request from
-     * there is an error, so a link already in hand just reopens the page.
+     * TDLib stays in the QR state and repeating the request there is an error, so a link in hand
+     * just reopens the page.
      */
     fun startQrLogin() {
         _uiState.update { it.copy(qrMode = true, error = null) }
@@ -225,9 +220,8 @@ class OnboardingViewModel(
     }
 
     /**
-     * Returns to the phone form. TDLib rejects a phone number while it waits
-     * for another device to confirm, so the session is restarted to land back
-     * on the phone step. The link is dropped with it.
+     * TDLib rejects a phone number while waiting for another device, so the session restarts to
+     * reach the phone step.
      */
     fun cancelQrLogin() {
         _uiState.update { it.copy(qrMode = false, qrLink = null, error = null) }
@@ -259,15 +253,14 @@ class OnboardingViewModel(
     }
 
     /**
-     * The drive is always shown before setup continues, so the user sees which
-     * channel their files will live in. An account with none gets one created.
+     * The drive is always shown first, so the user sees where files will live; an account with none
+     * gets one.
      */
     fun onPermissionsResolved() {
         _uiState.update { it.copy(working = true, error = null) }
         viewModelScope.launch { loadOrCreateDrive() }
     }
 
-    /** Retried from the drive step once the account has room again. */
     fun retryDriveSetup() {
         if (_uiState.value.working) return
         _uiState.update { it.copy(working = true, error = null) }

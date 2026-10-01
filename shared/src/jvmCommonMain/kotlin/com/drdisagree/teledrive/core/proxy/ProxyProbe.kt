@@ -14,13 +14,7 @@ import java.net.Socket
 import java.net.SocketTimeoutException
 import kotlin.random.Random
 
-/**
- * Checks a proxy without TDLib, which refuses every request until it has been
- * given API credentials. SOCKS5 and HTTP speak in the clear, so both can be
- * driven all the way to a Telegram data center and answer the real question.
- * MTProto hides its handshake behind the secret, so only the connection itself
- * can be confirmed.
- */
+/** Runs without TDLib, which refuses every request until it has API credentials. */
 class ProxyProbe(
     private val dispatchers: DispatcherProvider
 ) {
@@ -116,10 +110,8 @@ class ProxyProbe(
     }
 
     /**
-     * The real handshake is keyed with the secret, so a stand-in frame can only
-     * show whether something is listening and willing to hold the connection. A
-     * server that hangs up at once is reported as unreachable; silence is what a
-     * working MTProto proxy does with a frame it cannot read.
+     * The real handshake is keyed with the secret, so this only shows something holds the
+     * connection; silence is success.
      */
     private fun mtproto(socket: Socket): ProxyProbeResult {
         socket.getOutputStream().writeAll(Random.nextBytes(MTPROTO_FRAME))

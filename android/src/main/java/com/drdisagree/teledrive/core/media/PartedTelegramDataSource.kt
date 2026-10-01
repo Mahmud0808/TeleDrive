@@ -10,10 +10,6 @@ import com.drdisagree.teledrive.core.telegram.TelegramClient
 import java.io.IOException
 import kotlinx.coroutines.runBlocking
 
-/**
- * Media3 DataSource over the shared parted byte source, which streams a file
- * split across several Telegram messages as though it were one.
- */
 @UnstableApi
 class PartedTelegramDataSource(
     telegramClient: TelegramClient,

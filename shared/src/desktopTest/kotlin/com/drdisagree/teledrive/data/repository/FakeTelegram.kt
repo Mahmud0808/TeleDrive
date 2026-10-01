@@ -1,121 +1,18 @@
 package com.drdisagree.teledrive.data.repository
 
-import androidx.room.Room
-import androidx.sqlite.driver.bundled.BundledSQLiteDriver
-import com.drdisagree.teledrive.core.crypto.StreamCrypto
-import com.drdisagree.teledrive.core.crypto.WrappedKeyRepository
-import com.drdisagree.teledrive.core.files.AppStoragePaths
-import com.drdisagree.teledrive.core.publish.PublishScheduler
 import com.drdisagree.teledrive.core.telegram.MessageChange
 import com.drdisagree.teledrive.core.telegram.RemoteDocument
 import com.drdisagree.teledrive.core.telegram.RemoteDocumentPage
 import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.core.telegram.TelegramDownloadEvent
 import com.drdisagree.teledrive.core.telegram.TelegramUploadEvent
-import com.drdisagree.teledrive.data.local.database.TeleDriveDatabase
-import com.drdisagree.teledrive.data.remote.telegram.ManifestCodec
-import com.drdisagree.teledrive.data.remote.telegram.RemoteFileManifest
 import com.drdisagree.teledrive.data.remote.telegram.RemoteFolderState
-import com.drdisagree.teledrive.domain.model.UserPreferences
-import com.drdisagree.teledrive.domain.repository.SettingsRepository
+import com.drdisagree.teledrive.testing.unused
 import java.io.File
-import java.lang.reflect.Proxy
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.serialization.json.Json
-
-internal const val TEST_CHAT = 77L
-
-internal class SyncHarness : AutoCloseable {
-    private val dbFile = File.createTempFile("teledrive-sync", ".db")
-    val database: TeleDriveDatabase = Room.databaseBuilder<TeleDriveDatabase>(name = dbFile.absolutePath)
-        .setDriver(BundledSQLiteDriver())
-        .setQueryCoroutineContext(Dispatchers.IO)
-        .build()
-
-    val settings = FakeSettings(UserPreferences(storageChatId = TEST_CHAT))
-    val telegram = FakeTelegram()
-    val scheduler = CountingScheduler()
-    val codec = ManifestCodec(StreamCrypto(), unused<WrappedKeyRepository>())
-    val activeChannel = ActiveChannel(settings)
-    val folderPaths = FolderPathResolver(
-        database.folderDao(),
-        activeChannel,
-        database.folderTombstoneDao()
-    )
-    val storagePaths = FakeStoragePaths()
-    val folderState = FolderStateSynchronizer(
-        storagePaths,
-        telegram,
-        database.folderDao(),
-        database.folderTombstoneDao(),
-        settings,
-        StreamCrypto(),
-        unused<WrappedKeyRepository>()
-    )
-
-    fun newSync() = SyncRepositoryImpl(
-        telegramClient = telegram,
-        fileDao = database.fileDao(),
-        manifestCodec = codec,
-        pendingDeleteDao = database.pendingDeleteDao(),
-        filePartDao = database.filePartDao(),
-        folderDao = database.folderDao(),
-        folderPathResolver = folderPaths,
-        activeChannel = activeChannel,
-        channelOwnership = ChannelOwnership(
-            database.fileDao(),
-            database.folderDao(),
-            database.exclusionDao()
-        ),
-        folderStateSynchronizer = folderState,
-        publishScheduler = scheduler,
-        settingsRepository = settings,
-        database = database
-    )
-
-    fun caption(manifest: RemoteFileManifest) = codec.encode(manifest, encrypt = false)
-
-    override fun close() {
-        database.close()
-        dbFile.delete()
-        telegram.cleanUp()
-        storagePaths.cacheDir.deleteRecursively()
-    }
-}
-
-internal fun manifest(
-    id: String,
-    name: String,
-    size: Long = 4_000_000,
-    folderPath: String = "",
-    folderId: String? = null,
-    modifiedAt: Long = 2_000
-) = RemoteFileManifest(
-    fileId = id,
-    name = name,
-    folderPath = folderPath,
-    folderId = folderId,
-    mimeType = "application/octet-stream",
-    sizeBytes = size,
-    createdAt = 1_000,
-    modifiedAt = modifiedAt
-)
-
-internal fun document(messageId: Long, caption: String, size: Long = 4_000_000) = RemoteDocument(
-    chatId = TEST_CHAT,
-    messageId = messageId,
-    remoteFileId = "remote-$messageId",
-    uniqueFileId = "unique-$messageId",
-    fileName = "file-$messageId",
-    mimeType = "application/octet-stream",
-    sizeBytes = size,
-    caption = caption,
-    dateSeconds = 100
-)
 
 internal class FakeTelegram : TelegramClient by unused() {
     var documents: List<RemoteDocument> = emptyList()
@@ -240,32 +137,3 @@ internal class FakeTelegram : TelegramClient by unused() {
         stateFiles.forEach { it.delete() }
     }
 }
-
-internal class FakeStoragePaths : AppStoragePaths by unused() {
-    private val root = File.createTempFile("teledrive-paths", "").also {
-        it.delete()
-        it.mkdirs()
-    }
-    override val cacheDir: File = File(root, "cache").also { it.mkdirs() }
-}
-
-internal class FakeSettings(initial: UserPreferences) : SettingsRepository by unused() {
-    private val state = MutableStateFlow(initial)
-    override val preferences: Flow<UserPreferences> = state
-
-    override suspend fun update(transform: (UserPreferences) -> UserPreferences) {
-        state.value = transform(state.value)
-    }
-}
-
-internal class CountingScheduler : PublishScheduler {
-    var kicks = 0
-    override fun kick() {
-        kicks++
-    }
-}
-
-internal inline fun <reified T : Any> unused(): T = Proxy.newProxyInstance(
-    T::class.java.classLoader,
-    arrayOf(T::class.java)
-) { _, method, _ -> throw UnsupportedOperationException(method.name) } as T

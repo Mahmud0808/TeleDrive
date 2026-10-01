@@ -4,11 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.net.toUri
 
-/**
- * Visibility of tg: handlers on Android 11+ depends on the queries block in
- * the manifest; without it the probe reports no Telegram app even when one
- * is installed.
- */
+/** On Android 11+ tg: handlers are only visible through the manifest's queries block. */
 class AndroidTelegramLinkOpener(
     private val context: Context
 ) : TelegramLinkOpener {

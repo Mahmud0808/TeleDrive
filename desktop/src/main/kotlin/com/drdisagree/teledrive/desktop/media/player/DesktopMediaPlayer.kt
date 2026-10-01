@@ -5,7 +5,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -61,7 +60,6 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.drdisagree.teledrive.desktop.ui.LocalFullscreenController
 import com.drdisagree.teledrive.presentation.common.Formatters
@@ -93,11 +91,6 @@ import uk.co.caprica.vlcj.player.base.MediaPlayer
 import uk.co.caprica.vlcj.player.base.MediaPlayerEventAdapter
 import kotlin.time.Duration.Companion.milliseconds
 
-/**
- * Inline player backed by libVLC, mirroring the Android player: controls hide
- * while playback runs and return on mouse movement, seeking scrubs without
- * flooding the pipeline, and a wavy indicator marks buffering.
- */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun DesktopMediaPlayer(
@@ -342,14 +335,6 @@ fun DesktopMediaPlayer(
             )
         }
     }
-}
-
-internal enum class VideoScaling(val contentScale: ContentScale) {
-    FIT(ContentScale.Fit),
-    ZOOM(ContentScale.Crop),
-    FILL(ContentScale.FillBounds);
-
-    fun next(): VideoScaling = entries[(ordinal + 1) % entries.size]
 }
 
 @Composable

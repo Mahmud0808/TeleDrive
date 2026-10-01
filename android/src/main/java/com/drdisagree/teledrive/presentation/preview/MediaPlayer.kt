@@ -83,10 +83,8 @@ import org.koin.compose.koinInject
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
- * Media3 player for local and Telegram-streamed playback. PlayerView renders
- * the video only; the controls are Compose, so they follow the app theme and
- * the window insets. Controls share visibility with the surrounding chrome and
- * time out together with it while playback runs.
+ * PlayerView renders only the video; controls are Compose so they follow the theme and window
+ * insets.
  */
 @OptIn(UnstableApi::class)
 @Composable
@@ -421,11 +419,7 @@ fun MediaPlayer(
     }
 }
 
-/**
- * Stage for audio files, which have no video surface to look at. Cover art
- * embedded in the file is used when the container carries it, with the track
- * tags falling back to the file name.
- */
+/** Embedded cover art is used when present, with the track tags falling back to the file name. */
 @Composable
 private fun AudioStage(player: Player, fallbackTitle: String, modifier: Modifier = Modifier) {
     var metadata by remember(player) { mutableStateOf(player.mediaMetadata) }

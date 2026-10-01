@@ -1,12 +1,8 @@
 package com.drdisagree.teledrive.domain.usecase
 
-import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.domain.model.BackupState
 import com.drdisagree.teledrive.domain.model.DriveFile
 import com.drdisagree.teledrive.domain.model.FileCategory
-import com.drdisagree.teledrive.domain.repository.FileRepository
-import com.drdisagree.teledrive.domain.repository.TransferRepository
-import java.lang.reflect.Proxy
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -19,11 +15,11 @@ class KeepOnDeviceUseCaseTest {
     private val localOnly = file("staged", local = true, remote = false)
     private val inFolder = file("nested", local = false, remote = true)
 
-    private val files = FakeFiles(
+    private val files = FakeFileRepository(
         listOf(remoteOnly, alreadyLocal, localOnly, inFolder),
         tree = mapOf("folder" to listOf("nested", "local"))
     )
-    private val transfers = FakeTransfers()
+    private val transfers = FakeTransferRepository()
     private val keepOnDevice = KeepOnDeviceUseCase(files, transfers)
 
     @Test
@@ -86,39 +82,4 @@ class KeepOnDeviceUseCaseTest {
         modifiedAt = 0,
         addedAt = 0
     )
-
-    private class FakeFiles(
-        private val all: List<DriveFile>,
-        private val tree: Map<String, List<String>>
-    ) : FileRepository by unused() {
-        val pinnedFiles = mutableListOf<String>()
-        val unpinnedFiles = mutableListOf<String>()
-        val pinnedFolders = mutableListOf<String>()
-
-        override suspend fun setFilesPinned(ids: List<String>, pinned: Boolean) {
-            (if (pinned) pinnedFiles else unpinnedFiles) += ids
-        }
-
-        override suspend fun setFolderPinned(id: String, pinned: Boolean) {
-            if (pinned) pinnedFolders += id
-        }
-
-        override suspend fun fileIdsInTree(folderId: String) = tree[folderId].orEmpty()
-
-        override suspend fun filesByIds(ids: List<String>) = all.filter { it.id in ids }
-    }
-
-    private class FakeTransfers : TransferRepository by unused() {
-        val downloads = mutableListOf<String>()
-
-        override suspend fun enqueueDownload(fileId: String, priority: Int): AppResult<String> {
-            downloads += fileId
-            return AppResult.Success(fileId)
-        }
-    }
 }
-
-private inline fun <reified T : Any> unused(): T = Proxy.newProxyInstance(
-    T::class.java.classLoader,
-    arrayOf(T::class.java)
-) { _, method, _ -> throw UnsupportedOperationException(method.name) } as T

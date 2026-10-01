@@ -14,7 +14,6 @@ import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.common_refresh
 import org.jetbrains.compose.resources.stringResource
 
-/** Stands in for the pull gesture on platforms that do not have one. */
 @Composable
 fun RefreshAction(refreshing: Boolean, onRefresh: () -> Unit) {
     if (LocalPlatformCapabilities.current.supportsPullToRefresh) return

@@ -8,11 +8,7 @@ import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
-/**
- * Wraps a non-exportable AES-256 key held in the Android Keystore. Used only
- * to encrypt small blobs (wrapped content keys); bulk data uses [StreamCrypto]
- * with raw keys unwrapped through this class.
- */
+/** Encrypts only small blobs such as wrapped content keys; bulk data uses [StreamCrypto]. */
 class KeystoreManager : CredentialCipher {
 
     private val keyStore: KeyStore = KeyStore.getInstance(ANDROID_KEYSTORE).apply { load(null) }

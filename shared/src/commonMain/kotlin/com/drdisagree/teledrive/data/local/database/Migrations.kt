@@ -4,7 +4,6 @@ import androidx.room.migration.Migration
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
 
-/** Adds the record of folders deleted for good, so other devices drop them too. */
 val MIGRATION_12_13 = object : Migration(12, 13) {
     override fun migrate(connection: SQLiteConnection) {
         connection.execSQL(
@@ -14,7 +13,7 @@ val MIGRATION_12_13 = object : Migration(12, 13) {
     }
 }
 
-/** Adds the clock folder sync compares, since modifiedAt only moves on a rename or a move. */
+/** modifiedAt only moves on a rename or a move, so it cannot order flag and trash changes. */
 val MIGRATION_11_12 = object : Migration(11, 12) {
     override fun migrate(connection: SQLiteConnection) {
         connection.execSQL("ALTER TABLE folders ADD COLUMN changedAt INTEGER NOT NULL DEFAULT 0")
@@ -22,7 +21,6 @@ val MIGRATION_11_12 = object : Migration(11, 12) {
     }
 }
 
-/** Adds the device-local pin that keeps a copy out of "free up space". */
 val MIGRATION_10_11 = object : Migration(10, 11) {
     override fun migrate(connection: SQLiteConnection) {
         connection.execSQL("ALTER TABLE files ADD COLUMN isPinned INTEGER NOT NULL DEFAULT 0")
@@ -30,14 +28,12 @@ val MIGRATION_10_11 = object : Migration(10, 11) {
     }
 }
 
-/** Adds iconFileId for storing uploaded APK icon remote file IDs. */
 val MIGRATION_9_10 = object : Migration(9, 10) {
     override fun migrate(connection: SQLiteConnection) {
         connection.execSQL("ALTER TABLE files ADD COLUMN iconFileId TEXT")
     }
 }
 
-/** Adds saved proxies, for networks that block Telegram outright. */
 val MIGRATION_8_9 = object : Migration(8, 9) {
     override fun migrate(connection: SQLiteConnection) {
         connection.execSQL(
@@ -55,14 +51,12 @@ val MIGRATION_8_9 = object : Migration(8, 9) {
     }
 }
 
-/** Adds the local step a split transfer reports while it is between parts. */
 val MIGRATION_7_8 = object : Migration(7, 8) {
     override fun migrate(connection: SQLiteConnection) {
         connection.execSQL("ALTER TABLE transfers ADD COLUMN stage TEXT")
     }
 }
 
-/** Adds the parts a file too large for one Telegram message is split into. */
 val MIGRATION_6_7 = object : Migration(6, 7) {
     override fun migrate(connection: SQLiteConnection) {
         connection.execSQL(
@@ -88,7 +82,6 @@ val MIGRATION_6_7 = object : Migration(6, 7) {
     }
 }
 
-/** Adds delete tombstones so an interrupted permanent delete can be replayed. */
 val MIGRATION_5_6 = object : Migration(5, 6) {
     override fun migrate(connection: SQLiteConnection) {
         connection.execSQL(
@@ -101,10 +94,7 @@ val MIGRATION_5_6 = object : Migration(5, 6) {
     }
 }
 
-/**
- * Adds the publish outbox. Rows start clean: whatever is already in Telegram
- * is what the captions and the folder state document describe.
- */
+/** Rows start clean: the captions and folder document already describe what is in Telegram. */
 val MIGRATION_4_5 = object : Migration(4, 5) {
     override fun migrate(connection: SQLiteConnection) {
         connection.execSQL("ALTER TABLE files ADD COLUMN pendingPublish INTEGER NOT NULL DEFAULT 0")
@@ -117,9 +107,8 @@ val MIGRATION_4_5 = object : Migration(4, 5) {
 }
 
 /**
- * Adds multichannel support. Existing rows all belong to the single drive the
- * app used before, so they are left with a null owner and adopted by the first
- * channel that opens, which keeps a wiped local index in step with the cloud.
+ * Existing rows get no owner and are adopted by the first channel that opens, keeping a wiped index
+ * in step.
  */
 val MIGRATION_3_4 = object : Migration(3, 4) {
     override fun migrate(connection: SQLiteConnection) {

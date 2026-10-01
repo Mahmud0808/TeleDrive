@@ -23,11 +23,7 @@ import com.drdisagree.teledrive.domain.model.FileCategory
 import com.drdisagree.teledrive.domain.model.TransferTask
 import com.drdisagree.teledrive.presentation.components.iconFor
 
-/**
- * Leading visual for a transfer row. The category comes from the file name
- * because a transfer can outlive its source file record; a real thumbnail is
- * attempted only when one has already been generated.
- */
+/** The category comes from the file name because a transfer can outlive its file record. */
 @Composable
 fun TransferThumbnail(
     transfer: TransferTask,

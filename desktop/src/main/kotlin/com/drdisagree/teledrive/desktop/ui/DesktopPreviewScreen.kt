@@ -141,9 +141,8 @@ import java.io.File
 import com.drdisagree.teledrive.desktop.resources.Res as DesktopRes
 
 /**
- * Desktop preview renders what the shared resolver can produce inline and
- * hands everything else to the system's own viewer. Media never plays inside
- * the window; a local copy opens externally instead.
+ * Media never plays in the window; anything the shared resolver cannot render inline opens in the
+ * system viewer.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable

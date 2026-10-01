@@ -2,7 +2,6 @@ package com.drdisagree.teledrive.core.files
 
 import kotlinx.coroutines.flow.StateFlow
 
-/** Content another app handed over, waiting for the user to place it. */
 interface PendingShare {
 
     val uris: StateFlow<List<String>>

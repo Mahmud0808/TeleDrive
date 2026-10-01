@@ -29,10 +29,8 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 
 /**
- * Generates and caches thumbnails. Cache files are AES-GCM sealed when
- * thumbnail encryption is enabled, so private media never sits readable in
- * the cache directory. Falls back to the Telegram mini-thumbnail when no
- * local copy exists.
+ * Cache files are sealed when thumbnail encryption is on, so private media never sits readable in
+ * the cache.
  */
 class AndroidThumbnailStore(
     private val context: Context,
@@ -131,7 +129,6 @@ class AndroidThumbnailStore(
         return jpegBytes
     }
 
-    /** A note holding just a link previews as that link's image. */
     private suspend fun linkThumbnail(file: File): Bitmap? {
         if (file.length() > LINK_NOTE_LIMIT) return null
         if (!settingsRepository.preferences.first().linkPreviews) return null

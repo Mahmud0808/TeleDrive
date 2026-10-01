@@ -11,9 +11,8 @@ class TdlibDatabaseKeyProviderImpl(
 ) : TdlibDatabaseKeyProvider {
 
     /**
-     * A restored copy of the session database is unopenable once its key has
-     * been minted again, and TDLib fails rather than starting fresh, so the
-     * stale database goes with the stale key.
+     * A restored session database cannot be opened once its key is minted again, and TDLib fails
+     * instead of starting fresh.
      */
     override fun databaseKey(): ByteArray {
         val key = wrappedKeyRepository.getOrCreate(CryptoKeys.TDLIB_DATABASE)

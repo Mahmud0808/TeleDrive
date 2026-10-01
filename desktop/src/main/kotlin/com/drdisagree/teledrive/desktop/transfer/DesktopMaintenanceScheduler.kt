@@ -2,10 +2,7 @@ package com.drdisagree.teledrive.desktop.transfer
 
 import com.drdisagree.teledrive.core.transfer.MaintenanceScheduler
 
-/**
- * Desktop has no background scheduler yet; maintenance runs only while the
- * app is open, driven by the transfer and publish schedulers it already has.
- */
+/** No background scheduler yet, so maintenance runs only while the app is open. */
 class DesktopMaintenanceScheduler : MaintenanceScheduler {
 
     override fun scheduleUpdateCheck(enabled: Boolean) {

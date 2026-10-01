@@ -10,9 +10,8 @@ import android.provider.MediaStore
 import java.io.File
 
 /**
- * Maps SAF URIs to filesystem paths. Removable volumes are resolved through
- * [StorageManager] because their mount point is a per-device UUID, not a fixed
- * path. Providers that own no real file, such as cloud storage, resolve to null.
+ * Removable volumes resolve through [StorageManager], since their mount point is a per-device UUID;
+ * cloud providers resolve to null.
  */
 object DocumentTreePaths {
 
@@ -34,7 +33,6 @@ object DocumentTreePaths {
         return path.takeIf { File(it).isDirectory }
     }
 
-    /** Maps a single picked document to its file path, or null when it has none. */
     fun documentToFilePath(context: Context, uri: Uri): String? =
         mediaStorePath(context, uri) ?: externalDocumentPath(context, uri)
 

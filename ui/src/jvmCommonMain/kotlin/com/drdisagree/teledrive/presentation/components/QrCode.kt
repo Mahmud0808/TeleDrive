@@ -19,12 +19,8 @@ import com.google.zxing.qrcode.QRCodeWriter
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 
 /**
- * Renders [content] as a scannable QR code.
- *
- * The modules are drawn black on white rather than in scheme colors: scanners
- * expect dark-on-light and many reject an inverted code, so contrast here is a
- * functional requirement rather than a styling choice. The surface behind it
- * supplies the themed frame.
+ * Drawn black on white whatever the theme: scanners expect dark on light and many reject an
+ * inverted code.
  */
 @Composable
 fun QrCode(content: String, contentDescription: String?, modifier: Modifier = Modifier) {

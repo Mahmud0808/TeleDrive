@@ -2,8 +2,6 @@ package com.drdisagree.teledrive.presentation.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.drdisagree.teledrive.domain.model.DriveFile
-import com.drdisagree.teledrive.domain.model.DriveFolder
 import com.drdisagree.teledrive.domain.model.FileCategory
 import com.drdisagree.teledrive.domain.model.FileQuerySpec
 import com.drdisagree.teledrive.domain.model.FileSortField
@@ -12,7 +10,6 @@ import com.drdisagree.teledrive.domain.repository.FileRepository
 import com.drdisagree.teledrive.domain.repository.TransferRepository
 import com.drdisagree.teledrive.domain.repository.TrashRepository
 import com.drdisagree.teledrive.domain.usecase.KeepOnDeviceUseCase
-import com.drdisagree.teledrive.presentation.components.SelectionCapabilities
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.NonCancellable
@@ -32,35 +29,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.time.Duration.Companion.milliseconds
 
-data class SearchFilters(
-    val category: FileCategory? = null,
-    val backedUpOnly: Boolean = false,
-    val notBackedUpOnly: Boolean = false,
-    val minSizeMb: Int? = null,
-    val sortField: FileSortField = FileSortField.DATE_MODIFIED,
-    val sortDirection: SortDirection = SortDirection.DESCENDING
-)
-
-data class SearchUiState(
-    val query: String = "",
-    val filters: SearchFilters = SearchFilters(),
-    val results: List<DriveFile> = emptyList(),
-    val folders: List<DriveFolder> = emptyList(),
-    val searching: Boolean = false,
-    val searched: Boolean = false,
-    val selection: Set<String> = emptySet()
-) {
-    val selectionMode: Boolean get() = selection.isNotEmpty()
-    val selectedFiles: List<DriveFile> get() = results.filter { it.id in selection }
-    val capabilities: SelectionCapabilities get() = SelectionCapabilities.of(selectedFiles)
-    val allSelectedPinned: Boolean get() = selectionMode && !capabilities.anyUnpinned
-    val soleFolderId: String? get() = selectedFiles.singleOrNull()?.folderId
-}
-
-/**
- * Local-metadata search with debounced input. No remote calls happen while
- * typing; everything queries the Room index.
- */
+/** Queries only the local index; nothing remote happens while typing. */
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 class SearchViewModel(
     private val fileRepository: FileRepository,

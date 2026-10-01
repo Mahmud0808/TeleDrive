@@ -144,9 +144,8 @@ interface FileDao {
     suspend fun byRemoteUniqueIds(uniqueIds: List<String>): List<FileEntity>
 
     /**
-     * The home screen needs every headline number at once, and separate
-     * observed queries each rescan the table on any write. One pass keeps a
-     * large library from saturating the query executors during a backup.
+     * One pass for every home screen number: separate observed queries each rescan the table on any
+     * write.
      */
     @Query(
         """SELECT COUNT(*) AS total,
@@ -225,8 +224,8 @@ interface FileDao {
     suspend fun setBackupStates(ids: List<String>, state: BackupState)
 
     /**
-     * Transfer bookkeeping must never claim a file is unsaved while its copy
-     * still sits in the channel, so downgrades only apply to local-only rows.
+     * Only local-only rows are downgraded, so a file is never shown unsaved while its copy is in
+     * the channel.
      */
     @Query("UPDATE files SET backupState = :state WHERE id = :id AND messageId IS NULL")
     suspend fun setBackupStateIfLocalOnly(id: String, state: BackupState)
@@ -398,11 +397,7 @@ interface FileDao {
     )
     suspend fun reclaimableLocalCopies(): List<LocalCopyRef>
 
-    /**
-     * Held only on this device: never uploaded, or canceled or failed on the
-     * way up. A backup scan walks device folders and never sees these, so they
-     * need queueing by id.
-     */
+    /** A backup scan only walks device folders, so these need queueing by id. */
     @Query(
         """SELECT id FROM files
            WHERE trashedAt IS NULL

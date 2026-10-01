@@ -10,10 +10,8 @@ import com.drdisagree.teledrive.core.common.SafeLog
 import java.io.File
 
 /**
- * Removes local files that are already backed up. Media indexed by MediaStore
- * is deleted through the content provider so the gallery entry disappears with
- * it; on Android 11+ without all-files access that deletion needs one system
- * confirmation, which is returned as an IntentSender instead of failing quietly.
+ * Indexed media is deleted through MediaStore so the gallery entry goes too; on Android 11+ that
+ * may need a confirmation, returned as an IntentSender.
  */
 class MediaStoreLocalCopyDeleter(
     private val context: Context

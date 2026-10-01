@@ -629,7 +629,6 @@ fun FilesScreen(
                                             Icons.Filled.Add
                                         },
                                         contentDescription = stringResource(Res.string.common_add),
-                                        // The container animates to primary when checked.
                                         tint = if (showAddMenu) {
                                             MaterialTheme.colorScheme.onPrimary
                                         } else {
@@ -845,10 +844,7 @@ fun FilesScreen(
     }
 }
 
-/**
- * Folder path strip. Deep trees keep only the last three folders inline; the
- * rest collapse into a leading menu so the row never grows past one line.
- */
+/** Deep trees keep only the last three folders inline, so the row never grows past one line. */
 @Composable
 private fun Breadcrumbs(
     crumbs: List<FolderCrumb>,
@@ -1127,10 +1123,6 @@ private fun SortMenu(
     }
 }
 
-/**
- * Bridges the picker's synchronous tree callbacks to the suspending
- * repository by caching each level as it is browsed.
- */
 @Composable
 internal fun FolderPickerHost(
     title: String,
@@ -1192,11 +1184,7 @@ private const val FAB_SCROLL_THRESHOLD = 6f
 
 private val SORT_ICON_SIZE = 18.dp
 
-/**
- * Brief tint so a file reached from search is findable in a long list. Both
- * item shapes paint their own background, so this draws over them rather than
- * behind, where it would never be seen.
- */
+/** Draws over the item, since both item shapes paint their own background. */
 @Composable
 private fun Modifier.focusHighlight(active: Boolean): Modifier {
     val alpha by animateFloatAsState(

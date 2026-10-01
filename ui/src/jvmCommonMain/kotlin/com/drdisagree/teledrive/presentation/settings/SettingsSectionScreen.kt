@@ -1209,8 +1209,8 @@ private fun trashDaysLabel(days: Int): String =
     labelFor(Res.array.trash_clear_labels, trashDayOptions, days) { "$it d" }
 
 /**
- * Choice labels live in arrays.xml so a translation can reword them freely.
- * A value outside the offered set falls back to a plain formatted number.
+ * Labels live in arrays.xml so translations can reword them; a value outside the set shows as a
+ * number.
  */
 @Composable
 private fun labelFor(

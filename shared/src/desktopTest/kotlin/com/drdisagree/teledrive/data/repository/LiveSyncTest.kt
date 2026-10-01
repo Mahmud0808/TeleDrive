@@ -2,6 +2,7 @@ package com.drdisagree.teledrive.data.repository
 
 import com.drdisagree.teledrive.core.telegram.MessageChange
 import com.drdisagree.teledrive.data.local.entity.PendingDeleteEntity
+import com.drdisagree.teledrive.data.remote.telegram.RemoteFolderEntry
 import com.drdisagree.teledrive.data.remote.telegram.RemoteFolderState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
@@ -57,7 +58,7 @@ class LiveSyncTest {
         telegram.publishFolderState(
             RemoteFolderState(
                 folders = listOf(
-                    RemoteFolderState.Entry(
+                    RemoteFolderEntry(
                         id = "trips",
                         name = "Trips",
                         createdAt = 1,

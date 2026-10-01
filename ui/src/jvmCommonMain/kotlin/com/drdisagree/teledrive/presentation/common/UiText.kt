@@ -8,10 +8,7 @@ import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
-/**
- * Text a view model hands to the UI without resolving it, so the screen picks
- * the current locale at display time and view models stay platform-free.
- */
+/** Resolved by the screen, so it follows the current locale and view models stay platform-free. */
 sealed interface UiText {
 
     data class Plain(val value: String) : UiText

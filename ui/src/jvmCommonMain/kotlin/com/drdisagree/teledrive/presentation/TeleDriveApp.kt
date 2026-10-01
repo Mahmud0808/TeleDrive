@@ -59,7 +59,6 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
 import org.jetbrains.compose.resources.stringResource
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import org.koin.compose.viewmodel.koinViewModel
@@ -337,11 +336,7 @@ private fun MainScaffold(
     }
 }
 
-/**
- * Floating bottom navigation. Every destination keeps its label; the selected
- * one also reveals its icon, and a single pill slides between them instead of
- * each item drawing its own indicator.
- */
+/** A single pill slides between items instead of each item drawing its own indicator. */
 @Composable
 private fun FloatingNavigationBar(
     selectedIndex: Int,
@@ -468,9 +463,6 @@ private fun barSlideSpec() = tween<IntOffset>(
     durationMillis = BAR_SLIDE_MS,
     easing = FastOutSlowInEasing
 )
-
-/** Measured position of one navigation item inside the bar. */
-private data class DpRect(val left: Dp, val width: Dp)
 
 private val BAR_CORNER = 32.dp
 private val BAR_MARGIN = 12.dp

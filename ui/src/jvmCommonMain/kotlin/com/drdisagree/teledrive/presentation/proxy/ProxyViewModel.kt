@@ -101,7 +101,6 @@ class ProxyViewModel(
         }
     }
 
-    /** Accepts a shared `tg://proxy` or `t.me` link and saves what it describes. */
     fun importLink(link: String) {
         val parsed = ProxyLink.parse(link)
         if (parsed == null) {

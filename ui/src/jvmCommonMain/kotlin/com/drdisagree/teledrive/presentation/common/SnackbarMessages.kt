@@ -8,9 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
 /**
- * Shows each message as it arrives, replacing whatever is on screen. A queue
- * would leave the newest result waiting behind stale text, so the current
- * snackbar is dismissed and the next one shown right away.
+ * Replaces whatever is on screen: a queue would leave the newest result waiting behind stale text.
  */
 @Composable
 fun CollectSnackbarMessages(messages: Flow<UiText>, hostState: SnackbarHostState) {

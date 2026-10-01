@@ -2,7 +2,6 @@ package com.drdisagree.teledrive.core.files
 
 import java.io.OutputStream
 
-/** Writes a finished download where the platform keeps user downloads. */
 interface DownloadWriter {
 
     fun write(

@@ -20,11 +20,7 @@ import com.drdisagree.teledrive.resources.common_backup_uploading
 import com.drdisagree.teledrive.domain.model.BackupState
 import com.drdisagree.teledrive.domain.model.DriveFile
 
-/**
- * Backup state for files that still need attention. A file already in Telegram
- * draws nothing, since that is the normal state and a badge on every row would
- * carry no information.
- */
+/** A file already in Telegram draws nothing: a badge on every row would carry no information. */
 @Composable
 fun BackupStateBadge(file: DriveFile, modifier: Modifier = Modifier) {
     if (file.backupState == BackupState.BACKED_UP) return

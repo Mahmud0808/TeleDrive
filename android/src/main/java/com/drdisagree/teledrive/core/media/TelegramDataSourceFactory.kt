@@ -18,9 +18,8 @@ class TelegramDataSourceFactory(
         DataSource.Factory { TelegramDataSource(telegramClient, remoteFileId) }
 
     /**
-     * For a file stored as parts, streamed as though it were whole. The content
-     * key is read here rather than carried through the UI, which keeps key
-     * material out of state that gets held, compared and recomposed.
+     * The content key is read here rather than carried through the UI, keeping key material out of
+     * composed state.
      */
     fun createParted(
         parts: List<MediaPart>,

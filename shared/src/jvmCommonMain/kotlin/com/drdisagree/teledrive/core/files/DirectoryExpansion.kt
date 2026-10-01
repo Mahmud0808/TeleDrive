@@ -3,9 +3,8 @@ package com.drdisagree.teledrive.core.files
 import java.io.File
 
 /**
- * Lists the files under a picked directory, keeping each one's folder path
- * relative to the directory's parent so the picked folder itself becomes the
- * first segment. Returns null when the reference is not a readable directory.
+ * Paths stay relative to the directory's parent, so the picked folder is the first segment; null
+ * when unreadable.
  */
 fun expandDirectory(reference: String): List<ImportSource>? {
     val root = runCatching { File(reference) }.getOrNull() ?: return null

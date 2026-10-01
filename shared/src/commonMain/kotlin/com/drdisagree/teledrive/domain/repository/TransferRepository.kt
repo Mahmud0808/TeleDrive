@@ -7,34 +7,25 @@ import kotlinx.coroutines.flow.Flow
 
 interface TransferRepository {
 
-    /**
-     * The newest rows of one section. A backup can queue tens of thousands of
-     * transfers, far more than a list can show, so every observer is bounded.
-     */
+    /** Bounded, because a backup can queue tens of thousands of transfers. */
     fun observeSection(section: TransferSection, limit: Int): Flow<List<TransferTask>>
 
     fun observeSectionCount(section: TransferSection): Flow<Int>
 
     fun observeActiveCount(): Flow<Int>
 
-    /** The queued or running transfer that is fetching [fileId], if any. */
     fun observeActiveForFile(fileId: String): Flow<TransferTask?>
 
-    /** Queues an upload of [fileId]'s local copy to the storage chat. */
     suspend fun enqueueUpload(fileId: String, priority: Int = 0): AppResult<String>
 
-    /** Queues every file held only on this device. Returns how many were added. */
     suspend fun enqueuePendingUploads(): AppResult<Int>
 
     /**
-     * Queues a whole backup at once. The checks a single transfer repeats per
-     * file are answered once for the run, and the rows are written in batches,
-     * so a scan of tens of thousands of files does not spend a Telegram round
-     * trip and a separate write on each one.
+     * Checks are answered once per run and rows written in batches, so a large scan avoids a round
+     * trip per file.
      */
     suspend fun enqueueBackupBatch(fileIds: List<String>, sessionId: String): AppResult<Int>
 
-    /** Queues a download of [fileId]'s remote copy into local storage. */
     suspend fun enqueueDownload(fileId: String, priority: Int = 0): AppResult<String>
 
     suspend fun pause(id: String)
@@ -43,12 +34,10 @@ interface TransferRepository {
 
     suspend fun cancel(id: String)
 
-    /** Stops any queued, running or paused transfer belonging to [fileIds]. */
     suspend fun cancelForFiles(fileIds: List<String>)
 
     suspend fun retry(id: String)
 
-    /** Bulk controls applied in one database write so the list updates at once. */
     suspend fun pauseAll()
 
     suspend fun resumeAll()
@@ -57,6 +46,5 @@ interface TransferRepository {
 
     suspend fun clearFinished()
 
-    /** Re-queues transfers left RUNNING by a killed process. */
     suspend fun recoverOrphanedTransfers()
 }

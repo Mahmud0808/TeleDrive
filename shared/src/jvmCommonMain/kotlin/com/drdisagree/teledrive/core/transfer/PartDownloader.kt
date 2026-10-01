@@ -17,12 +17,7 @@ import com.drdisagree.teledrive.core.dispatchers.DispatcherProvider
 import kotlinx.coroutines.withContext
 
 /**
- * Rebuilds a split file. Parts are fetched in order and appended to one file,
- * decrypting each as it arrives, so the result is the file that was uploaded.
- *
- * The partly built file is kept between attempts and its length says how much
- * survived, which is what lets a paused or failed download carry on from the
- * part it reached instead of starting over.
+ * The partly built file is kept between attempts, so a download resumes from the part it reached.
  */
 class PartDownloader(
     private val storagePaths: AppStoragePaths,
@@ -33,13 +28,7 @@ class PartDownloader(
     private val dispatchers: DispatcherProvider
 ) {
 
-    sealed interface Event {
-        data class Progress(val transferredBytes: Long) : Event
-        data class Joining(val partIndex: Int) : Event
-        data class Completed(val localPath: String) : Event
-    }
-
-    fun download(fileId: String, encrypted: Boolean): Flow<Event> = flow {
+    fun download(fileId: String, encrypted: Boolean): Flow<PartDownloadEvent> = flow {
         val parts = filePartDao.partsOf(fileId)
         if (parts.isEmpty()) error("File has no parts on record")
 
@@ -48,7 +37,7 @@ class PartDownloader(
         if (resumeFrom.first == 0) target.delete()
 
         var written = resumeFrom.second
-        emit(Event.Progress(written))
+        emit(PartDownloadEvent.Progress(written))
 
         for (part in parts.drop(resumeFrom.first)) {
             val remoteFileId = part.remoteFileId ?: error("Part ${part.partIndex + 1} is missing")
@@ -56,7 +45,7 @@ class PartDownloader(
             telegramClient.downloadDocument(remoteFileId).collect { event ->
                 when (event) {
                     is TelegramDownloadEvent.Progress ->
-                        emit(Event.Progress(written + event.transferredBytes.coerceAtMost(part.plainSize)))
+                        emit(PartDownloadEvent.Progress(written + event.transferredBytes.coerceAtMost(part.plainSize)))
 
                     is TelegramDownloadEvent.Completed -> downloaded = event.localPath
                 }
@@ -65,14 +54,14 @@ class PartDownloader(
             val source = downloaded?.let(::File)?.takeIf { it.exists() }
                 ?: error("Part ${part.partIndex + 1} did not download")
 
-            emit(Event.Joining(part.partIndex))
+            emit(PartDownloadEvent.Joining(part.partIndex))
             withContext(dispatchers.io) { appendPart(source, target, encrypted) }
 
             written += part.plainSize
-            emit(Event.Progress(written))
+            emit(PartDownloadEvent.Progress(written))
         }
 
-        emit(Event.Completed(target.absolutePath))
+        emit(PartDownloadEvent.Completed(target.absolutePath))
     }
 
     suspend fun discardAssembly(fileId: String) {
@@ -93,10 +82,7 @@ class PartDownloader(
         }
     }
 
-    /**
-     * How much of the file is already assembled. Only whole parts count: a
-     * half-written one cannot be trusted, so it is dropped and fetched again.
-     */
+    /** Only whole parts count: a half-written one cannot be trusted and is fetched again. */
     private fun resumePoint(target: File, parts: List<FilePartEntity>): Pair<Int, Long> {
         if (!target.exists()) return 0 to 0L
         val length = target.length()

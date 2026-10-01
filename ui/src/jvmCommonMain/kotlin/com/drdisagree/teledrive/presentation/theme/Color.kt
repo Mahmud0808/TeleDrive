@@ -4,8 +4,6 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
-/** Blue fallback palette used when dynamic color is unavailable or disabled. */
-
 val BlueLightColorScheme = lightColorScheme(
     primary = Color(0xFF1B6EF3),
     onPrimary = Color(0xFFFFFFFF),
@@ -79,19 +77,3 @@ val BlueDarkColorScheme = darkColorScheme(
     surfaceContainerHigh = Color(0xFF282A2F),
     surfaceContainerHighest = Color(0xFF33353A)
 )
-
-/**
- * Source hues for the storage breakdown. Categorical data needs hues that stay
- * apart from each other, which the scheme's accent roles cannot guarantee, so
- * these are authored rather than derived. Each one is harmonized against the
- * active primary before it is drawn, which shifts it into the Monet palette
- * without collapsing the separation between them.
- */
-object ChartPalette {
-    val Blue = Color(0xFF4F86F7)
-    val Violet = Color(0xFF9B5DE5)
-    val Teal = Color(0xFF00BFA6)
-    val Amber = Color(0xFFF4A62A)
-    val Rose = Color(0xFFF2617A)
-    val Slate = Color(0xFF8A93A6)
-}

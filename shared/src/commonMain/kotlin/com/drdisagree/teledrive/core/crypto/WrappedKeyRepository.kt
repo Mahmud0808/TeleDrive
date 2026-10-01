@@ -1,9 +1,6 @@
 package com.drdisagree.teledrive.core.crypto
 
-/**
- * Persists random raw keys wrapped by a platform master key. Raw keys never
- * touch disk unencrypted; unwrapped copies are cached in memory only.
- */
+/** Raw keys never touch disk unwrapped; unwrapped copies live in memory only. */
 interface WrappedKeyRepository {
 
     fun getOrCreate(name: String, sizeBytes: Int = 32): ByteArray

@@ -81,7 +81,6 @@ class AppNotifications(
         )
     }
 
-    /** Opens the app on [destination], reusing the running task when there is one. */
     fun screenIntent(destination: String, requestCode: Int): PendingIntent {
         val intent = Intent(context, MainActivity::class.java).apply {
             action = ACTION_OPEN_DESTINATION

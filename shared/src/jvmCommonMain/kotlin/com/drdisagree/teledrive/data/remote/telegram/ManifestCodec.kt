@@ -7,10 +7,8 @@ import com.drdisagree.teledrive.core.crypto.WrappedKeyRepository
 import kotlinx.serialization.json.Json
 
 /**
- * Caption wire format:
- *  - plain:     "td1:" + JSON manifest
- *  - encrypted: "tde1:" + base64(AES-GCM(JSON)) using the content key, so a
- *    Telegram-side leak reveals no file names or structure for encrypted files.
+ * Captions are "td1:" plus JSON, or "tde1:" plus base64 AES-GCM of it, so a leak reveals nothing
+ * about encrypted files.
  */
 class ManifestCodec(
     private val streamCrypto: StreamCrypto,
@@ -34,7 +32,6 @@ class ManifestCodec(
         }
     }
 
-    /** Returns null for captions that are not TeleDrive manifests. */
     fun decode(caption: String): RemoteFileManifest? = runCatching {
         when {
             caption.startsWith(PREFIX_PLAIN) ->
@@ -61,10 +58,7 @@ class ManifestCodec(
 
     fun isEncryptedManifest(caption: String): Boolean = caption.startsWith(PREFIX_ENCRYPTED)
 
-    /**
-     * True when the caption is an encrypted manifest this device cannot read
-     * yet, which means the key backup has not been restored.
-     */
+    /** True when the caption is encrypted and the key backup has not been restored yet. */
     fun isLocked(caption: String): Boolean =
         isEncryptedManifest(caption) && !wrappedKeyRepository.exists(CryptoKeys.CONTENT)
 

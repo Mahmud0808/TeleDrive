@@ -11,20 +11,16 @@ import java.io.File
 import java.io.OutputStream
 
 /**
- * Writes finished downloads to the shared Downloads/TeleDrive folder, so they
- * survive uninstall, are reachable from any file manager, and get indexed for
- * the gallery. MediaStore owns the entry on Android 10 and above; older
- * releases and devices with all-files access write the file directly.
+ * Downloads/TeleDrive survives uninstall and gets indexed; MediaStore owns the entry from Android
+ * 10, older releases write directly.
  */
 class MediaStoreDownloadWriter(
     private val context: Context
 ) : DownloadWriter {
 
     /**
-     * Saves one download. [folderPath] mirrors the drive folder the file lives
-     * in, so downloading a folder recreates its tree under Downloads/TeleDrive.
-     * Returns the absolute path of the saved copy, or null when it could not
-     * be written.
+     * [folderPath] mirrors the drive folder, so downloading a folder recreates its tree; null when
+     * the copy could not be written.
      */
     override fun write(
         fileName: String,

@@ -27,11 +27,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastFirstOrNull
 
 /**
- * Long-press-and-drag range selection. The press is handled by the item, which
- * selects itself and becomes the anchor; dragging away extends the selection
- * over everything between the anchor and the finger. Holding near an edge keeps
- * the list scrolling, so a range can run past the viewport. Reported indices
- * are item indices, which the caller maps to its own content.
+ * The pressed item becomes the anchor; holding near an edge keeps the list scrolling so a range can
+ * run past the viewport.
  */
 @Composable
 fun rememberDragSelect(
@@ -134,9 +131,8 @@ private fun dragSelect(
 }
 
 /**
- * Waits out the long-press timeout without consuming anything, so the item
- * under the finger still gets its own long press and becomes the anchor. A
- * move past touch slop means the gesture is a scroll, not a selection.
+ * Consumes nothing while waiting, so the item still gets its long press; moving past touch slop
+ * means a scroll.
  */
 private suspend fun AwaitPointerEventScope.awaitLongPress(down: PointerInputChange): Boolean =
     try {

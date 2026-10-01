@@ -4,19 +4,12 @@ import com.drdisagree.teledrive.domain.model.Exclusion
 import com.drdisagree.teledrive.domain.model.ExclusionType
 
 /**
- * Pure exclusion matching. Paths are compared case-insensitively because
- * Android external storage is case-insensitive in practice.
+ * Paths compare case-insensitively because Android external storage is case-insensitive in
+ * practice.
  */
 class EvaluateExclusionsUseCase {
 
-    data class Candidate(
-        val absolutePath: String,
-        val sizeBytes: Long,
-        val mimeType: String,
-        val isHidden: Boolean
-    )
-
-    operator fun invoke(candidate: Candidate, exclusions: List<Exclusion>): Boolean {
+    operator fun invoke(candidate: ExclusionCandidate, exclusions: List<Exclusion>): Boolean {
         val path = candidate.absolutePath.replace('\\', '/').lowercase()
         val fileName = path.substringAfterLast('/')
         for (exclusion in exclusions) {

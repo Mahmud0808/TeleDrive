@@ -25,7 +25,6 @@ import com.drdisagree.teledrive.resources.info_yes
 import com.drdisagree.teledrive.domain.model.DriveFolder
 import com.drdisagree.teledrive.presentation.common.Formatters
 
-/** Folder counterpart to [FileInfoSheet], with what a folder actually has. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FolderInfoSheet(folder: DriveFolder, onDismiss: () -> Unit) {

@@ -15,10 +15,8 @@ import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
- * Hourly safety net for automatic backup. The media trigger is the fast path,
- * but the system batches those jobs and can drop a replaced one, so this sweep
- * makes sure nothing sits unbacked for long, and re-arms the trigger if it has
- * gone missing.
+ * The system batches media trigger jobs and can drop a replaced one, so this hourly sweep also
+ * re-arms the trigger.
  */
 class MediaSweepWorker(
     appContext: Context,

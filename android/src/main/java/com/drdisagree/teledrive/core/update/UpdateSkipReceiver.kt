@@ -14,9 +14,8 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 /**
- * Silences one version. Later releases are announced as usual, and a manual
- * check still reports the skipped one, so this hides a reminder rather than
- * hiding the update itself.
+ * Hides a reminder, not the update: later releases are announced and a manual check still reports
+ * this one.
  */
 class UpdateSkipReceiver : BroadcastReceiver(), KoinComponent {
 

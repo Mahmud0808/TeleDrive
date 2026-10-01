@@ -4,10 +4,8 @@ import androidx.room.Entity
 import androidx.room.Index
 
 /**
- * One piece of a file too large for a single Telegram message. Parts are whole
- * files in the channel, named with a .001 style suffix, and each carries the
- * plaintext range it covers so a reader can map a position onto the part
- * holding it without downloading anything else.
+ * Each part records the plaintext range it covers, so a position maps to its part without
+ * downloading others.
  */
 @Entity(
     tableName = "file_parts",

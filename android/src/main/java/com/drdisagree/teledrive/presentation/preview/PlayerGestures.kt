@@ -52,18 +52,9 @@ import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 import org.jetbrains.compose.resources.stringResource
 
-private enum class Adjustment { BRIGHTNESS, VOLUME }
-
-private data class AdjustmentLevel(val kind: Adjustment, val level: Float)
-
 /**
- * Touch surface under the controls. A tap toggles the chrome, a vertical drag
- * on the left half sets screen brightness and one on the right half sets media
- * volume, matching what every other video player on the platform does. The
- * readout and the transport buttons share the middle of the screen, so a drag
- * dismisses the chrome and the chrome coming back dismisses the readout. The
- * brightness override lives on the window, so it reverts to the system value
- * when the player leaves the composition.
+ * Left half sets brightness, right half volume; the brightness override lives on the window, so it
+ * reverts when the player leaves.
  */
 @Composable
 fun PlayerGestureArea(

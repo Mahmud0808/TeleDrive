@@ -10,9 +10,8 @@ import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
 /**
- * AES-GCM under a master key stored beside the data, for platforms without an
- * OS keystore. Protects against leaking individual files, not a full copy of
- * the directory; those platforms should grow a real keystore backend.
+ * The master key sits beside the data, so this protects against leaking single files, not a copy of
+ * the whole directory.
  */
 class LocalKeyCredentialCipher(
     storagePaths: AppStoragePaths

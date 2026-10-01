@@ -27,10 +27,8 @@ import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 
 /**
- * Generates and caches thumbnails. Cache files are AES-GCM sealed when
- * thumbnail encryption is enabled, so private media never sits readable in
- * the cache directory. Images are scaled locally; everything else falls back
- * to the thumbnail Telegram already holds for the message.
+ * Cache files are sealed when thumbnail encryption is on; non-images fall back to the thumbnail
+ * Telegram holds.
  */
 class DesktopThumbnailStore(
     private val storagePaths: AppStoragePaths,
@@ -127,7 +125,6 @@ class DesktopThumbnailStore(
         return jpegBytes
     }
 
-    /** A note holding just a link previews as that link's image. */
     private suspend fun linkThumbnail(file: File): BufferedImage? {
         if (file.length() > LINK_NOTE_LIMIT) return null
         if (!settingsRepository.preferences.first().linkPreviews) return null

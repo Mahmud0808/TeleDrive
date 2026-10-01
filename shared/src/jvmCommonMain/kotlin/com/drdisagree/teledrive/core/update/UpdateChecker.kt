@@ -3,16 +3,13 @@ package com.drdisagree.teledrive.core.update
 import com.drdisagree.teledrive.core.common.SafeLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.net.HttpURLConnection
 import java.net.URL
 
 /**
- * Reads the latest GitHub release and compares its tag with the running build.
- * Nothing is sent along with the request: it is an anonymous read of a public
- * endpoint, so a check reveals no more than visiting the releases page.
+ * An anonymous read of a public endpoint, so a check reveals no more than visiting the releases
+ * page.
  */
 class UpdateChecker(
     private val currentVersion: String
@@ -74,15 +71,6 @@ class UpdateChecker(
 
     private fun String.numbers(): List<Int> = split('.', '-', '_')
         .mapNotNull { part -> part.takeWhile(Char::isDigit).toIntOrNull() }
-
-    @Serializable
-    private data class GitHubRelease(
-        @SerialName("tag_name") val tag: String,
-        @SerialName("html_url") val pageUrl: String,
-        val body: String? = null,
-        val draft: Boolean = false,
-        @SerialName("prerelease") val preRelease: Boolean = false
-    )
 
     private companion object {
         const val TAG = "UpdateChecker"

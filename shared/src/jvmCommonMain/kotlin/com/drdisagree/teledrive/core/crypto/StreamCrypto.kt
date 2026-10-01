@@ -10,16 +10,8 @@ import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
 /**
- * Chunked AES-256-GCM for large files, following the segment layout used by
- * well-known streaming AEAD designs: each chunk is sealed independently and its
- * index is bound as associated data, so chunks cannot be dropped or reordered.
- *
- * File layout: MAGIC(4) VERSION(1) SALT(8), then per chunk:
- * length(4, ciphertext length with the top bit set on the last chunk)
- * || ciphertext(+16 tag).
- * Chunk nonce = SALT(8) || chunkIndex(4, big-endian). The associated data
- * carries the chunk index and whether it is the last chunk, so dropped
- * trailing chunks fail authentication instead of decrypting to truncated data.
+ * Layout: MAGIC(4) VERSION(1) SALT(8), then length(4, top bit marks the last) and sealed bytes per
+ * chunk; index and last flag are bound as AAD, so chunks cannot be dropped or reordered.
  */
 class StreamCrypto {
 
@@ -116,9 +108,7 @@ class StreamCrypto {
     }
 
     /**
-     * Frames are a fixed plaintext size, so the sealed bytes holding any given
-     * plaintext offset can be located arithmetically. That is what lets a
-     * player seek inside an encrypted file without reading it from the start.
+     * Fixed-size frames let a seek locate the sealed bytes for any plaintext offset by arithmetic.
      */
     fun headerSize(): Int = MAGIC.size + 1 + SALT_LENGTH
 
@@ -127,7 +117,6 @@ class StreamCrypto {
     fun frameStart(frameIndex: Int): Long =
         headerSize() + frameIndex.toLong() * (LENGTH_BYTES + CHUNK_SIZE + TAG_BYTES)
 
-    /** Sealed length of a frame holding [plainLength] bytes, header included. */
     fun frameStoredSize(plainLength: Int): Int = LENGTH_BYTES + plainLength + TAG_BYTES
 
     fun storedSize(plainSize: Long): Long {
@@ -150,7 +139,6 @@ class StreamCrypto {
         return header.copyOfRange(MAGIC.size + 1, headerSize())
     }
 
-    /** Decrypts one frame given its sealed bytes, length prefix included. */
     fun decryptFrame(
         key: ByteArray,
         salt: ByteArray,
@@ -176,7 +164,6 @@ class StreamCrypto {
         return cipher.doFinal(frame, LENGTH_BYTES, sealedLength)
     }
 
-    /** One-shot helper for small payloads such as thumbnails. */
     fun encryptBytes(key: ByteArray, plaintext: ByteArray): ByteArray {
         val nonce = ByteArray(NONCE_LENGTH).also(secureRandom::nextBytes)
         val cipher = Cipher.getInstance(TRANSFORMATION)

@@ -4,12 +4,13 @@ import com.drdisagree.teledrive.core.crypto.SecureFileDeleter
 import com.drdisagree.teledrive.data.local.entity.FileEntity
 import com.drdisagree.teledrive.data.local.entity.FolderEntity
 import com.drdisagree.teledrive.data.local.entity.FolderTombstoneEntity
+import com.drdisagree.teledrive.data.remote.telegram.RemoteFolderEntry
 import com.drdisagree.teledrive.data.remote.telegram.RemoteFolderState
-import com.drdisagree.teledrive.data.remote.telegram.RemoteFolderState.Entry
-import com.drdisagree.teledrive.data.remote.telegram.RemoteFolderState.Tombstone
+import com.drdisagree.teledrive.data.remote.telegram.RemoteFolderTombstone
 import com.drdisagree.teledrive.domain.model.BackupState
 import com.drdisagree.teledrive.domain.model.FileCategory
 import com.drdisagree.teledrive.domain.repository.TransferRepository
+import com.drdisagree.teledrive.testing.unused
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -56,7 +57,7 @@ class FolderMergeSyncTest {
     fun `a folder deleted elsewhere disappears and its files move to the root`() = runBlocking {
         folders.upsert(folder("x", "Work", changedAt = recent + 1_000))
         database.fileDao().upsert(file("f1", folderId = "x"))
-        telegram.publishFolderState(RemoteFolderState(deleted = listOf(Tombstone("x", recent + 2_000))))
+        telegram.publishFolderState(RemoteFolderState(deleted = listOf(RemoteFolderTombstone("x", recent + 2_000))))
 
         harness.folderState.pull()
 
@@ -70,7 +71,7 @@ class FolderMergeSyncTest {
     @Test
     fun `a folder changed after its deletion elsewhere is kept`() = runBlocking {
         folders.upsert(folder("x", "Work", changedAt = recent + 3_000))
-        telegram.publishFolderState(RemoteFolderState(deleted = listOf(Tombstone("x", recent + 2_000))))
+        telegram.publishFolderState(RemoteFolderState(deleted = listOf(RemoteFolderTombstone("x", recent + 2_000))))
 
         harness.folderState.pull()
 
@@ -82,7 +83,7 @@ class FolderMergeSyncTest {
     fun `a newer subfolder survives its parent's deletion at the root`() = runBlocking {
         folders.upsert(folder("p", "Parent", changedAt = recent + 1_000))
         folders.upsert(folder("c", "Child", parentId = "p", changedAt = recent + 3_000))
-        telegram.publishFolderState(RemoteFolderState(deleted = listOf(Tombstone("p", recent + 2_000))))
+        telegram.publishFolderState(RemoteFolderState(deleted = listOf(RemoteFolderTombstone("p", recent + 2_000))))
 
         harness.folderState.pull()
 
@@ -98,7 +99,7 @@ class FolderMergeSyncTest {
         telegram.publishFolderState(
             RemoteFolderState(
                 folders = listOf(entry("x", "Renamed", recent + 2_000), entry("y", "New", recent + 2_000)),
-                deleted = listOf(Tombstone("z", recent + 2_000))
+                deleted = listOf(RemoteFolderTombstone("z", recent + 2_000))
             )
         )
 
@@ -131,7 +132,7 @@ class FolderMergeSyncTest {
     @Test
     fun `a deletion older than the retention window is ignored`() = runBlocking {
         folders.upsert(folder("x", "Work", changedAt = 1_000))
-        telegram.publishFolderState(RemoteFolderState(deleted = listOf(Tombstone("x", 2_000))))
+        telegram.publishFolderState(RemoteFolderState(deleted = listOf(RemoteFolderTombstone("x", 2_000))))
 
         harness.folderState.pull()
 
@@ -205,7 +206,7 @@ class FolderMergeSyncTest {
         changedAt = changedAt
     )
 
-    private fun entry(id: String, name: String, clock: Long, parentId: String? = null) = Entry(
+    private fun entry(id: String, name: String, clock: Long, parentId: String? = null) = RemoteFolderEntry(
         id = id,
         parentId = parentId,
         name = name,

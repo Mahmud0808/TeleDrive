@@ -9,13 +9,9 @@ interface BackupRepository {
 
     fun observeActiveSession(): Flow<BackupSession?>
 
-    /** When the last backup finished, or null if none ever has. */
     fun observeLastBackupAt(): Flow<Long?>
 
-    /**
-     * Scans backup folders, applies exclusions and incremental rules, then
-     * queues uploads. Returns the session id, or null when nothing to back up.
-     */
+    /** Returns the session id, or null when there is nothing to back up. */
     suspend fun startBackup(trigger: BackupTrigger): AppResult<String?>
 
     suspend fun pauseBackup(sessionId: String)
@@ -24,16 +20,8 @@ interface BackupRepository {
 
     suspend fun cancelBackup(sessionId: String)
 
-    /**
-     * Drops queued or running backup transfers whose source no longer sits in a
-     * selected backup folder, then recounts the running session.
-     */
     suspend fun syncActiveSessionWithSelection()
 
-    /**
-     * Recounts the running session from its transfers. Called at startup so a
-     * session whose transfers all finished while the app was dead settles
-     * instead of showing progress forever.
-     */
+    /** Called at startup so a session whose transfers finished while the app was dead settles. */
     suspend fun refreshActiveSession()
 }

@@ -15,10 +15,7 @@ import com.drdisagree.teledrive.domain.model.TransferType
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.first
 
-/**
- * Runs the shared transfer queue drain as expedited work with a dataSync
- * foreground service, so long transfers survive app death.
- */
+/** Expedited with a dataSync foreground service, so long transfers survive app death. */
 class TransferQueueWorker(
     appContext: Context,
     params: WorkerParameters,

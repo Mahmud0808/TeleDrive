@@ -9,12 +9,8 @@ import com.drdisagree.teledrive.core.common.SafeLog
 import org.koin.android.ext.android.inject
 
 /**
- * Watches MediaStore for new photos and videos through JobScheduler directly.
- *
- * WorkManager was doing this before, but every re-arm churned its job ids and
- * left entries JobScheduler still fired while WorkManager no longer knew them,
- * so triggers were lost. A fixed job id makes re-arming deterministic: the next
- * job replaces the previous one, and the scan itself runs as ordinary work.
+ * JobScheduler directly with a fixed job id: WorkManager churns job ids on re-arm and loses
+ * triggers.
  */
 class MediaTriggerService : JobService() {
 

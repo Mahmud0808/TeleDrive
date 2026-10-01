@@ -99,10 +99,6 @@ import com.drdisagree.teledrive.presentation.components.EmptyState
 import com.drdisagree.teledrive.presentation.components.liftedTopAppBarColors
 import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
 
-/**
- * Drives this account owns. Every channel keeps its own index, folders and
- * backup selection, so switching is instant and nothing is re-downloaded.
- */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ChannelsScreen(
@@ -347,8 +343,8 @@ private fun channelSubtitle(channel: DriveChannel): String = buildString {
 }
 
 /**
- * Deleting a drive destroys every file in it for good, so the name has to be
- * typed out. A tap alone is too easy to make by accident.
+ * Deleting destroys every file in the drive, so the name has to be typed; a tap is too easy by
+ * accident.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable

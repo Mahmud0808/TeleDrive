@@ -1,8 +1,8 @@
 package com.drdisagree.teledrive.data.repository
 
 import com.drdisagree.teledrive.data.remote.telegram.RemoteFolderState
-import com.drdisagree.teledrive.data.remote.telegram.RemoteFolderState.Entry
-import com.drdisagree.teledrive.data.remote.telegram.RemoteFolderState.Tombstone
+import com.drdisagree.teledrive.data.remote.telegram.RemoteFolderEntry
+import com.drdisagree.teledrive.data.remote.telegram.RemoteFolderTombstone
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -44,18 +44,18 @@ class FolderStateMergeTest {
     fun `a deletion removes every copy that is not newer`() {
         val merged = merge(
             local = listOf(entry("x", "Work", clock = 1_000)),
-            remote = RemoteFolderState(deleted = listOf(Tombstone("x", 2_000)))
+            remote = RemoteFolderState(deleted = listOf(RemoteFolderTombstone("x", 2_000)))
         )
 
         assertTrue(merged.folders.none { it.id == "x" })
-        assertEquals(listOf(Tombstone("x", 2_000)), merged.deleted)
+        assertEquals(listOf(RemoteFolderTombstone("x", 2_000)), merged.deleted)
     }
 
     @Test
     fun `a folder changed after its deletion survives and the deletion is dropped`() {
         val merged = merge(
             local = listOf(entry("x", "Work", clock = 3_000)),
-            remote = RemoteFolderState(deleted = listOf(Tombstone("x", 2_000)))
+            remote = RemoteFolderState(deleted = listOf(RemoteFolderTombstone("x", 2_000)))
         )
 
         assertEquals("Work", merged.byId("x").name)
@@ -66,30 +66,30 @@ class FolderStateMergeTest {
     fun `a local deletion removes the remote copy`() {
         val merged = merge(
             local = emptyList(),
-            localDeleted = listOf(Tombstone("x", 2_000)),
+            localDeleted = listOf(RemoteFolderTombstone("x", 2_000)),
             remote = RemoteFolderState(folders = listOf(entry("x", "Work", clock = 1_000)))
         )
 
         assertTrue(merged.folders.isEmpty())
-        assertEquals(listOf(Tombstone("x", 2_000)), merged.deleted)
+        assertEquals(listOf(RemoteFolderTombstone("x", 2_000)), merged.deleted)
     }
 
     @Test
     fun `the latest copy of a deletion is kept`() {
         val merged = merge(
             local = emptyList(),
-            localDeleted = listOf(Tombstone("x", 1_000)),
-            remote = RemoteFolderState(deleted = listOf(Tombstone("x", 4_000)))
+            localDeleted = listOf(RemoteFolderTombstone("x", 1_000)),
+            remote = RemoteFolderState(deleted = listOf(RemoteFolderTombstone("x", 4_000)))
         )
 
-        assertEquals(listOf(Tombstone("x", 4_000)), merged.deleted)
+        assertEquals(listOf(RemoteFolderTombstone("x", 4_000)), merged.deleted)
     }
 
     @Test
     fun `deletions past the retention window are forgotten`() {
         val merged = merge(
             local = emptyList(),
-            remote = RemoteFolderState(deleted = listOf(Tombstone("old", 10), Tombstone("new", 5_000))),
+            remote = RemoteFolderState(deleted = listOf(RemoteFolderTombstone("old", 10), RemoteFolderTombstone("new", 5_000))),
             keepDeletionsSince = 1_000
         )
 
@@ -102,7 +102,7 @@ class FolderStateMergeTest {
             local = listOf(entry("child", "Kept", parentId = "parent", clock = 3_000)),
             remote = RemoteFolderState(
                 folders = listOf(entry("parent", "Gone", clock = 1_000)),
-                deleted = listOf(Tombstone("parent", 2_000))
+                deleted = listOf(RemoteFolderTombstone("parent", 2_000))
             )
         )
 
@@ -116,7 +116,7 @@ class FolderStateMergeTest {
             local = listOf(entry("x", "Mine", clock = 1_000)),
             remote = RemoteFolderState(
                 folders = listOf(
-                    Entry(id = "x", name = "Theirs", createdAt = 1, modifiedAt = 2_000)
+                    RemoteFolderEntry(id = "x", name = "Theirs", createdAt = 1, modifiedAt = 2_000)
                 )
             )
         )
@@ -135,9 +135,9 @@ class FolderStateMergeTest {
     }
 
     private fun merge(
-        local: List<Entry>,
+        local: List<RemoteFolderEntry>,
         remote: RemoteFolderState?,
-        localDeleted: List<Tombstone> = emptyList(),
+        localDeleted: List<RemoteFolderTombstone> = emptyList(),
         keepDeletionsSince: Long = 0
     ) = FolderStateMerge.merge(local, localDeleted, remote, keepDeletionsSince)
 
@@ -148,7 +148,7 @@ class FolderStateMergeTest {
         name: String,
         parentId: String? = null,
         clock: Long = 1_000
-    ) = Entry(
+    ) = RemoteFolderEntry(
         id = id,
         parentId = parentId,
         name = name,

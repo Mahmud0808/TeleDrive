@@ -9,12 +9,8 @@ import com.drdisagree.teledrive.core.common.SafeLog
 import java.io.File
 
 /**
- * Turns a SAF-picked document into a real path the transfer engine can upload
- * and resume from. When the picked document is a file this app can already read
- * directly, that original path is used so the upload does not duplicate the
- * bytes and "Free up space" can reclaim the real copy later. Anything else
- * (cloud providers, in-memory providers) is copied into app storage, because a
- * content URI permission is not guaranteed to survive a reboot.
+ * Files the app can already read are used in place so nothing is duplicated; anything else is
+ * copied, since a content URI grant may not survive a reboot.
  */
 class AndroidFileImporter(
     private val context: Context
@@ -70,7 +66,6 @@ class AndroidFileImporter(
         }
     }
 
-    /** Drops a staged copy the drive turned out not to need. */
     override fun discard(imported: ImportedFile) {
         if (isStaged(imported.path)) File(imported.path).delete()
     }

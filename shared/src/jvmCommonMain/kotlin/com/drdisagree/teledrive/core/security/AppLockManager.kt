@@ -6,11 +6,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 
-/**
- * Session lock state. The app locks on launch and after the configured
- * inactivity timeout in the background. Biometric verification itself happens
- * in the UI layer; this class only owns the locked/unlocked state.
- */
+/** Owns only the locked state; biometric verification happens in the UI layer. */
 class AppLockManager(
     private val settingsRepository: SettingsRepository
 ) {

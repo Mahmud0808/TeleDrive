@@ -1,9 +1,5 @@
 package com.drdisagree.teledrive.core.files
 
-/**
- * Strips Markdown down to the words it decorates. Used where a note's text has
- * to read as a plain label, such as the file name taken from its first line.
- */
 object Markdown {
 
     private val BLOCK_PREFIX = Regex("""^\s*(#{1,6}\s+|>\s+|[-*+]\s+\[[ xX]]\s+|[-*+]\s+|\d+[.)]\s+)""")

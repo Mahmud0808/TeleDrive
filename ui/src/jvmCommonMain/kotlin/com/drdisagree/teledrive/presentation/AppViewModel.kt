@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.drdisagree.teledrive.core.security.AppLockManager
 import com.drdisagree.teledrive.core.telegram.TelegramAuthState
-import com.drdisagree.teledrive.domain.model.AppTheme
 import com.drdisagree.teledrive.domain.model.BackupTrigger
 import com.drdisagree.teledrive.domain.model.LayoutDensity
 import com.drdisagree.teledrive.domain.repository.BackupRepository
@@ -33,18 +32,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.data.repository.LocalDataWiper
 import kotlinx.coroutines.NonCancellable
-import com.drdisagree.teledrive.domain.model.AppLanguage
 import kotlinx.coroutines.withContext
-
-data class AppUiState(
-    val loading: Boolean = true,
-    val onboardingComplete: Boolean = false,
-    val theme: AppTheme = AppTheme.SYSTEM,
-    val language: AppLanguage = AppLanguage.SYSTEM,
-    val dynamicColor: Boolean = true,
-    val compactLayout: Boolean = false,
-    val locked: Boolean = false
-)
 
 class AppViewModel(
     private val settingsRepository: SettingsRepository,
@@ -168,7 +156,6 @@ class AppViewModel(
         }
     }
 
-    /** Drops the unusable session and sends the user back to signing in. */
     fun resetSession() {
         viewModelScope.launch {
             withContext(NonCancellable) {

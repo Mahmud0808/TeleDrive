@@ -5,9 +5,8 @@ import android.content.Context
 import android.content.Intent
 
 /**
- * Reschedules periodic work after a reboot. WorkManager re-registers its own
- * periodic jobs, so this receiver only exists to trigger process start early
- * enough for pending transfer recovery.
+ * Only exists to start the process early enough for pending transfer recovery; WorkManager
+ * re-registers its own jobs.
  */
 class BootCompletedReceiver : BroadcastReceiver() {
 

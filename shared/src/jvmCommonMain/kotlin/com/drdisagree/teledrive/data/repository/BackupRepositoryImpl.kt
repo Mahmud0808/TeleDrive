@@ -31,13 +31,14 @@ import com.drdisagree.teledrive.domain.repository.ExclusionRepository
 import com.drdisagree.teledrive.domain.repository.FileRepository
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.usecase.DecideBackupActionUseCase
-import com.drdisagree.teledrive.domain.usecase.EvaluateExclusionsUseCase
+import com.drdisagree.teledrive.domain.usecase.ExclusionCandidate
+import com.drdisagree.teledrive.domain.usecase.ExistingBackupRecord
+import java.io.File
+import java.util.UUID
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import java.io.File
-import java.util.UUID
 
 class BackupRepositoryImpl(
     private val backupDao: BackupDao,
@@ -125,7 +126,7 @@ class BackupRepositoryImpl(
             val record = backupDao.recordByPath(candidate.absolutePath)
             val mime = MimeTypes.fromFileName(candidate.name)
             val decision = decideBackupAction(
-                candidate = EvaluateExclusionsUseCase.Candidate(
+                candidate = ExclusionCandidate(
                     absolutePath = candidate.absolutePath,
                     sizeBytes = candidate.length(),
                     mimeType = mime,
@@ -133,7 +134,7 @@ class BackupRepositoryImpl(
                 ),
                 modifiedAt = candidate.lastModified(),
                 existingRecord = record?.let {
-                    DecideBackupActionUseCase.ExistingRecord(
+                    ExistingBackupRecord(
                         it.sizeBytes, it.modifiedAt, it.contentHash
                     )
                 },
@@ -178,8 +179,8 @@ class BackupRepositoryImpl(
     }
 
     /**
-     * A file uploaded by hand already carries its remote mapping, so a folder
-     * added to backup later must claim it instead of uploading a second copy.
+     * A file uploaded by hand already has a remote mapping, so adding its folder to backup claims
+     * it instead.
      */
     private suspend fun adoptLinkedUpload(candidate: File): Boolean {
         val existing = fileDao.byLocalPath(candidate.absolutePath) ?: return false
@@ -191,10 +192,7 @@ class BackupRepositoryImpl(
         return true
     }
 
-    /**
-     * A file deleted inside the app but still on disk is restored rather than
-     * uploaded again, so the drive keeps one copy with its original history.
-     */
+    /** A file trashed in the app but still on disk is restored instead of uploaded again. */
     private suspend fun reviveTrashedUpload(candidate: File): Boolean {
         val revived = fileRepository.reviveTrashedCopy(
             localPath = candidate.absolutePath,
@@ -207,9 +205,8 @@ class BackupRepositoryImpl(
     }
 
     /**
-     * After a reinstall the drive is rebuilt from Telegram, so uploaded files
-     * have no path on this device. Matching them back to the identical local
-     * file avoids uploading a second copy and keeps the local copy reclaimable.
+     * After a reinstall uploaded files have no local path; matching the identical file avoids a
+     * second upload.
      */
     private suspend fun adoptUploadedCopy(candidate: File, chatId: Long?): Boolean {
         val matches = fileDao.unlinkedRemoteMatches(candidate.name, candidate.length(), chatId)
@@ -240,17 +237,13 @@ class BackupRepositoryImpl(
         )
     }
 
-    /**
-     * Mirrors the device folder structure at the drive root, so backed-up
-     * files share the same tree as manual uploads instead of a separate silo.
-     */
+    /** Backed-up files share the drive tree with manual uploads instead of a separate silo. */
     private suspend fun backupFolderIdFor(source: File): String? {
         val parent = source.parentFile?.absolutePath ?: return null
         val relative = relativeToStorageRoot(parent)
         return if (relative.isEmpty()) null else folderPathResolver.resolveOrCreate(relative)
     }
 
-    /** Strips the primary or removable volume mount point from [absolutePath]. */
     private fun relativeToStorageRoot(absolutePath: String): String {
         val normalized = absolutePath.trimEnd('/')
         val primary = storagePaths.externalStorageRoot?.absolutePath?.trimEnd('/')
@@ -267,10 +260,8 @@ class BackupRepositoryImpl(
     }
 
     /**
-     * An existing row for this path may describe an older version of the file.
-     * Its size, timestamp, and hash must be refreshed before the upload is
-     * queued, otherwise the backup record written on completion carries stale
-     * values and every following scan re-uploads the file.
+     * Refreshes size, timestamp and hash first, or the backup record is stale and every later scan
+     * uploads again.
      */
     private suspend fun registerFile(
         source: File,
@@ -396,9 +387,8 @@ class BackupRepositoryImpl(
     }
 
     /**
-     * Only the item itself is hidden by its name. A marker file such as
-     * .nomedia says how a gallery should index a folder, never whether its
-     * contents are worth keeping, so it excludes nothing but itself.
+     * A marker like .nomedia says how a gallery indexes a folder, not whether its contents matter,
+     * so only the item itself is hidden.
      */
     private fun isHiddenName(file: File): Boolean = file.name.startsWith('.')
 

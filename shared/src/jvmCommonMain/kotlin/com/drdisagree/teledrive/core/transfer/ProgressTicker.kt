@@ -1,13 +1,8 @@
 package com.drdisagree.teledrive.core.transfer
 
 /**
- * Paces progress writes to one a second and reports the speed as an average
- * over that second rather than over whatever moment the last update landed in.
- *
- * Telegram reports bytes far more often than a person can read them, and a
- * reading taken over a fraction of a second swings with every burst, which
- * makes the speed and the time left jump about. Averaging the interval, then
- * easing the result into the previous one, gives a figure that settles.
+ * Averages each one-second interval and eases into the last reading, so speed and time left stop
+ * jumping.
  */
 class ProgressTicker(
     private val intervalMs: Long = INTERVAL_MS,
@@ -24,7 +19,6 @@ class ProgressTicker(
         speed = 0
     }
 
-    /** The speed to record, or null when the next tick is not due yet. */
     fun tick(bytes: Long, now: Long): Long? {
         val elapsed = now - lastTick
         if (elapsed < intervalMs) return null

@@ -12,11 +12,7 @@ import com.drdisagree.teledrive.resources.session_broken_action
 import com.drdisagree.teledrive.resources.session_broken_message
 import com.drdisagree.teledrive.resources.session_broken_title
 
-/**
- * Shown when the stored session cannot be read, which leaves the app unable to
- * reach Telegram at all. There is nothing to go back to, so the dialog has no
- * way out other than signing in again.
- */
+/** No way out but signing in again, since the app cannot reach Telegram at all. */
 @Composable
 fun SessionBrokenDialog(onSignInAgain: () -> Unit) {
     AlertDialog(

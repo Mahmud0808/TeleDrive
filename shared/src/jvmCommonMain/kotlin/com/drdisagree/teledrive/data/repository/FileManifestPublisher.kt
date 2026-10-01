@@ -10,12 +10,7 @@ import com.drdisagree.teledrive.data.local.entity.FileEntity
 import com.drdisagree.teledrive.data.remote.telegram.ManifestCodec
 import com.drdisagree.teledrive.data.remote.telegram.RemoteFileManifest
 
-/**
- * Rewrites the caption manifest of already-uploaded files so organisational
- * state (name, folder, favorite, hidden, archived, trash) lives in Telegram
- * and survives a local wipe. Local rows are the fast path; the caption is the
- * durable copy.
- */
+/** Local rows are the fast path; the caption is the durable copy that survives a wipe. */
 class FileManifestPublisher(
     private val telegramClient: TelegramClient,
     private val manifestCodec: ManifestCodec,

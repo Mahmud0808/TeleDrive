@@ -26,10 +26,8 @@ import com.drdisagree.teledrive.domain.model.DriveChannel
 import kotlin.math.absoluteValue
 
 /**
- * Channel picture, or the same placeholder Telegram itself draws when a chat
- * has none: initials over one of seven gradients picked from the chat id.
- * Telegram stores no image in that case, so matching means reproducing its
- * palette rather than theming the circle like the rest of the app.
+ * Telegram stores no image for its placeholder, so its seven gradients are reproduced rather than
+ * themed.
  */
 @Composable
 fun ChannelAvatar(
@@ -77,7 +75,6 @@ fun ChannelAvatar(
     }
 }
 
-/** First letters of the first two words, as Telegram builds them. */
 private fun initialsOf(label: String): String {
     val words = label.trim().split(' ', '\t').filter { it.isNotBlank() }
     return when {

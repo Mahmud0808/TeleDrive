@@ -33,11 +33,7 @@ import kotlinx.coroutines.flow.flowOn
 import net.lingala.zip4j.ZipFile
 import java.io.File
 
-/**
- * Turns a [DriveFile] into displayable preview content, fetching remote files
- * into the preview cache when they are small enough. Original local files are
- * always plaintext; only remote copies and caches are ever encrypted.
- */
+/** Original local files are always plaintext; only remote copies and caches are ever encrypted. */
 class PreviewContentResolver(
     private val storagePaths: AppStoragePaths,
     private val telegramClient: TelegramClient,
@@ -110,9 +106,8 @@ class PreviewContentResolver(
             }
         }
 
-        /* Only small files a viewer cannot show any other way are fetched on
-           open, so browsing stays instant while a large transfer never starts
-           without the user asking. */
+        // Only small files are fetched on open, so browsing stays instant and a large transfer
+        // never starts unasked.
         val autoFetchable = file.sizeBytes <= AUTO_PREVIEW_LIMIT &&
                 (MimeTypes.isImage(file.mimeType) ||
                         MimeTypes.isText(file.mimeType) ||
@@ -180,7 +175,7 @@ class PreviewContentResolver(
         }
         return runCatching {
             val entries = ZipFile(path).fileHeaders.map { header ->
-                PreviewContent.ArchiveEntry(
+                ArchiveEntry(
                     name = header.fileName,
                     sizeBytes = header.uncompressedSize,
                     compressedBytes = header.compressedSize,

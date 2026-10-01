@@ -1,25 +1,19 @@
 package com.drdisagree.teledrive.data.repository
 
 import com.drdisagree.teledrive.data.remote.telegram.RemoteFolderState
-import com.drdisagree.teledrive.data.remote.telegram.RemoteFolderState.Entry
-import com.drdisagree.teledrive.data.remote.telegram.RemoteFolderState.Tombstone
+import com.drdisagree.teledrive.data.remote.telegram.RemoteFolderEntry
+import com.drdisagree.teledrive.data.remote.telegram.RemoteFolderTombstone
 
-/**
- * Combines this device's folder tree with the one in the channel, folder by
- * folder, so a device that has not caught up cannot erase changes made
- * elsewhere. The newer clock wins, and a deletion beats any copy that is not
- * newer than it. A folder changed after its deletion survives and the
- * deletion is dropped.
- */
+/** Per folder the newer clock wins; a deletion beats any copy that is not newer than it. */
 internal object FolderStateMerge {
 
     fun merge(
-        local: List<Entry>,
-        localDeleted: List<Tombstone>,
+        local: List<RemoteFolderEntry>,
+        localDeleted: List<RemoteFolderTombstone>,
         remote: RemoteFolderState?,
         keepDeletionsSince: Long
     ): RemoteFolderState {
-        val newest = LinkedHashMap<String, Entry>()
+        val newest = LinkedHashMap<String, RemoteFolderEntry>()
         remote?.folders.orEmpty().forEach { newest[it.id] = it }
         local.forEach { entry ->
             val other = newest[entry.id]

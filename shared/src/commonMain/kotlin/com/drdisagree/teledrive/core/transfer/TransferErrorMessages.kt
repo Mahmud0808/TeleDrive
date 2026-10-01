@@ -1,6 +1,5 @@
 package com.drdisagree.teledrive.core.transfer
 
-/** Human-readable transfer failure texts, localized by each platform. */
 interface TransferErrorMessages {
 
     val keyMissing: String

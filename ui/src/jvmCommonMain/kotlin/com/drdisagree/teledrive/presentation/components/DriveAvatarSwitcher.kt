@@ -34,12 +34,8 @@ import kotlin.math.absoluteValue
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
- * Drive avatar that cycles drives on a vertical swipe, the way mail apps flip
- * accounts. The outgoing picture slides toward the swipe and fades over a
- * bordered placeholder; the incoming one enters from the opposite edge once
- * the switch has landed, so the animation never shows the wrong drive. With a
- * single drive the picture just springs back. Taps pass through to the parent
- * untouched.
+ * The incoming drive enters only once the switch has landed, so the animation never shows the wrong
+ * drive.
  */
 @Composable
 fun DriveAvatarSwitcher(

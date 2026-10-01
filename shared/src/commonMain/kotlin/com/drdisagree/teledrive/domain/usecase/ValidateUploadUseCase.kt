@@ -3,10 +3,6 @@ package com.drdisagree.teledrive.domain.usecase
 import com.drdisagree.teledrive.core.common.AppError
 import com.drdisagree.teledrive.core.telegram.TelegramLimits
 
-/**
- * Pre-flight checks before a transfer is queued, so obvious failures surface
- * immediately instead of near the end of a long upload.
- */
 class ValidateUploadUseCase {
 
     /**

@@ -7,8 +7,7 @@ import com.sun.jna.ptr.IntByReference
 import java.awt.Window
 
 /**
- * Windows leaves the title bar light no matter what the app draws, so the
- * dark preference is pushed down to the compositor. Attribute 20 is
+ * Windows keeps the title bar light whatever the app draws. Attribute 20 is
  * DWMWA_USE_IMMERSIVE_DARK_MODE; builds before 20H1 used 19.
  */
 object WindowsTitleBar {

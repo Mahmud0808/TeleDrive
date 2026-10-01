@@ -1,6 +1,5 @@
 package com.drdisagree.teledrive.presentation.preview
 
-import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.RectF
 import android.graphics.pdf.PdfRenderer
@@ -59,10 +58,8 @@ import kotlinx.coroutines.withContext
 import java.io.File
 
 /**
- * PDF viewer backed by the platform PdfRenderer. Pages render lazily and are
- * kept as bitmaps only while visible. Rendering is serialized because
- * PdfRenderer is not thread-safe. Pinch zooms the whole document; a two finger
- * drag, or a one finger drag while zoomed, pans it.
+ * Rendering is serialized because PdfRenderer is not thread-safe; bitmaps are kept only while
+ * visible.
  */
 @Composable
 fun PdfPreview(path: String, modifier: Modifier = Modifier) {
@@ -239,8 +236,8 @@ private fun PdfPage(
 }
 
 /**
- * Link rectangles are only exposed by the platform from Android 15 on. Older
- * releases render the page without them rather than shipping a PDF parser.
+ * The platform only exposes link rectangles from Android 15; older releases render without them
+ * rather than ship a parser.
  */
 private fun linksOf(page: PdfRenderer.Page): List<PdfLink> {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) return emptyList()
@@ -275,22 +272,9 @@ private fun RectF.toLink(
     targetPage = targetPage
 )
 
-private data class RenderedPage(val bitmap: Bitmap, val links: List<PdfLink>)
-
-/** Link bounds as fractions of the page, so they survive zoom and resize. */
-private data class PdfLink(
-    val left: Float,
-    val top: Float,
-    val right: Float,
-    val bottom: Float,
-    val uri: String?,
-    val targetPage: Int?
-)
-
 private const val TARGET_WIDTH = 1080
 private const val PLACEHOLDER_RATIO = 0.7f
 
-/** Keeps the zoomed page covering the viewport, so no empty edge shows. */
 private fun clampPdfOffset(target: Offset, scale: Float, viewport: IntSize): Offset {
     val maxX = viewport.width * (scale - 1f) / 2f
     val maxY = viewport.height * (scale - 1f) / 2f

@@ -3,25 +3,15 @@ package com.drdisagree.teledrive.domain.usecase
 import com.drdisagree.teledrive.domain.model.BackupDecision
 import com.drdisagree.teledrive.domain.model.Exclusion
 
-/**
- * Incremental backup decision for a single candidate file. Change detection
- * uses size + mtime first and falls back to the content hash when only the
- * mtime changed, so touched-but-identical files are not re-uploaded.
- */
+/** Checks size and mtime first, and the content hash only when the mtime alone changed. */
 class DecideBackupActionUseCase(
     private val evaluateExclusions: EvaluateExclusionsUseCase
 ) {
 
-    data class ExistingRecord(
-        val sizeBytes: Long,
-        val modifiedAt: Long,
-        val contentHash: String?
-    )
-
     operator fun invoke(
-        candidate: EvaluateExclusionsUseCase.Candidate,
+        candidate: ExclusionCandidate,
         modifiedAt: Long,
-        existingRecord: ExistingRecord?,
+        existingRecord: ExistingBackupRecord?,
         exclusions: List<Exclusion>,
         maxFileSizeBytes: Long,
         contentHashProvider: () -> String?

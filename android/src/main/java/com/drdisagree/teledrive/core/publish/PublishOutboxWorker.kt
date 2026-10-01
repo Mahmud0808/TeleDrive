@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 
-/** Runs the shared publish outbox drain as background work. */
 class PublishOutboxWorker(
     appContext: Context,
     params: WorkerParameters,

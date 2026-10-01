@@ -28,11 +28,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.drdisagree.teledrive.core.files.Urls
 
-/**
- * Renders the Markdown subset the note editor writes: headings, bold, italic,
- * strikethrough, inline code, links, bullets and quotes. Anything it does not
- * recognize stays as written, so no text is ever lost to the parser.
- */
+/** Anything it does not recognize stays as written, so no text is lost to the parser. */
 @Composable
 fun MarkdownText(
     text: String,
@@ -54,11 +50,7 @@ fun MarkdownText(
     }
 }
 
-/**
- * One line of Markdown. Block markers can wrap each other, so a quote holding
- * a list holding a heading is rendered by recursing on what is left after the
- * outer marker is taken off.
- */
+/** Block markers nest, so what follows an outer marker is rendered by recursion. */
 @Composable
 private fun MarkdownBlock(
     line: String,
@@ -191,9 +183,8 @@ private fun inlineMarkdown(line: String, linkColor: Color): AnnotatedString =
     buildAnnotatedString { appendMarkdown(line, linkColor, 0) }
 
 /**
- * Styles nest, so what a marker wraps is parsed again instead of appended
- * verbatim: bold holding a link, a link holding code, and so on. Code is the
- * exception, since Markdown inside it is meant to stay as written.
+ * Styles nest, so wrapped text is parsed again; code is the exception, since Markdown inside it
+ * stays as written.
  */
 private fun AnnotatedString.Builder.appendMarkdown(
     line: String,
@@ -244,7 +235,6 @@ private fun AnnotatedString.Builder.appendMarkdown(
     appendPlain(line.substring(cursor), linkColor)
 }
 
-/** Bare links still become tappable, without any markup around them. */
 private fun AnnotatedString.Builder.appendPlain(
     segment: String,
     linkColor: Color
@@ -277,7 +267,6 @@ private inline fun AnnotatedString.Builder.withStyle(
     pop(index)
 }
 
-/** Pinch scaling applied to every line of a rendered note. */
 fun TextStyle.scaledBy(scale: Float): TextStyle =
     if (scale == 1f) this else copy(fontSize = fontSize * scale, lineHeight = lineHeight * scale)
 

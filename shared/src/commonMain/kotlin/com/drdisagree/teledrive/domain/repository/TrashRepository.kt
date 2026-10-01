@@ -8,16 +8,11 @@ interface TrashRepository {
 
     fun observeTrash(): Flow<List<TrashItem>>
 
-    /**
-     * Marks folders that were left behind inside an already trashed parent, so
-     * their contents show under the folder instead of loose in the trash list.
-     */
+    /** So contents left inside an already trashed parent show under it, not loose in the trash. */
     suspend fun repairTrashTree()
 
-    /** How many trashed items sit inside each of [folderIds]. */
     suspend fun trashedChildCounts(folderIds: List<String>): Map<String, Int>
 
-    /** Trashed folders and files that went to the trash inside [folderId]. */
     suspend fun trashedChildren(folderId: String): List<TrashItem>
 
     suspend fun moveFilesToTrash(ids: List<String>): AppResult<Unit>
@@ -28,13 +23,12 @@ interface TrashRepository {
 
     suspend fun restoreFolder(id: String): AppResult<Unit>
 
-    /** Deletes local copies and remote messages. Irreversible. */
+    /** Irreversible: deletes local copies and remote messages. */
     suspend fun deleteFilesPermanently(ids: List<String>): AppResult<Unit>
 
     suspend fun deleteFolderPermanently(id: String): AppResult<Unit>
 
     suspend fun emptyTrash(): AppResult<Unit>
 
-    /** Removes trash items older than [days]; returns the number deleted. */
     suspend fun clearExpired(days: Int): AppResult<Int>
 }

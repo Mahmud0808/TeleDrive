@@ -9,10 +9,7 @@ import com.drdisagree.teledrive.resources.backup_folder_movies
 import com.drdisagree.teledrive.resources.backup_folder_pictures
 import org.jetbrains.compose.resources.StringResource
 
-/**
- * Well-known media folders offered as one-tap backup sources. Paths are
- * resolved at runtime because the external storage root differs per device.
- */
+/** Resolved at runtime because the external storage root differs per device. */
 enum class StandardBackupFolder(
     val labelRes: StringResource,
     private val directory: String

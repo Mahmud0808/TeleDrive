@@ -7,9 +7,10 @@ import com.drdisagree.teledrive.data.local.dao.CacheDao
 import com.drdisagree.teledrive.data.local.dao.ThumbnailDao
 import com.drdisagree.teledrive.data.local.entity.CacheEntryType
 import com.drdisagree.teledrive.domain.repository.CacheRepository
+import com.drdisagree.teledrive.domain.repository.CacheStats
+import java.io.File
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import java.io.File
 
 class CacheRepositoryImpl(
     private val storagePaths: AppStoragePaths,
@@ -19,12 +20,12 @@ class CacheRepositoryImpl(
     private val thumbnailMemoryCache: ThumbnailMemoryCache
 ) : CacheRepository {
 
-    private val stats = MutableStateFlow(CacheRepository.CacheStats(0, 0, 0, 0, 0))
+    private val stats = MutableStateFlow(CacheStats(0, 0, 0, 0, 0))
 
-    override fun observeStats(): Flow<CacheRepository.CacheStats> = stats
+    override fun observeStats(): Flow<CacheStats> = stats
 
     override suspend fun refreshStats() {
-        stats.value = CacheRepository.CacheStats(
+        stats.value = CacheStats(
             thumbnailBytes = thumbnailDao.totalSizeBytes(),
             previewBytes = cacheDao.sizeByType(CacheEntryType.PREVIEW),
             streamBytes = cacheDao.sizeByType(CacheEntryType.STREAM),

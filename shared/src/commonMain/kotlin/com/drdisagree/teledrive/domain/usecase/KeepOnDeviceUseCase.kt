@@ -9,12 +9,8 @@ class KeepOnDeviceUseCase(
 ) {
 
     /**
-     * Pinning promises an offline copy, so a file with none is queued. It does
-     * not reconcile first: that decides "missing" from File.exists(), which is
-     * false for any path this process cannot see, and would re-download copies
-     * that are sitting on the device already.
-     *
-     * Returns how many downloads were queued.
+     * Does not reconcile first: File.exists() is false for paths this process cannot see,
+     * so it would re-download copies already on the device.
      */
     suspend operator fun invoke(
         fileIds: List<String>,

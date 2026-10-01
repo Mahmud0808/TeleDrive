@@ -8,9 +8,7 @@ import kotlinx.coroutines.sync.withLock
 import java.util.UUID
 
 /**
- * Maps between folder ids and slash-separated paths used in remote manifests.
- * Creating missing segments is serialized to avoid duplicate folders when the
- * sync engine and uploads race.
+ * Creating missing segments is serialized so sync and uploads cannot race into duplicate folders.
  */
 class FolderPathResolver(
     private val folderDao: FolderDao,
@@ -33,7 +31,6 @@ class FolderPathResolver(
         return segments.joinToString("/")
     }
 
-    /** Resolves a path without creating anything. Null when it does not exist. */
     suspend fun resolveExisting(path: String): String? {
         if (path.isBlank()) return null
         var parentId: String? = null
@@ -46,16 +43,12 @@ class FolderPathResolver(
         return parentId
     }
 
-    /** True when a folder row with this id exists locally. */
     suspend fun exists(folderId: String?): Boolean =
         folderId != null && folderDao.byId(folderId) != null
 
     /**
-     * Resolves a path, creating missing folders. Empty path means root. A
-     * created leaf takes [leafId] so it keeps the identity the other device
-     * gave it, or the folder state document later adds an empty twin. A leaf
-     * id deleted for good is not reused, or its deletion would remove the
-     * folder again on the next merge.
+     * A created leaf keeps [leafId], the identity another device gave it, unless that id was
+     * deleted for good.
      */
     suspend fun resolveOrCreate(
         path: String,

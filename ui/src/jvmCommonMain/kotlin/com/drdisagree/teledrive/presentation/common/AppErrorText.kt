@@ -30,7 +30,6 @@ import com.drdisagree.teledrive.resources.error_timed_out
 import com.drdisagree.teledrive.resources.error_transfer_incomplete
 import com.drdisagree.teledrive.resources.error_unknown
 
-/** Maps typed errors to short, user-facing text. */
 fun AppError.toUiText(): UiText = when (this) {
     is AppError.NetworkUnavailable -> UiText.Resource(Res.string.error_no_internet)
     is AppError.Timeout -> UiText.Resource(Res.string.error_timed_out)

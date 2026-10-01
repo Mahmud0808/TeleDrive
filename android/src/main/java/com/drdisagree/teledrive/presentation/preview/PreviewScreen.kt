@@ -213,8 +213,8 @@ fun PreviewScreen(
         pageCount = { state.files.size }
     )
     val pagedFile = state.files[pagerState.currentPage.coerceAtMost(state.files.lastIndex)]
-    /* The pager holds a snapshot, so the open row is read live: a rename or an
-       edit made elsewhere shows without reopening. */
+    // The pager holds a snapshot, so the open row is read live and edits made elsewhere show at
+    // once.
     val liveFile by viewModel.observeFile(pagedFile.id)
         .collectAsStateWithLifecycle(initialValue = pagedFile)
     val currentFile = liveFile ?: pagedFile
@@ -304,7 +304,6 @@ fun PreviewScreen(
                         }
                     },
                     actions = {
-                        // Only text has anything the note editor can open.
                         if (MimeTypes.isText(currentFile.mimeType)) {
                             IconButton(
                                 onClick = {
@@ -491,8 +490,8 @@ private fun PreviewPage(
     storedTextScale: Float,
     onTextScaleChange: (Float) -> Unit
 ) {
-    /* One state for the screen's life: re-creating it on save would leave the
-       gesture handler writing to a state nothing renders. */
+    // One state for the screen's life: re-creating it on save would leave the gesture writing to a
+    // state nothing renders.
     var textScale by remember { mutableFloatStateOf(storedTextScale) }
     LaunchedEffect(storedTextScale) {
         if (storedTextScale != textScale) textScale = storedTextScale
@@ -650,8 +649,7 @@ private fun PreviewPage(
 }
 
 /**
- * Content in the viewer draws edge to edge under the overlaid toolbar and the
- * system bars, so scrollable previews pad themselves instead of being clipped.
+ * Previews draw edge to edge under the toolbar and system bars, so scrollable ones pad themselves.
  */
 @Composable
 private fun previewContentPadding(): PaddingValues =
@@ -869,10 +867,9 @@ private fun ArchiveRow(
 }
 
 /**
- * ZIP stores a flat list of paths, so the tree is derived from the names.
- * Folders without an entry of their own are created from the paths below them.
+ * ZIP stores flat paths, so folders without their own entry are created from the paths below them.
  */
-private fun buildArchiveTree(entries: List<PreviewContent.ArchiveEntry>): ArchiveNode {
+private fun buildArchiveTree(entries: List<ArchiveEntry>): ArchiveNode {
     val root = ArchiveNode(path = "", name = "", isDirectory = true)
     for (entry in entries) {
         val segments = entry.name.split(SEPARATOR).filter { it.isNotEmpty() }
@@ -932,21 +929,6 @@ private fun flattenArchive(
     return out
 }
 
-private class ArchiveNode(
-    val path: String,
-    val name: String,
-    val isDirectory: Boolean,
-    var sizeBytes: Long = 0,
-    var compressedBytes: Long = 0,
-    val children: LinkedHashMap<String, ArchiveNode> = LinkedHashMap()
-)
-
-private data class ArchiveRowState(
-    val node: ArchiveNode,
-    val depth: Int,
-    val expanded: Boolean
-)
-
 private const val SEPARATOR = "/"
 private const val ROW_FADE_MS = 180
 private const val CHEVRON_ROTATE_MS = 220
@@ -972,7 +954,6 @@ private fun shareFile(context: Context, file: DriveFile, chooserTitle: String) {
     )
 }
 
-/** Height the overlaid preview toolbar covers at the top of the screen. */
 val PreviewTopBarHeight = 64.dp
 
 private fun openUrl(context: Context, url: String) {

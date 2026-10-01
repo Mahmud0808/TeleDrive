@@ -15,7 +15,7 @@ class EvaluateExclusionsUseCaseTest {
         size: Long = 1000,
         mime: String = "image/jpeg",
         hidden: Boolean = false
-    ) = EvaluateExclusionsUseCase.Candidate(path, size, mime, hidden)
+    ) = ExclusionCandidate(path, size, mime, hidden)
 
     private fun exclusion(type: ExclusionType, value: String, enabled: Boolean = true) =
         Exclusion("id", type, value, enabled, 0)

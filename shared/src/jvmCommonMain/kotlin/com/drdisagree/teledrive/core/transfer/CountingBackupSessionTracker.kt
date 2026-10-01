@@ -4,11 +4,7 @@ import com.drdisagree.teledrive.data.local.dao.BackupDao
 import com.drdisagree.teledrive.data.local.dao.TransferDao
 import com.drdisagree.teledrive.domain.model.BackupSessionStatus
 
-/**
- * Recomputes a backup session from the transfers that belong to it. Counting
- * live rows instead of incrementing counters keeps the session honest when
- * transfers are canceled, for example after a folder is unselected mid-run.
- */
+/** Counts live rows instead of incrementing, so canceled transfers keep the session honest. */
 open class CountingBackupSessionTracker(
     private val transferDao: TransferDao,
     private val backupDao: BackupDao

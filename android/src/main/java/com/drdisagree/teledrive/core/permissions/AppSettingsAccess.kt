@@ -5,7 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
 
-/** Opens the app's own system settings page, the way back from a permanent denial. */
+/** The only way back from a permanent denial. */
 fun openAppSettings(context: Context) {
     runCatching {
         context.startActivity(

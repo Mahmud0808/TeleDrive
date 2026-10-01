@@ -19,10 +19,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /**
- * Watches MediaStore while the app process is alive. The WorkManager content
- * trigger still covers the background case, but the system schedules that job
- * and can hold it for minutes; this picks a new shot up straight away whenever
- * the app is running, which is when the user is watching for it.
+ * The WorkManager trigger covers the background but the system can hold it for minutes; this
+ * catches a new shot at once while the app runs.
  */
 class MediaStoreWatcher(
     private val context: Context,

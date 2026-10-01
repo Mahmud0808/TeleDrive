@@ -11,13 +11,8 @@ import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
 
 /**
- * Reads a file split across several Telegram messages as though it were one.
- *
- * A position in the original file is mapped to the part holding it, so seeking
- * fetches only that part. Encrypted parts are sealed in fixed size frames, so a
- * seek decrypts the one frame it lands in rather than the whole part. As the
- * read approaches the end of a part the next one starts buffering, so playback
- * carries across the boundary without stalling.
+ * A seek fetches only the part holding the position, and the next part starts buffering before the
+ * current one ends.
  */
 class PartedMediaByteSource(
     private val telegramClient: TelegramClient,
@@ -26,14 +21,6 @@ class PartedMediaByteSource(
     private val encrypted: Boolean,
     private val contentKey: ByteArray?
 ) : MediaByteSource {
-
-    private class OpenPart(
-        val part: MediaPart,
-        val index: Int,
-        val fileId: Int,
-        val storedSize: Long,
-        val salt: ByteArray?
-    )
 
     private var open: OpenPart? = null
     private var preloaded: Int = -1
@@ -76,10 +63,6 @@ class PartedMediaByteSource(
         telegramClient.readFilePart(fileId, position, count).takeIf { it.isNotEmpty() }
     }.getOrNull()
 
-    /**
-     * Frames are a fixed plaintext size, so the sealed bytes covering a position
-     * are found by arithmetic instead of by reading from the start of the part.
-     */
     private suspend fun readEncrypted(active: OpenPart, within: Long, count: Int): ByteArray {
         val key = contentKey ?: throw IOException("Encryption key missing")
         val salt = active.salt ?: throw IOException("Encrypted part has no header")
@@ -132,7 +115,6 @@ class PartedMediaByteSource(
         return OpenPart(part, index, info.fileId, info.sizeBytes, salt).also { open = it }
     }
 
-    /** Starts the next part buffering before the current one runs out. */
     private suspend fun preloadNext(part: MediaPart, within: Long) {
         val nextIndex = parts.indexOf(part) + 1
         val next = parts.getOrNull(nextIndex) ?: return

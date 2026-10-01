@@ -429,9 +429,8 @@ class FileRepositoryImpl(
     }
 
     /**
-     * Queues a caption rewrite for every file under [folderId], subfolders
-     * included, without walking the files themselves: a folder rename can
-     * cover thousands of captions and none of them block the caller.
+     * Marks rows by folder instead of walking files: a rename can cover thousands of captions
+     * without blocking the caller.
      */
     private suspend fun markFolderContentsDirty(folderId: String) {
         var frontier = listOf(folderId)
@@ -590,7 +589,6 @@ class FileRepositoryImpl(
     override suspend fun readNote(fileId: String): AppResult<String> {
         val entity = fileDao.byId(fileId) ?: return AppResult.Failure(AppError.NotFound)
         entity.localPath?.let(noteStore::read)?.let { return AppResult.Success(it) }
-        // Saving replaces the file, but the editor still has to show what is there.
         val fetched = fetchNoteBody(entity) ?: return AppResult.Failure(AppError.NoRemoteCopy)
         return AppResult.Success(fetched)
     }
@@ -621,7 +619,6 @@ class FileRepositoryImpl(
         return body
     }
 
-    /** A note with no title borrows the link's host, or its first line. */
     private fun fallbackTitle(body: String): String {
         val trimmed = body.trim()
         val firstLine = trimmed.lineSequence().firstOrNull { it.isNotBlank() }.orEmpty().trim()
@@ -639,9 +636,7 @@ class FileRepositoryImpl(
         val source = File(localPath)
         if (!source.exists() || !source.isFile) return null
 
-        /* Re-importing the very same path is the commonest duplicate of all,
-           and it needs no hashing to recognize. Rows without a remote copy do
-           not count: an interrupted upload must not block its own retry. */
+        // Rows without a remote copy do not count, so an interrupted upload can be retried.
         fileDao.byLocalPath(source.absolutePath)
             ?.takeIf { it.trashedAt == null && it.messageId != null }
             ?.let { return it.toDomain() }

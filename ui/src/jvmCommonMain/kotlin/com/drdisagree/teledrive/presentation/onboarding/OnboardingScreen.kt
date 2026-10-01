@@ -361,10 +361,7 @@ fun OnboardingScreen(
     }
 }
 
-/**
- * Shown only when the account already holds more than one drive, so the user
- * says which one this device opens before anything is indexed.
- */
+/** Shown only when the account holds more than one drive, before anything is indexed. */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun ChannelSelectStep(
@@ -497,10 +494,6 @@ private fun StepHeader(step: OnboardingStep, modifier: Modifier = Modifier) {
     }
 }
 
-/**
- * Every onboarding step is laid out the same way: hero shape, title, supporting
- * line, then whatever that step needs. Only the content block differs.
- */
 @Composable
 private fun OnboardingPage(
     icon: ImageVector? = null,
@@ -640,8 +633,7 @@ private fun CredentialsStep(
 }
 
 /**
- * The way out for anyone whose network blocks Telegram outright, offered where
- * they first stall rather than buried in a screen they cannot reach yet.
+ * Offered where users with a blocked network first stall, not in a screen they cannot reach yet.
  */
 @Composable
 private fun BlockedNetworkCard(onOpenProxy: () -> Unit) {
@@ -794,11 +786,10 @@ private fun QrStep(
 ) {
     var openFailed by remember { mutableStateOf(false) }
 
-    /* The QR payload is a tg: link, so a Telegram app on this same device can
-       confirm the login directly. Scanning is only needed across devices. */
+    // The QR payload is a tg: link, so Telegram on this device can confirm directly.
     val telegramLinkOpener = LocalTelegramLinkOpener.current
     val canConfirmHere = telegramLinkOpener.canOpenTelegram
-    /* One route at a time: showing both at once reads like two required steps. */
+    // One route at a time: both at once reads like two required steps.
     var scanning by rememberSaveable(canConfirmHere) { mutableStateOf(!canConfirmHere) }
 
     OnboardingPage(
@@ -1133,7 +1124,6 @@ private fun CountryPickerSheet(
 }
 
 
-/** Explains where the code actually went, as Telegram reported it. */
 @Composable
 private fun codeDeliveryText(channel: CodeDeliveryChannel, target: String): String =
     when (channel) {
@@ -1557,7 +1547,7 @@ private val PREFIX_GAP = 4.dp
 private val SPINNER_SIZE = 20.dp
 private val SPINNER_STROKE = 2.dp
 
-/* White frame behind the code: scanners expect dark modules on light. */
+// Scanners expect dark modules on light.
 private val QR_SURFACE = Color.White
 private const val QR_WIDTH_FRACTION = 0.8f
 private val QR_PADDING = 16.dp

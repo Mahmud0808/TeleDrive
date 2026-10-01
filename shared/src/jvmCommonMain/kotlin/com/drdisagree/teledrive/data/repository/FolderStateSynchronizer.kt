@@ -1,10 +1,10 @@
 package com.drdisagree.teledrive.data.repository
 
-import com.drdisagree.teledrive.core.files.AppStoragePaths
 import com.drdisagree.teledrive.core.common.SafeLog
 import com.drdisagree.teledrive.core.crypto.CryptoKeys
 import com.drdisagree.teledrive.core.crypto.StreamCrypto
 import com.drdisagree.teledrive.core.crypto.WrappedKeyRepository
+import com.drdisagree.teledrive.core.files.AppStoragePaths
 import com.drdisagree.teledrive.core.telegram.RemoteDocument
 import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.core.telegram.TelegramDownloadEvent
@@ -14,20 +14,19 @@ import com.drdisagree.teledrive.data.local.dao.FolderDao
 import com.drdisagree.teledrive.data.local.dao.FolderTombstoneDao
 import com.drdisagree.teledrive.data.local.entity.FolderEntity
 import com.drdisagree.teledrive.data.local.entity.FolderTombstoneEntity
+import com.drdisagree.teledrive.data.remote.telegram.RemoteFolderEntry
 import com.drdisagree.teledrive.data.remote.telegram.RemoteFolderState
+import com.drdisagree.teledrive.data.remote.telegram.RemoteFolderTombstone
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
+import java.io.File
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
-import java.io.File
 
 /**
- * Mirrors the folder tree into a single document in the storage chat. File
- * captions only carry a folder path, so empty folders, folder ids, and folder
- * flags would otherwise be lost when local data is wiped.
- *
- * Pushes are debounced because a bulk operation can touch many folders.
+ * File captions only carry a folder path, so this document keeps empty folders, ids and flags
+ * across a wipe.
  */
 class FolderStateSynchronizer(
     private val storagePaths: AppStoragePaths,
@@ -43,22 +42,20 @@ class FolderStateSynchronizer(
     private val mutex = Mutex()
 
     /**
-     * Uploads this device's tree merged with the one already in the channel,
-     * and keeps the merge locally too. A document that exists but cannot be
-     * read without the content key is replaced, as it always was, because
-     * waiting for a key that may never come would block every folder change.
+     * A document unreadable without the content key is replaced, since waiting for that key would
+     * block every folder change.
      */
     suspend fun push() = mutex.withLock {
         val chatId = storageChatId()
         val existing = findStateDocument(chatId)
         val remote = existing?.let { document ->
             when (val read = read(document)) {
-                is RemoteRead.Ok -> read.state
-                RemoteRead.Unreadable -> {
+                is RemoteFolderRead.Ok -> read.state
+                RemoteFolderRead.Unreadable -> {
                     SafeLog.w(TAG, "Folder state unreadable, replacing it")
                     null
                 }
-                RemoteRead.Unavailable -> error("Folder state download failed")
+                RemoteFolderRead.Unavailable -> error("Folder state download failed")
             }
         }
         val state = merged(chatId, remote)
@@ -89,9 +86,8 @@ class FolderStateSynchronizer(
     }
 
     /**
-     * The tree names folders the owner chose, so it is sealed with the same
-     * content key as the files whenever encryption is on. Older plaintext
-     * documents stay readable because the sealed form carries a magic header.
+     * Sealed with the content key when encryption is on; older plaintext documents stay readable by
+     * the magic header.
      */
     private fun seal(payload: ByteArray): ByteArray {
         val key = wrappedKeyRepository.get(CryptoKeys.CONTENT) ?: return payload
@@ -111,45 +107,40 @@ class FolderStateSynchronizer(
         }.getOrNull()
     }
 
-    /**
-     * Brings other devices' folder changes into the local tree without ever
-     * publishing anything, so applying them cannot echo back. Skipped while
-     * local changes wait to publish, since [push] merges those itself.
-     */
+    /** Never publishes, so applying other devices' changes cannot echo back. */
     suspend fun pull(): Int = mutex.withLock {
         if (folderDao.pendingPublishCount() > 0) return@withLock 0
         val chatId = storageChatId()
         val document = findStateDocument(chatId) ?: return@withLock 0
-        val remote = (read(document) as? RemoteRead.Ok)?.state ?: return@withLock 0
+        val remote = (read(document) as? RemoteFolderRead.Ok)?.state ?: return@withLock 0
         applyLocally(chatId, merged(chatId, remote))
     }
 
-    private suspend fun read(document: RemoteDocument): RemoteRead {
+    private suspend fun read(document: RemoteDocument): RemoteFolderRead {
         var localPath: String? = null
         telegramClient.downloadDocument(document.remoteFileId).collect { event ->
             if (event is TelegramDownloadEvent.Completed) localPath = event.localPath
         }
         val blob = localPath?.let(::File)?.takeIf { it.exists() }?.readBytes()
-            ?: return RemoteRead.Unavailable
-        val payload = unseal(blob) ?: return RemoteRead.Unreadable
+            ?: return RemoteFolderRead.Unavailable
+        val payload = unseal(blob) ?: return RemoteFolderRead.Unreadable
         return runCatching { json.decodeFromString(RemoteFolderState.serializer(), payload) }
-            .fold({ RemoteRead.Ok(it) }, { RemoteRead.Unreadable })
+            .fold({ RemoteFolderRead.Ok(it) }, { RemoteFolderRead.Unreadable })
     }
 
     private suspend fun merged(chatId: Long, remote: RemoteFolderState?): RemoteFolderState =
         FolderStateMerge.merge(
             local = folderDao.allFolders(chatId).map { it.toEntry() },
             localDeleted = tombstoneDao.inChat(chatId).map {
-                RemoteFolderState.Tombstone(it.id, it.deletedAt)
+                RemoteFolderTombstone(it.id, it.deletedAt)
             },
             remote = remote,
             keepDeletionsSince = deletionCutoff()
         )
 
     /**
-     * Existing rows are updated rather than replaced: a REPLACE deletes the
-     * row first, and the folder foreign keys would take its children and
-     * the folder of every file inside with it.
+     * Updates instead of REPLACE: REPLACE deletes the row first, and the foreign keys would take
+     * its subfolders with it.
      */
     private suspend fun applyLocally(chatId: Long, state: RemoteFolderState): Int {
         var changed = 0
@@ -215,7 +206,7 @@ class FolderStateSynchronizer(
 
     private fun deletionCutoff(): Long = System.currentTimeMillis() - DELETION_RETENTION_MS
 
-    private fun FolderEntity.toEntry() = RemoteFolderState.Entry(
+    private fun FolderEntity.toEntry() = RemoteFolderEntry(
         id = id,
         parentId = parentId,
         name = name,
@@ -229,15 +220,9 @@ class FolderStateSynchronizer(
         changedAt = changedAt
     )
 
-    private sealed interface RemoteRead {
-        data class Ok(val state: RemoteFolderState) : RemoteRead
-        data object Unreadable : RemoteRead
-        data object Unavailable : RemoteRead
-    }
-
     private fun depthOf(
-        entry: RemoteFolderState.Entry,
-        all: List<RemoteFolderState.Entry>
+        entry: RemoteFolderEntry,
+        all: List<RemoteFolderEntry>
     ): Int {
         var depth = 0
         var parentId = entry.parentId

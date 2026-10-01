@@ -3,8 +3,8 @@ package com.drdisagree.teledrive.presentation.trash
 import com.drdisagree.teledrive.domain.model.TrashItem
 
 /**
- * One line of the trash tree. Only top-level rows can be selected, because
- * restoring or deleting a folder always takes everything inside it with it.
+ * Only top-level rows can be selected, because restoring or deleting a folder takes its contents
+ * along.
  */
 data class TrashRow(
     val item: TrashItem,

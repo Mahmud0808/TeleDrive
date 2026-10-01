@@ -222,7 +222,6 @@ fun AppNavHost(
     }
 }
 
-/** The rail stacks destinations vertically, so switching tabs moves up or down. */
 private fun tabEnterFor(vertical: Boolean, forward: Boolean) =
     if (vertical) NavigationTransitions.tabEnterVertical(forward)
     else NavigationTransitions.tabEnter(forward)
@@ -231,11 +230,7 @@ private fun tabExitFor(vertical: Boolean, forward: Boolean) =
     if (vertical) NavigationTransitions.tabExitVertical(forward)
     else NavigationTransitions.tabExit(forward)
 
-/**
- * Screens that sit under the bottom bar reserve its height for their whole
- * lifetime. Reading it per screen rather than from the current destination
- * keeps an outgoing screen's padding steady while it animates away.
- */
+/** Read per screen, so an outgoing screen's padding stays steady while it animates away. */
 @Composable
 private fun UnderBottomBar(content: @Composable () -> Unit) {
     CompositionLocalProvider(

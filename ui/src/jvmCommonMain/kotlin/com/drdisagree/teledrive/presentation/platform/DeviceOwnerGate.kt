@@ -2,10 +2,7 @@ package com.drdisagree.teledrive.presentation.platform
 
 import androidx.compose.runtime.staticCompositionLocalOf
 
-/**
- * Asks for the device owner before a sensitive change. Platforms without a
- * secure lock confirm immediately, otherwise there would be no way to recover.
- */
+/** Platforms without a secure lock confirm immediately, or there would be no way to recover. */
 fun interface DeviceOwnerGate {
 
     fun require(

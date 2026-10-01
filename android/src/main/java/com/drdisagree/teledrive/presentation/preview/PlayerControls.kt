@@ -30,9 +30,7 @@ import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Audiotrack
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.FitScreen
 import androidx.compose.material.icons.filled.Forward10
-import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PictureInPictureAlt
@@ -41,13 +39,9 @@ import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.RepeatOne
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.Replay10
-import androidx.compose.material.icons.filled.ScreenLockLandscape
-import androidx.compose.material.icons.filled.ScreenLockPortrait
-import androidx.compose.material.icons.filled.ScreenRotation
 import androidx.compose.material.icons.filled.SlowMotionVideo
 import androidx.compose.material.icons.filled.Subtitles
 import androidx.compose.material.icons.filled.SubtitlesOff
-import androidx.compose.material.icons.filled.ZoomOutMap
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledIconButton
@@ -114,9 +108,8 @@ import kotlin.math.abs
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
- * Playback controls drawn in Compose over the video surface. The Media3
- * controller is not used: its layout ignores window insets, leaves no side
- * padding, and anchors its settings popup to the top of the view.
+ * Not the Media3 controller: it ignores window insets, leaves no side padding and anchors its popup
+ * to the top.
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -157,9 +150,8 @@ fun PlayerControls(
     val activity = LocalActivity.current
 
     /**
-     * Streaming from Telegram means a seek, or the first frames of a file, can
-     * take a moment. Showing play there reads as "nothing happened", so the
-     * button reports that the player is waiting on data instead.
+     * A seek on a stream can take a moment, so the button reports waiting for data instead of
+     * showing play.
      */
     val waitingForData = playbackState == Player.STATE_BUFFERING ||
             (playWhenReady && !playing && !ended && playbackState != Player.STATE_IDLE)
@@ -595,7 +587,6 @@ fun PlayerControls(
     }
 }
 
-
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun TransportRow(
@@ -737,40 +728,6 @@ private fun playerSecondaryColor(): Color =
     } else {
         MaterialTheme.colorScheme.onSurfaceVariant
     }
-
-/** Video scaling applied to the surface, cycled from the controls. */
-enum class PlayerResizeMode(val icon: ImageVector, val description: String) {
-    FIT(Icons.Filled.FitScreen, "Scaling: fit"),
-    ZOOM(Icons.Filled.ZoomOutMap, "Scaling: crop to fill"),
-    FILL(Icons.Filled.Fullscreen, "Scaling: stretch");
-
-    fun next(): PlayerResizeMode = entries[(ordinal + 1) % entries.size]
-}
-
-/** Screen orientation while a video is open, cycled from the controls. */
-private enum class PlayerRotation(
-    val icon: ImageVector,
-    val description: String,
-    val orientation: Int
-) {
-    AUTO(
-        Icons.Filled.ScreenRotation,
-        "Rotation: follow device",
-        ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-    ),
-    LANDSCAPE(
-        Icons.Filled.ScreenLockLandscape,
-        "Rotation: locked landscape",
-        ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-    ),
-    PORTRAIT(
-        Icons.Filled.ScreenLockPortrait,
-        "Rotation: locked portrait",
-        ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-    );
-
-    fun next(): PlayerRotation = entries[(ordinal + 1) % entries.size]
-}
 
 private fun speedLabel(speed: Float): String =
     if (speed % 1f == 0f) "${speed.toInt()}x" else "${speed}x"

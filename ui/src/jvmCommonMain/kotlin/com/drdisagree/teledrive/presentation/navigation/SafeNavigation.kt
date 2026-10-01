@@ -5,9 +5,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavOptionsBuilder
 
 /**
- * Compose keeps handing taps to a screen while its exit transition runs, so a
- * fast double tap fires the same destination twice and stacks it. Navigating
- * only from a resumed entry drops the extra taps.
+ * Compose keeps delivering taps during exit transitions, so a double tap would stack the
+ * destination twice.
  */
 private val NavHostController.isReadyForNavigation: Boolean
     get() = currentBackStackEntry?.lifecycle?.currentState?.isAtLeast(Lifecycle.State.RESUMED)

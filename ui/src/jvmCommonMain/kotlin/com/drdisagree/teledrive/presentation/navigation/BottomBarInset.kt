@@ -5,28 +5,18 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
- * Height the bottom navigation bar overlays on top of the current screen.
- * Screens add it to their scroll content padding instead of being resized, so
- * showing or hiding the bar never changes the viewport or the scroll position.
+ * Added to scroll padding instead of resizing the screen, so showing the bar never moves the
+ * viewport.
  */
 val LocalBottomBarInset = compositionLocalOf { 0.dp }
 
 /**
- * Height the bar would occupy in this layout, whether or not the current
- * screen sits under it. Layouts that navigate with a rail leave it at zero.
- * Screens resolve their own inset from this once, so a route change never
- * retimes the padding of a screen that is still on its way out.
+ * Resolved once per screen, so a route change never retimes the padding of a screen on its way out.
  */
 val LocalBottomBarHeight = compositionLocalOf { 0.dp }
 
-/**
- * Bar height above the system navigation inset: 12dp margin, the 64dp bar,
- * and another 12dp margin. Screens add this to their own bottom padding.
- */
+/** 12dp margin, the 64dp bar, and another 12dp margin. */
 val BottomBarHeight: Dp = 88.dp
 
-/**
- * Extra lift for a floating action button. Scaffold already parks it above the
- * system inset with its own margin, so it needs less than the full bar height.
- */
+/** Scaffold already parks a FAB above the system inset with its own margin. */
 val FabBottomBarInset: Dp = BottomBarHeight - 20.dp

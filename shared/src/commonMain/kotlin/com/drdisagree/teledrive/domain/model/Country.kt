@@ -1,13 +1,11 @@
 package com.drdisagree.teledrive.domain.model
 
-/** A dialling destination, as Telegram itself lists them. */
 data class Country(
     val isoCode: String,
     val name: String,
     val callingCode: String
 ) {
 
-    /** Flag drawn from the regional indicators for the ISO code. */
     val flag: String
         get() = isoCode
             .uppercase()

@@ -27,15 +27,6 @@ import com.drdisagree.teledrive.resources.player_track_unsupported
 import org.jetbrains.compose.resources.stringResource
 import java.util.Locale
 
-data class PlayerTrack(
-    val group: Tracks.Group,
-    val index: Int,
-    val label: String,
-    val language: String,
-    val selected: Boolean,
-    val supported: Boolean
-)
-
 fun Tracks.playerTracks(type: Int, fallbackPrefix: String): List<PlayerTrack> {
     var position = 0
     return groups.filter { it.type == type }.flatMap { group ->
