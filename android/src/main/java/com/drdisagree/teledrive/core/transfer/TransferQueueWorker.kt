@@ -10,7 +10,6 @@ import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import com.drdisagree.teledrive.R
 import com.drdisagree.teledrive.core.common.AppNotifications
-import com.drdisagree.teledrive.data.local.dao.TransferDao
 import com.drdisagree.teledrive.domain.model.TransferType
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.first
@@ -19,14 +18,13 @@ import kotlinx.coroutines.flow.first
 class TransferQueueWorker(
     appContext: Context,
     params: WorkerParameters,
-    private val transferDao: TransferDao,
     private val drainer: TransferQueueDrainer,
     private val settingsRepository: SettingsRepository,
     private val appNotifications: AppNotifications
 ) : CoroutineWorker(appContext, params) {
 
     override suspend fun doWork(): Result {
-        if (transferDao.nextQueued(1).isEmpty()) return Result.success()
+        if (!drainer.hasRunnableWork()) return Result.success()
         appNotifications.createChannels()
         runCatching { setForeground(getForegroundInfo()) }
 

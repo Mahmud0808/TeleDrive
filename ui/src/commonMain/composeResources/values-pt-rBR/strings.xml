@@ -243,6 +243,8 @@
     <!-- Home -->
     <string name="home_active_transfers">%1$d transferências ativas</string>
     <string name="home_backing_up">Fazendo backup…</string>
+    <string name="home_backup_waiting_charger">Aguardando carregador</string>
+    <string name="home_backup_waiting_wifi">Aguardando Wi-Fi</string>
     <string name="home_backing_up_new_files">Fazendo backup de novos arquivos</string>
     <string name="home_backup_all_in_telegram">Todos os arquivos estão no Telegram</string>
     <string name="home_backup_at">Último backup %1$s</string>

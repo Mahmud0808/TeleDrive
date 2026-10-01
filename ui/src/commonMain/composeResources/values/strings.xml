@@ -243,6 +243,8 @@
     <!-- Home -->
     <string name="home_active_transfers">%1$d active transfers</string>
     <string name="home_backing_up">Backing up…</string>
+    <string name="home_backup_waiting_charger">Waiting for charger</string>
+    <string name="home_backup_waiting_wifi">Waiting for Wi-Fi</string>
     <string name="home_backing_up_new_files">Backing up new files</string>
     <string name="home_backup_all_in_telegram">Every file is in Telegram</string>
     <string name="home_backup_at">Last backup %1$s</string>

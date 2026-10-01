@@ -119,7 +119,10 @@ class SettingsViewModel(
             if (current.linkPreviews != previous.linkPreviews) {
                 cacheRepository.clearLinkThumbnails()
             }
-            if (current.allowMeteredTransfers != previous.allowMeteredTransfers) {
+            if (current.allowMeteredTransfers != previous.allowMeteredTransfers ||
+                current.backupChargingOnly != previous.backupChargingOnly ||
+                current.backupWifiOnly != previous.backupWifiOnly
+            ) {
                 transferScheduler.rekick(current.allowMeteredTransfers)
             }
             if (current.updateCheckEnabled != previous.updateCheckEnabled) {

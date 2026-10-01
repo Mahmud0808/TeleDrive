@@ -6,9 +6,10 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.drdisagree.teledrive.data.local.entity.TransferEntity
-import com.drdisagree.teledrive.domain.model.TransferState
-import kotlinx.coroutines.flow.Flow
 import com.drdisagree.teledrive.domain.model.TransferStage
+import com.drdisagree.teledrive.domain.model.TransferState
+import com.drdisagree.teledrive.domain.model.TransferType
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TransferDao {
@@ -76,6 +77,15 @@ interface TransferDao {
 
     @Query("SELECT * FROM transfers WHERE state = 'QUEUED' ORDER BY priority DESC, createdAt ASC LIMIT :limit")
     suspend fun nextQueued(limit: Int): List<TransferEntity>
+
+    @Query(
+        """SELECT * FROM transfers WHERE state = 'QUEUED' AND type != :type
+           ORDER BY priority DESC, createdAt ASC LIMIT :limit"""
+    )
+    suspend fun nextQueuedExcept(type: TransferType, limit: Int): List<TransferEntity>
+
+    @Query("SELECT EXISTS(SELECT 1 FROM transfers WHERE state = 'QUEUED' AND type = :type)")
+    suspend fun hasQueued(type: TransferType): Boolean
 
     @Query("SELECT COUNT(*) FROM transfers WHERE state IN ('QUEUED', 'RUNNING')")
     fun observeActiveCount(): Flow<Int>

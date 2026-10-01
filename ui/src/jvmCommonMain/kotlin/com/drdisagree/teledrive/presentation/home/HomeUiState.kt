@@ -2,6 +2,7 @@ package com.drdisagree.teledrive.presentation.home
 
 import com.drdisagree.teledrive.core.permissions.AppPermission
 import com.drdisagree.teledrive.core.telegram.TelegramConnectionState
+import com.drdisagree.teledrive.domain.model.BackupHold
 import com.drdisagree.teledrive.domain.model.BackupSession
 import com.drdisagree.teledrive.domain.model.DriveChannel
 import com.drdisagree.teledrive.domain.model.DriveFile
@@ -29,6 +30,7 @@ data class HomeUiState(
     val rebuilding: Boolean = false,
     val appLockEnabled: Boolean = false,
     val activeTransferCount: Int = 0,
+    val backupHold: BackupHold? = null,
     val activeChannel: DriveChannel? = null,
     val storage: List<StorageSlice> = emptyList(),
     val autoBackupEnabled: Boolean = false,

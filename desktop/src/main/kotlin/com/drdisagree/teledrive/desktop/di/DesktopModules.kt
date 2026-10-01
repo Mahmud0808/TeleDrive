@@ -18,22 +18,24 @@ import com.drdisagree.teledrive.core.dispatchers.DispatcherProvider
 import com.drdisagree.teledrive.core.files.AppStoragePaths
 import com.drdisagree.teledrive.core.files.DownloadWriter
 import com.drdisagree.teledrive.core.files.FileImporter
-import com.drdisagree.teledrive.core.files.PendingShare
 import com.drdisagree.teledrive.core.files.LocalCopyDeleter
+import com.drdisagree.teledrive.core.files.PendingShare
 import com.drdisagree.teledrive.core.files.sharedFilesModule
 import com.drdisagree.teledrive.core.media.MediaMetadataExtractor
 import com.drdisagree.teledrive.core.media.ThumbnailMemoryCache
 import com.drdisagree.teledrive.core.media.ThumbnailStore
 import com.drdisagree.teledrive.core.network.NetworkMonitor
 import com.drdisagree.teledrive.core.permissions.PermissionChecker
+import com.drdisagree.teledrive.core.power.PowerMonitor
 import com.drdisagree.teledrive.core.proxy.ProxyProbe
-import com.drdisagree.teledrive.core.security.AppLockManager
 import com.drdisagree.teledrive.core.publish.PublishOutboxDrainer
 import com.drdisagree.teledrive.core.publish.PublishScheduler
+import com.drdisagree.teledrive.core.security.AppLockManager
 import com.drdisagree.teledrive.core.telegram.DesktopTelegramClient
 import com.drdisagree.teledrive.core.telegram.TdlibDatabaseKeyProvider
 import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.core.telegram.TelegramPacer
+import com.drdisagree.teledrive.core.transfer.BackupResumeScheduler
 import com.drdisagree.teledrive.core.transfer.BackupSessionTracker
 import com.drdisagree.teledrive.core.transfer.CountingBackupSessionTracker
 import com.drdisagree.teledrive.core.transfer.MaintenanceScheduler
@@ -60,12 +62,12 @@ import com.drdisagree.teledrive.data.repository.repositoryModule
 import com.drdisagree.teledrive.desktop.BuildInfo
 import com.drdisagree.teledrive.desktop.DesktopPlatformCapabilities
 import com.drdisagree.teledrive.desktop.crypto.DpapiCredentialCipher
-import com.drdisagree.teledrive.desktop.data.DesktopLocalDataWiper
 import com.drdisagree.teledrive.desktop.crypto.LocalKeyCredentialCipher
+import com.drdisagree.teledrive.desktop.data.DesktopLocalDataWiper
 import com.drdisagree.teledrive.desktop.files.DesktopDownloadWriter
 import com.drdisagree.teledrive.desktop.files.DesktopFileImporter
-import com.drdisagree.teledrive.desktop.files.DesktopPendingShare
 import com.drdisagree.teledrive.desktop.files.DesktopLocalCopyDeleter
+import com.drdisagree.teledrive.desktop.files.DesktopPendingShare
 import com.drdisagree.teledrive.desktop.files.DesktopStandardFolderPaths
 import com.drdisagree.teledrive.desktop.files.DesktopStoragePaths
 import com.drdisagree.teledrive.desktop.media.DesktopMediaMetadataExtractor
@@ -75,9 +77,11 @@ import com.drdisagree.teledrive.desktop.media.MediaStreamServer
 import com.drdisagree.teledrive.desktop.media.NoopThumbnailMemoryCache
 import com.drdisagree.teledrive.desktop.network.DesktopNetworkMonitor
 import com.drdisagree.teledrive.desktop.permissions.DesktopPermissionChecker
+import com.drdisagree.teledrive.desktop.power.DesktopPowerMonitor
 import com.drdisagree.teledrive.desktop.publish.DesktopPublishScheduler
-import com.drdisagree.teledrive.desktop.transfer.DesktopTransferErrorMessages
+import com.drdisagree.teledrive.desktop.transfer.DesktopBackupResumeScheduler
 import com.drdisagree.teledrive.desktop.transfer.DesktopMaintenanceScheduler
+import com.drdisagree.teledrive.desktop.transfer.DesktopTransferErrorMessages
 import com.drdisagree.teledrive.desktop.transfer.DesktopTransferScheduler
 import com.drdisagree.teledrive.domain.usecase.useCaseModule
 import com.drdisagree.teledrive.presentation.di.sharedUiModule
@@ -121,6 +125,7 @@ val desktopModule = module {
     singleOf(::DesktopPlatformCapabilities) bind PlatformCapabilities::class
     singleOf(::PublishOutboxDrainer)
     singleOf(::DesktopNetworkMonitor) bind NetworkMonitor::class
+    singleOf(::DesktopPowerMonitor) bind PowerMonitor::class
     singleOf(::DesktopTransferErrorMessages) bind TransferErrorMessages::class
     singleOf(::DesktopDownloadWriter) bind DownloadWriter::class
     singleOf(::MediaStreamServer)
@@ -133,6 +138,7 @@ val desktopModule = module {
     singleOf(::NoopThumbnailMemoryCache) bind ThumbnailMemoryCache::class
     singleOf(::CountingBackupSessionTracker) bind BackupSessionTracker::class
     singleOf(::DesktopTransferScheduler) bind TransferScheduler::class
+    singleOf(::DesktopBackupResumeScheduler) bind BackupResumeScheduler::class
     singleOf(::DesktopMaintenanceScheduler) bind MaintenanceScheduler::class
     singleOf(::DesktopLocalDataWiper) bind LocalDataWiper::class
     singleOf(::DesktopPublishScheduler) bind PublishScheduler::class

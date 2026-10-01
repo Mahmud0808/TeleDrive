@@ -74,6 +74,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.drdisagree.teledrive.core.telegram.TelegramConnectionState
+import com.drdisagree.teledrive.domain.model.BackupHold
 import com.drdisagree.teledrive.domain.model.BackupSessionStatus
 import com.drdisagree.teledrive.domain.model.FileSortField
 import com.drdisagree.teledrive.domain.model.SortDirection
@@ -118,6 +119,8 @@ import com.drdisagree.teledrive.resources.home_backup_just_now
 import com.drdisagree.teledrive.resources.home_backup_never
 import com.drdisagree.teledrive.resources.home_backup_nothing_to_back_up
 import com.drdisagree.teledrive.resources.home_backup_paused
+import com.drdisagree.teledrive.resources.home_backup_waiting_charger
+import com.drdisagree.teledrive.resources.home_backup_waiting_wifi
 import com.drdisagree.teledrive.resources.home_cancel_backup_action
 import com.drdisagree.teledrive.resources.home_cancel_backup_title
 import com.drdisagree.teledrive.resources.home_choose_folders
@@ -144,12 +147,12 @@ import com.drdisagree.teledrive.resources.home_transfer_history
 import com.drdisagree.teledrive.resources.home_transfer_history_subtitle
 import com.drdisagree.teledrive.resources.home_waiting_count
 import com.drdisagree.teledrive.resources.trash
+import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
-import kotlin.math.roundToInt
-import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -537,7 +540,13 @@ private fun BackupCard(
                     Text(
                         text = when {
                             state.activeBackup?.status == BackupSessionStatus.RUNNING ->
-                                stringResource(Res.string.home_backing_up)
+                                stringResource(
+                                    when (state.backupHold) {
+                                        BackupHold.CHARGER -> Res.string.home_backup_waiting_charger
+                                        BackupHold.WIFI -> Res.string.home_backup_waiting_wifi
+                                        null -> Res.string.home_backing_up
+                                    }
+                                )
 
                             state.activeBackup?.status == BackupSessionStatus.PAUSED ->
                                 stringResource(Res.string.home_backup_paused)

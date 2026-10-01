@@ -6,7 +6,9 @@ import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.core.network.NetworkMonitor
 import com.drdisagree.teledrive.core.network.NetworkStatus
 import com.drdisagree.teledrive.core.permissions.PermissionChecker
+import com.drdisagree.teledrive.core.power.PowerMonitor
 import com.drdisagree.teledrive.core.security.AppLockManager
+import com.drdisagree.teledrive.core.transfer.BackupGate
 import com.drdisagree.teledrive.data.local.dao.FileDao
 import com.drdisagree.teledrive.data.repository.ActiveChannel
 import com.drdisagree.teledrive.domain.model.BackupTrigger
@@ -26,6 +28,7 @@ import com.drdisagree.teledrive.resources.home_backing_up_new_files
 import com.drdisagree.teledrive.resources.home_nothing_new_to_back_up
 import com.drdisagree.teledrive.resources.home_queued_files
 import com.drdisagree.teledrive.resources.home_switched_drive
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
@@ -44,7 +47,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModel(
@@ -59,7 +61,8 @@ class HomeViewModel(
     private val settingsRepository: SettingsRepository,
     private val fileDao: FileDao,
     private val activeChannel: ActiveChannel,
-    private val channelRepository: ChannelRepository
+    private val channelRepository: ChannelRepository,
+    private val powerMonitor: PowerMonitor
 ) : ViewModel() {
 
     private val missingPermissions = MutableStateFlow(permissionChecker.missingCritical())
@@ -132,10 +135,12 @@ class HomeViewModel(
             combine(
                 settingsRepository.preferences,
                 syncRepository.syncing,
-                activeDrive
-            ) { prefs, syncing, drive -> Triple(prefs, syncing, drive) }
-        ) { session, connection, network, missing, prefsAndSync ->
-            val (prefs, syncing, drive) = prefsAndSync
+                activeDrive,
+                powerMonitor.charging,
+                ::HomeSettings
+            )
+        ) { session, connection, network, missing, settings ->
+            val (prefs, syncing, drive, charging) = settings
             HomeMisc(
                 syncing,
                 session,
@@ -147,7 +152,8 @@ class HomeViewModel(
                 prefs.appLockEnabled,
                 prefs.showArchivedFiles,
                 prefs.showHiddenFiles,
-                prefs.showRecentFiles
+                prefs.showRecentFiles,
+                BackupGate.hold(prefs, network, charging)
             )
         }
     ) { countsWithStorage, recents, favorites, activeTransfers, misc ->
@@ -180,7 +186,8 @@ class HomeViewModel(
             showArchivedSection = showArchived,
             showHiddenSection = showHidden,
             showRecentSection = misc.showRecentSection,
-            activeTransferCount = activeTransfers
+            activeTransferCount = activeTransfers,
+            backupHold = misc.backupHold
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
 

@@ -2,11 +2,13 @@ package com.drdisagree.teledrive.core.transfer
 
 import com.drdisagree.teledrive.core.network.NetworkMonitor
 import com.drdisagree.teledrive.core.network.NetworkStatus
+import com.drdisagree.teledrive.core.power.PowerMonitor
 import com.drdisagree.teledrive.data.local.dao.FileDao
 import com.drdisagree.teledrive.data.local.dao.TransferDao
 import com.drdisagree.teledrive.data.local.entity.TransferEntity
 import com.drdisagree.teledrive.domain.model.BackupState
 import com.drdisagree.teledrive.domain.model.TransferState
+import com.drdisagree.teledrive.domain.model.TransferType
 import com.drdisagree.teledrive.domain.model.UserPreferences
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import kotlin.time.Duration.Companion.milliseconds
@@ -28,7 +30,9 @@ class TransferQueueDrainer(
     private val transferExecutor: TransferExecutor,
     private val backupSessionTracker: BackupSessionTracker,
     private val settingsRepository: SettingsRepository,
-    private val networkMonitor: NetworkMonitor
+    private val networkMonitor: NetworkMonitor,
+    private val powerMonitor: PowerMonitor,
+    private val backupResumeScheduler: BackupResumeScheduler
 ) {
 
     suspend fun drain(
@@ -37,6 +41,7 @@ class TransferQueueDrainer(
     ): TransferDrainResult {
         val claimLock = Mutex()
         var interrupted = false
+        var backupsHeld = false
 
         coroutineScope {
             List(MAX_CONCURRENCY) { slot ->
@@ -58,17 +63,41 @@ class TransferQueueDrainer(
                             interrupted = true
                             return@launch
                         }
-                        val next = claimLock.withLock { claimNextQueued() } ?: return@launch
+                        val hold = BackupGate.hold(prefs, status, powerMonitor.isCharging())
+                        val next = claimLock.withLock { claimNextQueued(includeBackups = hold == null) }
+                        if (next == null) {
+                            if (hold != null && transferDao.hasQueued(TransferType.BACKUP)) {
+                                backupsHeld = true
+                            }
+                            return@launch
+                        }
                         runTransfer(next, prefs.transferRetryCount, onTerminalFailure)
                     }
                 }
             }.joinAll()
         }
+        if (backupsHeld) scheduleResume()
         if (interrupted) {
             withContext(NonCancellable) { transferDao.requeueRunning() }
             return TransferDrainResult.INTERRUPTED
         }
         return TransferDrainResult.COMPLETED
+    }
+
+    suspend fun hasRunnableWork(): Boolean {
+        val prefs = settingsRepository.preferences.first()
+        val hold = currentHold(prefs)
+        if (nextClaimable(includeBackups = hold == null) != null) return true
+        if (hold != null && transferDao.hasQueued(TransferType.BACKUP)) scheduleResume()
+        return false
+    }
+
+    private fun currentHold(prefs: UserPreferences) =
+        BackupGate.hold(prefs, networkMonitor.currentStatus(), powerMonitor.isCharging())
+
+    private suspend fun scheduleResume() {
+        val prefs = settingsRepository.preferences.first()
+        backupResumeScheduler.resumeWhen(prefs.backupChargingOnly, prefs.backupWifiOnly)
     }
 
     private fun concurrencyOf(prefs: UserPreferences): Int =
@@ -82,12 +111,21 @@ class TransferQueueDrainer(
         val widened = withTimeoutOrNull(SLOT_WAIT_MS.milliseconds) {
             settingsRepository.preferences.first { slot < concurrencyOf(it) }
         }
-        return widened != null || transferDao.nextQueued(1).isNotEmpty()
+        if (widened != null) return true
+        val hold = currentHold(settingsRepository.preferences.first())
+        return nextClaimable(includeBackups = hold == null) != null
     }
 
     /** Marked running before the lock is released, so every slot picks a different row. */
-    private suspend fun claimNextQueued(): String? {
-        val next = transferDao.nextQueued(1).firstOrNull() ?: return null
+    private suspend fun nextClaimable(includeBackups: Boolean): TransferEntity? =
+        if (includeBackups) {
+            transferDao.nextQueued(1).firstOrNull()
+        } else {
+            transferDao.nextQueuedExcept(TransferType.BACKUP, 1).firstOrNull()
+        }
+
+    private suspend fun claimNextQueued(includeBackups: Boolean): String? {
+        val next = nextClaimable(includeBackups) ?: return null
         transferDao.setState(next.id, TransferState.RUNNING, System.currentTimeMillis())
         return next.id
     }

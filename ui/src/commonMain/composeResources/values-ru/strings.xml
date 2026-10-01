@@ -265,6 +265,8 @@
     <!-- Home -->
     <string name="home_active_transfers">Активных передач: %1$d</string>
     <string name="home_backing_up">Выполняется резервное копирование…</string>
+    <string name="home_backup_waiting_charger">Ожидание зарядки</string>
+    <string name="home_backup_waiting_wifi">Ожидание Wi-Fi</string>
     <string name="home_backing_up_new_files">Копирование новых файлов</string>
     <string name="home_backup_all_in_telegram">Все файлы сохранены в Telegram</string>
     <string name="home_backup_at">Последний бэкап %1$s</string>

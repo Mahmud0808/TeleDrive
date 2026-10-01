@@ -232,6 +232,8 @@
     <!-- Home -->
     <string name="home_active_transfers">%1$d 个进行中的传输</string>
     <string name="home_backing_up">正在备份…</string>
+    <string name="home_backup_waiting_charger">等待充电</string>
+    <string name="home_backup_waiting_wifi">等待 Wi-Fi</string>
     <string name="home_backing_up_new_files">正在备份新文件</string>
     <string name="home_backup_all_in_telegram">所有文件都已存入 Telegram</string>
     <string name="home_backup_at">上次备份 %1$s</string>

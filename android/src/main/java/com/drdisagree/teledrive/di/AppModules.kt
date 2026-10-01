@@ -7,6 +7,7 @@ import com.drdisagree.teledrive.core.files.filesModule
 import com.drdisagree.teledrive.core.files.sharedFilesModule
 import com.drdisagree.teledrive.core.media.mediaModule
 import com.drdisagree.teledrive.core.network.networkModule
+import com.drdisagree.teledrive.core.power.powerModule
 import com.drdisagree.teledrive.core.permissions.permissionsModule
 import com.drdisagree.teledrive.core.proxy.proxyModule
 import com.drdisagree.teledrive.core.publish.publishModule
@@ -30,6 +31,7 @@ val appModules = listOf(
     filesModule,
     mediaModule,
     networkModule,
+    powerModule,
     permissionsModule,
     proxyModule,
     publishModule,
