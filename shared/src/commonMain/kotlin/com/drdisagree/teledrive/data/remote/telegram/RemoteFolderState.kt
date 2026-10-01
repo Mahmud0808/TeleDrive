@@ -25,8 +25,11 @@ data class RemoteFolderState(
         @SerialName("tr") val trashedAt: Long? = null,
         @SerialName("pt") val preTrashParentId: String? = null,
         @SerialName("ct") val createdAt: Long,
-        @SerialName("mt") val modifiedAt: Long
-    )
+        @SerialName("mt") val modifiedAt: Long,
+        @SerialName("ca") val changedAt: Long? = null
+    ) {
+        val clock: Long get() = changedAt?.takeIf { it > 0 } ?: modifiedAt
+    }
 
     companion object {
         const val VERSION = 1

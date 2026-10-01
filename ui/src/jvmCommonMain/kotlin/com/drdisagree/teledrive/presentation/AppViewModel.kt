@@ -65,6 +65,9 @@ class AppViewModel(
     private val _pendingUpdate = MutableStateFlow<AppRelease?>(null)
     val pendingUpdate: StateFlow<AppRelease?> = _pendingUpdate.asStateFlow()
 
+    @Volatile
+    private var driveReady = false
+
     val uiState: StateFlow<AppUiState> = combine(
         settingsRepository.preferences,
         appLockManager.locked
@@ -93,6 +96,7 @@ class AppViewModel(
             uiState.map { it.onboardingComplete }
         ) { ready, onboarded -> ready && onboarded }
             .distinctUntilChanged()
+            .onEach { ready -> if (!ready) driveReady = false }
             .filter { it }
             .onEach {
                 channelRepository.refreshKnown()
@@ -100,8 +104,10 @@ class AppViewModel(
                     _driveMissing.tryEmit(Unit)
                     return@onEach
                 }
+                driveReady = true
                 syncRepository.syncOnStart()
                 catchUpBackup()
+                viewModelScope.launch { syncRepository.catchUpWithRemote() }
             }
             .launchIn(viewModelScope)
     }
@@ -117,6 +123,7 @@ class AppViewModel(
 
     fun onAppStarted() {
         viewModelScope.launch { appLockManager.onAppStarted() }
+        if (driveReady) viewModelScope.launch { syncRepository.catchUpWithRemote() }
     }
 
     /**

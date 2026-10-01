@@ -53,7 +53,8 @@ class FolderStateSynchronizer(
                     trashedAt = folder.trashedAt,
                     preTrashParentId = folder.preTrashParentId,
                     createdAt = folder.createdAt,
-                    modifiedAt = folder.modifiedAt
+                    modifiedAt = folder.modifiedAt,
+                    changedAt = folder.changedAt
                 )
             }
         )
@@ -127,7 +128,7 @@ class FolderStateSynchronizer(
         var restored = 0
         for (entry in state.folders.sortedBy { depthOf(it, state.folders) }) {
             val existing = folderDao.byId(entry.id)
-            if (existing != null && existing.modifiedAt >= entry.modifiedAt) continue
+            if (existing != null && existing.changedAt >= entry.clock) continue
             folderDao.upsert(
                 FolderEntity(
                     id = entry.id,
@@ -137,11 +138,13 @@ class FolderStateSynchronizer(
                     isHidden = entry.hidden,
                     isArchived = entry.archived,
                     isFavorite = entry.favorite,
+                    isPinned = existing?.isPinned == true,
                     trashedAt = entry.trashedAt,
                     preTrashParentId = entry.preTrashParentId,
                     pendingPublish = existing?.pendingPublish == true,
                     createdAt = entry.createdAt,
-                    modifiedAt = entry.modifiedAt
+                    modifiedAt = entry.modifiedAt,
+                    changedAt = entry.clock
                 )
             )
             restored++

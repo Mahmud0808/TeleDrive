@@ -163,35 +163,42 @@ interface FolderDao {
         excludeId: String
     ): List<String>
 
-    @Query("UPDATE folders SET name = :name, modifiedAt = :modifiedAt WHERE id = :id")
+    @Query(
+        "UPDATE folders SET name = :name, modifiedAt = :modifiedAt, changedAt = :modifiedAt WHERE id = :id"
+    )
     suspend fun rename(id: String, name: String, modifiedAt: Long)
 
-    @Query("UPDATE folders SET parentId = :parentId, modifiedAt = :modifiedAt WHERE id = :id")
+    @Query(
+        """UPDATE folders SET parentId = :parentId, modifiedAt = :modifiedAt, changedAt = :modifiedAt
+           WHERE id = :id"""
+    )
     suspend fun move(id: String, parentId: String?, modifiedAt: Long)
 
-    @Query("UPDATE folders SET isFavorite = :favorite WHERE id = :id")
-    suspend fun setFavorite(id: String, favorite: Boolean)
+    @Query("UPDATE folders SET isFavorite = :favorite, changedAt = :changedAt WHERE id = :id")
+    suspend fun setFavorite(id: String, favorite: Boolean, changedAt: Long)
 
     @Query("UPDATE folders SET isPinned = :pinned WHERE id = :id")
     suspend fun setPinned(id: String, pinned: Boolean)
 
-    @Query("UPDATE folders SET isHidden = :hidden WHERE id = :id")
-    suspend fun setHidden(id: String, hidden: Boolean)
+    @Query("UPDATE folders SET isHidden = :hidden, changedAt = :changedAt WHERE id = :id")
+    suspend fun setHidden(id: String, hidden: Boolean, changedAt: Long)
 
-    @Query("UPDATE folders SET isArchived = :archived WHERE id = :id")
-    suspend fun setArchived(id: String, archived: Boolean)
+    @Query("UPDATE folders SET isArchived = :archived, changedAt = :changedAt WHERE id = :id")
+    suspend fun setArchived(id: String, archived: Boolean, changedAt: Long)
 
     @Query(
-        """UPDATE folders SET trashedAt = :trashedAt, preTrashParentId = parentId, parentId = NULL
+        """UPDATE folders SET trashedAt = :trashedAt, preTrashParentId = parentId, parentId = NULL,
+                  changedAt = :trashedAt
            WHERE id = :id"""
     )
     suspend fun moveToTrash(id: String, trashedAt: Long)
 
     @Query(
-        """UPDATE folders SET parentId = preTrashParentId, trashedAt = NULL, preTrashParentId = NULL
+        """UPDATE folders SET parentId = preTrashParentId, trashedAt = NULL, preTrashParentId = NULL,
+                  changedAt = :changedAt
            WHERE id = :id"""
     )
-    suspend fun restoreFromTrash(id: String)
+    suspend fun restoreFromTrash(id: String, changedAt: Long)
 
     @Query(
         """SELECT * FROM folders

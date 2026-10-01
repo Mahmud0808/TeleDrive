@@ -29,6 +29,14 @@ interface SyncRepository {
      */
     suspend fun syncOnStart(): AppResult<SyncStats>
 
+    /**
+     * Picks up renames, moves and folder changes made on other devices, which
+     * edit existing messages and so never reach [incrementalSync]. Runs a full
+     * pass without reporting progress through [syncing], and returns null when
+     * skipped because a sync is running or a full pass finished moments ago.
+     */
+    suspend fun catchUpWithRemote(): AppResult<SyncStats>?
+
     data class SyncStats(
         val inserted: Int,
         val updated: Int,

@@ -30,5 +30,6 @@ data class FolderEntity(
     val preTrashParentId: String? = null,
     val pendingPublish: Boolean = false,
     val createdAt: Long,
-    val modifiedAt: Long
+    val modifiedAt: Long,
+    val changedAt: Long = 0
 )

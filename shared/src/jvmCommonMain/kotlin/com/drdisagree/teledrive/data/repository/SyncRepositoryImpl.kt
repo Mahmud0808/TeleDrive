@@ -64,6 +64,9 @@ class SyncRepositoryImpl(
     private val syncMutex = Mutex()
     private val captionRepairsQueued = mutableSetOf<String>()
 
+    @Volatile
+    private var lastFullSyncAt = 0L
+
     override suspend fun fullResync(): AppResult<SyncRepository.SyncStats> =
         runSync(incremental = false)
 
@@ -75,19 +78,35 @@ class SyncRepositoryImpl(
         return runSync(incremental = fileDao.fileCount(activeChannel.id()) > 0)
     }
 
-    private suspend fun runSync(incremental: Boolean): AppResult<SyncRepository.SyncStats> =
+    override suspend fun catchUpWithRemote(): AppResult<SyncRepository.SyncStats>? {
+        if (syncMutex.isLocked) return null
+        val since = System.currentTimeMillis() - lastFullSyncAt
+        if (since in 0 until CATCH_UP_INTERVAL_MS) return null
+        return runSync(incremental = false, quiet = true)
+    }
+
+    private suspend fun runSync(
+        incremental: Boolean,
+        quiet: Boolean = false
+    ): AppResult<SyncRepository.SyncStats> =
         syncMutex.withLock {
-            _syncing.value = true
-            _indexedSoFar.value = 0
+            if (!quiet) {
+                _syncing.value = true
+                _indexedSoFar.value = 0
+            }
             try {
-                doSync(incremental)
+                doSync(incremental, quiet).also { result ->
+                    if (!incremental && result is AppResult.Success) {
+                        lastFullSyncAt = System.currentTimeMillis()
+                    }
+                }
             } catch (e: TelegramException) {
                 AppResult.Failure(
                     if (e.isRateLimit) AppError.RateLimited(e.retryAfterSeconds ?: 0)
                     else AppError.TelegramError(e.code, e.message)
                 )
             } finally {
-                _syncing.value = false
+                if (!quiet) _syncing.value = false
             }
         }
 
@@ -97,7 +116,10 @@ class SyncRepositoryImpl(
         SafeLog.d(TAG, "Storage chat changed: dropped $removed, detached $detached")
     }
 
-    private suspend fun doSync(incremental: Boolean): AppResult<SyncRepository.SyncStats> {
+    private suspend fun doSync(
+        incremental: Boolean,
+        quiet: Boolean
+    ): AppResult<SyncRepository.SyncStats> {
         val prefs = settingsRepository.preferences.first()
         val chatId = telegramClient.ensureStorageChat(prefs.storageChatId)
         channelOwnership.claimUnowned(chatId)
@@ -113,6 +135,11 @@ class SyncRepositoryImpl(
         }
 
         val pendingDeletes = pendingDeleteDao.messageIdsIn(chatId).toSet()
+        val mappedBeforeScan = if (incremental) {
+            emptyMap()
+        } else {
+            fileDao.filesWithRemote().associate { it.id to it.messageId }
+        }
         val folderCache = mutableMapOf<String, String?>()
         SafeLog.d(TAG, "Sync start chat=$chatId incremental=$incremental")
         var inserted = 0
@@ -155,7 +182,7 @@ class SyncRepositoryImpl(
                     when (reconcile(document, folderCache, known)) {
                         ReconcileResult.INSERTED -> {
                             inserted++
-                            _indexedSoFar.value = inserted
+                            if (!quiet) _indexedSoFar.value = inserted
                         }
 
                         ReconcileResult.UPDATED -> updated++
@@ -166,7 +193,8 @@ class SyncRepositoryImpl(
             if (reachedKnown) {
                 if (captionRepairsQueued.size > repairsBefore) publishScheduler.kick()
                 return finishSync(
-                    chatId, seenMessageIds, inserted, updated, locked, partial = true
+                    chatId, seenMessageIds, mappedBeforeScan, inserted, updated, locked,
+                    partial = true
                 )
             }
             if (page.nextFromMessageId == 0L) break
@@ -175,13 +203,15 @@ class SyncRepositoryImpl(
 
         if (captionRepairsQueued.size > repairsBefore) publishScheduler.kick()
         return finishSync(
-            chatId, seenMessageIds, inserted, updated, locked, partial = incremental
+            chatId, seenMessageIds, mappedBeforeScan, inserted, updated, locked,
+            partial = incremental
         )
     }
 
     private suspend fun finishSync(
         chatId: Long,
         seenMessageIds: Set<Long>,
+        mappedBeforeScan: Map<String, Long?>,
         inserted: Int,
         updated: Int,
         locked: Int,
@@ -189,11 +219,14 @@ class SyncRepositoryImpl(
     ): AppResult<SyncRepository.SyncStats> {
         var detached = 0
         /* Locked files still register as seen, so they cannot be mistaken for
-           missing ones and a restored key backup is not required to prune. */
+           missing ones and a restored key backup is not required to prune.
+           Only rows mapped before the scan are judged: an upload that finished
+           while it ran sits above the pages already read. */
         if (!partial) {
             val stale = fileDao.filesWithRemote().filter { entity ->
                 val messageId = entity.messageId
-                messageId != null && entity.chatId == chatId && messageId !in seenMessageIds
+                messageId != null && entity.chatId == chatId && messageId !in seenMessageIds &&
+                        mappedBeforeScan[entity.id] == messageId
             }
             if (stale.isNotEmpty()) {
                 database.inImmediateTransaction {
@@ -462,5 +495,6 @@ class SyncRepositoryImpl(
         private const val ICON_MARKER = "#teledrive-icon"
         private const val PAGE_SIZE = 100
         private const val MAX_PAGES = 2000
+        private const val CATCH_UP_INTERVAL_MS = 60_000L
     }
 }

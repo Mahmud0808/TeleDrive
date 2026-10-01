@@ -133,7 +133,8 @@ class TrashRepositoryImpl(
     override suspend fun restoreFolder(id: String): AppResult<Unit> {
         val folderIds = collectTrashedDescendantFolderIds(id)
         val fileIds = fileDao.trashedInFolders(folderIds).map { it.id }
-        folderIds.reversed().forEach { folderDao.restoreFromTrash(it) }
+        val restoredAt = System.currentTimeMillis()
+        folderIds.reversed().forEach { folderDao.restoreFromTrash(it, restoredAt) }
         restoreAncestors(folderDao.byId(id)?.parentId)
         val restoredParent = folderDao.byId(id)?.parentId
         if (restoredParent != null && folderDao.byId(restoredParent) == null) {
@@ -271,7 +272,7 @@ class TrashRepositoryImpl(
             val folder = folderDao.byId(cursor) ?: return
             if (folder.trashedAt == null) return
             val parentId = folder.preTrashParentId
-            folderDao.restoreFromTrash(cursor)
+            folderDao.restoreFromTrash(cursor, System.currentTimeMillis())
             if (parentId != null && folderDao.byId(parentId) == null) {
                 folderDao.move(cursor, null, System.currentTimeMillis())
                 return

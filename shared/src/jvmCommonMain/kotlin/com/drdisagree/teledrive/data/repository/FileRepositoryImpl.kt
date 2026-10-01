@@ -230,7 +230,8 @@ class FileRepositoryImpl(
             parentId = parentId,
             name = sanitized,
             createdAt = now,
-            modifiedAt = now
+            modifiedAt = now,
+            changedAt = now
         )
         folderDao.upsert(folder)
         markFolderStateDirty()
@@ -479,17 +480,17 @@ class FileRepositoryImpl(
     }
 
     override suspend fun setFolderFavorite(id: String, favorite: Boolean) {
-        folderDao.setFavorite(id, favorite)
+        folderDao.setFavorite(id, favorite, System.currentTimeMillis())
         markFolderStateDirty()
     }
 
     override suspend fun setFolderHidden(id: String, hidden: Boolean) {
-        folderDao.setHidden(id, hidden)
+        folderDao.setHidden(id, hidden, System.currentTimeMillis())
         markFolderStateDirty()
     }
 
     override suspend fun setFolderArchived(id: String, archived: Boolean) {
-        folderDao.setArchived(id, archived)
+        folderDao.setArchived(id, archived, System.currentTimeMillis())
         markFolderStateDirty()
     }
 

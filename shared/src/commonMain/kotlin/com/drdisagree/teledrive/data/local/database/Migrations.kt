@@ -4,6 +4,14 @@ import androidx.room.migration.Migration
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
 
+/** Adds the clock folder sync compares, since modifiedAt only moves on a rename or a move. */
+val MIGRATION_11_12 = object : Migration(11, 12) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("ALTER TABLE folders ADD COLUMN changedAt INTEGER NOT NULL DEFAULT 0")
+        connection.execSQL("UPDATE folders SET changedAt = modifiedAt")
+    }
+}
+
 /** Adds the device-local pin that keeps a copy out of "free up space". */
 val MIGRATION_10_11 = object : Migration(10, 11) {
     override fun migrate(connection: SQLiteConnection) {
