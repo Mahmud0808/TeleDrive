@@ -282,6 +282,7 @@ compose.desktop {
             description = "Private cloud storage on your own Telegram channel"
             modules(
                 "java.instrument",
+                "jdk.accessibility",
                 "java.naming",
                 "java.sql",
                 "jdk.crypto.ec",
