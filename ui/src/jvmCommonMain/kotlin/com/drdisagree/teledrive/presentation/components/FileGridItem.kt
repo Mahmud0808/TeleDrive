@@ -1,22 +1,21 @@
 package com.drdisagree.teledrive.presentation.components
 
-import androidx.compose.material.icons.filled.Star
-import com.drdisagree.teledrive.resources.common_content_description_favorite
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.OfflinePin
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.OfflinePin
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -25,15 +24,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.drdisagree.teledrive.resources.common_content_description_available_offline
-import com.drdisagree.teledrive.resources.Res
-import com.drdisagree.teledrive.resources.common_content_description_selected
 import com.drdisagree.teledrive.domain.model.BackupState
 import com.drdisagree.teledrive.domain.model.DriveFile
 import com.drdisagree.teledrive.presentation.common.Formatters
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.common_content_description_available_offline
+import com.drdisagree.teledrive.resources.common_content_description_favorite
+import com.drdisagree.teledrive.resources.common_content_description_selected
+import com.drdisagree.teledrive.resources.common_select
+import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -53,11 +54,16 @@ fun FileGridItem(
                 if (selected) MaterialTheme.colorScheme.secondaryContainer
                 else MaterialTheme.colorScheme.surfaceContainerLow
             )
-            .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+            .combinedClickable(
+                onLongClickLabel = stringResource(Res.string.common_select),
+                onClick = onClick,
+                onLongClick = onLongClick
+            )
     ) {
         Box {
             FileThumbnail(
                 file = file,
+                contentDescription = if (compact) file.name else null,
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(1f)

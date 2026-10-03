@@ -10,6 +10,7 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -84,28 +85,44 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
-import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import org.koin.compose.viewmodel.koinViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.drdisagree.teledrive.core.permissions.AppPermission
+import com.drdisagree.teledrive.core.permissions.PermissionChecker
+import com.drdisagree.teledrive.core.telegram.CodeDeliveryChannel
+import com.drdisagree.teledrive.domain.model.Country
+import com.drdisagree.teledrive.domain.model.DriveChannel
+import com.drdisagree.teledrive.presentation.common.UiText
+import com.drdisagree.teledrive.presentation.common.resolve
+import com.drdisagree.teledrive.presentation.components.ChannelAvatar
+import com.drdisagree.teledrive.presentation.components.QrCode
+import com.drdisagree.teledrive.presentation.platform.LocalPermissionRequester
+import com.drdisagree.teledrive.presentation.platform.LocalPlatformCapabilities
+import com.drdisagree.teledrive.presentation.platform.LocalSystemScreens
+import com.drdisagree.teledrive.presentation.platform.LocalTelegramLinkOpener
 import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.app_name
 import com.drdisagree.teledrive.resources.backup
 import com.drdisagree.teledrive.resources.common_try_again
+import com.drdisagree.teledrive.resources.ic_launcher_monochrome
 import com.drdisagree.teledrive.resources.onboarding_action_continue
 import com.drdisagree.teledrive.resources.onboarding_allow_all_files
 import com.drdisagree.teledrive.resources.onboarding_allow_media
@@ -194,21 +211,10 @@ import com.drdisagree.teledrive.resources.onboarding_toggle_wifi_only
 import com.drdisagree.teledrive.resources.onboarding_two_step_verification
 import com.drdisagree.teledrive.resources.onboarding_verify
 import com.drdisagree.teledrive.resources.onboarding_where_i_get_these
-import com.drdisagree.teledrive.core.permissions.AppPermission
-import com.drdisagree.teledrive.core.permissions.PermissionChecker
-import com.drdisagree.teledrive.presentation.platform.LocalPermissionRequester
-import com.drdisagree.teledrive.presentation.platform.LocalPlatformCapabilities
-import com.drdisagree.teledrive.presentation.platform.LocalSystemScreens
-import com.drdisagree.teledrive.presentation.platform.LocalTelegramLinkOpener
-import com.drdisagree.teledrive.resources.ic_launcher_monochrome
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
-import com.drdisagree.teledrive.core.telegram.CodeDeliveryChannel
-import com.drdisagree.teledrive.domain.model.Country
-import com.drdisagree.teledrive.domain.model.DriveChannel
-import com.drdisagree.teledrive.presentation.common.UiText
-import com.drdisagree.teledrive.presentation.common.resolve
-import com.drdisagree.teledrive.presentation.components.ChannelAvatar
-import com.drdisagree.teledrive.presentation.components.QrCode
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -474,7 +480,7 @@ private fun StepHeader(step: OnboardingStep, modifier: Modifier = Modifier) {
     )
     val stepNumber = step.displayNumber(counted)
     val totalSteps = counted.size
-    Column(modifier = modifier) {
+    Column(modifier = modifier.semantics(mergeDescendants = true) {}) {
         Surface(
             shape = RoundedCornerShape(100),
             color = MaterialTheme.colorScheme.secondaryContainer
@@ -549,7 +555,11 @@ private fun HeroShape(icon: ImageVector?, iconPainter: Painter?) {
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun StepTitle(title: String, description: String) {
-    Column {
+    Column(
+        modifier = Modifier
+            .semantics(mergeDescendants = true) { heading() }
+            .focusable()
+    ) {
         Text(
             text = title,
             style = MaterialTheme.typography.displaySmallEmphasized,
@@ -644,7 +654,7 @@ private fun BlockedNetworkCard(onOpenProxy: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(shape)
-            .clickable(onClick = onOpenProxy)
+            .clickable(role = Role.Button, onClick = onOpenProxy)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
@@ -751,6 +761,8 @@ private fun InstructionCard(number: Int, content: @Composable () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 5.dp)
+            .semantics(mergeDescendants = true) {}
+            .focusable()
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -1020,6 +1032,8 @@ private fun CountryField(
     enabled: Boolean,
     onClick: () -> Unit
 ) {
+    val fieldLabel = stringResource(Res.string.onboarding_country)
+    val fieldDescription = country?.name?.let { "$fieldLabel, $it" } ?: fieldLabel
     Box {
         OutlinedTextField(
             value = country?.name.orEmpty(),
@@ -1038,13 +1052,17 @@ private fun CountryField(
                 }
             },
             singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .focusProperties { canFocus = false }
+                .clearAndSetSemantics {}
         )
         Box(
             modifier = Modifier
                 .matchParentSize()
                 .clip(OutlinedTextFieldDefaults.shape)
-                .clickable(enabled = enabled, onClick = onClick)
+                .clickable(enabled = enabled, role = Role.DropdownList, onClick = onClick)
+                .semantics { contentDescription = fieldDescription }
         )
     }
 }
@@ -1097,7 +1115,7 @@ private fun CountryPickerSheet(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(MaterialTheme.shapes.large)
-                            .clickable { onSelect(country) }
+                            .clickable(role = Role.Button) { onSelect(country) }
                             .padding(horizontal = 8.dp, vertical = 14.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -1411,7 +1429,9 @@ private fun SectionLabel(text: String) {
         text = text,
         style = MaterialTheme.typography.labelLarge,
         color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(start = 4.dp, bottom = 6.dp)
+        modifier = Modifier
+            .padding(start = 4.dp, bottom = 6.dp)
+            .semantics { heading() }
     )
 }
 
@@ -1436,10 +1456,16 @@ private fun ToggleCard(label: String, checked: Boolean, onChange: (Boolean) -> U
             Text(
                 text = label,
                 style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier
+                    .weight(1f)
+                    .clearAndSetSemantics {}
             )
             Spacer(Modifier.width(16.dp))
-            Switch(checked = checked, onCheckedChange = onChange)
+            Switch(
+                checked = checked,
+                onCheckedChange = onChange,
+                modifier = Modifier.semantics { contentDescription = label }
+            )
         }
     }
 }

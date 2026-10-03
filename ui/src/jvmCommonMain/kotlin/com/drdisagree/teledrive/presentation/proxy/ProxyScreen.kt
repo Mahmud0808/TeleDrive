@@ -27,6 +27,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -79,13 +81,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
-import org.jetbrains.compose.resources.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.koin.compose.viewmodel.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.drdisagree.teledrive.core.telegram.ProxyLink
+import com.drdisagree.teledrive.core.telegram.TelegramProxyType
+import com.drdisagree.teledrive.domain.model.ProxyServer
+import com.drdisagree.teledrive.presentation.common.CollectSnackbarMessages
+import com.drdisagree.teledrive.presentation.common.add
+import com.drdisagree.teledrive.presentation.common.imeTargetBottomInset
+import com.drdisagree.teledrive.presentation.components.ConfirmDialog
+import com.drdisagree.teledrive.presentation.components.EmptyState
+import com.drdisagree.teledrive.presentation.components.liftedTopAppBarColors
+import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
 import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.common_actions
 import com.drdisagree.teledrive.resources.common_back
@@ -123,17 +134,9 @@ import com.drdisagree.teledrive.resources.proxy_type_mtproto
 import com.drdisagree.teledrive.resources.proxy_type_socks5
 import com.drdisagree.teledrive.resources.proxy_unreachable
 import com.drdisagree.teledrive.resources.proxy_username_optional
-import com.drdisagree.teledrive.core.telegram.ProxyLink
-import com.drdisagree.teledrive.core.telegram.TelegramProxyType
-import com.drdisagree.teledrive.domain.model.ProxyServer
-import com.drdisagree.teledrive.presentation.common.imeTargetBottomInset
-import com.drdisagree.teledrive.presentation.common.CollectSnackbarMessages
-import com.drdisagree.teledrive.presentation.common.add
-import com.drdisagree.teledrive.presentation.components.ConfirmDialog
-import com.drdisagree.teledrive.presentation.components.EmptyState
-import com.drdisagree.teledrive.presentation.components.liftedTopAppBarColors
-import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
 import java.util.UUID
+import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -323,7 +326,7 @@ private fun RoutingCard(
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
             .clip(shape)
-            .clickable { onChange(!enabled) }
+            .toggleable(value = enabled, role = Role.Switch, onValueChange = onChange)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp),
@@ -350,7 +353,7 @@ private fun RoutingCard(
                 }
             }
             Spacer(Modifier.width(16.dp))
-            Switch(checked = enabled, onCheckedChange = onChange)
+            Switch(checked = enabled, onCheckedChange = null)
         }
     }
 }
@@ -387,13 +390,13 @@ private fun ProxyCard(
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 4.dp)
             .clip(shape)
-            .clickable(onClick = onSelect)
+            .selectable(selected = proxy.isActive, role = Role.RadioButton, onClick = onSelect)
     ) {
         Row(
             modifier = Modifier.padding(start = 12.dp, top = 12.dp, end = 4.dp, bottom = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            RadioButton(selected = proxy.isActive, onClick = onSelect)
+            RadioButton(selected = proxy.isActive, onClick = null)
             Spacer(Modifier.width(8.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(

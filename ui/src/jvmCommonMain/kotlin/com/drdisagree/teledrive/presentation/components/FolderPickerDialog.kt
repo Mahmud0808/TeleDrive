@@ -33,9 +33,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import org.jetbrains.compose.resources.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.drdisagree.teledrive.domain.model.DriveFolder
 import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.common_cancel
 import com.drdisagree.teledrive.resources.common_create
@@ -44,7 +45,7 @@ import com.drdisagree.teledrive.resources.common_folder_name
 import com.drdisagree.teledrive.resources.common_no_subfolders
 import com.drdisagree.teledrive.resources.common_one_level
 import com.drdisagree.teledrive.resources.files_new_folder
-import com.drdisagree.teledrive.domain.model.DriveFolder
+import org.jetbrains.compose.resources.stringResource
 
 /** Navigating into a folder does not select it; confirming targets the folder being shown. */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -120,7 +121,7 @@ fun FolderPickerDialog(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clickable { currentId = folder.id }
+                                    .clickable(role = Role.Button) { currentId = folder.id }
                                     .padding(vertical = 10.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {

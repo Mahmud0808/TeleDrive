@@ -40,22 +40,25 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalUriHandler
-import org.jetbrains.compose.resources.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.createBitmap
-import com.drdisagree.teledrive.resources.Res
-import com.drdisagree.teledrive.resources.preview_page_number
-import com.drdisagree.teledrive.resources.preview_pdf_open_failed
 import com.drdisagree.teledrive.presentation.common.add
 import com.drdisagree.teledrive.presentation.components.ErrorState
 import com.drdisagree.teledrive.presentation.components.LoadingState
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.preview_page_number
+import com.drdisagree.teledrive.resources.preview_pdf_open_failed
+import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import java.io.File
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Rendering is serialized because PdfRenderer is not thread-safe; bitmaps are kept only while
@@ -219,6 +222,8 @@ private fun PdfPage(
             modifier = Modifier.fillMaxSize()
         )
         page.links.forEach { link ->
+            val linkLabel = link.uri
+                ?: link.targetPage?.let { stringResource(Res.string.preview_page_number, it + 1) }
             Box(
                 modifier = Modifier
                     .offset(x = maxWidth * link.left, y = maxHeight * link.top)
@@ -226,10 +231,11 @@ private fun PdfPage(
                         width = maxWidth * (link.right - link.left),
                         height = maxHeight * (link.bottom - link.top)
                     )
-                    .clickable {
+                    .clickable(role = Role.Button) {
                         link.uri?.let { uriHandler.openUri(it) }
                             ?: link.targetPage?.let(onJumpToPage)
                     }
+                    .semantics { linkLabel?.let { contentDescription = it } }
             )
         }
     }

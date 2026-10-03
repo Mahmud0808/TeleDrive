@@ -1,8 +1,8 @@
 package com.drdisagree.teledrive.presentation.components
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,8 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.OfflinePin
 import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.OfflinePin
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -22,13 +22,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.drdisagree.teledrive.resources.Res
-import com.drdisagree.teledrive.resources.common_content_description_favorite
-import com.drdisagree.teledrive.resources.common_content_description_available_offline
 import com.drdisagree.teledrive.domain.model.DriveFolder
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.common_content_description_available_offline
+import com.drdisagree.teledrive.resources.common_content_description_favorite
+import com.drdisagree.teledrive.resources.common_select
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun FolderRow(
@@ -49,7 +50,11 @@ fun FolderRow(
                 if (selected) MaterialTheme.colorScheme.secondaryContainer
                 else Color.Transparent
             )
-            .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+            .combinedClickable(
+                onLongClickLabel = stringResource(Res.string.common_select),
+                onClick = onClick,
+                onLongClick = onLongClick
+            )
             .padding(horizontal = 12.dp, vertical = if (compact) 4.dp else 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

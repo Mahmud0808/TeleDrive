@@ -102,6 +102,8 @@
     <string name="common_retry">重试</string>
     <string name="common_save">保存</string>
     <string name="common_select_all">全选</string>
+    <string name="common_open">打开</string>
+    <string name="common_select">选择</string>
     <string name="common_selection_count">已选中 %1$d 项</string>
     <string name="common_share">分享</string>
     <string name="common_storage_channels">存储频道</string>
@@ -443,6 +445,7 @@
     <string name="player_lock_controls">锁定控制栏</string>
     <string name="player_unlock_controls">解锁控制栏</string>
     <string name="player_brightness">亮度</string>
+    <string name="player_toggle_controls">显示或隐藏控件</string>
     <string name="player_volume">音量</string>
     <string name="player_track_unsupported">此设备不支持</string>
     <string name="player_codec_unsupported">此设备无法解码该视频，请下载后用其他应用播放。</string>

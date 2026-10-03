@@ -45,11 +45,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import org.jetbrains.compose.resources.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import org.koin.compose.viewmodel.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.drdisagree.teledrive.domain.model.Exclusion
+import com.drdisagree.teledrive.domain.model.ExclusionType
+import com.drdisagree.teledrive.presentation.common.add
+import com.drdisagree.teledrive.presentation.components.ConfirmDialog
+import com.drdisagree.teledrive.presentation.components.EmptyState
+import com.drdisagree.teledrive.presentation.components.liftedTopAppBarColors
+import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
+import com.drdisagree.teledrive.presentation.platform.LocalFilePicker
+import com.drdisagree.teledrive.presentation.platform.LocalFolderPicker
+import com.drdisagree.teledrive.presentation.platform.PickResult
 import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.common_back
 import com.drdisagree.teledrive.resources.common_cancel
@@ -76,16 +86,8 @@ import com.drdisagree.teledrive.resources.settings_no_exclusions
 import com.drdisagree.teledrive.resources.settings_remove
 import com.drdisagree.teledrive.resources.settings_remove_exclusion
 import com.drdisagree.teledrive.resources.settings_skips_every_file_folder
-import com.drdisagree.teledrive.domain.model.Exclusion
-import com.drdisagree.teledrive.domain.model.ExclusionType
-import com.drdisagree.teledrive.presentation.platform.LocalFilePicker
-import com.drdisagree.teledrive.presentation.platform.LocalFolderPicker
-import com.drdisagree.teledrive.presentation.platform.PickResult
-import com.drdisagree.teledrive.presentation.common.add
-import com.drdisagree.teledrive.presentation.components.ConfirmDialog
-import com.drdisagree.teledrive.presentation.components.EmptyState
-import com.drdisagree.teledrive.presentation.components.liftedTopAppBarColors
-import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
+import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -173,9 +175,11 @@ fun ExclusionsScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
+                    val exclusionLabel = displayValue(exclusion)
                     Switch(
                         checked = exclusion.enabled,
-                        onCheckedChange = { viewModel.setEnabled(exclusion.id, it) }
+                        onCheckedChange = { viewModel.setEnabled(exclusion.id, it) },
+                        modifier = Modifier.semantics { contentDescription = exclusionLabel }
                     )
                     IconButton(onClick = { exclusionToRemove = exclusion }) {
                         Icon(

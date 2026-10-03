@@ -40,13 +40,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import org.jetbrains.compose.resources.pluralStringResource
-import org.jetbrains.compose.resources.stringResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import org.koin.compose.viewmodel.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.drdisagree.teledrive.domain.model.TransferStage
+import com.drdisagree.teledrive.domain.model.TransferState
+import com.drdisagree.teledrive.domain.model.TransferTask
+import com.drdisagree.teledrive.domain.model.TransferType
+import com.drdisagree.teledrive.presentation.common.Formatters
+import com.drdisagree.teledrive.presentation.common.add
+import com.drdisagree.teledrive.presentation.components.ConfirmDialog
+import com.drdisagree.teledrive.presentation.components.EmptyState
+import com.drdisagree.teledrive.presentation.components.liftedTopAppBarColors
+import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
 import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.common_actions
 import com.drdisagree.teledrive.resources.common_back
@@ -81,16 +90,9 @@ import com.drdisagree.teledrive.resources.transfers_section_active
 import com.drdisagree.teledrive.resources.transfers_section_finished
 import com.drdisagree.teledrive.resources.transfers_section_paused
 import com.drdisagree.teledrive.resources.transfers_uploads_downloads_appear_here
-import com.drdisagree.teledrive.domain.model.TransferStage
-import com.drdisagree.teledrive.domain.model.TransferState
-import com.drdisagree.teledrive.domain.model.TransferTask
-import com.drdisagree.teledrive.domain.model.TransferType
-import com.drdisagree.teledrive.presentation.common.Formatters
-import com.drdisagree.teledrive.presentation.common.add
-import com.drdisagree.teledrive.presentation.components.ConfirmDialog
-import com.drdisagree.teledrive.presentation.components.EmptyState
-import com.drdisagree.teledrive.presentation.components.liftedTopAppBarColors
-import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -262,7 +264,9 @@ private fun LazyListScope.section(
         Text(
             text = title,
             style = MaterialTheme.typography.titleSmall,
-            modifier = Modifier.padding(top = 8.dp, bottom = 2.dp)
+            modifier = Modifier
+                .padding(top = 8.dp, bottom = 2.dp)
+                .semantics { heading() }
         )
     }
     items(transfers, key = { "$sectionKey-${it.id}" }) { transfer ->

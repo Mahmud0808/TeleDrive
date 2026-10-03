@@ -39,6 +39,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.drdisagree.teledrive.domain.model.FileCategory
@@ -68,8 +70,8 @@ import com.drdisagree.teledrive.resources.common_clear
 import com.drdisagree.teledrive.resources.common_download
 import com.drdisagree.teledrive.resources.common_make_available_offline
 import com.drdisagree.teledrive.resources.common_move_trash
-import com.drdisagree.teledrive.resources.common_select_all
 import com.drdisagree.teledrive.resources.common_remove_from_offline
+import com.drdisagree.teledrive.resources.common_select_all
 import com.drdisagree.teledrive.resources.search_open_folder
 import com.drdisagree.teledrive.resources.search_section_files
 import com.drdisagree.teledrive.resources.search_section_folders
@@ -350,6 +352,8 @@ private fun SearchSectionHeader(title: String, modifier: Modifier = Modifier) {
         text = title,
         style = MaterialTheme.typography.titleSmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = modifier.padding(start = 4.dp, top = 8.dp, bottom = 6.dp)
+        modifier = modifier
+            .padding(start = 4.dp, top = 8.dp, bottom = 6.dp)
+            .semantics { heading() }
     )
 }

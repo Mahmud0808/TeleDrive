@@ -81,8 +81,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
-import org.jetbrains.compose.resources.pluralStringResource
-import org.jetbrains.compose.resources.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -92,47 +91,8 @@ import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import org.koin.compose.viewmodel.koinViewModel
-import org.koin.compose.koinInject
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.util.UnstableApi
-import com.drdisagree.teledrive.resources.files_hide
-import com.drdisagree.teledrive.resources.files_unhide
-import com.drdisagree.teledrive.resources.Res
-import com.drdisagree.teledrive.resources.file_count
-import com.drdisagree.teledrive.resources.folder_count
-import com.drdisagree.teledrive.resources.item_count
-import com.drdisagree.teledrive.resources.preview_share_chooser_title
-import com.drdisagree.teledrive.resources.common_actions
-import com.drdisagree.teledrive.resources.common_back
-import com.drdisagree.teledrive.resources.common_collapse
-import com.drdisagree.teledrive.resources.common_download
-import com.drdisagree.teledrive.resources.common_expand
-import com.drdisagree.teledrive.resources.common_free_space
-import com.drdisagree.teledrive.resources.common_move_trash
-import com.drdisagree.teledrive.resources.common_rename
-import com.drdisagree.teledrive.resources.common_rename_file
-import com.drdisagree.teledrive.resources.common_upload
-import com.drdisagree.teledrive.resources.note_edit_action
-import com.drdisagree.teledrive.resources.preview_add_favorites
-import com.drdisagree.teledrive.resources.preview_archive
-import com.drdisagree.teledrive.resources.preview_archive_format_title
-import com.drdisagree.teledrive.resources.preview_archive_packed_summary
-import com.drdisagree.teledrive.resources.preview_archive_packed_summary_saved
-import com.drdisagree.teledrive.resources.preview_chevron
-import com.drdisagree.teledrive.resources.preview_confirm_trash_file_message
-import com.drdisagree.teledrive.resources.preview_download_view
-import com.drdisagree.teledrive.resources.preview_extraction_supported_yet_download
-import com.drdisagree.teledrive.resources.preview_file_info
-import com.drdisagree.teledrive.resources.preview_move_to_trash
-import com.drdisagree.teledrive.resources.preview_no_preview
-import com.drdisagree.teledrive.resources.preview_preparing
-import com.drdisagree.teledrive.resources.preview_progress_bytes
-import com.drdisagree.teledrive.resources.preview_remove_favorites
-import com.drdisagree.teledrive.resources.preview_requires_download
-import com.drdisagree.teledrive.resources.preview_share_copy
-import com.drdisagree.teledrive.resources.preview_truncated_download_view
-import com.drdisagree.teledrive.resources.preview_unarchive
 import com.drdisagree.teledrive.core.files.MimeTypes
 import com.drdisagree.teledrive.core.media.PipController
 import com.drdisagree.teledrive.core.media.TelegramDataSourceFactory
@@ -154,9 +114,50 @@ import com.drdisagree.teledrive.presentation.components.FileInfoSheet
 import com.drdisagree.teledrive.presentation.components.LoadingState
 import com.drdisagree.teledrive.presentation.components.RenameDialog
 import com.drdisagree.teledrive.presentation.components.iconFor
-import kotlinx.coroutines.delay
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.common_actions
+import com.drdisagree.teledrive.resources.common_back
+import com.drdisagree.teledrive.resources.common_collapse
+import com.drdisagree.teledrive.resources.common_download
+import com.drdisagree.teledrive.resources.common_expand
+import com.drdisagree.teledrive.resources.common_free_space
+import com.drdisagree.teledrive.resources.common_move_trash
+import com.drdisagree.teledrive.resources.common_rename
+import com.drdisagree.teledrive.resources.common_rename_file
+import com.drdisagree.teledrive.resources.common_upload
+import com.drdisagree.teledrive.resources.file_count
+import com.drdisagree.teledrive.resources.files_hide
+import com.drdisagree.teledrive.resources.files_unhide
+import com.drdisagree.teledrive.resources.folder_count
+import com.drdisagree.teledrive.resources.item_count
+import com.drdisagree.teledrive.resources.note_edit_action
+import com.drdisagree.teledrive.resources.preview_add_favorites
+import com.drdisagree.teledrive.resources.preview_archive
+import com.drdisagree.teledrive.resources.preview_archive_format_title
+import com.drdisagree.teledrive.resources.preview_archive_packed_summary
+import com.drdisagree.teledrive.resources.preview_archive_packed_summary_saved
+import com.drdisagree.teledrive.resources.preview_chevron
+import com.drdisagree.teledrive.resources.preview_confirm_trash_file_message
+import com.drdisagree.teledrive.resources.preview_download_view
+import com.drdisagree.teledrive.resources.preview_extraction_supported_yet_download
+import com.drdisagree.teledrive.resources.preview_file_info
+import com.drdisagree.teledrive.resources.preview_move_to_trash
+import com.drdisagree.teledrive.resources.preview_no_preview
+import com.drdisagree.teledrive.resources.preview_preparing
+import com.drdisagree.teledrive.resources.preview_progress_bytes
+import com.drdisagree.teledrive.resources.preview_remove_favorites
+import com.drdisagree.teledrive.resources.preview_requires_download
+import com.drdisagree.teledrive.resources.preview_share_chooser_title
+import com.drdisagree.teledrive.resources.preview_share_copy
+import com.drdisagree.teledrive.resources.preview_truncated_download_view
+import com.drdisagree.teledrive.resources.preview_unarchive
 import java.io.File
 import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.delay
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @androidx.annotation.OptIn(UnstableApi::class)
@@ -795,7 +796,13 @@ private fun ArchiveRow(
             .padding(start = INDENT_STEP * row.depth)
             .clip(MaterialTheme.shapes.large)
             .background(MaterialTheme.colorScheme.surfaceContainerLow)
-            .then(if (node.isDirectory) Modifier.clickable { onToggle() } else Modifier)
+            .then(
+                if (node.isDirectory) {
+                    Modifier.clickable(role = Role.Button) { onToggle() }
+                } else {
+                    Modifier
+                }
+            )
             .padding(horizontal = 14.dp, vertical = 12.dp)
     ) {
         Box(

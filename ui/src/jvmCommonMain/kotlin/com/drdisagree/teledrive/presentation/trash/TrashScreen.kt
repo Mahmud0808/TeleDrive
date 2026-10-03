@@ -1,6 +1,5 @@
 package com.drdisagree.teledrive.presentation.trash
 
-import com.drdisagree.teledrive.presentation.common.AppBackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -44,17 +43,29 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import org.koin.compose.viewmodel.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.drdisagree.teledrive.domain.model.TrashItem
+import com.drdisagree.teledrive.presentation.common.AppBackHandler
+import com.drdisagree.teledrive.presentation.common.CollectSnackbarMessages
+import com.drdisagree.teledrive.presentation.common.Formatters
+import com.drdisagree.teledrive.presentation.common.add
+import com.drdisagree.teledrive.presentation.common.resolve
+import com.drdisagree.teledrive.presentation.components.BlockingProgressDialog
+import com.drdisagree.teledrive.presentation.components.ConfirmDialog
+import com.drdisagree.teledrive.presentation.components.EmptyState
+import com.drdisagree.teledrive.presentation.components.FileThumbnail
+import com.drdisagree.teledrive.presentation.components.liftedTopAppBarColors
+import com.drdisagree.teledrive.presentation.components.rememberDragSelect
+import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
 import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.common_back
 import com.drdisagree.teledrive.resources.common_clear_selection
 import com.drdisagree.teledrive.resources.common_delete_forever
 import com.drdisagree.teledrive.resources.common_deselect_all
 import com.drdisagree.teledrive.resources.common_restore
+import com.drdisagree.teledrive.resources.common_select
 import com.drdisagree.teledrive.resources.common_select_all
 import com.drdisagree.teledrive.resources.common_selection_count
 import com.drdisagree.teledrive.resources.trash
@@ -66,18 +77,8 @@ import com.drdisagree.teledrive.resources.trash_empty_trash_title
 import com.drdisagree.teledrive.resources.trash_items_permanently_deleted_device
 import com.drdisagree.teledrive.resources.trash_restores_with_folder
 import com.drdisagree.teledrive.resources.trash_trashed_at
-import com.drdisagree.teledrive.domain.model.TrashItem
-import com.drdisagree.teledrive.presentation.common.resolve
-import com.drdisagree.teledrive.presentation.common.CollectSnackbarMessages
-import com.drdisagree.teledrive.presentation.common.Formatters
-import com.drdisagree.teledrive.presentation.common.add
-import com.drdisagree.teledrive.presentation.components.BlockingProgressDialog
-import com.drdisagree.teledrive.presentation.components.ConfirmDialog
-import com.drdisagree.teledrive.presentation.components.EmptyState
-import com.drdisagree.teledrive.presentation.components.FileThumbnail
-import com.drdisagree.teledrive.presentation.components.liftedTopAppBarColors
-import com.drdisagree.teledrive.presentation.components.rememberDragSelect
-import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
+import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -236,6 +237,11 @@ fun TrashScreen(
                                     row.expandable -> viewModel.toggleExpanded(item.id)
                                 }
                             },
+                            onLongClickLabel = if (row.selectable) {
+                                stringResource(Res.string.common_select)
+                            } else {
+                                null
+                            },
                             onLongClick = {
                                 if (row.selectable) viewModel.toggleSelection(item.id)
                             }
@@ -246,6 +252,7 @@ fun TrashScreen(
                     when (item) {
                         is TrashItem.File -> FileThumbnail(
                             file = item.file,
+                            contentDescription = null,
                             modifier = Modifier
                                 .size(44.dp)
                                 .clip(MaterialTheme.shapes.medium)

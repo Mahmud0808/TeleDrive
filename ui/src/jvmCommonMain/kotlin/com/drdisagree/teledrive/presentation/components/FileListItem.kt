@@ -12,8 +12,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.OfflinePin
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.OfflinePin
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -23,16 +23,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.drdisagree.teledrive.resources.Res
-import com.drdisagree.teledrive.resources.common_content_description_favorite
-import com.drdisagree.teledrive.resources.common_content_description_available_offline
-import com.drdisagree.teledrive.resources.common_content_description_selected
-import com.drdisagree.teledrive.resources.common_file_size_and_date
 import com.drdisagree.teledrive.domain.model.DriveFile
 import com.drdisagree.teledrive.presentation.common.Formatters
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.common_content_description_available_offline
+import com.drdisagree.teledrive.resources.common_content_description_favorite
+import com.drdisagree.teledrive.resources.common_content_description_selected
+import com.drdisagree.teledrive.resources.common_file_size_and_date
+import com.drdisagree.teledrive.resources.common_open
+import com.drdisagree.teledrive.resources.common_select
+import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -58,13 +60,21 @@ fun FileListItem(
             .fillMaxWidth()
             .clip(MaterialTheme.shapes.large)
             .background(background)
-            .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+            .combinedClickable(
+                onClickLabel = stringResource(
+                    if (selectionMode) Res.string.common_select else Res.string.common_open
+                ),
+                onLongClickLabel = stringResource(Res.string.common_select),
+                onClick = onClick,
+                onLongClick = onLongClick
+            )
             .padding(horizontal = 12.dp, vertical = if (compact) 4.dp else 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box {
             FileThumbnail(
                 file = file,
+                contentDescription = null,
                 modifier = Modifier
                     .size(if (compact) 38.dp else 48.dp)
                     .clip(MaterialTheme.shapes.medium)

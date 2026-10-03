@@ -113,6 +113,8 @@
     <string name="common_retry">Tentar novamente</string>
     <string name="common_save">Salvar</string>
     <string name="common_select_all">Selecionar tudo</string>
+    <string name="common_open">Abrir</string>
+    <string name="common_select">Selecionar</string>
     <string name="common_selection_count">%1$d selecionados</string>
     <string name="common_share">Compartilhar</string>
     <string name="common_storage_channels">Canais de armazenamento</string>
@@ -454,6 +456,7 @@
     <string name="player_lock_controls">Bloquear controles</string>
     <string name="player_unlock_controls">Desbloquear controles</string>
     <string name="player_brightness">Brilho</string>
+    <string name="player_toggle_controls">Mostrar ou ocultar controles</string>
     <string name="player_volume">Volume</string>
     <string name="player_track_unsupported">Não suportado neste dispositivo</string>
     <string name="player_codec_unsupported">Este dispositivo não consegue decodificar este vídeo. Baixe-o e reproduza-o em outro app.</string>

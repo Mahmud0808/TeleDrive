@@ -43,13 +43,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.player_brightness
+import com.drdisagree.teledrive.resources.player_toggle_controls
 import com.drdisagree.teledrive.resources.player_volume
-import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -104,10 +107,17 @@ fun PlayerGestureArea(
         adjustment = null
     }
 
+    val toggleControlsLabel = stringResource(Res.string.player_toggle_controls)
     Box(modifier = modifier.fillMaxSize()) {
         Box(
             modifier = Modifier
                 .matchParentSize()
+                .semantics {
+                    onClick(label = toggleControlsLabel) {
+                        tap()
+                        true
+                    }
+                }
                 .pointerInput(Unit) {
                     detectTapGestures { tap() }
                 }

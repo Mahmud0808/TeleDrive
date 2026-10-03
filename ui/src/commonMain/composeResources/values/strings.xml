@@ -113,6 +113,8 @@
     <string name="common_retry">Retry</string>
     <string name="common_save">Save</string>
     <string name="common_select_all">Select all</string>
+    <string name="common_open">Open</string>
+    <string name="common_select">Select</string>
     <string name="common_selection_count">%1$d selected</string>
     <string name="common_share">Share</string>
     <string name="common_storage_channels">Storage channels</string>
@@ -454,6 +456,7 @@
     <string name="player_lock_controls">Lock controls</string>
     <string name="player_unlock_controls">Unlock controls</string>
     <string name="player_brightness">Brightness</string>
+    <string name="player_toggle_controls">Show or hide controls</string>
     <string name="player_volume">Volume</string>
     <string name="player_track_unsupported">Not supported on this device</string>
     <string name="player_codec_unsupported">This device cannot decode this video. Download it and play it in another app.</string>

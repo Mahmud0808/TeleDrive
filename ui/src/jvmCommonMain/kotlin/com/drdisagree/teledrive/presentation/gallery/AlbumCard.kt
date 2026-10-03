@@ -19,16 +19,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import org.jetbrains.compose.resources.pluralStringResource
-import org.jetbrains.compose.resources.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.drdisagree.teledrive.core.media.ThumbnailModel
+import com.drdisagree.teledrive.domain.model.MediaAlbum
 import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.album_not_in_folder
 import com.drdisagree.teledrive.resources.item_count
-import com.drdisagree.teledrive.core.media.ThumbnailModel
-import com.drdisagree.teledrive.domain.model.MediaAlbum
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun AlbumCard(
@@ -41,7 +42,7 @@ fun AlbumCard(
         modifier = modifier
             .clip(MaterialTheme.shapes.large)
             .background(MaterialTheme.colorScheme.surfaceContainerLow)
-            .clickable(onClick = onClick)
+            .clickable(role = Role.Button, onClick = onClick)
             .padding(6.dp)
     ) {
         Box(

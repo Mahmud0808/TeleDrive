@@ -66,6 +66,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -309,7 +312,7 @@ fun HomeScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clip(MaterialTheme.shapes.medium)
-                                    .clickable { onOpenFolder(folder.id) }
+                                    .clickable(role = Role.Button) { onOpenFolder(folder.id) }
                                     .padding(vertical = 8.dp, horizontal = 4.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
@@ -341,7 +344,7 @@ fun HomeScreen(
                                     .width(112.dp)
                                     .clip(MaterialTheme.shapes.large)
                                     .background(MaterialTheme.colorScheme.surfaceContainerLow)
-                                    .clickable {
+                                    .clickable(role = Role.Button) {
                                         onOpenFile(
                                             file.id,
                                             PreviewSequence(
@@ -354,6 +357,7 @@ fun HomeScreen(
                             ) {
                                 FileThumbnail(
                                     file = file,
+                                    contentDescription = null,
                                     modifier = Modifier
                                         .size(100.dp)
                                         .clip(MaterialTheme.shapes.medium)
@@ -461,7 +465,7 @@ private fun CollectionRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .clickable(role = Role.Button, onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -487,7 +491,8 @@ private fun SectionHeader(title: String) {
     Text(
         text = title,
         style = MaterialTheme.typography.titleMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.semantics { heading() }
     )
 }
 

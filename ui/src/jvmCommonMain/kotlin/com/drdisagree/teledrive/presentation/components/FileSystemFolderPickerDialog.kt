@@ -51,6 +51,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.drdisagree.teledrive.resources.Res
@@ -67,9 +68,9 @@ import com.drdisagree.teledrive.resources.picker_internal_storage
 import com.drdisagree.teledrive.resources.picker_select_this_folder
 import com.drdisagree.teledrive.resources.picker_title_select_folder
 import com.drdisagree.teledrive.resources.picker_use_saf
+import java.io.File
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-import java.io.File
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -235,7 +236,9 @@ fun FileSystemFolderPickerDialog(
                                         Row(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .clickable { currentPath = item.path }
+                                                .clickable(role = Role.Button) {
+                                                    currentPath = item.path
+                                                }
                                                 .padding(vertical = 10.dp),
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
