@@ -185,7 +185,12 @@ fun ChannelsScreen(
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = { showCreate = true },
-                icon = { Icon(Icons.Filled.Add, contentDescription = null) },
+                icon = {
+                    Icon(
+                        Icons.Filled.Add,
+                        contentDescription = stringResource(Res.string.channels_new_drive)
+                    )
+                },
                 text = { Text(stringResource(Res.string.channels_new_drive)) }
             )
         }
