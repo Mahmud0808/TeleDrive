@@ -19,12 +19,14 @@ class PartedTelegramDataSource(
     contentKey: ByteArray?
 ) : BaseDataSource(true) {
 
-    private val source = PartedMediaByteSource(
-        telegramClient = telegramClient,
-        streamCrypto = streamCrypto,
-        parts = parts,
-        encrypted = encrypted,
-        contentKey = contentKey
+    private val source = BufferedMediaByteSource(
+        PartedMediaByteSource(
+            telegramClient = telegramClient,
+            streamCrypto = streamCrypto,
+            parts = parts,
+            encrypted = encrypted,
+            contentKey = contentKey
+        )
     )
 
     private var uri: Uri? = null

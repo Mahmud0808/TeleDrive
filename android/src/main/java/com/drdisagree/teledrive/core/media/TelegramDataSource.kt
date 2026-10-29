@@ -16,7 +16,7 @@ class TelegramDataSource(
     remoteFileId: String
 ) : BaseDataSource(true) {
 
-    private val source = TelegramMediaByteSource(telegramClient, remoteFileId)
+    private val source = BufferedMediaByteSource(TelegramMediaByteSource(telegramClient, remoteFileId))
 
     private var uri: Uri? = null
     private var position: Long = 0
