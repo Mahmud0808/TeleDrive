@@ -36,7 +36,7 @@ class TransferQueueDrainer(
 ) {
 
     private val claimLock = Mutex()
-    private val executing = mutableSetOf<String>()
+    private val executing = mutableMapOf<String, TransferType>()
 
     suspend fun drain(
         isStopped: () -> Boolean,
@@ -70,6 +70,10 @@ class TransferQueueDrainer(
                         if (next == null) {
                             if (hold != null && transferDao.hasQueued(TransferType.BACKUP)) {
                                 backupsHeld = true
+                            }
+                            if (othersBusy()) {
+                                delay(IDLE_POLL_MS.milliseconds)
+                                continue
                             }
                             return@launch
                         }
@@ -126,22 +130,27 @@ class TransferQueueDrainer(
 
     private suspend fun nextClaimable(
         includeBackups: Boolean,
-        skip: Set<String> = emptySet()
+        skip: Set<String> = emptySet(),
+        includeUploads: Boolean = true
     ): TransferEntity? {
-        val candidates = if (includeBackups) {
-            transferDao.nextQueued(skip.size + 1)
-        } else {
-            transferDao.nextQueuedExcept(TransferType.BACKUP, skip.size + 1)
+        val types = TransferType.entries.filter { type ->
+            (includeBackups || type != TransferType.BACKUP) &&
+                    (includeUploads || type.isIncoming)
         }
-        return candidates.firstOrNull { it.id !in skip }
+        if (types.isEmpty()) return null
+        return transferDao.nextQueuedOf(types, skip.size + 1).firstOrNull { it.id !in skip }
     }
 
     private suspend fun claimNextQueued(includeBackups: Boolean): String? = claimLock.withLock {
-        val next = nextClaimable(includeBackups, executing) ?: return@withLock null
+        val uploading = executing.values.any { !it.isIncoming }
+        val next = nextClaimable(includeBackups, executing.keys, includeUploads = !uploading)
+            ?: return@withLock null
         transferDao.setState(next.id, TransferState.RUNNING, System.currentTimeMillis())
-        executing += next.id
+        executing[next.id] = next.type
         next.id
     }
+
+    private suspend fun othersBusy(): Boolean = claimLock.withLock { executing.isNotEmpty() }
 
     private suspend fun runTransfer(
         transferId: String,
@@ -209,6 +218,7 @@ class TransferQueueDrainer(
     private companion object {
         const val MAX_CONCURRENCY = 6
         const val SLOT_WAIT_MS = 5_000L
+        const val IDLE_POLL_MS = 1_000L
         const val BASE_BACKOFF_SECONDS = 2
         const val MAX_BACKOFF_SECONDS = 300
     }

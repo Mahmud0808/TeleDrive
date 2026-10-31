@@ -90,6 +90,12 @@ interface TransferDao {
     )
     suspend fun nextQueuedExcept(type: TransferType, limit: Int): List<TransferEntity>
 
+    @Query(
+        """SELECT * FROM transfers WHERE state = 'QUEUED' AND type IN (:types)
+           ORDER BY priority DESC, createdAt ASC LIMIT :limit"""
+    )
+    suspend fun nextQueuedOf(types: List<TransferType>, limit: Int): List<TransferEntity>
+
     @Query("SELECT EXISTS(SELECT 1 FROM transfers WHERE state = 'QUEUED' AND type = :type)")
     suspend fun hasQueued(type: TransferType): Boolean
 
