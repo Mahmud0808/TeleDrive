@@ -536,6 +536,7 @@
     <!-- Transfers -->
     <string name="transfer_stage_joining">Mesclando partes</string>
     <string name="transfer_stage_sealing">Criptografando parte</string>
+    <string name="transfer_stage_verifying">Verificando arquivo</string>
     <string name="transfer_type_backup">Backup</string>
     <string name="transfer_type_download">Download</string>
     <string name="transfer_type_restore">Restauração</string>

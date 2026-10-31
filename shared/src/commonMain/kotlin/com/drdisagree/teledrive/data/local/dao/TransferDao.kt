@@ -108,6 +108,9 @@ interface TransferDao {
     )
     fun observeActiveDownloads(): Flow<List<TransferEntity>>
 
+    @Query("UPDATE transfers SET localPath = :localPath WHERE id = :id")
+    suspend fun setLocalPath(id: String, localPath: String?)
+
     @Query("UPDATE transfers SET stage = :stage, updatedAt = :updatedAt WHERE id = :id")
     suspend fun setStage(id: String, stage: TransferStage?, updatedAt: Long)
 

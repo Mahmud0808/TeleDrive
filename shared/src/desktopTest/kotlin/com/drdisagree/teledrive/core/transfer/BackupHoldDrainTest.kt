@@ -157,7 +157,7 @@ class BackupHoldDrainTest {
                 ApkIconUploader(unused(), unused(), StreamCrypto(), unused(), unused())
             ),
             partDownloader = PartDownloader(
-                unused(), unused(), database.filePartDao(), StreamCrypto(), unused(), unused()
+                unused(), database.filePartDao(), StreamCrypto(), unused(), unused()
             ),
             apkIconUploader = ApkIconUploader(unused(), unused(), StreamCrypto(), unused(), unused()),
             localCopyDeleter = unused()

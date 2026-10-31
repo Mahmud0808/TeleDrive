@@ -1,8 +1,11 @@
 package com.drdisagree.teledrive.desktop.transfer
 
 import com.drdisagree.teledrive.core.transfer.TransferErrorMessages
+import com.drdisagree.teledrive.presentation.common.Formatters
 import com.drdisagree.teledrive.desktop.resources.Res
+import com.drdisagree.teledrive.desktop.resources.transfer_error_cache_full
 import com.drdisagree.teledrive.desktop.resources.transfer_error_decryption_failed
+import com.drdisagree.teledrive.desktop.resources.transfer_error_destination_full
 import com.drdisagree.teledrive.desktop.resources.transfer_error_download_ended
 import com.drdisagree.teledrive.desktop.resources.transfer_error_download_stalled
 import com.drdisagree.teledrive.desktop.resources.transfer_error_downloaded_missing
@@ -15,6 +18,7 @@ import com.drdisagree.teledrive.desktop.resources.transfer_error_no_remote_copy
 import com.drdisagree.teledrive.desktop.resources.transfer_error_save_failed
 import com.drdisagree.teledrive.desktop.resources.transfer_error_upload_ended
 import com.drdisagree.teledrive.desktop.resources.transfer_error_upload_stalled
+import com.drdisagree.teledrive.desktop.resources.transfer_error_verify_failed
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
@@ -46,6 +50,16 @@ class DesktopTransferErrorMessages : TransferErrorMessages {
     override val decryptionFailed by resource(Res.string.transfer_error_decryption_failed)
 
     override val saveFailed by resource(Res.string.transfer_error_save_failed)
+
+    override val verifyFailed by resource(Res.string.transfer_error_verify_failed)
+
+    override fun destinationFull(neededBytes: Long): String = runBlocking {
+        getString(Res.string.transfer_error_destination_full, Formatters.bytes(neededBytes))
+    }
+
+    override fun cacheFull(neededBytes: Long): String = runBlocking {
+        getString(Res.string.transfer_error_cache_full, Formatters.bytes(neededBytes))
+    }
 
     private fun resource(resource: StringResource) = lazy {
         runBlocking { getString(resource) }

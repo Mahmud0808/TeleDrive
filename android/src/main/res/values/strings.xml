@@ -27,6 +27,9 @@
     <string name="transfer_error_no_local_copy">No local copy to upload</string>
     <string name="transfer_error_no_remote_copy">File has no remote copy</string>
     <string name="transfer_error_save_failed">Could not save the download</string>
+    <string name="transfer_error_verify_failed">The downloaded file doesn\'t match the original. Try downloading it again.</string>
+    <string name="transfer_error_destination_full">Not enough free space where downloads are saved. Needs %1$s.</string>
+    <string name="transfer_error_cache_full">Not enough free space for TeleDrive\'s temporary files. Needs %1$s.</string>
     <string name="transfer_error_upload_ended">Upload ended unexpectedly</string>
     <string name="transfer_error_upload_stalled">Upload stopped responding</string>
 

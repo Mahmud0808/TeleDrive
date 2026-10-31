@@ -560,6 +560,7 @@
     <!-- Transfers -->
     <string name="transfer_stage_joining">Объединение частей</string>
     <string name="transfer_stage_sealing">Шифрование части</string>
+    <string name="transfer_stage_verifying">Проверка файла</string>
     <string name="transfer_type_backup">Бэкап</string>
     <string name="transfer_type_download">Скачивание</string>
     <string name="transfer_type_restore">Восстановление</string>

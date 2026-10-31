@@ -77,6 +77,7 @@ import com.drdisagree.teledrive.resources.common_resume
 import com.drdisagree.teledrive.resources.common_retry
 import com.drdisagree.teledrive.resources.transfer_stage_joining
 import com.drdisagree.teledrive.resources.transfer_stage_sealing
+import com.drdisagree.teledrive.resources.transfer_stage_verifying
 import com.drdisagree.teledrive.resources.transfer_type_backup
 import com.drdisagree.teledrive.resources.transfer_type_download
 import com.drdisagree.teledrive.resources.transfer_type_restore
@@ -355,6 +356,7 @@ private fun transferRate(transfer: TransferTask): String {
             when (stage) {
                 TransferStage.SEALING -> Res.string.transfer_stage_sealing
                 TransferStage.JOINING -> Res.string.transfer_stage_joining
+                TransferStage.VERIFYING -> Res.string.transfer_stage_verifying
             }
         )
     }

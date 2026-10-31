@@ -10,4 +10,13 @@ interface DownloadWriter {
         folderPath: String? = null,
         body: (OutputStream) -> Unit
     ): String?
+
+    fun openPartial(
+        fileName: String,
+        mimeType: String,
+        folderPath: String?,
+        token: String?
+    ): PartialDownload?
+
+    fun freeBytes(folderPath: String?): Long?
 }

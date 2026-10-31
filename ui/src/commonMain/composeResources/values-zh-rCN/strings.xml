@@ -524,6 +524,7 @@
     <!-- Transfers -->
     <string name="transfer_stage_joining">正在合并分片</string>
     <string name="transfer_stage_sealing">正在加密分片</string>
+    <string name="transfer_stage_verifying">正在校验文件</string>
     <string name="transfer_type_backup">备份</string>
     <string name="transfer_type_download">下载</string>
     <string name="transfer_type_restore">恢复</string>

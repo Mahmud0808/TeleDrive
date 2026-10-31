@@ -71,4 +71,7 @@
     <string name="transfer_error_no_remote_copy">文件没有远程副本</string>
     <string name="transfer_error_decryption_failed">解密失败</string>
     <string name="transfer_error_save_failed">无法保存下载的文件</string>
+    <string name="transfer_error_verify_failed">下载的文件与原文件不一致，请重新下载。</string>
+    <string name="transfer_error_destination_full">下载保存位置的可用空间不足，还需要 %1$s。</string>
+    <string name="transfer_error_cache_full">TeleDrive 临时文件的可用空间不足，需要 %1$s。</string>
 </resources>

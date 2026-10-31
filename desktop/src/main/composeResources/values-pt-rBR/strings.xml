@@ -71,4 +71,7 @@
     <string name="transfer_error_no_remote_copy">O arquivo não possui cópia remota</string>
     <string name="transfer_error_decryption_failed">Falha na descriptografia</string>
     <string name="transfer_error_save_failed">Não foi possível salvar o download</string>
+    <string name="transfer_error_verify_failed">O arquivo baixado não corresponde ao original. Tente baixá-lo novamente.</string>
+    <string name="transfer_error_destination_full">Não há espaço livre suficiente onde os downloads são salvos. São necessários %1$s.</string>
+    <string name="transfer_error_cache_full">Não há espaço livre suficiente para os arquivos temporários do TeleDrive. São necessários %1$s.</string>
 </resources>

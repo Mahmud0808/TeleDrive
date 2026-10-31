@@ -9,6 +9,7 @@ import com.drdisagree.teledrive.core.files.DownloadWriter
 import com.drdisagree.teledrive.core.files.FileImporter
 import com.drdisagree.teledrive.core.files.Hashing
 import com.drdisagree.teledrive.core.files.LocalCopyDeleter
+import com.drdisagree.teledrive.core.files.PartialDownload
 import com.drdisagree.teledrive.core.media.ThumbnailStore
 import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.core.telegram.TelegramDownloadEvent
@@ -31,6 +32,7 @@ import com.drdisagree.teledrive.domain.model.TransferStage
 import com.drdisagree.teledrive.domain.model.TransferState
 import com.drdisagree.teledrive.domain.model.TransferType
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -38,6 +40,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import java.io.File
 import java.util.UUID
@@ -441,12 +444,31 @@ class TransferExecutor(
         transfer: TransferEntity,
         entity: FileEntity
     ): TransferOutcome {
+        val folderPath = folderPathResolver.pathOf(entity.folderId)
+        val target = downloadWriter.openPartial(
+            fileName = entity.name,
+            mimeType = entity.mimeType,
+            folderPath = folderPath,
+            token = transfer.localPath
+        ) ?: return TransferOutcome.Failed(messages.saveFailed)
+        transferDao.setLocalPath(transfer.id, target.token)
+
+        val needed = entity.sizeBytes - target.length()
+        val free = downloadWriter.freeBytes(folderPath)
+        if (free != null && free < needed + SPACE_MARGIN_BYTES) {
+            return TransferOutcome.Failed(messages.destinationFull(needed))
+        }
+        val cacheNeeded = FileParts.PART_SIZE + SPACE_MARGIN_BYTES
+        if (storagePaths.filesDir.usableSpace in 1 until cacheNeeded) {
+            return TransferOutcome.Failed(messages.cacheFull(cacheNeeded))
+        }
+
         val ticker = ProgressTicker().apply { start(0, System.currentTimeMillis()) }
         var outcome: TransferOutcome =
             TransferOutcome.Failed(messages.downloadEnded)
 
         return try {
-            partDownloader.download(entity.id, entity.isEncrypted)
+            partDownloader.download(entity.id, entity.isEncrypted, target)
                 .failWhenIdle(messages.downloadStalled)
                 .collect { event ->
                     currentCoroutineContext().ensureActive()
@@ -472,24 +494,45 @@ class TransferExecutor(
                         }
 
                         is PartDownloadEvent.Completed -> {
-                            transferDao.setStage(transfer.id, null, System.currentTimeMillis())
-                            outcome = finalizeDownload(
-                                transfer = transfer,
-                                fileId = entity.id,
-                                tdlibPath = event.localPath,
-                                alreadyPlain = true
-                            )
-                            partDownloader.discardAssembly(entity.id)
+                            outcome = finishParts(transfer, entity, target)
                         }
                     }
                 }
             outcome
         } catch (e: TransferControlException) {
-            if (!e.paused) partDownloader.discardAssembly(entity.id)
+            if (!e.paused) {
+                target.discard()
+                transferDao.setLocalPath(transfer.id, null)
+            }
             if (e.paused) TransferOutcome.Paused else TransferOutcome.Canceled
         } catch (e: TelegramException) {
             TransferOutcome.Failed(e.message, e.retryAfterSeconds)
         }
+    }
+
+    private suspend fun finishParts(
+        transfer: TransferEntity,
+        entity: FileEntity,
+        target: PartialDownload
+    ): TransferOutcome {
+        transferDao.setStage(transfer.id, TransferStage.VERIFYING, System.currentTimeMillis())
+        val intact = withContext(Dispatchers.IO) {
+            target.length() == entity.sizeBytes && (
+                    entity.contentHash == null ||
+                            Hashing.sha256(target.read()) == entity.contentHash
+                    )
+        }
+        transferDao.setStage(transfer.id, null, System.currentTimeMillis())
+        if (!intact) {
+            target.discard()
+            transferDao.setLocalPath(transfer.id, null)
+            return TransferOutcome.Failed(messages.verifyFailed)
+        }
+        val savedPath = target.finish() ?: return TransferOutcome.Failed(messages.saveFailed)
+        transferDao.setLocalPath(transfer.id, null)
+        fileDao.setLocalPath(entity.id, savedPath)
+        transferDao.setCompleted(transfer.id, System.currentTimeMillis())
+        return TransferOutcome.Completed
     }
 
     private suspend fun finalizeDownload(
@@ -579,6 +622,7 @@ class TransferExecutor(
 
     companion object {
         private const val EAGER_HASH_LIMIT = 512L * 1024 * 1024
+        private const val SPACE_MARGIN_BYTES = 256L * 1024 * 1024
         private const val STALL_TIMEOUT_MS = 180_000L
         private const val STALL_CODE = 408
     }

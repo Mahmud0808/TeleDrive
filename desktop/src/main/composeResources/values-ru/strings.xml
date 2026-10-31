@@ -71,4 +71,7 @@
     <string name="transfer_error_no_remote_copy">Файл не имеет копии на сервере</string>
     <string name="transfer_error_decryption_failed">Ошибка расшифровки</string>
     <string name="transfer_error_save_failed">Не удалось сохранить скачанный файл</string>
+    <string name="transfer_error_verify_failed">Скачанный файл не совпадает с оригиналом. Попробуйте скачать его снова.</string>
+    <string name="transfer_error_destination_full">Недостаточно свободного места в папке загрузок. Нужно %1$s.</string>
+    <string name="transfer_error_cache_full">Недостаточно свободного места для временных файлов TeleDrive. Нужно %1$s.</string>
 </resources>

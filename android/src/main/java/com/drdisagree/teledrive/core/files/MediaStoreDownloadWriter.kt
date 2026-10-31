@@ -4,6 +4,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.os.Build
 import android.os.Environment
+import android.os.StatFs
 import android.provider.MediaStore
 import androidx.annotation.RequiresApi
 import com.drdisagree.teledrive.core.common.SafeLog
@@ -33,6 +34,29 @@ class MediaStoreDownloadWriter(
         } else {
             writeDirectly(fileName, folderPath, body)
         }
+
+    override fun openPartial(
+        fileName: String,
+        mimeType: String,
+        folderPath: String?,
+        token: String?
+    ): PartialDownload? = runCatching {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            MediaStorePartialDownload.open(
+                context.contentResolver,
+                fileName,
+                mimeType,
+                relativePath(folderPath),
+                token
+            )
+        } else {
+            FilePartialDownload.open(directoryFor(folderPath), fileName, token)
+        }
+    }.onFailure { SafeLog.w(TAG, "Could not open a partial download", it) }.getOrNull()
+
+    override fun freeBytes(folderPath: String?): Long? = runCatching {
+        StatFs(Environment.getExternalStorageDirectory().path).availableBytes
+    }.getOrNull()
 
     @RequiresApi(Build.VERSION_CODES.Q)
     private fun writeThroughMediaStore(
@@ -86,11 +110,7 @@ class MediaStoreDownloadWriter(
         folderPath: String?,
         body: (OutputStream) -> Unit
     ): String? {
-        val root = File(
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-            FOLDER_NAME
-        )
-        val directory = folderPath?.takeIf { it.isNotBlank() }?.let { File(root, it) } ?: root
+        val directory = directoryFor(folderPath)
         if (!directory.exists() && !directory.mkdirs()) return null
 
         val existingNames = directory.list()?.toSet().orEmpty()
@@ -103,6 +123,14 @@ class MediaStoreDownloadWriter(
             target.delete()
             null
         }
+    }
+
+    private fun directoryFor(folderPath: String?): File {
+        val root = File(
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+            FOLDER_NAME
+        )
+        return folderPath?.takeIf { it.isNotBlank() }?.let { File(root, it) } ?: root
     }
 
     private fun relativePath(folderPath: String?): String {

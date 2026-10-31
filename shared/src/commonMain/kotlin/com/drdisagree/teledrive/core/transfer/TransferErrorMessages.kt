@@ -27,4 +27,10 @@ interface TransferErrorMessages {
     val decryptionFailed: String
 
     val saveFailed: String
+
+    val verifyFailed: String
+
+    fun destinationFull(neededBytes: Long): String
+
+    fun cacheFull(neededBytes: Long): String
 }

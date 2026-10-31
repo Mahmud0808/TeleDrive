@@ -1,6 +1,7 @@
 package com.drdisagree.teledrive.core.transfer
 
 import android.content.Context
+import android.text.format.Formatter
 import com.drdisagree.teledrive.R
 
 class ResourceTransferErrorMessages(
@@ -45,4 +46,17 @@ class ResourceTransferErrorMessages(
 
     override val saveFailed: String
         get() = context.getString(R.string.transfer_error_save_failed)
+
+    override val verifyFailed: String
+        get() = context.getString(R.string.transfer_error_verify_failed)
+
+    override fun destinationFull(neededBytes: Long): String = context.getString(
+        R.string.transfer_error_destination_full,
+        Formatter.formatFileSize(context, neededBytes)
+    )
+
+    override fun cacheFull(neededBytes: Long): String = context.getString(
+        R.string.transfer_error_cache_full,
+        Formatter.formatFileSize(context, neededBytes)
+    )
 }
