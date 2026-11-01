@@ -1,6 +1,5 @@
 package com.drdisagree.teledrive.presentation.preview
 
-import android.content.pm.ActivityInfo
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandHorizontally
@@ -61,7 +60,6 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -115,6 +113,7 @@ import kotlin.time.Duration.Companion.milliseconds
 @Composable
 fun PlayerControls(
     player: Player,
+    session: PlayerSession,
     visible: Boolean,
     audioOnly: Boolean,
     resizeMode: PlayerResizeMode,
@@ -134,20 +133,25 @@ fun PlayerControls(
     var position by remember(player) { mutableLongStateOf(player.currentPosition.coerceAtLeast(0)) }
     var scrubTarget by remember(player) { mutableStateOf<Float?>(null) }
     var pendingSeek by remember(player) { mutableStateOf<Long?>(null) }
-    var speed by remember(player) { mutableFloatStateOf(player.playbackParameters.speed) }
+    var speed by session::speed
     var muted by remember(player) { mutableStateOf(player.volume == 0f) }
     var repeatOne by remember(player) {
         mutableStateOf(player.repeatMode == Player.REPEAT_MODE_ONE)
     }
     var tracks by remember(player) { mutableStateOf(player.currentTracks) }
     var subtitlesOn by remember(player) { mutableStateOf(false) }
-    var rotation by remember { mutableStateOf(PlayerRotation.AUTO) }
     var expanded by remember { mutableStateOf(false) }
     var showSpeeds by remember { mutableStateOf(false) }
     var showAudioTracks by remember { mutableStateOf(false) }
     var showTextTracks by remember { mutableStateOf(false) }
 
     val activity = LocalActivity.current
+    var rotation by remember(activity) {
+        mutableStateOf(PlayerRotation.of(activity?.requestedOrientation))
+    }
+    LaunchedEffect(visible) {
+        if (visible) rotation = PlayerRotation.of(activity?.requestedOrientation)
+    }
 
     /**
      * A seek on a stream can take a moment, so the button reports waiting for data instead of
@@ -194,14 +198,6 @@ fun PlayerControls(
         }
         player.addListener(listener)
         onDispose { player.removeListener(listener) }
-    }
-
-    DisposableEffect(activity) {
-        onDispose {
-            if (rotation != PlayerRotation.AUTO) {
-                activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-            }
-        }
     }
 
     LaunchedEffect(player, visible, playing) {

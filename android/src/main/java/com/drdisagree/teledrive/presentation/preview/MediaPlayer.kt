@@ -104,6 +104,7 @@ fun MediaPlayer(
     onPreferredAudioLanguage: (String) -> Unit = {},
     onPreferredSubtitleLanguage: (String) -> Unit = {},
     onControlsVisibilityChanged: (Boolean) -> Unit = {},
+    session: PlayerSession = remember { PlayerSession() },
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -189,7 +190,8 @@ fun MediaPlayer(
     var locked by remember(content) { mutableStateOf(false) }
     var lockHintVisible by remember(content) { mutableStateOf(false) }
     val visibleControls by rememberUpdatedState(controlsVisible)
-    var resizeMode by remember { mutableStateOf(PlayerResizeMode.FIT) }
+    var resizeMode by session::resizeMode
+    LaunchedEffect(player) { player?.setPlaybackSpeed(session.speed) }
     var playing by remember(player) { mutableStateOf(player?.isPlaying == true) }
     var sized by remember(player) { mutableStateOf((player?.videoSize?.width ?: 0) > 0) }
     var videoRatio by remember(player) {
@@ -383,6 +385,7 @@ fun MediaPlayer(
         if (player != null) {
             PlayerControls(
                 player = player,
+                session = session,
                 visible = controlsVisible &&
                         !locked &&
                         !inPipMode &&

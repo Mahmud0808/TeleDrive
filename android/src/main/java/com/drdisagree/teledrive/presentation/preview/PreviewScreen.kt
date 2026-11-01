@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.view.WindowManager
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -224,6 +225,7 @@ fun PreviewScreen(
     val immersive = currentFile.category == FileCategory.IMAGE ||
             currentFile.category == FileCategory.VIDEO
     var chromeVisible by remember { mutableStateOf(true) }
+    val playerSession = remember { PlayerSession() }
     val inPipMode by koinInject<PipController>().inPipMode.collectAsStateWithLifecycle()
     val chromeShown = (chromeVisible || !immersive) && !inPipMode
 
@@ -244,6 +246,9 @@ fun PreviewScreen(
             val window = activity?.window ?: return@onDispose
             WindowInsetsControllerCompat(window, view)
                 .show(WindowInsetsCompat.Type.systemBars())
+            if (activity?.requestedOrientation != ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED) {
+                activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+            }
             if (window.attributes.screenBrightness >= 0f) {
                 window.attributes = window.attributes.apply {
                     screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
@@ -283,7 +288,8 @@ fun PreviewScreen(
                     onPreferredAudioLanguage = viewModel::setPreferredAudioLanguage,
                     onPreferredSubtitleLanguage = viewModel::setPreferredSubtitleLanguage,
                     onToggleChrome = { chromeVisible = !chromeVisible },
-                    onChromeRequested = { visible -> chromeVisible = visible }
+                    onChromeRequested = { visible -> chromeVisible = visible },
+                    playerSession = playerSession
                 )
             }
 
@@ -494,6 +500,7 @@ private fun PreviewPage(
     onToggleChrome: () -> Unit,
     onChromeRequested: (Boolean) -> Unit,
     loadLinkMetadata: suspend (String) -> LinkMetadata?,
+    playerSession: PlayerSession,
     storedTextScale: Float,
     onTextScaleChange: (Float) -> Unit
 ) {
@@ -576,7 +583,8 @@ private fun PreviewPage(
                 preferredSubtitleLanguage = preferredSubtitleLanguage,
                 onPreferredAudioLanguage = onPreferredAudioLanguage,
                 onPreferredSubtitleLanguage = onPreferredSubtitleLanguage,
-                onControlsVisibilityChanged = onChromeRequested
+                onControlsVisibilityChanged = onChromeRequested,
+                session = playerSession
             )
 
         is PreviewContent.Pdf -> PdfPreview(path = content.path)

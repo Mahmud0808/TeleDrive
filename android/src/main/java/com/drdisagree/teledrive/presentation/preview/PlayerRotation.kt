@@ -30,4 +30,9 @@ internal enum class PlayerRotation(
     );
 
     fun next(): PlayerRotation = entries[(ordinal + 1) % entries.size]
+
+    companion object {
+        fun of(orientation: Int?): PlayerRotation =
+            entries.firstOrNull { it.orientation == orientation } ?: AUTO
+    }
 }
