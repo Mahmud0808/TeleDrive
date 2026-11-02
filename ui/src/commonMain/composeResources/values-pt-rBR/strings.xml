@@ -715,6 +715,7 @@
     <string name="language_russian">Русский</string>
     <string name="language_portuguese_br">Português (Brasil)</string>
     <string name="language_chinese">简体中文</string>
+    <string name="language_spanish">Español</string>
     <string name="settings_tighter_list_rows_without">Linhas de lista mais compactas, sem exibir tamanho e data</string>
     <string name="settings_use_wallpaper_colors_available">Usar as cores do papel de parede quando disponíveis</string>
     <string name="theme_dark">Escuro</string>
@@ -958,5 +959,6 @@
         <item>Русский</item>
         <item>Português (Brasil)</item>
         <item>简体中文</item>
+        <item>Español</item>
     </string-array>
 </resources>
