@@ -1,3 +1,5 @@
+<p align="right">English · <a href="README.es.md">Español</a></p>
+
 <div align="center">
 
 <img src="android/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" width="120" alt="TeleDrive icon">
