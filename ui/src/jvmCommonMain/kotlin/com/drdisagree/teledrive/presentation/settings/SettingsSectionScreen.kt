@@ -50,6 +50,7 @@ import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.language_english
 import com.drdisagree.teledrive.resources.language_labels
 import com.drdisagree.teledrive.resources.language_chinese
+import com.drdisagree.teledrive.resources.language_spanish
 import com.drdisagree.teledrive.resources.language_portuguese_br
 import com.drdisagree.teledrive.resources.language_russian
 import com.drdisagree.teledrive.resources.language_system
