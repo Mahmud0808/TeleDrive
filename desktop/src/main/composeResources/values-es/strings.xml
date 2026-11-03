@@ -1,0 +1,77 @@
+<resources>
+    <!-- App-wide -->
+    <string name="app_name">TeleDrive</string>
+    <string name="app_already_running">TeleDrive ya se está ejecutando.</string>
+
+    <!-- Navigation -->
+    <string name="nav_files">Archivos</string>
+    <string name="nav_gallery">Galería</string>
+    <string name="nav_transfers">Transferencias</string>
+    <string name="nav_trash">Papelera</string>
+    <string name="nav_channels">Unidades</string>
+    <string name="nav_proxy">Proxy</string>
+
+    <!-- Sign in -->
+    <string name="auth_credentials_prompt">Escribe tus credenciales de la API de Telegram desde my.telegram.org</string>
+    <string name="auth_api_id">ID de la API</string>
+    <string name="auth_api_hash">Hash de la API</string>
+    <string name="auth_continue">Continuar</string>
+    <string name="auth_connecting">Conectando con Telegram</string>
+    <string name="auth_phone_number">Número de teléfono</string>
+    <string name="auth_send_code">Enviar código</string>
+    <string name="auth_code_sent_to">Escribe el código enviado a %1$s</string>
+    <string name="auth_code">Código</string>
+    <string name="auth_verify">Verificar</string>
+    <string name="auth_email_address">Dirección de correo</string>
+    <string name="auth_password">Contraseña</string>
+    <string name="auth_password_prompt">Contraseña de verificación en dos pasos</string>
+    <string name="auth_password_hint">Contraseña de verificación en dos pasos (pista: %1$s)</string>
+    <string name="auth_sign_in">Iniciar sesión</string>
+    <string name="auth_confirm_other_device">Confirma en otro dispositivo</string>
+    <string name="auth_registration_required">Este número no tiene cuenta de Telegram. Regístrate primero en un teléfono.</string>
+    <string name="auth_signed_in_as">Sesión iniciada como %1$s</string>
+    <string name="auth_signing_out">Cerrando sesión</string>
+    <string name="auth_session_closed">Sesión cerrada. Reinicia la app.</string>
+    <string name="auth_failed">No se pudo iniciar sesión: %1$s</string>
+    <string name="auth_your_account">tu cuenta</string>
+    <string name="auth_sign_out">Cerrar sesión</string>
+
+    <!-- Drive -->
+    <string name="drive_loading">Cargando tus unidades</string>
+    <string name="drive_pick_title">Elige una unidad</string>
+    <string name="drive_pick_subtitle">Los archivos se guardan en un canal privado de Telegram</string>
+    <string name="drive_create">Crear una unidad nueva</string>
+    <string name="drive_open">Abrir</string>
+    <string name="drive_file_count">%1$d archivos</string>
+    <string name="drive_syncing">Sincronizando con Telegram</string>
+    <string name="drive_empty">Esta unidad aún no tiene archivos</string>
+    <string name="drive_sync">Sincronizar</string>
+    <string name="drive_upload">Subir</string>
+    <string name="drive_download">Descargar</string>
+    <string name="drive_downloaded">Descargado</string>
+    <string name="drive_queued">En cola</string>
+    <string name="drive_upload_chooser_title">Elige un archivo para subir</string>
+
+    <!-- Preview -->
+    <string name="preview_open_externally">Abrir con la app del sistema</string>
+    <string name="preview_stream">Reproducir en el reproductor del sistema</string>
+    <string name="preview_open_failed">No se pudo abrir el archivo con una app del sistema</string>
+
+    <!-- Transfer errors -->
+    <string name="transfer_error_key_missing">Falta la clave de cifrado. Restáurala en Ajustes.</string>
+    <string name="transfer_error_no_file_reference">La transferencia no tiene referencia de archivo</string>
+    <string name="transfer_error_file_record_missing">Falta el registro del archivo</string>
+    <string name="transfer_error_no_local_copy">No hay copia local para subir</string>
+    <string name="transfer_error_local_file_gone">El archivo local ya no existe</string>
+    <string name="transfer_error_upload_ended">La subida terminó de forma inesperada</string>
+    <string name="transfer_error_upload_stalled">La subida dejó de responder</string>
+    <string name="transfer_error_download_ended">La descarga terminó de forma inesperada</string>
+    <string name="transfer_error_download_stalled">La descarga dejó de responder</string>
+    <string name="transfer_error_downloaded_missing">Falta el archivo descargado</string>
+    <string name="transfer_error_no_remote_copy">El archivo no tiene copia remota</string>
+    <string name="transfer_error_decryption_failed">Falló el descifrado</string>
+    <string name="transfer_error_save_failed">No se pudo guardar la descarga</string>
+    <string name="transfer_error_verify_failed">El archivo descargado no coincide con el original. Intenta descargarlo de nuevo.</string>
+    <string name="transfer_error_destination_full">No hay espacio libre suficiente donde se guardan las descargas. Se necesitan %1$s.</string>
+    <string name="transfer_error_cache_full">No hay espacio libre suficiente para los archivos temporales de TeleDrive. Se necesitan %1$s.</string>
+</resources>

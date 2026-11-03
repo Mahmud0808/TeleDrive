@@ -703,6 +703,7 @@
     <string name="language_russian">Русский</string>
     <string name="language_portuguese_br">Português (Brasil)</string>
     <string name="language_chinese">简体中文</string>
+    <string name="language_spanish">Español</string>
     <string name="settings_tighter_list_rows_without">更紧凑的列表行，不显示大小和日期</string>
     <string name="settings_use_wallpaper_colors_available">可用时使用壁纸颜色</string>
     <string name="theme_dark">深色</string>
@@ -946,5 +947,6 @@
         <item>Русский</item>
         <item>Português (Brasil)</item>
         <item>简体中文</item>
+        <item>Español</item>
     </string-array>
 </resources>
