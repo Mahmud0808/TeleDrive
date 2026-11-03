@@ -209,6 +209,7 @@ import com.drdisagree.teledrive.resources.files_show_in_file_manager
 import com.drdisagree.teledrive.resources.files_sort
 import com.drdisagree.teledrive.resources.info_details
 import com.drdisagree.teledrive.resources.note_edit_action
+import com.drdisagree.teledrive.resources.nav_files
 import com.drdisagree.teledrive.resources.note_new
 import com.drdisagree.teledrive.resources.preview_remove_favorites
 import com.drdisagree.teledrive.resources.preview_share_chooser_title
@@ -1062,7 +1063,12 @@ private fun FilesContent(
         columns = GridCells.Fixed(columns),
         modifier = Modifier
             .fillMaxSize()
-            .keyboardCollection(keyboard, itemCount, shortcuts)
+            .keyboardCollection(
+                keyboard,
+                itemCount,
+                shortcuts,
+                label = stringResource(Res.string.nav_files)
+            )
             .pinchZoom(onZoomIn = viewModel::zoomIn, onZoomOut = viewModel::zoomOut)
             .then(dragSelect),
         contentPadding = padding.add(horizontal = 12.dp, top = 12.dp, bottom = 100.dp),

@@ -118,6 +118,7 @@ import com.drdisagree.teledrive.resources.gallery_no_albums
 import com.drdisagree.teledrive.resources.gallery_no_media
 import com.drdisagree.teledrive.resources.gallery_photos_videos_appear_here
 import com.drdisagree.teledrive.resources.gallery_title
+import com.drdisagree.teledrive.resources.nav_gallery
 import com.drdisagree.teledrive.domain.model.MediaAlbum
 import com.drdisagree.teledrive.domain.model.ViewMode
 import com.drdisagree.teledrive.presentation.common.DayBucket
@@ -646,7 +647,12 @@ fun GalleryScreen(
                         state = mediaListState,
                         modifier = Modifier
                             .fillMaxSize()
-                            .keyboardCollection(listKeyboard, media.itemCount, shortcuts)
+                            .keyboardCollection(
+                                listKeyboard,
+                                media.itemCount,
+                                shortcuts,
+                                label = stringResource(Res.string.nav_gallery)
+                            )
                             .pinchZoom(
                                 onZoomIn = viewModel::zoomIn,
                                 onZoomOut = viewModel::zoomOut
@@ -699,7 +705,12 @@ fun GalleryScreen(
                         columns = GridCells.Fixed(state.gridSize),
                         modifier = Modifier
                             .fillMaxSize()
-                            .keyboardCollection(gridKeyboard, media.itemCount, shortcuts)
+                            .keyboardCollection(
+                                gridKeyboard,
+                                media.itemCount,
+                                shortcuts,
+                                label = stringResource(Res.string.nav_gallery)
+                            )
                             .pinchZoom(
                                 onZoomIn = viewModel::zoomIn,
                                 onZoomOut = viewModel::zoomOut

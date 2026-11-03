@@ -12,9 +12,13 @@ import androidx.compose.ui.semantics.semantics
 fun Modifier.keyboardCollection(
     state: KeyboardCollectionState,
     itemCount: Int,
-    shortcuts: CollectionShortcuts = CollectionShortcuts()
+    shortcuts: CollectionShortcuts = CollectionShortcuts(),
+    label: String? = null
 ): Modifier = this
-    .semantics { collectionInfo = state.collectionInfo(itemCount) }
+    .semantics {
+        collectionInfo = state.collectionInfo(itemCount)
+        if (label != null) collectionRole(label, grid = state.columns > 1)
+    }
     .onPreviewKeyEvent { event -> state.handle(event, shortcuts) }
 
 fun Modifier.keyboardCollectionItem(
