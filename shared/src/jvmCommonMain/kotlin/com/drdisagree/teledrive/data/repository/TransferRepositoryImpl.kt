@@ -153,9 +153,11 @@ class TransferRepositoryImpl(
         val prefs = settingsRepository.preferences.first()
         val availableBytes = storageInspector.availableBytes()
         var queued = 0
+        var waiting = 0
 
         for (chunk in fileIds.chunked(SQL_BATCH)) enqueueLock.withLock {
             val alreadyQueued = transferDao.unfinishedFileIds(chunk).toSet()
+            waiting += alreadyQueued.size
             if (sessionId != null && alreadyQueued.isNotEmpty()) {
                 transferDao.adoptIntoSession(alreadyQueued.toList(), sessionId)
             }
@@ -201,7 +203,7 @@ class TransferRepositoryImpl(
                 queued += transfers.size
             }
         }
-        if (queued > 0) kickWorker()
+        if (queued > 0 || waiting > 0) kickWorker()
         return queued
     }
 

@@ -204,10 +204,9 @@ class BackupRepositoryImpl(
 
     /** A file trashed in the app but still on disk is restored instead of uploaded again. */
     private suspend fun reviveTrashedUpload(candidate: File, chatId: Long?): Boolean {
-        val revived = fileRepository.reviveTrashedCopy(
-            localPath = candidate.absolutePath,
-            folderId = backupFolderIdFor(candidate, chatId)
-        ) ?: return false
+        val revived = fileRepository.reviveTrashedCopy(candidate.absolutePath) {
+            backupFolderIdFor(candidate, chatId)
+        } ?: return false
         if (!revived.hasRemoteCopy) return false
         recordBackedUp(candidate, revived.id, revived.contentHash, chatId)
         SafeLog.d(TAG, "Restored a trashed file instead of uploading a copy")

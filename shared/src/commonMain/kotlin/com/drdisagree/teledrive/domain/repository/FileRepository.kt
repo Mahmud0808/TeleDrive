@@ -133,7 +133,7 @@ interface FileRepository {
 
     suspend fun resolveImportFolder(relativePath: String, parentId: String?): String?
 
-    suspend fun reviveTrashedCopy(localPath: String, folderId: String?): DriveFile?
+    suspend fun reviveTrashedCopy(localPath: String, folderId: suspend () -> String?): DriveFile?
 
     /** Removes only the local copy; remote copy must be verified first. */
     suspend fun deleteLocalCopy(ids: List<String>): AppResult<LocalCleanup>

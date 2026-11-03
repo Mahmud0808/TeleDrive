@@ -22,13 +22,17 @@ class WorkTransferScheduler(
         val pending = workManager.getWorkInfosForUniqueWork(TransferQueueWorker.UNIQUE_NAME)
         pending.addListener(
             {
-                val running = runCatching { pending.get() }
+                val states = runCatching { pending.get() }
                     .getOrNull()
                     .orEmpty()
-                    .any { it.state == WorkInfo.State.RUNNING }
+                    .map { it.state }
                 enqueue(
                     allowMetered = allowMetered,
-                    policy = if (running) ExistingWorkPolicy.KEEP else ExistingWorkPolicy.REPLACE,
+                    policy = when {
+                        WorkInfo.State.BLOCKED in states -> ExistingWorkPolicy.KEEP
+                        WorkInfo.State.RUNNING in states -> ExistingWorkPolicy.APPEND_OR_REPLACE
+                        else -> ExistingWorkPolicy.REPLACE
+                    },
                     expedited = true
                 )
             },

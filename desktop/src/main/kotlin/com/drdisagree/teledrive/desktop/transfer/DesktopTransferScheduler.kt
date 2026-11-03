@@ -18,21 +18,26 @@ class DesktopTransferScheduler(
 
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.io)
     private val draining = AtomicBoolean(false)
+    private val requested = AtomicBoolean(false)
 
     override fun kick(allowMetered: Boolean) {
+        requested.set(true)
         if (!draining.compareAndSet(false, true)) return
         scope.launch {
             try {
-                while (drainer.drain(
-                        isStopped = { false },
-                        onTerminalFailure = { }
-                    ) == TransferDrainResult.INTERRUPTED
-                ) {
-                    delay(RETRY_DELAY_SECONDS.seconds)
+                while (requested.getAndSet(false)) {
+                    while (drainer.drain(
+                            isStopped = { false },
+                            onTerminalFailure = { }
+                        ) == TransferDrainResult.INTERRUPTED
+                    ) {
+                        delay(RETRY_DELAY_SECONDS.seconds)
+                    }
                 }
             } finally {
                 draining.set(false)
             }
+            if (requested.get()) kick(allowMetered)
         }
     }
 
