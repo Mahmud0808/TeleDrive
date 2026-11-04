@@ -22,6 +22,7 @@ import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.core.telegram.TelegramDownloadEvent
 import com.drdisagree.teledrive.core.telegram.TelegramException
 import com.drdisagree.teledrive.data.local.FileQueryBuilder
+import com.drdisagree.teledrive.data.local.OffsetRefreshPagingSource
 import com.drdisagree.teledrive.data.local.dao.FileDao
 import com.drdisagree.teledrive.data.local.dao.FolderDao
 import com.drdisagree.teledrive.data.local.entity.FileEntity
@@ -94,7 +95,9 @@ class FileRepositoryImpl(
                     enablePlaceholders = false
                 ),
                 pagingSourceFactory = {
-                    fileDao.pagingSource(FileQueryBuilder.build(spec.copy(chatId = chatId)))
+                    OffsetRefreshPagingSource(
+                        fileDao.pagingSource(FileQueryBuilder.build(spec.copy(chatId = chatId)))
+                    )
                 }
             ).flow.map { paging -> paging.map { it.toDomain() } }
         }
