@@ -193,7 +193,12 @@ class ChannelRepositoryImpl(
     }
 
     private suspend fun deleteConfirmed(chatId: Long): AppResult<Unit> = runTelegram {
-        telegramClient.deleteStorageChannel(chatId)
+        try {
+            telegramClient.deleteStorageChannel(chatId)
+        } catch (e: TelegramException) {
+            if (telegramClient.chatExists(chatId) != false) throw e
+            SafeLog.w(TAG, "Drive channel was already gone, removing it here")
+        }
         forget(chatId)
         AppResult.Success(Unit)
     }
