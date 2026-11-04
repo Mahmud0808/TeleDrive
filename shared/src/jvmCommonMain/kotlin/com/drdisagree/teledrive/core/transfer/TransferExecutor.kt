@@ -387,7 +387,9 @@ class TransferExecutor(
                 entity.id,
                 if (e.paused) BackupState.QUEUED else BackupState.NONE
             )
-            if (!e.paused) partUploader.discardParts(entity.id)
+            if (!e.paused && fileDao.byId(entity.id)?.messageId == null) {
+                partUploader.discardParts(entity.id)
+            }
             if (e.paused) TransferOutcome.Paused else TransferOutcome.Canceled
         } catch (e: TelegramException) {
             fileDao.setBackupStateIfLocalOnly(entity.id, BackupState.FAILED)
