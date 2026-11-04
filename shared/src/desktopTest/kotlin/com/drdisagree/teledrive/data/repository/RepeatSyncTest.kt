@@ -45,6 +45,9 @@ class RepeatSyncTest {
         )
 
         stats(harness.newSync().fullResync())
+        telegram.documents = telegram.documents.map {
+            it.copy(remoteFileId = "${it.remoteFileId}-next-session")
+        }
         val second = stats(harness.newSync().fullResync())
 
         assertEquals(0, second.inserted)

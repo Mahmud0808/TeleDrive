@@ -588,7 +588,7 @@ class SyncRepositoryImpl(
                 ReconcileResult.UPDATED
             }
 
-            existing != entity -> {
+            existing != entity.keepingRemoteIdOf(existing) -> {
                 fileDao.upsert(entity)
                 ReconcileResult.UPDATED
             }
@@ -596,6 +596,13 @@ class SyncRepositoryImpl(
             else -> ReconcileResult.UNCHANGED
         }
     }
+
+    private fun FileEntity.keepingRemoteIdOf(existing: FileEntity): FileEntity =
+        if (remoteUniqueId != null && remoteUniqueId == existing.remoteUniqueId) {
+            copy(remoteFileId = existing.remoteFileId)
+        } else {
+            this
+        }
 
     private suspend fun recordPart(document: RemoteDocument, manifest: RemoteFileManifest) {
         filePartDao.upsert(
