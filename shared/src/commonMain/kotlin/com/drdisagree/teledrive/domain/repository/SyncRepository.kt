@@ -9,6 +9,8 @@ interface SyncRepository {
 
     val indexedSoFar: Flow<Int>
 
+    val lockedFileCounts: Flow<Map<Long, Int>>
+
     /**
      * Safe after a local wipe: rows whose message vanished become local-only, missing documents are
      * inserted.

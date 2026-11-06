@@ -22,7 +22,12 @@ internal class SyncHarness : AutoCloseable {
     val settings = FakeSettings(UserPreferences(storageChatId = TEST_CHAT))
     val telegram = FakeTelegram()
     val scheduler = CountingScheduler()
-    val codec = ManifestCodec(StreamCrypto(), unused<WrappedKeyRepository>())
+    val codec = ManifestCodec(
+        StreamCrypto(),
+        object : WrappedKeyRepository by unused() {
+            override fun exists(name: String): Boolean = false
+        }
+    )
     val activeChannel = ActiveChannel(settings)
     val folderPaths = FolderPathResolver(
         database.folderDao(),

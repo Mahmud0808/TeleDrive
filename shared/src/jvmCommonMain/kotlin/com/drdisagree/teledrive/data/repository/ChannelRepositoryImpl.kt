@@ -34,9 +34,10 @@ class ChannelRepositoryImpl(
 
     override fun observeChannels(): Flow<List<DriveChannel>> = combine(
         channelDao.observeAll(),
-        settingsRepository.preferences.map { it.storageChatId }
-    ) { channels, activeId ->
-        channels.map { channel -> channel.toDomain(activeId) }
+        settingsRepository.preferences.map { it.storageChatId },
+        syncRepository.lockedFileCounts
+    ) { channels, activeId, locked ->
+        channels.map { channel -> channel.toDomain(activeId, locked[channel.chatId] ?: 0) }
     }
 
     override suspend fun refresh(): AppResult<List<DriveChannel>> = runTelegram {
@@ -252,7 +253,10 @@ class ChannelRepositoryImpl(
         SafeLog.d(TAG, "Removed a drive from this device")
     }
 
-    private suspend fun StorageChannelEntity.toDomain(activeId: Long?) = DriveChannel(
+    private suspend fun StorageChannelEntity.toDomain(
+        activeId: Long?,
+        lockedFiles: Int = 0
+    ) = DriveChannel(
         chatId = chatId,
         title = title,
         fileCount = channelDao.fileCount(chatId),
@@ -262,7 +266,8 @@ class ChannelRepositoryImpl(
         photoPath = photoPath?.takeIf { File(it).exists() },
         isActive = chatId == activeId,
         isIndexed = lastOpenedAt > 0 || channelDao.fileCount(chatId) > 0,
-        lastOpenedAt = lastOpenedAt
+        lastOpenedAt = lastOpenedAt,
+        lockedFiles = lockedFiles
     )
 
     private fun String.toFolderSet(): Set<String> =

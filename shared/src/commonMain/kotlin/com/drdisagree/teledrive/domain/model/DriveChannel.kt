@@ -10,7 +10,8 @@ data class DriveChannel(
     val photoPath: String?,
     val isActive: Boolean,
     val isIndexed: Boolean,
-    val lastOpenedAt: Long
+    val lastOpenedAt: Long,
+    val lockedFiles: Int = 0
 ) {
 
     /** The part the user chose, empty for a drive that was never named. */

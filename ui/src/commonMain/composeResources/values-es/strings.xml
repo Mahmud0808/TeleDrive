@@ -41,6 +41,17 @@
         <item quantity="one">%1$d archivo cifrado omitido. Restaura el respaldo de tu clave para indexarlo.</item>
         <item quantity="other">%1$d archivos cifrados omitidos. Restaura el respaldo de tu clave para indexarlos.</item>
     </plurals>
+    <plurals name="home_encrypted_message">
+        <item quantity="one">%1$d archivo de esta unidad está cifrado. Restaura tu clave de cifrado para verlo.</item>
+        <item quantity="other">%1$d archivos de esta unidad están cifrados. Restaura tu clave de cifrado para verlos.</item>
+    </plurals>
+    <plurals name="channels_encrypted_files">
+        <item quantity="one">%1$d archivo cifrado</item>
+        <item quantity="other">%1$d archivos cifrados</item>
+    </plurals>
+    <string name="home_encrypted_title">Se encontraron archivos cifrados</string>
+    <string name="home_encrypted_open_settings">Abrir ajustes</string>
+    <string name="home_encrypted_later">Más tarde</string>
     <plurals name="home_saving_changes_left">
         <item quantity="one">Falta %1$d archivo</item>
         <item quantity="other">Faltan %1$d archivos</item>

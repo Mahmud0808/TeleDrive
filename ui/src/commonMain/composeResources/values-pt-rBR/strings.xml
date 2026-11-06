@@ -41,6 +41,17 @@
         <item quantity="one">%1$d arquivo criptografado ignorado. Restaure o backup da chave para indexá-lo.</item>
         <item quantity="other">%1$d arquivos criptografados ignorados. Restaure o backup da chave para indexá-los.</item>
     </plurals>
+    <plurals name="home_encrypted_message">
+        <item quantity="one">%1$d arquivo nesta unidade está criptografado. Restaure sua chave de criptografia para vê-lo.</item>
+        <item quantity="other">%1$d arquivos nesta unidade estão criptografados. Restaure sua chave de criptografia para vê-los.</item>
+    </plurals>
+    <plurals name="channels_encrypted_files">
+        <item quantity="one">%1$d arquivo criptografado</item>
+        <item quantity="other">%1$d arquivos criptografados</item>
+    </plurals>
+    <string name="home_encrypted_title">Arquivos criptografados encontrados</string>
+    <string name="home_encrypted_open_settings">Abrir configurações</string>
+    <string name="home_encrypted_later">Depois</string>
     <plurals name="home_saving_changes_left">
         <item quantity="one">Falta %1$d arquivo</item>
         <item quantity="other">Faltam %1$d arquivos</item>

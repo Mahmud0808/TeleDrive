@@ -177,6 +177,7 @@ fun HomeScreen(
     onOpenChannels: () -> Unit,
     onOpenCollection: (CollectionType) -> Unit,
     onOpenBackupSettings: () -> Unit,
+    onOpenSecuritySettings: () -> Unit,
     viewModel: HomeViewModel = koinViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -189,6 +190,18 @@ fun HomeScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     val permissionRequester = LocalPermissionRequester.current
     val capabilities = LocalPlatformCapabilities.current
+
+    val lockedFiles by viewModel.lockedFilesPrompt.collectAsStateWithLifecycle()
+    if (lockedFiles > 0) {
+        EncryptedFilesDialog(
+            count = lockedFiles,
+            onOpenSettings = {
+                viewModel.dismissLockedFilesPrompt()
+                onOpenSecuritySettings()
+            },
+            onDismiss = viewModel::dismissLockedFilesPrompt
+        )
+    }
 
     var confirmCancelBackup by remember { mutableStateOf<String?>(null) }
     confirmCancelBackup?.let { sessionId ->

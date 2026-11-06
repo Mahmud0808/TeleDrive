@@ -227,6 +227,20 @@ class HomeViewModel(
 
     fun syncNow() = publishScheduler.kick()
 
+    private val lockedPromptDismissed = MutableStateFlow(false)
+
+    val lockedFilesPrompt: StateFlow<Int> = combine(
+        activeChannel.observe(),
+        syncRepository.lockedFileCounts,
+        lockedPromptDismissed
+    ) { chatId, counts, dismissed ->
+        if (dismissed || chatId == null) 0 else counts[chatId] ?: 0
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
+
+    fun dismissLockedFilesPrompt() {
+        lockedPromptDismissed.value = true
+    }
+
     fun scanNow() {
         if (_scanning.value) return
         viewModelScope.launch {

@@ -85,6 +85,7 @@ import com.drdisagree.teledrive.presentation.components.rememberKeyboardCollecti
 import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
 import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.channels_channel_container
+import com.drdisagree.teledrive.resources.channels_encrypted_files
 import com.drdisagree.teledrive.resources.channels_create_one_teledrive_store
 import com.drdisagree.teledrive.resources.channels_creates_private_channel_account
 import com.drdisagree.teledrive.resources.channels_delete_confirm_hint
@@ -105,6 +106,7 @@ import com.drdisagree.teledrive.resources.common_create
 import com.drdisagree.teledrive.resources.common_delete_forever
 import com.drdisagree.teledrive.resources.common_rename
 import com.drdisagree.teledrive.resources.common_storage_channels
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -300,7 +302,11 @@ private fun ChannelRow(
                 overflow = TextOverflow.Ellipsis
             )
             Text(
-                text = channelSubtitle(channel),
+                text = channelSubtitle(
+                    channel,
+                    encrypted = channel.lockedFiles.takeIf { it > 0 && channel.fileCount == 0 }
+                        ?.let { pluralStringResource(Res.plurals.channels_encrypted_files, it, it) }
+                ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
@@ -354,14 +360,18 @@ private fun ChannelRow(
     }
 }
 
-private fun channelSubtitle(channel: DriveChannel): String = buildString {
+private fun channelSubtitle(channel: DriveChannel, encrypted: String?): String = buildString {
     val count = if (channel.isIndexed) channel.fileCount else channel.remoteFileCount
-    append(if (count == 1) "1 file" else "$count files")
-    if (channel.isIndexed) {
-        append(" · ")
-        append(Formatters.bytes(channel.storedBytes))
+    if (encrypted != null) {
+        append(encrypted)
     } else {
-        append(" · opens on first use")
+        append(if (count == 1) "1 file" else "$count files")
+        if (channel.isIndexed) {
+            append(" · ")
+            append(Formatters.bytes(channel.storedBytes))
+        } else {
+            append(" · opens on first use")
+        }
     }
     if (channel.backupFolders.isNotEmpty()) {
         append(" · ")

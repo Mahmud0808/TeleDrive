@@ -41,6 +41,17 @@
         <item quantity="one">%1$d encrypted file skipped. Restore your key backup to index it.</item>
         <item quantity="other">%1$d encrypted files skipped. Restore your key backup to index them.</item>
     </plurals>
+    <plurals name="home_encrypted_message">
+        <item quantity="one">%1$d file on this drive is encrypted. Restore your encryption key to see it.</item>
+        <item quantity="other">%1$d files on this drive are encrypted. Restore your encryption key to see them.</item>
+    </plurals>
+    <plurals name="channels_encrypted_files">
+        <item quantity="one">%1$d encrypted file</item>
+        <item quantity="other">%1$d encrypted files</item>
+    </plurals>
+    <string name="home_encrypted_title">Encrypted files found</string>
+    <string name="home_encrypted_open_settings">Open settings</string>
+    <string name="home_encrypted_later">Later</string>
     <plurals name="home_saving_changes_left">
         <item quantity="one">%1$d file left</item>
         <item quantity="other">%1$d files left</item>

@@ -37,6 +37,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -68,6 +69,9 @@ class SyncRepositoryImpl(
 
     private val _indexedSoFar = MutableStateFlow(0)
     override val indexedSoFar: Flow<Int> = _indexedSoFar
+
+    private val _lockedFileCounts = MutableStateFlow<Map<Long, Int>>(emptyMap())
+    override val lockedFileCounts: Flow<Map<Long, Int>> = _lockedFileCounts
     private val syncMutex = Mutex()
     private val captionRepairsQueued = mutableSetOf<String>()
 
@@ -271,6 +275,10 @@ class SyncRepositoryImpl(
                         mappedBeforeScan[entity.id] == messageId
             }
             detached = detach(stale)
+        }
+        _lockedFileCounts.update { counts ->
+            val known = if (partial) maxOf(counts[chatId] ?: 0, locked) else locked
+            counts + (chatId to known)
         }
         SafeLog.d(TAG, "Sync done: +$inserted ~$updated -$detached, $locked locked")
         return AppResult.Success(

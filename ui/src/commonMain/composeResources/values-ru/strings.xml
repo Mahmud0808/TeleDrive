@@ -57,6 +57,21 @@
         <item quantity="many">Пропущено %1$d зашифрованных файлов. Восстановите резервную копию ключа для индексации.</item>
         <item quantity="other">Пропущено %1$d зашифрованных файлов. Восстановите резервную копию ключа для индексации.</item>
     </plurals>
+    <plurals name="home_encrypted_message">
+        <item quantity="one">%1$d файл на этом диске зашифрован. Восстановите ключ шифрования, чтобы увидеть его.</item>
+        <item quantity="few">%1$d файла на этом диске зашифрованы. Восстановите ключ шифрования, чтобы увидеть их.</item>
+        <item quantity="many">%1$d файлов на этом диске зашифрованы. Восстановите ключ шифрования, чтобы увидеть их.</item>
+        <item quantity="other">%1$d файлов на этом диске зашифрованы. Восстановите ключ шифрования, чтобы увидеть их.</item>
+    </plurals>
+    <plurals name="channels_encrypted_files">
+        <item quantity="one">%1$d зашифрованный файл</item>
+        <item quantity="few">%1$d зашифрованных файла</item>
+        <item quantity="many">%1$d зашифрованных файлов</item>
+        <item quantity="other">%1$d зашифрованных файлов</item>
+    </plurals>
+    <string name="home_encrypted_title">Найдены зашифрованные файлы</string>
+    <string name="home_encrypted_open_settings">Открыть настройки</string>
+    <string name="home_encrypted_later">Позже</string>
     <plurals name="home_saving_changes_left">
         <item quantity="one">Остался %1$d файл</item>
         <item quantity="few">Осталось %1$d файла</item>
