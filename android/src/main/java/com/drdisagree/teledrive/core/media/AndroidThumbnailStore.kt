@@ -70,7 +70,9 @@ class AndroidThumbnailStore(
         val dir = File(context.cacheDir, "upload-thumbs").apply { mkdirs() }
         val target = File(dir, "$fileId.jpg")
         return runCatching {
-            target.writeBytes(bytes)
+            if (!target.exists() || !target.readBytes().contentEquals(bytes)) {
+                target.writeBytes(bytes)
+            }
             target
         }.getOrNull()
     }

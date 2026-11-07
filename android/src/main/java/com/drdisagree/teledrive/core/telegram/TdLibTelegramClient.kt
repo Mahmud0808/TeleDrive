@@ -53,6 +53,7 @@ class TdLibTelegramClient(
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val clientMutex = Mutex()
+    private val networkWatcher = TdlibNetworkWatcher(context) { scope.launch { reconnect() } }
 
     @Volatile
     private var client: Client? = null
@@ -237,6 +238,7 @@ class TdLibTelegramClient(
                 }
             } else {
                 parametersReady = true
+                networkWatcher.start()
             }
         }
     }
