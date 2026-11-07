@@ -6,7 +6,8 @@ enum class AppLanguage(val code: String) {
     RUSSIAN("ru"),
     PORTUGUESE_BR("pt-BR"),
     CHINESE_SIMPLIFIED("zh-CN"),
-    SPANISH("es");
+    SPANISH("es"),
+    INDONESIAN("id");
 
     companion object {
         fun fromCode(code: String?): AppLanguage {
