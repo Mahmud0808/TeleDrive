@@ -1,0 +1,62 @@
+<resources>
+    <!-- App-wide -->
+    <string name="app_name">TeleDrive</string>
+
+    <!-- Shared labels and dialogs -->
+    <string name="common_actions">Tindakan lainnya</string>
+    <string name="common_back">Kembali</string>
+    <string name="common_download">Unduh</string>
+    <string name="common_free_space">Kosongkan ruang</string>
+    <string name="common_move_trash">Pindahkan ke tempat sampah</string>
+    <string name="common_rename">Ganti nama</string>
+    <string name="common_rename_file">Ganti nama file</string>
+    <string name="common_upload">Unggah</string>
+
+    <!-- Notes -->
+    <string name="note_edit_action">Edit teks</string>
+
+    <!-- Transfers -->
+    <string name="transfer_error_decryption_failed">Gagal mendekripsi</string>
+    <string name="transfer_error_download_ended">Unduhan berhenti secara tak terduga</string>
+    <string name="transfer_error_download_stalled">Unduhan berhenti merespons</string>
+    <string name="transfer_error_downloaded_missing">File yang diunduh hilang</string>
+    <string name="transfer_error_file_record_missing">Catatan file hilang</string>
+    <string name="transfer_error_key_missing">Kunci enkripsi hilang. Pulihkan di Pengaturan.</string>
+    <string name="transfer_error_local_file_gone">File lokal sudah tidak ada</string>
+    <string name="transfer_error_no_file_reference">Transfer tidak memiliki referensi file</string>
+    <string name="transfer_error_no_local_copy">Tidak ada salinan lokal untuk diunggah</string>
+    <string name="transfer_error_no_remote_copy">File tidak memiliki salinan remote</string>
+    <string name="transfer_error_save_failed">Gagal menyimpan unduhan</string>
+    <string name="transfer_error_verify_failed">File yang diunduh tidak cocok dengan aslinya. Coba unduh lagi.</string>
+    <string name="transfer_error_destination_full">Tidak ada cukup ruang kosong di lokasi penyimpanan unduhan. Membutuhkan %1$s.</string>
+    <string name="transfer_error_cache_full">Tidak ada cukup ruang kosong untuk file sementara TeleDrive. Membutuhkan %1$s.</string>
+    <string name="transfer_error_upload_ended">Proses unggah berhenti secara tak terduga</string>
+    <string name="transfer_error_upload_stalled">Proses unggah berhenti merespons</string>
+
+    <!-- Notifications -->
+    <string name="notification_backup_complete">Pencadangan selesai</string>
+    <string name="notification_backup_summary">%1$d dari %2$d file dicadangkan</string>
+    <string name="notification_channel_backup">Cadangan</string>
+    <string name="notification_channel_backup_desc">Kemajuan dan hasil pencadangan</string>
+    <string name="notification_channel_failures">Kegagalan</string>
+    <string name="notification_channel_failures_desc">Transfer dan pencadangan gagal</string>
+    <string name="notification_channel_transfers">Transfer</string>
+    <string name="notification_channel_transfers_desc">Kemajuan unggahan dan unduhan</string>
+    <string name="notification_channel_updates">Pembaruan aplikasi</string>
+    <string name="notification_channel_updates_desc">Memberi tahu Anda saat ada versi baru</string>
+    <string name="notification_download_failed">Unduhan gagal</string>
+    <string name="notification_downloading_many">Mengunduh %1$d dari %2$d file</string>
+    <string name="notification_downloading_one">Mengunduh satu file</string>
+    <string name="notification_publish_progress">%1$d dari %2$d file diperbarui</string>
+    <string name="notification_publish_waiting">Dijeda oleh batas Telegram · berlanjut dalam %1$s</string>
+    <string name="notification_publish_title">Menyimpan perubahan ke Telegram</string>
+    <string name="notification_transfer_and_more">%1$s dan %2$d lainnya</string>
+    <string name="notification_transferring_many">Mentransfer %1$d dari %2$d file</string>
+    <string name="notification_transfers_active">Transfer aktif</string>
+    <string name="notification_update_message">%1$s %2$s siap diunduh</string>
+    <string name="notification_update_skip">Lewati versi ini</string>
+    <string name="notification_update_title">Pembaruan tersedia</string>
+    <string name="notification_upload_failed">Unggahan gagal</string>
+    <string name="notification_uploading_many">Mengunggah %1$d dari %2$d file</string>
+    <string name="notification_uploading_one">Mengunggah satu file</string>
+</resources>

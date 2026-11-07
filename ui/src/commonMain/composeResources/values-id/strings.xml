@@ -1,0 +1,975 @@
+<resources>
+    <!-- App-wide -->
+    <string name="app_name">TeleDrive</string>
+    <string name="app_backed_up">Dicadangkan</string>
+    <string name="app_drive_recreated">Drive Anda telah dihapus di Telegram, sehingga drive kosong baru telah dibuat</string>
+    <string name="app_no_results">Tidak ada hasil</string>
+    <string name="app_not_backed_up">Belum dicadangkan</string>
+    <string name="app_nothing_matches_search">Tidak ada yang cocok dengan pencarian Anda.</string>
+    <string name="app_search_drive">Cari di drive Anda</string>
+    <string name="app_search_files">Cari file</string>
+    <string name="app_search_name_filter_type">Cari berdasarkan nama, atau filter berdasarkan tipe dan status pencadangan.</string>
+    <plurals name="file_count">
+        <item quantity="one">%1$d file</item>
+        <item quantity="other">%1$d file</item>
+    </plurals>
+    <plurals name="folder_count">
+        <item quantity="one">%1$d folder</item>
+        <item quantity="other">%1$d folder</item>
+    </plurals>
+    <plurals name="backup_age_minutes">
+        <item quantity="one">%1$d menit yang lalu</item>
+        <item quantity="other">%1$d menit yang lalu</item>
+    </plurals>
+    <plurals name="backup_age_hours">
+        <item quantity="one">%1$d jam yang lalu</item>
+        <item quantity="other">%1$d jam yang lalu</item>
+    </plurals>
+    <plurals name="backup_age_days">
+        <item quantity="one">%1$d hari yang lalu</item>
+        <item quantity="other">%1$d hari yang lalu</item>
+    </plurals>
+    <plurals name="item_count">
+        <item quantity="one">%1$d item</item>
+        <item quantity="other">%1$d item</item>
+    </plurals>
+    <plurals name="rebuild_indexed_files">
+        <item quantity="one">%1$d file diindeks</item>
+        <item quantity="other">%1$d file diindeks</item>
+    </plurals>
+    <plurals name="rebuild_locked_files">
+        <item quantity="one">%1$d file terenkripsi dilewati. Pulihkan kunci Anda untuk mengindeksnya.</item>
+        <item quantity="other">%1$d file terenkripsi dilewati. Pulihkan kunci Anda untuk mengindeksnya.</item>
+    </plurals>
+    <plurals name="home_saving_changes_left">
+        <item quantity="one">Tersisa %1$d file</item>
+        <item quantity="other">Tersisa %1$d file</item>
+    </plurals>
+    <plurals name="home_back_up_pending">
+        <item quantity="one">Mencadangkan %1$d file</item>
+        <item quantity="other">Mencadangkan %1$d file</item>
+    </plurals>
+    <plurals name="home_queued_files">
+        <item quantity="one">%1$d file dalam antrean</item>
+        <item quantity="other">%1$d file dalam antrean</item>
+    </plurals>
+    <plurals name="transfers_more_queued">
+        <item quantity="one">%1$d lagi disembunyikan</item>
+        <item quantity="other">%1$d lagi disembunyikan</item>
+    </plurals>
+
+    <!-- Bottom navigation -->
+    <string name="nav_files">File</string>
+    <string name="nav_gallery">Galeri</string>
+    <string name="nav_home">Beranda</string>
+    <string name="nav_settings">Pengaturan</string>
+
+    <!-- Shared labels and dialogs -->
+    <string name="common_actions">Tindakan lainnya</string>
+    <string name="common_add">Tambah</string>
+    <string name="common_add_favorites">Tambahkan ke favorit</string>
+    <string name="common_back">Kembali</string>
+    <string name="common_backup_failed">Cadangan gagal</string>
+    <string name="common_backup_not_backed_up">Belum dicadangkan</string>
+    <string name="common_backup_queued">Dalam antrean</string>
+    <string name="common_backup_uploading">Mengunggah</string>
+    <string name="common_cancel">Batal</string>
+    <string name="common_category_archives">Arsip</string>
+    <string name="common_category_audio">Audio</string>
+    <string name="common_category_documents">Dokumen</string>
+    <string name="common_category_other">Lainnya</string>
+    <string name="common_category_photos">Foto</string>
+    <string name="common_category_videos">Video</string>
+    <string name="common_clear">Bersihkan</string>
+    <string name="common_clear_selection">Hapus pilihan</string>
+    <string name="common_collapse">Tutup</string>
+    <string name="common_confirm_trash_count_title">Pindahkan %1$d ke tempat sampah?</string>
+    <string name="common_content_description_favorite">Favorit</string>
+    <string name="common_make_available_offline">Tersedia offline</string>
+    <string name="common_organize">Atur</string>
+    <string name="common_storage_actions">Penyimpanan</string>
+    <string name="common_remove_from_offline">Hapus dari offline</string>
+    <string name="common_content_description_available_offline">Tersedia offline</string>
+    <string name="common_content_description_selected">Dipilih</string>
+    <string name="common_create">Buat</string>
+    <string name="common_delete_forever">Hapus permanen</string>
+    <string name="common_deselect_all">Batal pilih semua</string>
+    <string name="common_dismiss">Tutup</string>
+    <string name="common_download">Unduh</string>
+    <string name="common_drive_root">Root drive</string>
+    <string name="common_empty">Kosong</string>
+    <string name="common_expand">Perluas</string>
+    <string name="common_file_size_and_date">%1$s \u00b7 %2$s</string>
+    <string name="common_folder_name">Nama folder</string>
+    <string name="common_free_space">Kosongkan ruang</string>
+    <string name="common_grant_permissions">Beri izin</string>
+    <string name="common_move_trash">Pindahkan ke tempat sampah</string>
+    <string name="common_name">Nama</string>
+    <string name="common_no_subfolders">Tidak ada subfolder di sini</string>
+    <string name="common_one_level">Naik satu tingkat</string>
+    <string name="common_pause">Jeda</string>
+    <string name="common_refresh">Segarkan</string>
+    <string name="common_rename">Ganti nama</string>
+    <string name="common_rename_file">Ganti nama file</string>
+    <string name="common_restore">Pulihkan</string>
+    <string name="common_restore_trash_emptied">Anda dapat memulihkannya dari tempat sampah sebelum dikosongkan.</string>
+    <string name="common_resume">Lanjutkan</string>
+    <string name="common_retry">Coba lagi</string>
+    <string name="common_save">Simpan</string>
+    <string name="common_select_all">Pilih semua</string>
+    <string name="common_open">Buka</string>
+    <string name="common_select">Pilih</string>
+    <string name="common_selection_count">%1$d dipilih</string>
+    <string name="common_share">Bagikan</string>
+    <string name="common_storage_channels">Channel penyimpanan</string>
+    <string name="common_try_again">Coba lagi</string>
+    <string name="common_upload">Unggah</string>
+
+    <!-- Dates -->
+    <string name="date_days_ago">%1$d hari yang lalu</string>
+    <string name="date_today">Hari ini</string>
+    <string name="date_yesterday">Kemarin</string>
+
+    <!-- App lock -->
+    <string name="lock_no_screen_lock">Kunci layar tidak tersedia di perangkat ini. Aplikasi akan terbuka.</string>
+    <string name="lock_prompt_title">Buka kunci TeleDrive</string>
+    <string name="lock_screen_title">TeleDrive terkunci</string>
+    <string name="lock_too_many_attempts">Terlalu banyak percobaan. Coba lagi nanti.</string>
+    <string name="lock_unlock">Buka kunci</string>
+    <string name="session_broken_action">Masuk kembali</string>
+    <string name="session_broken_message">Perangkat ini tidak dapat lagi membaca sesi Telegram yang disimpan. Ini biasanya terjadi setelah memulihkan cadangan ke perangkat lain atau mengubah kunci layar. File Anda aman di channel. Masuk kembali untuk mengaksesnya.</string>
+    <string name="session_broken_title">Sesi tidak terbaca</string>
+
+    <!-- Onboarding flow -->
+    <string name="onboarding_action_continue">Lanjutkan</string>
+    <string name="onboarding_continue">Lanjutkan</string>
+    <string name="onboarding_continue_without">Lanjutkan tanpa ini</string>
+    <string name="onboarding_files_live_own_private">File Anda tersimpan di channel Telegram pribadi Anda sendiri. Akun Anda, penyimpanan Anda, kontrol Anda.</string>
+    <string name="onboarding_get_started">Mulai</string>
+    <string name="onboarding_got">Mengerti</string>
+    <string name="onboarding_opening">Membuka</string>
+    <string name="onboarding_sign">Masuk</string>
+    <string name="onboarding_step">Langkah onboarding</string>
+    <string name="onboarding_step_counter">Pangkah %1$d dari %2$d</string>
+    <string name="onboarding_verify">Verifikasi</string>
+
+    <!-- Onboarding: API credentials -->
+    <string name="onboarding_api_access">Akses API</string>
+    <string name="onboarding_api_hash">API Hash</string>
+    <string name="onboarding_api_hash_short">API hash tampaknya terlalu pendek</string>
+    <string name="onboarding_api_id">API ID</string>
+    <string name="onboarding_api_id_number">API ID harus berupa angka</string>
+    <string name="onboarding_choose_api_dev_tools">Pilih "API development tools" dan buat aplikasi. Gunakan nama apa saja.</string>
+    <string name="onboarding_copy_api_keys">Salin api_id dan api_hash ke TeleDrive.</string>
+    <string name="onboarding_get_api_keys">Dapatkan kunci API Anda</string>
+    <string name="onboarding_my_telegram_org">my.telegram.org</string>
+    <string name="onboarding_one_time_setup_keys">Pengaturan sekali saja. Kunci Anda tersimpan secara lokal dan terenkripsi.</string>
+    <string name="onboarding_open_dev_page">Buka halaman developer Telegram dan masuk</string>
+    <string name="onboarding_set_up_proxy">Atur proxy</string>
+    <string name="onboarding_telegram_blocked">Apakah Telegram diblokir di jaringan ini?</string>
+    <string name="onboarding_where_i_get_these">Di mana saya bisa mendapatkan ini?</string>
+
+    <!-- Onboarding: phone and code -->
+    <string name="onboarding_choose_country">Pilih negara</string>
+    <string name="onboarding_code">Kode</string>
+    <string name="onboarding_code_sent">Kode verifikasi telah dikirim.</string>
+    <string name="onboarding_code_via_call">Anda akan menerima panggilan ke %1$s dengan kode tersebut.</string>
+    <string name="onboarding_code_via_email">Kode telah dikirim ke %1$s.</string>
+    <string name="onboarding_code_via_flash_call">Telegram akan memanggil %1$s dan langsung menutupnya. Kodenya adalah nomor yang memanggil Anda.</string>
+    <string name="onboarding_code_via_fragment">Kode Anda menunggu di Fragment untuk %1$s. Buka fragment.com untuk melihatnya.</string>
+    <string name="onboarding_code_via_missed_call">Telegram akan memanggil %1$s dan langsung menutupnya. Kodenya adalah digit terakhir dari nomor yang memanggil Anda.</string>
+    <string name="onboarding_code_via_sms">Kode telah dikirim melalui SMS ke %1$s.</string>
+    <string name="onboarding_code_via_sms_phrase">Telegram mengirim sebuah frasa via SMS ke %1$s. Masukkan frasa tersebut.</string>
+    <string name="onboarding_code_via_sms_word">Telegram mengirim sebuah kata via SMS ke %1$s. Masukkan kata tersebut.</string>
+    <string name="onboarding_code_via_telegram">Telegram telah mengirim kode ke perangkat Anda yang lain.</string>
+    <string name="onboarding_country">Negara</string>
+    <string name="onboarding_email_code_title">Masukkan kode dari email</string>
+    <string name="onboarding_email_continue">Kirim kode</string>
+    <string name="onboarding_email_description">Akun ini menggunakan email untuk masuk. Masukkan email untuk menerima kode Anda.</string>
+    <string name="onboarding_email_label">Alamat email</string>
+    <string name="onboarding_email_title">Email login</string>
+    <string name="onboarding_enter_code">Masukkan kode</string>
+    <string name="onboarding_enter_password">Masukkan kata sandi Telegram Anda.</string>
+    <string name="onboarding_enter_phone">Masukkan nomor telepon Anda</string>
+    <string name="onboarding_include_country_code_like">Sertakan kode negara, seperti +62</string>
+    <string name="onboarding_no_account">Nomor ini belum memiliki akun Telegram. Buat akun terlebih dahulu melalui aplikasi resmi Telegram.</string>
+    <string name="onboarding_no_country_match">Tidak ada negara yang cocok dengan pencarian.</string>
+    <string name="onboarding_number">Nomor Anda</string>
+    <string name="onboarding_password">Kata Sandi</string>
+    <string name="onboarding_phone_number">Nomor telepon</string>
+    <string name="onboarding_phone_number_telegram_account">Nomor telepon akun Telegram Anda, dengan kode negara.</string>
+    <string name="onboarding_resend_code">Kirim ulang kode</string>
+    <string name="onboarding_search_country">Cari negara</string>
+    <string name="onboarding_send_code">Kirim kode</string>
+    <string name="onboarding_two_step_verification">Verifikasi Dua Langkah</string>
+
+    <!-- Onboarding: QR sign-in -->
+    <string name="onboarding_qr_code_description">Kode QR login</string>
+    <string name="onboarding_qr_confirm_instead">Konfirmasi di telepon ini</string>
+    <string name="onboarding_qr_description">Buka Telegram di perangkat yang sudah masuk, lalu pindai kode ini.</string>
+    <string name="onboarding_qr_open_failed">Gagal membuka Telegram di perangkat ini.</string>
+    <string name="onboarding_qr_open_telegram">Konfirmasi di Telegram</string>
+    <string name="onboarding_qr_same_device_description">Telegram terinstal di sini. Konfirmasi login Anda dan selesai.</string>
+    <string name="onboarding_qr_scan_instead">Pindai dari perangkat lain</string>
+    <string name="onboarding_qr_sign_in">Masuk dengan kode QR</string>
+    <string name="onboarding_qr_step_1">Buka Telegram di perangkat Anda yang lain</string>
+    <string name="onboarding_qr_step_2">Buka Pengaturan lalu ke Perangkat</string>
+    <string name="onboarding_qr_step_3">Ketuk Tautkan Perangkat Desktop dan pindai kode ini</string>
+    <string name="onboarding_qr_title">Pindai untuk masuk</string>
+    <string name="onboarding_qr_use_phone">Gunakan nomor telepon</string>
+    <string name="onboarding_qr_waiting">Menunggu pemindaian</string>
+
+    <!-- Onboarding: permissions -->
+    <string name="onboarding_allow_all_files">Izinkan akses ke semua file</string>
+    <string name="onboarding_allow_media">Izinkan akses ke media</string>
+    <string name="onboarding_files_access_covers_documents">Akses ke semua file mencakup dokumen, unduhan, dan kartu SD. Tanpa izin ini, folder tersebut tidak dapat dicadangkan.</string>
+    <string name="onboarding_storage_access">Akses penyimpanan</string>
+    <string name="onboarding_teledrive_needs_media_files">TeleDrive memerlukan izin akses file dan media untuk mencadangkannya, serta notifikasi untuk menampilkan progres transfer.</string>
+
+    <!-- Onboarding: drive setup -->
+    <string name="onboarding_channel_files_in_channel">%1$d file di channel ini</string>
+    <string name="onboarding_choose_drive">Pilih drive</string>
+    <string name="onboarding_drive_created_desc">Sebuah channel pribadi telah dibuat di akun Anda. Semua file cadangan akan masuk ke sana dan hanya Anda yang dapat membacanya.</string>
+    <string name="onboarding_drive_ready">Drive Anda siap</string>
+    <string name="onboarding_looking_for_drives">Mencari drive Anda</string>
+    <string name="onboarding_no_drive_yet">Gagal membuat drive</string>
+    <string name="onboarding_pick_drive_desc">Akun Anda sudah memiliki channel TeleDrive. Pilih mana yang ingin dibuka di perangkat ini; Anda dapat menambahkannya nanti di Pengaturan.</string>
+    <string name="onboarding_single_drive_desc">File Anda dicadangkan ke channel pribadi di akun Anda ini. Anda dapat menambahkan drive lain nanti di Pengaturan.</string>
+
+    <!-- Onboarding: backup setup -->
+    <string name="onboarding_choose_what_back_change">Pilih apa yang ingin dicadangkan. Anda dapat mengubahnya kapan saja di Pengaturan.</string>
+    <string name="onboarding_section_behavior">Perilaku</string>
+    <string name="onboarding_section_folders">Folder</string>
+    <string name="onboarding_toggle_auto_backup">Pencadangan otomatis</string>
+    <string name="onboarding_toggle_camera">Kamera (DCIM)</string>
+    <string name="onboarding_toggle_movies">Film</string>
+    <string name="onboarding_toggle_pictures">Gambar</string>
+    <string name="onboarding_toggle_wifi_only">Hanya Wi-Fi</string>
+
+    <!-- Home -->
+    <string name="home_active_transfers">%1$d transfer aktif</string>
+    <string name="home_backing_up">Mencadangkan…</string>
+    <string name="home_backup_waiting_charger">Menunggu pengisi daya</string>
+    <string name="home_backup_waiting_wifi">Menunggu Wi-Fi</string>
+    <string name="home_backing_up_new_files">Mencadangkan file baru</string>
+    <string name="home_backup_all_in_telegram">Semua file tersimpan di Telegram</string>
+    <string name="home_backup_at">Pencadangan terakhir %1$s</string>
+    <string name="home_backup_auto_off">Pencadangan otomatis nonaktif</string>
+    <string name="home_backup_just_now">Baru saja dicadangkan</string>
+    <string name="home_backup_never">Belum ada cadangan</string>
+    <string name="home_backup_nothing_to_back_up">Tidak ada yang perlu dicadangkan</string>
+    <string name="home_backup_paused">Pencadangan dijeda</string>
+    <string name="home_cancel_backup_action">Batalkan cadangan</string>
+    <string name="home_cancel_backup_title">Batalkan pencadangan?</string>
+    <string name="home_choose_folders">Pilih folder</string>
+    <string name="home_deleted_files_kept_removal">File terhapus tetap disimpan sebelum dihapus permanen</string>
+    <string name="home_failed_count">%1$d gagal</string>
+    <string name="home_lock_app">Kunci aplikasi</string>
+    <string name="home_not_backed_up_count">%1$d belum dicadangkan</string>
+    <string name="home_nothing_new_to_back_up">Tidak ada file baru untuk dicadangkan</string>
+    <string name="home_open_drives">Ganti drive</string>
+    <string name="home_queued_uploads_discarded_files">Unggahan dalam antrean diabaikan. File yang sudah diunggah akan tetap ada di Telegram dan Anda dapat mencadangkannya kembali nanti.</string>
+    <string name="home_saving_changes">Menyimpan perubahan di Telegram</string>
+    <string name="home_saving_folder_changes">Perubahan folder tertunda</string>
+    <string name="home_scan_now">Pindai sekarang</string>
+    <string name="home_scanning">Memindai…</string>
+    <string name="home_sync_now">Sinkronkan sekarang</string>
+    <string name="home_section_favorites">Favorit</string>
+    <string name="home_section_recent">Terbaru</string>
+    <string name="home_section_storage">Penyimpanan</string>
+    <string name="home_session_progress">%1$d dari %2$d file</string>
+    <string name="home_status_connected">Terhubung</string>
+    <string name="home_status_connecting">Menghubungkan…</string>
+    <string name="home_status_offline">Offline</string>
+    <string name="home_status_rebuilding">Membangun ulang indeks…</string>
+    <string name="home_status_syncing">Menyinkronkan…</string>
+    <string name="home_storage_percent">%1$d%%</string>
+    <string name="home_storage_percent_min">&lt;1%%</string>
+    <string name="home_switched_drive">Beralih ke %1$s</string>
+    <string name="home_transfer_history">Riwayat transfer</string>
+    <string name="home_transfer_history_subtitle">Unggahan dan unduhan</string>
+    <string name="home_waiting_count">%1$d menunggu</string>
+
+    <!-- Search -->
+    <string name="search_section_files">File</string>
+    <string name="search_open_folder">Buka folder direktori</string>
+    <string name="search_section_folders">Folder</string>
+
+    <!-- Files -->
+    <string name="files">File</string>
+    <string name="files_add_files">Unggah file</string>
+    <string name="files_add_folder">Unggah folder</string>
+    <string name="files_archive">Arsipkan</string>
+    <string name="files_back_import_appear">File yang Anda cadangkan atau impor akan muncul di sini.</string>
+    <string name="files_copy">Salin ke…</string>
+    <string name="files_copy_here">Salin di sini</string>
+    <string name="files_copy_to">Salin ke</string>
+    <string name="files_delete_local">Hapus salinan lokal</string>
+    <string name="files_delete_local_copies">Hapus salinan lokal?</string>
+    <string name="files_drop_folders_unsupported">Tidak dapat mengunggah folder</string>
+    <string name="files_drop_to_upload">Jatuhkan file untuk diunggah</string>
+    <string name="files_hide">Sembunyikan</string>
+    <string name="files_import_copied">%1$d disalin karena sudah ada di Telegram</string>
+    <string name="files_import_duplicates">%1$d sudah ada di drive Anda</string>
+    <string name="files_import_failed">Gagal mengimpor file yang dipilih</string>
+    <string name="files_folder_exists_title">"%1$s" sudah ada</string>
+    <string name="files_folders_exist_title">Folder ini sudah ada</string>
+    <string name="files_folder_exists_message">Opsi Gabungkan akan menambahkan file baru ke dalam folder yang ada. Simpan Keduanya akan membuat folder baru bernama "%1$s".</string>
+    <string name="files_folders_exist_message">Opsi Gabungkan akan menambahkan file baru ke dalam folder yang ada. Simpan Keduanya akan memisahkan folder dengan tambahan nomor pada namanya.</string>
+    <string name="files_folder_merge">Gabungkan</string>
+    <string name="files_folder_keep_both">Simpan keduanya</string>
+    <string name="files_import_preparing">Menyiapkan file untuk diunggah…</string>
+    <string name="files_import_restored">%1$d dipulihkan dari tempat sampah</string>
+    <string name="files_import_uploading">Mengunggah %1$d</string>
+    <string name="files_import_uploading_copied">Mengunggah %1$d, %2$d disalin (sudah ada di Telegram)</string>
+    <string name="files_import_uploading_duplicates">Mengunggah %1$d, %2$d sudah ada di drive Anda</string>
+    <string name="files_import_uploading_failed">Mengunggah %1$d, %2$d gagal</string>
+    <string name="files_import_uploading_restored">Mengunggah %1$d, %2$d dipulihkan</string>
+    <string name="files_move">Pindahkan</string>
+    <string name="files_move_here">Pindahkan ke sini</string>
+    <string name="files_move_to">Pindahkan ke</string>
+    <string name="files_new_folder">Folder baru</string>
+    <string name="files_nothing_here_yet">Belum ada apa-apa di sini</string>
+    <string name="files_only_files_verified_telegram">Hanya file dengan cadangan terverifikasi di Telegram yang akan dihapus dari perangkat ini.</string>
+    <string name="files_rename_file">Ganti nama file</string>
+    <string name="files_rename_folder">Ganti nama folder</string>
+    <string name="files_root_name">File</string>
+    <string name="files_search">Cari</string>
+    <string name="files_share_destination_confirm">Simpan di sini</string>
+    <string name="files_share_destination_title">Simpan file yang dibagikan ke</string>
+    <string name="files_share_needs_local">Unduh file ini sebelum membagikannya</string>
+    <string name="files_show_in_file_manager">Tampilkan di pengelola file</string>
+    <string name="files_sort">Urutkan</string>
+    <string name="files_sort_ascending">Menaik</string>
+    <string name="files_sort_backup_status">Status cadangan</string>
+    <string name="files_sort_date_added">Tanggal ditambahkan</string>
+    <string name="files_sort_date_modified">Tanggal diubah</string>
+    <string name="files_sort_descending">Menurun</string>
+    <string name="files_sort_name">Nama</string>
+    <string name="files_sort_size">Ukuran</string>
+    <string name="files_sort_type">Tipe</string>
+    <string name="files_unhide">Tampilkan</string>
+    <string name="files_copied_all">%1$d disalin</string>
+    <string name="files_copied_partial">%1$d dari %2$d disalin</string>
+    <string name="files_cut_count">%1$d dipotong. Buka folder dan tekan Ctrl+V untuk menempelkannya.</string>
+    <string name="files_moving_to_trash">Memindahkan %1$d ke tempat sampah…</string>
+    <string name="files_queued_for_download">%1$d dalam antrean unduhan</string>
+    <string name="files_queued_for_upload">%1$d dalam antrean unggahan</string>
+    <string name="files_queued_partial">%1$d dalam antrean, %2$d gagal</string>
+    <string name="files_removed_local_copies">%1$d salinan lokal dihapus</string>
+    <string name="files_kept_offline_copies">%1$d file tetap dipertahankan tersedia offline</string>
+    <string name="files_sync_result">%1$d baru, %2$d diperbarui</string>
+
+    <!-- File and folder info -->
+    <string name="info_added">Ditambahkan</string>
+    <string name="info_backup">Cadangan</string>
+    <string name="info_backup_done">Dicadangkan di Telegram</string>
+    <string name="info_backup_failed">Gagal</string>
+    <string name="info_backup_none">Belum dicadangkan</string>
+    <string name="info_backup_queued">Antre</string>
+    <string name="info_backup_uploading">Mengunggah</string>
+    <string name="info_contents">Isi</string>
+    <string name="info_created">Dibuat</string>
+    <string name="info_details">Informasi</string>
+    <string name="info_duration">Durasi</string>
+    <string name="info_encrypted">Dienkripsi</string>
+    <string name="info_extension">Ekstensi</string>
+    <string name="info_favorite">Favorit</string>
+    <string name="info_local_copy">Salinan lokal</string>
+    <string name="info_modified">Dimodifikasi</string>
+    <string name="info_no">Tidak</string>
+    <string name="info_path">Jalur (Path)</string>
+    <string name="info_resolution">Resolusi</string>
+    <string name="info_sha256">SHA-256</string>
+    <string name="info_size">Ukuran</string>
+    <string name="info_type">Tipe</string>
+    <string name="info_yes">Ya</string>
+
+    <!-- Notes -->
+    <string name="note_body_hint">Teks, tautan, atau keduanya</string>
+    <string name="note_bold">Tebal</string>
+    <string name="note_bullet">Daftar berpoin</string>
+    <string name="note_code">Kode</string>
+    <string name="note_edit">Edit catatan</string>
+    <string name="note_edit_action">Edit teks</string>
+    <string name="note_heading">Judul</string>
+    <string name="note_italic">Miring</string>
+    <string name="note_link">Tautan</string>
+    <string name="note_link_text">teks</string>
+    <string name="note_link_url">https://</string>
+    <string name="note_new">Catatan baru</string>
+    <string name="note_not_editable">Hanya file teks yang bisa diedit di sini</string>
+    <string name="note_quote">Kutipan</string>
+    <string name="note_save">Simpan</string>
+    <string name="note_saved">Catatan disimpan</string>
+    <string name="note_strikethrough">Coret</string>
+    <string name="note_title_hint">Judul (opsional)</string>
+
+    <!-- Gallery -->
+    <string name="album_not_in_folder">Di luar folder</string>
+    <string name="gallery_albums_appear_organise_media">Album akan muncul saat Anda mengatur media ke dalam folder.</string>
+    <string name="gallery_no_albums">Tidak ada album</string>
+    <string name="gallery_no_media">Tidak ada media</string>
+    <string name="gallery_photos_videos_appear_here">Foto dan video muncul di sini setelah Anda mengimpor atau mencadangkannya.</string>
+    <string name="gallery_tab_albums">Album</string>
+    <string name="gallery_tab_all">Semua</string>
+    <string name="gallery_tab_photos">Foto</string>
+    <string name="gallery_tab_videos">Video</string>
+    <string name="gallery_title">Galeri</string>
+
+    <!-- Preview -->
+    <string name="preview_add_favorites">Tambahkan ke favorit</string>
+    <string name="preview_added_favorites">Ditambahkan ke favorit</string>
+    <string name="preview_archive">Arsipkan</string>
+    <string name="preview_archive_failed">Gagal membuka arsip</string>
+    <string name="preview_archive_format_title">Arsip %1$s</string>
+    <string name="preview_archive_packed_summary">%1$s dikompres dari %2$s</string>
+    <string name="preview_archive_packed_summary_saved">%1$s dikompres dari %2$s, lebih hemat %3$d%%</string>
+    <string name="preview_archived">Diarsipkan</string>
+    <string name="preview_back_10_seconds">Mundur 10 detik</string>
+    <string name="preview_chevron">chevron</string>
+    <string name="preview_confirm_trash_file_message">"%1$s" akan dipindahkan ke tempat sampah. Anda bisa memulihkannya nanti.</string>
+    <string name="preview_download_view">Unduh untuk melihat</string>
+    <string name="preview_extraction_supported_yet_download">Ekstraksi belum didukung. Unduh arsip ini untuk membukanya.</string>
+    <string name="preview_fetch_failed">Gagal mengambil file</string>
+    <string name="preview_file_info">Informasi file</string>
+    <string name="preview_forward_10_seconds">Maju 10 detik</string>
+    <string name="preview_hidden">Tersembunyi</string>
+    <string name="preview_image_undecodable">Format gambar ini tidak dapat ditampilkan di sini. Unduh dan buka dengan aplikasi lain.</string>
+    <string name="preview_local_copy_removed">Salinan lokal dihapus</string>
+    <string name="preview_move_to_trash">Pindahkan ke tempat sampah?</string>
+    <string name="preview_next">File berikutnya</string>
+    <string name="preview_no_copy_available">Tidak ada salinan lokal maupun jarak jauh (remote)</string>
+    <string name="preview_no_preview">Tidak ada pratinjau</string>
+    <string name="preview_no_preview_for_type">Pratinjau tidak tersedia untuk jenis file ini</string>
+    <string name="preview_nothing_to_remove">Tidak ada yang bisa dihapus</string>
+    <string name="preview_only_zip">Hanya file ZIP yang dapat dijelajahi.</string>
+    <string name="preview_open_link">Buka tautan</string>
+    <string name="preview_page_number">Halaman %1$d</string>
+    <string name="preview_pdf_open_failed">Gagal membuka PDF</string>
+    <string name="preview_playback_speed">Kecepatan pemutaran</string>
+    <string name="preview_preparing">Menyiapkan %1$s</string>
+    <string name="preview_previous">File sebelumnya</string>
+    <string name="preview_progress_bytes">%1$s dari %2$s</string>
+    <string name="preview_read_failed">Gagal membaca file</string>
+    <string name="preview_remove_favorites">Hapus dari favorit</string>
+    <string name="preview_removed_favorites">Dihapus dari favorit</string>
+    <string name="preview_requires_download">File ini berukuran %1$s dan belum diunduh di perangkat ini.</string>
+    <string name="preview_share_chooser_title">Bagikan</string>
+    <string name="preview_share_copy">Bagikan salinan</string>
+    <string name="preview_truncated_download_view">\nPratinjau dipotong. Unduh untuk melihat file selengkapnya.</string>
+    <string name="preview_unarchive">Ekstrak arsip</string>
+    <string name="preview_unarchived">Diekstrak</string>
+    <string name="preview_unhidden">Tidak disembunyikan</string>
+
+    <!-- Player -->
+    <string name="player_audio_track">Trek audio</string>
+    <string name="player_subtitles">Subtitel</string>
+    <string name="player_subtitles_off">Nonaktif</string>
+    <string name="player_track">Trek</string>
+    <string name="player_lock_controls">Kunci kontrol</string>
+    <string name="player_unlock_controls">Buka kunci kontrol</string>
+    <string name="player_brightness">Kecerahan</string>
+    <string name="player_toggle_controls">Tampilkan atau sembunyikan kontrol</string>
+    <string name="player_volume">Volume</string>
+    <string name="player_track_unsupported">Tidak didukung pada perangkat ini</string>
+    <string name="player_codec_unsupported">Perangkat ini tidak dapat memecahkan kode video ini. Unduh dan putar di aplikasi lain.</string>
+    <string name="player_exit_full_screen">Keluar dari layar penuh</string>
+    <string name="player_fewer_controls">Sedikit kontrol</string>
+    <string name="player_full_screen">Layar penuh</string>
+    <string name="player_hide_subtitles">Sembunyikan subtitel</string>
+    <string name="player_more_controls">Lebih banyak kontrol</string>
+    <string name="player_mute">Bisukan</string>
+    <string name="player_picture_in_picture">Gambar dalam gambar (PiP)</string>
+    <string name="player_pause">Jeda</string>
+    <string name="player_play">Putar</string>
+    <string name="player_playback_failed">Pemutaran gagal</string>
+    <string name="player_repeat_off">Pengulangan mati</string>
+    <string name="player_repeat_one">Ulangi satu</string>
+    <string name="player_replay">Putar ulang</string>
+    <string name="player_scaling">Skala (Scaling)</string>
+    <string name="player_skip_back">Mundur 10 detik</string>
+    <string name="player_skip_forward">Maju 10 detik</string>
+    <string name="player_show_subtitles">Tampilkan subtitel</string>
+    <string name="player_unmute">Bunyikan</string>
+
+    <!-- Collections -->
+    <string name="collection_archived_empty">File yang diarsipkan disembunyikan dari tampilan utama, namun tetap dicadangkan.</string>
+    <string name="collection_archived_subtitle">Tersembunyi dari penjelajah utama</string>
+    <string name="collection_archived_title">Diarsipkan</string>
+    <string name="collection_empty_title">Tidak ada apa-apa di %1$s</string>
+    <string name="collection_favorites_empty">Tandai file dengan bintang agar tetap muncul di sini.</string>
+    <string name="collection_favorites_subtitle">File yang ditandai bintang</string>
+    <string name="collection_favorites_title">Favorit</string>
+    <string name="collection_hidden_empty">File tersembunyi tidak akan muncul di penjelajah file maupun galeri.</string>
+    <string name="collection_hidden_subtitle">Hanya terlihat di sini</string>
+    <string name="collection_hidden_title">Tersembunyi</string>
+    <string name="collection_offline_title">File Offline</string>
+    <string name="collection_offline_subtitle">Buka tanpa internet</string>
+    <string name="collection_offline_empty">Jadikan file atau folder tersedia secara offline untuk membukanya tanpa koneksi internet.</string>
+    <string name="collection_offline_on_device">%1$s di perangkat ini</string>
+    <string name="collection_offline_downloading">Mengunduh</string>
+    <string name="collection_offline_not_downloaded">Belum diunduh</string>
+    <string name="collection_offline_download_missing">Unduh file yang kurang</string>
+    <string name="collection_remove_from">Hapus dari %1$s</string>
+
+    <!-- Trash -->
+    <string name="trash">Tempat sampah</string>
+    <string name="trash_auto_clear_after_days">Item dihapus secara permanen setelah %1$d hari.</string>
+    <string name="trash_delete_permanently">Hapus secara permanen?</string>
+    <string name="trash_delete_selected_message">%1$d item, termasuk semua isi dalam folder yang dipilih, akan dihapus permanen dari perangkat ini dan dari Telegram.</string>
+    <string name="trash_empty">Tempat sampah kosong</string>
+    <string name="trash_empty_trash_action">Kosongkan tempat sampah</string>
+    <string name="trash_empty_trash_title">Kosongkan tempat sampah?</string>
+    <string name="trash_items_permanently_deleted_device">Semua item akan dihapus secara permanen dari perangkat ini dan dari Telegram. Tindakan ini tidak dapat dibatalkan.</string>
+    <string name="trash_kept_until_removed">Item yang dihapus akan tetap di sini sampai Anda menghapusnya permanen.</string>
+    <string name="trash_restores_with_folder">Dipulihkan bersama folder</string>
+    <string name="trash_trashed_at">Dibuang pada %1$s</string>
+    <string name="trash_delete_partial">Gagal menghapus %1$d dari %2$d</string>
+    <string name="trash_deleted_permanently">%1$d dihapus secara permanen</string>
+    <string name="trash_emptying">Mengosongkan tempat sampah…</string>
+    <string name="trash_restored">%1$d dipulihkan</string>
+    <string name="trash_restored_partial">%1$d dipulihkan, %2$d gagal</string>
+    <plurals name="trash_deleting_items">
+        <item quantity="one">Menghapus %1$d item…</item>
+        <item quantity="other">Menghapus %1$d item…</item>
+    </plurals>
+    <plurals name="trash_restoring_items">
+        <item quantity="one">Memulihkan %1$d item…</item>
+        <item quantity="other">Memulihkan %1$d item…</item>
+    </plurals>
+
+    <!-- Transfers -->
+    <string name="transfer_stage_joining">Menggabungkan bagian file</string>
+    <string name="transfer_stage_sealing">Mengenktripsi bagian file</string>
+    <string name="transfer_stage_verifying">Memeriksa file</string>
+    <string name="transfer_type_backup">Cadangan</string>
+    <string name="transfer_type_download">Unduhan</string>
+    <string name="transfer_type_restore">Pemulihan</string>
+    <string name="transfer_type_upload">Unggahan</string>
+    <string name="transfers">Transfer</string>
+    <string name="transfers_cancel">Batalkan semua</string>
+    <string name="transfers_cancel_transfers">Batalkan semua transfer?</string>
+    <string name="transfers_clear_finished">Bersihkan yang selesai</string>
+    <string name="transfers_clear_finished_transfers">Bersihkan semua transfer yang sudah selesai?</string>
+    <string name="transfers_completed_canceled_entries_removed">Entri yang sudah selesai dan dibatalkan akan dihapus dari daftar ini. File Anda tidak terpengaruh.</string>
+    <string name="transfers_failed">Gagal</string>
+    <string name="transfers_failed_downloads">Unduhan gagal</string>
+    <string name="transfers_failed_transfers">Transfer gagal</string>
+    <string name="transfers_failed_uploads">Unggahan gagal</string>
+    <string name="transfers_no_transfers">Tidak ada transfer</string>
+    <string name="transfers_pause">Jeda semua</string>
+    <string name="transfers_queued_running_paused_failed">Membatalkan semua transfer yang ada dalam antrean, sedang berjalan, dijeda, atau gagal. File yang sudah diunggah akan tetap ada di Telegram.</string>
+    <string name="transfers_resume">Lanjutkan semua</string>
+    <string name="transfers_section_active">Aktif</string>
+    <string name="transfers_section_finished">Selesai</string>
+    <string name="transfers_section_paused">Dijeda</string>
+    <string name="transfers_uploads_downloads_appear_here">Unggahan dan unduhan akan muncul di sini.</string>
+
+    <!-- Drives and channels -->
+    <string name="channels_channel_container">channel-container</string>
+    <string name="channels_create_one_teledrive_store">Buat sebuah drive dan TeleDrive akan menyimpan file Anda di channel pribadi tersebut.</string>
+    <string name="channels_creates_private_channel_account">Membuat sebuah channel Telegram pribadi di akun Anda. Penamaan membantu Anda membedakan berbagai drive Anda.</string>
+    <string name="channels_creating_drive">Membuat drive</string>
+    <string name="channels_delete_confirm_hint">Ketik %1$s untuk mengonfirmasi</string>
+    <string name="channels_delete_message">Channel ini beserta %1$d file (%2$s) di dalamnya akan dihapus selamanya dari Telegram. Tindakan ini tidak dapat dibatalkan.</string>
+    <string name="channels_delete_telegram">Hapus dari Telegram</string>
+    <string name="channels_delete_title">Hapus %1$s?</string>
+    <string name="channels_deleting">Menghapus channel</string>
+    <string name="channels_drive_actions">Tindakan drive</string>
+    <string name="channels_drive_name">Nama drive</string>
+    <string name="channels_look_drives">Cari drive</string>
+    <string name="channels_looking_for_drives">Mencari drive</string>
+    <string name="channels_new_drive">Drive baru</string>
+    <string name="channels_no_drives_yet">Belum ada drive</string>
+    <string name="channels_open_drive">Buka drive</string>
+    <string name="channels_opening_drive">Membuka drive</string>
+    <string name="channels_removed_missing">%1$d drive dihapus karena channelnya sudah tidak ada</string>
+    <string name="channels_rename_drive">Ganti nama drive</string>
+    <string name="channels_renames_channel_telegram_well">Ini juga akan mengganti nama channelnya langsung di Telegram.</string>
+    <string name="channels_renaming">Mengganti nama</string>
+
+    <!-- Settings home -->
+    <string name="settings">Pengaturan</string>
+    <string name="settings_section_about_subtitle">Versi, tautan, dan pembaruan</string>
+    <string name="settings_section_about_title">Tentang</string>
+    <string name="settings_section_account_subtitle">Sesi Telegram, sinkronisasi, keluar</string>
+    <string name="settings_section_account_title">Akun</string>
+    <string name="settings_section_advanced_subtitle">Transfer, percobaan ulang, proxy, log</string>
+    <string name="settings_section_advanced_title">Lanjutan</string>
+    <string name="settings_section_appearance_subtitle">Tema, kisi, tata letak</string>
+    <string name="settings_section_appearance_title">Penampilan</string>
+    <string name="settings_section_backup_subtitle">Folder, jadwal pencadangan, jaringan</string>
+    <string name="settings_section_backup_title">Cadangan</string>
+    <string name="settings_section_notifications_subtitle">Peringatan progres dan error</string>
+    <string name="settings_section_notifications_title">Notifikasi</string>
+    <string name="settings_section_permissions_subtitle">Akses media, pemberitahuan</string>
+    <string name="settings_section_permissions_title">Izin</string>
+    <string name="settings_section_playback_subtitle">Streaming, audio latar belakang</string>
+    <string name="settings_section_playback_title">Pemutaran</string>
+    <string name="settings_section_security_subtitle">Kunci aplikasi, enkripsi</string>
+    <string name="settings_section_security_title">Keamanan</string>
+    <string name="settings_section_storage_subtitle">Cache, pengosongan tempat sampah otomatis</string>
+    <string name="settings_section_storage_title">Penyimpanan</string>
+
+    <!-- Settings: account -->
+    <string name="settings_files_stay_telegram_channel">File Anda tetap aman di channel Telegram. Perangkat ini hanya akan membuang indeks, thumbnail, dan cache lokalnya, serta menyusunnya kembali saat Anda login ulang.</string>
+    <string name="settings_log">Keluar akun</string>
+    <string name="settings_log_telegram">Keluar dari Telegram?</string>
+    <string name="settings_reading_channel">Membaca channel penyimpanan Anda</string>
+    <string name="settings_rebuild_index_telegram">Bangun ulang indeks dari Telegram</string>
+    <string name="settings_removes_session_stored_api">Hapus sesi dan kredensial API yang tersimpan</string>
+    <string name="settings_restores_file_list">Pulihkan daftar file dari channel penyimpanan Anda</string>
+    <string name="settings_shown_channels_private_owned">Channel yang ditampilkan adalah channel pribadi milik Anda sendiri dan bernama TeleDrive.</string>
+    <string name="settings_state_connected">Terhubung</string>
+    <string name="settings_state_connecting">Menghubungkan</string>
+    <string name="settings_state_syncing">Menyinkronkan</string>
+    <string name="settings_state_waiting_network">Menunggu jaringan</string>
+    <string name="settings_switch_drives_create_another">Beralih drive, buat yang baru, atau hapus</string>
+    <string name="settings_telegram_account">Akun Telegram</string>
+
+    <!-- Settings: backup -->
+    <string name="settings_add">Tambah</string>
+    <string name="settings_add_another_folder">Tambah folder lain</string>
+    <string name="settings_automatic_backup">Pencadangan otomatis</string>
+    <string name="settings_back_new_media_instantly">Cadangkan file media baru secara instan</string>
+    <string name="settings_backup_folders_title">Folder pencadangan</string>
+    <string name="settings_backup_interval">Interval cadangan</string>
+    <string name="settings_folder_unreadable">Folder ini tidak dapat dibaca secara langsung</string>
+    <string name="settings_no_folders_selected">Tidak ada folder yang dipilih, sehingga proses pencadangan otomatis folder tidak akan melakukan apa pun. Unggahan manual dari File tidak akan terpengaruh.</string>
+    <string name="settings_only_charging">Hanya saat mengisi daya</string>
+    <string name="settings_remove_backup_folder">Hapus folder cadangan?</string>
+    <string name="settings_skip_files_larger_than">Lewati file yang lebih besar dari</string>
+    <string name="settings_uploads_photos_videos_soon">Unggah foto dan video segera setelah mereka muncul</string>
+    <string name="settings_wi_fi_only">Cadangkan hanya melalui Wi-Fi</string>
+    <string name="settings_wi_fi_only_summary">Pencadangan otomatis akan menunggu hingga terhubung ke jaringan tanpa kuota data (unmetered)</string>
+
+    <!-- Settings: storage -->
+    <string name="settings_auto_clear_trash">Kosongkan tempat sampah otomatis</string>
+    <string name="settings_cache_current_size">Saat ini %1$s</string>
+    <string name="settings_cache_limit">Batas cache</string>
+    <string name="settings_cached_previews_thumbnails_temporary">Pratinjau, thumbnail yang disimpan dalam cache, dan file sementara akan dihapus. File asli dan cadangan Anda tidak akan terpengaruh.</string>
+    <string name="settings_clear_cache_action">Hapus Cache</string>
+    <string name="settings_clear_cache_title">Hapus cache?</string>
+    <string name="settings_download_location">Lokasi unduhan</string>
+    <string name="settings_download_location_default">Downloads/TeleDrive</string>
+    <string name="settings_download_location_reset">Setel ulang lokasi unduhan</string>
+    <string name="settings_free_up_subtitle">%1$s file yang dicadangkan disimpan secara lokal</string>
+    <string name="settings_free_up_none">Tidak ada file cadangan yang menghabiskan ruang lokal</string>
+    <string name="settings_clear_thumbnails_action">Hapus Thumbnail</string>
+    <string name="settings_clear_thumbnails_title">Hapus thumbnail?</string>
+    <string name="settings_free_up_space_title">Kosongkan %1$s?</string>
+    <string name="settings_delete_after_upload">Hapus salinan lokal setelah dicadangkan</string>
+    <string name="settings_delete_after_upload_summary">Hapus file dari perangkat setelah tersimpan di channel dan jika hash-nya masih cocok. File yang dijadikan offline tidak akan pernah dihapus.</string>
+    <string name="settings_gallery_previews_regenerated_browse">Pratinjau galeri akan dibuat ulang secara otomatis saat Anda menjelajah. File Anda tidak terpengaruh.</string>
+    <string name="settings_local_copies_files_already">Salinan file lokal yang sudah dicadangkan di Telegram akan dihapus dari perangkat ini. File tetap aman di channel Telegram Anda dan bisa diunduh kembali kapan saja.</string>
+
+    <!-- Settings: security -->
+    <string name="settings_app_lock">Kunci aplikasi</string>
+    <string name="settings_auto_lock">Kunci otomatis setelah</string>
+    <string name="settings_back_encryption_key">Cadangkan kunci enkripsi</string>
+    <string name="settings_block_screenshots">Blokir tangkapan layar</string>
+    <string name="settings_change_passphrase">Ubah frasa sandi (passphrase) pemulihan</string>
+    <string name="settings_confirm_removing_lock">Konfirmasikan bahwa ini adalah Anda sebelum mematikan kunci aplikasi</string>
+    <string name="settings_encrypt_thumbnails">Enkripsi thumbnail</string>
+    <string name="settings_encrypt_uploads">Enkripsi unggahan</string>
+    <string name="settings_encryption_stays_off">Enkripsi akan dinonaktifkan sampai frasa sandi (passphrase) dibuat</string>
+    <string name="settings_enter_passphrase_used_backing">Masukkan frasa sandi yang Anda gunakan saat mencadangkan kunci.</string>
+    <string name="settings_files_sealed_leaving_device">File akan dikunci sebelum keluar dari perangkat ini. Membutuhkan frasa sandi (passphrase) pemulihan.</string>
+    <string name="settings_forgot_show_hint">Lupa? Tampilkan petunjuk</string>
+    <string name="settings_hides_app_screenshots_screen">Sembunyikan aplikasi ini dari tangkapan layar, perekaman layar, dan tampilan aplikasi terbaru (recent apps)</string>
+    <string name="settings_hint_optional">Petunjuk (opsional)</string>
+    <string name="settings_key_backup_stored">Cadangan kunci Anda telah disimpan di channel Telegram Anda</string>
+    <string name="settings_no_key_backup_found">Tidak ditemukan cadangan kunci di channel penyimpanan Anda.</string>
+    <string name="settings_no_recovery_passphrase">Tidak ada frasa sandi pemulihan</string>
+    <string name="settings_passphrase">Frasa sandi (Passphrase)</string>
+    <string name="settings_passphrase_min_length">Setidaknya %1$d karakter</string>
+    <string name="settings_passphrases_do_not_match">Frasa sandi tidak cocok</string>
+    <string name="settings_protects_cached_previews_device">Lindungi pratinjau cache dengan kunci unik perangkat ini. Tidak perlu frasa sandi. Proses buka galeri akan sedikit lebih lambat.</string>
+    <string name="settings_reading_hint">Membaca petunjuk…</string>
+    <string name="settings_repeat_passphrase">Ulangi frasa sandi</string>
+    <string name="settings_require_fingerprint_screen_lock">Gunakan sidik jari atau kunci layar</string>
+    <string name="settings_required_before_encrypt">Wajib diatur sebelum Anda bisa mengenkripsi unggahan</string>
+    <string name="settings_required_encryption_key_wrapped">Wajib untuk enkripsi. Kunci Anda akan dibungkus dengan frasa sandi ini dan disimpan di Telegram, jadi Anda bisa memulihkan file Anda di perangkat baru. Telegram tidak akan pernah mengetahui frasa sandi ini.</string>
+    <string name="settings_restore_encryption_key">Pulihkan kunci enkripsi</string>
+    <string name="settings_save_backup">Simpan cadangan</string>
+    <string name="settings_set">Atur</string>
+    <string name="settings_set_passphrase">Buat frasa sandi (passphrase) pemulihan</string>
+    <string name="settings_stored_unencrypted_never_put">Disimpan tanpa enkripsi. Jangan pernah memasukkan frasa sandi Anda di sini.</string>
+    <string name="settings_turn_off_app_lock">Matikan kunci aplikasi</string>
+    <string name="settings_unlock_files_encrypted_earlier">Buka kunci file yang pernah Anda enkripsi sebelumnya menggunakan frasa sandi, baik dari perangkat ini maupun perangkat lain</string>
+    <string name="settings_uploads_stay_unencrypted_set">Unggahan tidak akan dienkripsi sampai Anda mengaturnya. File yang sudah dienkripsi secara lokal di perangkat ini juga dapat diamankan (cover).</string>
+    <string name="settings_nothing_to_remove">Tidak ada yang perlu dihapus</string>
+
+    <!-- Settings: appearance -->
+    <string name="settings_archived_shortcut">Pintasan ke Arsip</string>
+    <string name="settings_compact_layout">Tata letak ringkas (compact)</string>
+    <string name="settings_dynamic_color">Warna dinamis</string>
+    <string name="settings_gallery_grid_columns">Kolom grid galeri</string>
+    <string name="settings_gallery_grid_view">Tampilan grid Galeri</string>
+    <string name="settings_grid_columns">Kolom grid file</string>
+    <string name="settings_grid_view">Tampilan grid File</string>
+    <string name="settings_hidden_shortcut">Pintasan ke Tersembunyi</string>
+    <string name="settings_recent_files">File terbaru</string>
+    <string name="settings_recent_files_subtitle">Tampilkan file yang baru saja ditambahkan di layar beranda</string>
+    <string name="settings_shows_archived_collection_home">Tampilkan koleksi Arsip di layar beranda</string>
+    <string name="settings_shows_hidden_collection_home">Tampilkan koleksi Tersembunyi di layar beranda</string>
+    <string name="settings_theme">Tema</string>
+    <string name="settings_language">Bahasa</string>
+    <string name="language_system">Sistem Default</string>
+    <string name="language_english">English</string>
+    <string name="language_russian">Русский</string>
+    <string name="language_portuguese_br">Português (Brasil)</string>
+    <string name="language_chinese">简体中文</string>
+    <string name="language_spanish">Español</string>
+    <string name="language_indonesian">Bahasa Indonesia</string>
+    <string name="settings_tighter_list_rows_without">Baris daftar lebih rapat, tanpa informasi ukuran dan tanggal</string>
+    <string name="settings_use_wallpaper_colors_available">Gunakan warna dari wallpaper jika tersedia</string>
+    <string name="theme_dark">Gelap</string>
+    <string name="theme_light">Terang</string>
+    <string name="theme_system">Ikuti Sistem</string>
+
+    <!-- Settings: playback -->
+    <string name="settings_background_playback">Pemutaran di latar belakang</string>
+    <string name="settings_play_videos_load_instead">Mainkan video sambil memuat (streaming) alih-alih mengunduhnya penuh terlebih dahulu</string>
+    <string name="settings_stream_downloading">Streaming sebelum mengunduh penuh</string>
+
+    <!-- Settings: notifications -->
+    <string name="settings_backup_results">Hasil pencadangan</string>
+    <string name="settings_failures">Kegagalan</string>
+
+    <!-- Settings: advanced -->
+    <string name="settings_debug_logging">Log proses debugging</string>
+    <string name="settings_share_debug_log">Bagikan log</string>
+    <string name="settings_share_debug_log_subtitle">Kirim log debugging untuk dilampirkan pada laporan masalah/bug</string>
+    <string name="settings_debug_log_empty">Belum ada log. Coba reka ulang masalahnya (reproduce) lalu bagikan log ini.</string>
+    <string name="settings_link_previews">Pratinjau tautan</string>
+    <string name="settings_link_previews_subtitle">Telegram akan mengambil judul dan gambar pratinjau dari tautan yang disimpan</string>
+    <string name="settings_parallel_transfers">Transfer paralel</string>
+    <string name="settings_proxy">Proxy</string>
+    <string name="settings_proxy_subtitle">Akses Telegram jika diblokir di jaringan Anda</string>
+    <string name="settings_retry_attempts">Jumlah percobaan ulang (retry)</string>
+    <string name="settings_transfers_wi_fi_only">Transfer hanya pakai Wi-Fi</string>
+    <string name="settings_transfers_wi_fi_only_summary">Hanya berlaku pada unduhan dan unggahan yang Anda mulai secara manual</string>
+
+    <!-- Exclusions -->
+    <string name="exclusions_change_file">Ubah file</string>
+    <string name="exclusions_change_folder">Ubah folder</string>
+    <string name="exclusions_choose_file">Pilih file</string>
+    <string name="exclusions_choose_folder">Pilih folder</string>
+    <string name="exclusions_dot_names">Nama yang berawalan titik (dot)</string>
+    <string name="exclusions_size_in_bytes">Ukuran dalam satuan bytes</string>
+    <string name="exclusions_type_extension">Ekstensi</string>
+    <string name="exclusions_type_file">File</string>
+    <string name="exclusions_type_folder">Folder</string>
+    <string name="exclusions_type_hidden">File Tersembunyi</string>
+    <string name="exclusions_type_max_size">Ukuran maksimal</string>
+    <string name="exclusions_type_mime">Tipe MIME</string>
+    <string name="exclusions_type_pattern">Pola Kata (Pattern)</string>
+    <string name="settings_add_exclusion">Tambahkan pengecualian</string>
+    <string name="settings_choose_folder_device">Pilih folder apapun di perangkat ini</string>
+    <string name="settings_excluded_files_folders_skipped">Pencadangan otomatis akan melompati file dan folder yang dikecualikan (excluded).</string>
+    <string name="settings_exclusion_remove_message">"%1$s" akan disertakan kembali dalam pencadangan.</string>
+    <string name="settings_exclusions">Pengecualian</string>
+    <string name="settings_files_folders_skipped_backup">File dan folder yang dilewati dari pencadangan</string>
+    <string name="settings_item_lives_app_cloud">Item tersebut ada di dalam aplikasi atau cloud, bukan tersimpan di folder lokal perangkat. Anda harus memakai pengaturan tipe "Pola Kata".</string>
+    <string name="settings_no_exclusions">Tidak ada pengecualian</string>
+    <string name="settings_remove">Hapus</string>
+    <string name="settings_remove_exclusion">Hapus pengecualian?</string>
+    <string name="settings_skips_every_file_folder">Lompati setiap file dan folder yang berawalan titik, seperti file .thumbnails atau .trashed.</string>
+
+    <!-- Proxy -->
+    <string name="proxy_add">Tambah Proxy</string>
+    <string name="proxy_add_one_first">Simpan minimal satu proxy sebelum Anda bisa menyalakannya</string>
+    <string name="proxy_delete_action">Hapus</string>
+    <string name="proxy_delete_message">%1$s akan dihapus dari daftar.</string>
+    <string name="proxy_delete_title">Hapus proxy ini?</string>
+    <string name="proxy_edit">Edit</string>
+    <string name="proxy_endpoint">%1$s \u00b7 %2$s:%3$d</string>
+    <string name="proxy_host">Server Host</string>
+    <string name="proxy_import">Impor</string>
+    <string name="proxy_link">Tautan Proxy</string>
+    <string name="proxy_link_imported">%1$s berhasil disimpan</string>
+    <string name="proxy_link_not_recognised">Tautan ini tidak dikenali sebagai tautan proxy</string>
+    <string name="proxy_name_optional">Nama (opsional)</string>
+    <string name="proxy_none_saved">Tidak ada proxy tersimpan</string>
+    <string name="proxy_none_saved_summary">Tambahkan secara manual atau cukup tempelkan link dari orang yang membagikannya</string>
+    <string name="proxy_password_optional">Kata Sandi (opsional)</string>
+    <string name="proxy_paste_link">Tempel sebuah tautan</string>
+    <string name="proxy_paste_link_summary">Proxy biasanya dibagikan lewat tautan tg:// atau t.me. Tempelkan tautan tersebut di sini untuk mengisinya secara otomatis.</string>
+    <string name="proxy_port">Port</string>
+    <string name="proxy_reachable">Telegram telah merespon</string>
+    <string name="proxy_route_needs_one">Simpan satu server di bawah ini untuk menyalakannya</string>
+    <string name="proxy_route_off_summary">Langsung terhubung ke Telegram tanpa perantara</string>
+    <string name="proxy_route_on_summary">Terhubung ke Telegram melalui server proxy pilihan Anda</string>
+    <string name="proxy_route_through">Rutekan koneksi melalui proxy</string>
+    <string name="proxy_saved">Server tersimpan</string>
+    <string name="proxy_secret">Secret</string>
+    <string name="proxy_test">Uji koneksi</string>
+    <string name="proxy_server_reachable">Server dapat dijangkau, silakan login untuk menguji secara penuh</string>
+    <string name="proxy_testing">Menguji proxy...</string>
+    <string name="proxy_title">Proxy</string>
+    <string name="proxy_type_http">HTTP</string>
+    <string name="proxy_type_mtproto">MTProto</string>
+    <string name="proxy_type_socks5">SOCKS5</string>
+    <string name="proxy_unreachable">Tidak ada respons dari server ini</string>
+    <string name="proxy_username_optional">Nama Pengguna (opsional)</string>
+
+    <!-- Backup folders -->
+    <string name="backup">Cadangan</string>
+    <string name="backup_folder_camera">Kamera (DCIM)</string>
+    <string name="backup_folder_documents">Dokumen</string>
+    <string name="backup_folder_downloads">Unduhan</string>
+    <string name="backup_folder_movies">Film</string>
+    <string name="backup_folder_pictures">Gambar</string>
+    <string name="backup_folder_remove_message">%1$s tidak akan dicadangkan lagi. File yang sudah diunggah sebelumnya akan tetap aman di Telegram.</string>
+    <string name="backup_folder_subtitle">%1$s \u00b7 Ketuk untuk menghapus</string>
+    <string name="backup_interval_with_sweep">%1$s \u00b7 sapuan perbaikan otomatis</string>
+    <string name="backup_paused">Pencadangan sedang dijeda</string>
+
+    <!-- Permissions -->
+    <string name="permission_all_files_rationale">Wajib diizinkan untuk mencadangkan Dokumen, Unduhan, dan folder di Kartu SD</string>
+    <string name="permission_all_files_title">Akses Semua File</string>
+    <string name="permission_battery_rationale">Menjaga proses unggah dan sinkronisasi tetap berjalan walau aplikasi TeleDrive ditutup</string>
+    <string name="permission_battery_title">Penggunaan baterai tak dibatasi (unrestricted)</string>
+    <string name="permission_missing_message">TeleDrive tidak dapat membaca %1$s Anda tanpa izin akses.</string>
+    <string name="permission_not_allowed">Tidak Diizinkan \u00b7 %1$s</string>
+    <string name="permission_notifications_rationale">Menampilkan progres transfer dan status cadangan di bilah notifikasi</string>
+    <string name="permission_notifications_title">Notifikasi</string>
+    <string name="permission_photos_rationale">Wajib diizinkan untuk mencadangkan Foto</string>
+    <string name="permission_photos_title">Foto</string>
+    <string name="permission_separator"> dan </string>
+    <string name="permission_videos_rationale">Wajib diizinkan untuk mencadangkan Video</string>
+    <string name="permission_videos_title">Video</string>
+    <string name="permissions_allowed">Diizinkan</string>
+    <string name="permissions_not_allowed">Tidak Diizinkan</string>
+    <string name="permissions_not_allowed_optional">Tidak Diizinkan, Opsional</string>
+
+    <!-- Folder Picker -->
+    <string name="picker_folder_create_failed">Gagal membuat folder</string>
+    <string name="picker_folder_unreadable">Isi folder tidak dapat dibaca</string>
+    <string name="picker_folder_unreadable_hint">Izinkan akses ke semua file di Pengaturan, atau gunakan pemilih SAF (Sistem File Bawaan) di bawah ini.</string>
+    <string name="picker_internal_storage">Penyimpanan Internal</string>
+    <string name="picker_select_this_folder">Gunakan Folder Ini</string>
+    <string name="picker_title_select_folder">Pilih Folder</string>
+    <string name="picker_use_saf">Gunakan pemilih folder bawaan sistem (SAF)</string>
+
+    <!-- About -->
+    <string name="about_auto_check">Periksa otomatis</string>
+    <string name="about_auto_check_summary">Memeriksa versi baru setiap hari sekali</string>
+    <string name="about_check_updates">Periksa Pembaruan</string>
+    <string name="about_check_updates_summary">Mencari ketersediaan versi terbaru secara manual</string>
+    <string name="about_checking">Memeriksa...</string>
+    <string name="about_donate">Traktir saya Kopi</string>
+    <string name="about_donate_summary">Dukung pengembangan aplikasi ini</string>
+    <string name="about_no_update">Aplikasi Anda sudah dalam versi terbaru</string>
+    <string name="about_section_project">Proyek</string>
+    <string name="about_section_updates">Pembaruan</string>
+    <string name="about_source_code">Kode Sumber (Source Code)</string>
+    <string name="about_source_code_summary">Jelajahi proyek ini di repositori GitHub</string>
+    <string name="about_tagline">Cloud drive pribadimu, tersimpan aman di channel private Telegram.</string>
+    <string name="about_telegram">Channel Telegram</string>
+    <string name="about_telegram_summary">Info perilisan versi baru dan diskusi</string>
+    <string name="about_update_download">Unduh</string>
+    <string name="about_update_from">Terpasang %1$s, versi baru %2$s</string>
+    <string name="about_update_later">Nanti saja</string>
+    <string name="about_update_ready">Versi %1$s siap diunduh</string>
+    <string name="about_update_title">Perbarui ke %1$s</string>
+    <string name="about_version">Versi %1$s</string>
+
+    <!-- Snackbar messages -->
+    <string name="message_backing_up_new_folder">Mencadangkan folder baru</string>
+    <string name="message_cache_cleared">Cache berhasil dihapus</string>
+    <string name="message_created_drive">Drive %1$s berhasil dibuat</string>
+    <string name="message_download_queued">Dimasukkan ke antrean unduhan</string>
+    <string name="message_key_backup_saved">Cadangan kunci berhasil disimpan di Telegram</string>
+    <string name="message_key_restored">Kunci enkripsi berhasil dipulihkan, sedang mengindeks ulang...</string>
+    <string name="message_moved_count">%1$d dipindahkan</string>
+    <string name="message_moved_to_trash">Dipindahkan ke tempat sampah</string>
+    <string name="message_moved_to_trash_count">%1$d dipindahkan ke tempat sampah</string>
+    <string name="message_nothing_to_download">Tidak ada file yang perlu diunduh</string>
+    <string name="message_rebuild_done">Diindeks ulang: %1$d ditambah, %2$d diupdate, %3$d dihapus</string>
+    <string name="message_renamed">Berhasil diganti nama</string>
+    <string name="message_thumbnails_cleared">Thumbnail berhasil dihapus</string>
+    <string name="message_trash_emptied">Tempat sampah berhasil dikosongkan</string>
+    <string name="message_upload_queued">Dimasukkan ke antrean unggahan</string>
+    <string name="message_wrong_passphrase">Frasa sandi yang Anda masukkan salah</string>
+
+    <!-- Error messages -->
+    <string name="error_authentication_failed">Autentikasi gagal</string>
+    <string name="error_backup_running">Proses pencadangan sudah berjalan</string>
+    <string name="error_channel_limit">Akun Telegram Anda sudah menyentuh batas maksimum pembuatan channel/grup. Keluar dari grup yang tidak terpakai lewat Telegram lalu coba lagi.</string>
+    <string name="error_encryption_failed">Gagal mengenkripsi</string>
+    <string name="error_file_too_large">File ini berukuran %1$s. Batas maksimalnya adalah %2$s</string>
+    <string name="error_folder_exists">Folder dengan nama ini sudah ada</string>
+    <string name="error_folder_into_itself">Folder tidak bisa dipindahkan ke dalam dirinya sendiri</string>
+    <string name="error_incorrect_code">Kode salah</string>
+    <string name="error_incorrect_password">Kata sandi salah</string>
+    <string name="error_insufficient_storage">Ruang penyimpanan tidak cukup. Butuh %1$s sedangkan yang tersisa hanya %2$s</string>
+    <string name="error_invalid_api">API ID atau Hash tidak valid</string>
+    <string name="error_invalid_phone">Nomor telepon tidak valid</string>
+    <string name="error_key_unreadable">Perangkat ini tidak dapat membaca kunci enkripsi Anda. Pulihkan terlebih dahulu cadangan kunci menggunakan frasa sandi Anda.</string>
+    <string name="error_last_drive">Ini adalah satu-satunya drive yang Anda miliki. Buat drive lain terlebih dahulu sebelum menghapus ini.</string>
+    <string name="error_no_internet">Tidak ada koneksi internet</string>
+    <string name="error_no_local_copy">File ini tidak memiliki salinan lokal</string>
+    <string name="error_no_remote_copy">File ini tidak memiliki salinan remote (cloud)</string>
+    <string name="error_not_found">Tidak ditemukan</string>
+    <string name="error_not_supported">Tidak didukung</string>
+    <string name="error_backup_folders_unreadable">Folder cadangan ini tidak dapat dibaca. Berikan izin Akses Semua File di Pengaturan.</string>
+    <string name="error_permission_denied">Izin Ditolak</string>
+    <string name="error_rate_limited">Terkena limit dari Telegram. Silakan coba lagi dalam %1$ddetik</string>
+    <string name="error_sign_in_required">Silakan masuk ke Telegram untuk melanjutkan</string>
+    <string name="error_telegram">Error dari sistem Telegram: %1$s</string>
+    <string name="error_timed_out">Proses sudah terlalu lama dan terputus (time out)</string>
+    <string name="error_transfer_incomplete">Transfer tidak selesai dengan sempurna</string>
+    <string name="error_unknown">Terjadi masalah tak terduga</string>
+
+    <!-- Settings choice labels -->
+    <string-array name="backup_interval_labels">
+        <item>Setiap 1 jam</item>
+        <item>Setiap 2 jam</item>
+        <item>Setiap 4 jam</item>
+        <item>Setiap 6 jam</item>
+        <item>Setiap 12 jam</item>
+        <item>Harian</item>
+        <item>Setiap 2 hari</item>
+    </string-array>
+    <string-array name="backup_size_limit_labels">
+        <item>Tanpa Batas</item>
+        <item>100 MB</item>
+        <item>500 MB</item>
+        <item>1 GB</item>
+        <item>2 GB</item>
+        <item>4 GB</item>
+    </string-array>
+    <string-array name="lock_timeout_labels">
+        <item>Langsung (Segera)</item>
+        <item>Setelah 1 Menit</item>
+        <item>Setelah 5 Menit</item>
+        <item>Setelah 10 Menit</item>
+        <item>Setelah 15 Menit</item>
+        <item>Setelah 30 Menit</item>
+    </string-array>
+    <string-array name="trash_clear_labels">
+        <item>Jangan Pernah</item>
+        <item>Setelah 1 Hari</item>
+        <item>Setelah 1 Minggu</item>
+        <item>Setelah 1 Bulan</item>
+        <item>Setelah 3 Bulan</item>
+        <item>Setelah 1 Tahun</item>
+    </string-array>
+    <string-array name="theme_labels">
+        <item>Terang</item>
+        <item>Gelap</item>
+        <item>Ikuti Sistem</item>
+    </string-array>
+    <string-array name="language_labels">
+        <item>Sistem Default</item>
+        <item>English</item>
+        <item>Русский</item>
+        <item>Português (Brasil)</item>
+        <item>简体中文</item>
+        <item>Español</item>
+        <item>Bahasa Indonesia</item>
+    </string-array>
+</resources>

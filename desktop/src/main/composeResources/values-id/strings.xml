@@ -1,0 +1,77 @@
+<resources>
+    <!-- App-wide -->
+    <string name="app_name">TeleDrive</string>
+    <string name="app_already_running">TeleDrive sudah berjalan.</string>
+
+    <!-- Navigation -->
+    <string name="nav_files">File</string>
+    <string name="nav_gallery">Galeri</string>
+    <string name="nav_transfers">Transfer</string>
+    <string name="nav_trash">Tempat sampah</string>
+    <string name="nav_channels">Unit</string>
+    <string name="nav_proxy">Proxy</string>
+
+    <!-- Sign in -->
+    <string name="auth_credentials_prompt">Masukkan kredensial API Telegram dari my.telegram.org</string>
+    <string name="auth_api_id">API ID</string>
+    <string name="auth_api_hash">API Hash</string>
+    <string name="auth_continue">Lanjutkan</string>
+    <string name="auth_connecting">Menghubungkan ke Telegram</string>
+    <string name="auth_phone_number">Nomor telepon</string>
+    <string name="auth_send_code">Kirim kode</string>
+    <string name="auth_code_sent_to">Masukkan kode yang dikirim ke %1$s</string>
+    <string name="auth_code">Kode</string>
+    <string name="auth_verify">Verifikasi</string>
+    <string name="auth_email_address">Alamat email</string>
+    <string name="auth_password">Kata Sandi</string>
+    <string name="auth_password_prompt">Kata sandi verifikasi dua langkah</string>
+    <string name="auth_password_hint">Kata sandi verifikasi dua langkah (petunjuk: %1$s)</string>
+    <string name="auth_sign_in">Masuk</string>
+    <string name="auth_confirm_other_device">Konfirmasi di perangkat lain</string>
+    <string name="auth_registration_required">Nomor ini belum memiliki akun Telegram. Daftar terlebih dahulu di telepon.</string>
+    <string name="auth_signed_in_as">Masuk sebagai %1$s</string>
+    <string name="auth_signing_out">Keluar sesi</string>
+    <string name="auth_session_closed">Sesi ditutup. Mulai ulang aplikasi.</string>
+    <string name="auth_failed">Gagal masuk: %1$s</string>
+    <string name="auth_your_account">akun Anda</string>
+    <string name="auth_sign_out">Keluar</string>
+
+    <!-- Drive -->
+    <string name="drive_loading">Memuat unit Anda</string>
+    <string name="drive_pick_title">Pilih sebuah unit</string>
+    <string name="drive_pick_subtitle">File disimpan di channel pribadi Telegram</string>
+    <string name="drive_create">Buat unit baru</string>
+    <string name="drive_open">Buka</string>
+    <string name="drive_file_count">%1$d file</string>
+    <string name="drive_syncing">Menyinkronkan dengan Telegram</string>
+    <string name="drive_empty">Unit ini belum memiliki file</string>
+    <string name="drive_sync">Sinkronkan</string>
+    <string name="drive_upload">Unggah</string>
+    <string name="drive_download">Unduh</string>
+    <string name="drive_downloaded">Diunduh</string>
+    <string name="drive_queued">Dalam antrean</string>
+    <string name="drive_upload_chooser_title">Pilih file untuk diunggah</string>
+
+    <!-- Preview -->
+    <string name="preview_open_externally">Buka dengan aplikasi sistem</string>
+    <string name="preview_stream">Putar di pemutar sistem</string>
+    <string name="preview_open_failed">Gagal membuka file dengan aplikasi sistem</string>
+
+    <!-- Transfer errors -->
+    <string name="transfer_error_key_missing">Kunci enkripsi hilang. Pulihkan di Pengaturan.</string>
+    <string name="transfer_error_no_file_reference">Transfer tidak memiliki referensi file</string>
+    <string name="transfer_error_file_record_missing">Catatan file hilang</string>
+    <string name="transfer_error_no_local_copy">Tidak ada salinan lokal untuk diunggah</string>
+    <string name="transfer_error_local_file_gone">File lokal sudah tidak ada</string>
+    <string name="transfer_error_upload_ended">Proses unggah berhenti secara tak terduga</string>
+    <string name="transfer_error_upload_stalled">Proses unggah berhenti merespons</string>
+    <string name="transfer_error_download_ended">Unduhan berhenti secara tak terduga</string>
+    <string name="transfer_error_download_stalled">Unduhan berhenti merespons</string>
+    <string name="transfer_error_downloaded_missing">File yang diunduh hilang</string>
+    <string name="transfer_error_no_remote_copy">File tidak memiliki salinan remote (cloud)</string>
+    <string name="transfer_error_decryption_failed">Gagal mendekripsi</string>
+    <string name="transfer_error_save_failed">Gagal menyimpan unduhan</string>
+    <string name="transfer_error_verify_failed">File yang diunduh tidak cocok dengan aslinya. Coba unduh lagi.</string>
+    <string name="transfer_error_destination_full">Tidak ada cukup ruang kosong di lokasi penyimpanan unduhan. Membutuhkan %1$s.</string>
+    <string name="transfer_error_cache_full">Tidak ada cukup ruang kosong untuk file sementara TeleDrive. Membutuhkan %1$s.</string>
+</resources>
