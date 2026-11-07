@@ -48,6 +48,7 @@ import com.drdisagree.teledrive.resources.settings_delete_after_upload
 import com.drdisagree.teledrive.resources.settings_delete_after_upload_summary
 import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.language_english
+import com.drdisagree.teledrive.resources.language_indonesian
 import com.drdisagree.teledrive.resources.language_labels
 import com.drdisagree.teledrive.resources.language_chinese
 import com.drdisagree.teledrive.resources.language_spanish
