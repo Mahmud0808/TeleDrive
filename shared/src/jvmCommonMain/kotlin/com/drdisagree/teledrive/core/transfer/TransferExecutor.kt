@@ -431,6 +431,9 @@ class TransferExecutor(
 
                         is TelegramDownloadEvent.Completed -> {
                             outcome = finalizeDownload(transfer, entity.id, event.localPath)
+                            if (outcome == TransferOutcome.Completed) {
+                                runCatching { telegramClient.deleteLocalCopy(remoteFileId) }
+                            }
                         }
                     }
                 }
