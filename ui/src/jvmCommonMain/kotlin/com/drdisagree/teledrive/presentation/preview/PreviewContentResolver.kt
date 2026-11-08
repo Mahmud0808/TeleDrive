@@ -1,5 +1,9 @@
 package com.drdisagree.teledrive.presentation.preview
 
+import com.drdisagree.teledrive.core.media.ThumbnailStore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.preview_archive_failed
 import com.drdisagree.teledrive.resources.preview_fetch_failed
@@ -42,8 +46,11 @@ class PreviewContentResolver(
     private val cacheDao: CacheDao,
     private val filePartDao: FilePartDao,
     private val settingsRepository: SettingsRepository,
+    private val thumbnailStore: ThumbnailStore,
     private val dispatchers: DispatcherProvider
 ) {
+
+    private val scope = CoroutineScope(SupervisorJob() + dispatchers.io)
 
     fun resolve(file: DriveFile): Flow<PreviewContent> = flow {
         emit(PreviewContent.Loading)
@@ -70,6 +77,7 @@ class PreviewContentResolver(
             if (mediaParts.size == parts.size &&
                 (!file.isEncrypted || wrappedKeyRepository.exists(CryptoKeys.CONTENT))
             ) {
+                captureVideoFrame(file, mediaParts)
                 emit(
                     PreviewContent.StreamedMedia(
                         remoteFileId = remoteFileId,
@@ -94,11 +102,13 @@ class PreviewContentResolver(
             }
 
             if (wrappedKeyRepository.exists(CryptoKeys.CONTENT)) {
+                val single = listOf(MediaPart(remoteFileId, 0, file.sizeBytes))
+                captureVideoFrame(file, single)
                 emit(
                     PreviewContent.StreamedMedia(
                         remoteFileId = remoteFileId,
                         isAudio = file.category == FileCategory.AUDIO,
-                        parts = listOf(MediaPart(remoteFileId, 0, file.sizeBytes)),
+                        parts = single,
                         encrypted = true
                     )
                 )
@@ -124,6 +134,9 @@ class PreviewContentResolver(
             emit(PreviewContent.Failed(Res.string.preview_fetch_failed))
         } else {
             emit(fromLocal(file, cached.absolutePath))
+            if (file.isEncrypted && MimeTypes.isImage(file.mimeType)) {
+                runCatching { thumbnailStore.storeFromDecrypted(file.id, cached) }
+            }
         }
     }
         .catch { failure ->
@@ -131,6 +144,13 @@ class PreviewContentResolver(
             emit(PreviewContent.Failed(Res.string.preview_fetch_failed))
         }
         .flowOn(dispatchers.io)
+
+    private fun captureVideoFrame(file: DriveFile, parts: List<MediaPart>) {
+        if (!file.isEncrypted || file.category != FileCategory.VIDEO) return
+        scope.launch {
+            runCatching { thumbnailStore.storeFromStream(file.id, parts, encrypted = true) }
+        }
+    }
 
     private fun fromLocal(file: DriveFile, path: String): PreviewContent = when {
         MimeTypes.isImage(file.mimeType) -> PreviewContent.Image(File(path))
