@@ -5,19 +5,22 @@ import android.net.ConnectivityManager
 import android.net.Network
 import com.drdisagree.teledrive.core.common.SafeLog
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlinx.coroutines.CoroutineScope
 
 class TdlibNetworkWatcher(
     context: Context,
-    private val onChange: () -> Unit
+    scope: CoroutineScope,
+    onChange: () -> Unit
 ) {
 
     private val manager = context.getSystemService(ConnectivityManager::class.java)
     private val started = AtomicBoolean(false)
+    private val settler = NetworkSettler<Network>(scope, SETTLE_MS, onChange)
 
     private val callback = object : ConnectivityManager.NetworkCallback() {
-        override fun onAvailable(network: Network) = onChange()
+        override fun onAvailable(network: Network) = settler.available(network)
 
-        override fun onLost(network: Network) = onChange()
+        override fun onLost(network: Network) = settler.lost(network)
     }
 
     fun start() {
@@ -32,5 +35,6 @@ class TdlibNetworkWatcher(
 
     private companion object {
         const val TAG = "TdlibNetworkWatcher"
+        const val SETTLE_MS = 10_000L
     }
 }
