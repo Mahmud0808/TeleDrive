@@ -8,7 +8,7 @@ import androidx.navigation.NavOptionsBuilder
  * Compose keeps delivering taps during exit transitions, so a double tap would stack the
  * destination twice.
  */
-private val NavHostController.isReadyForNavigation: Boolean
+internal val NavHostController.isReadyForNavigation: Boolean
     get() = currentBackStackEntry?.lifecycle?.currentState?.isAtLeast(Lifecycle.State.RESUMED)
         ?: false
 

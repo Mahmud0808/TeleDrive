@@ -87,7 +87,6 @@ import com.drdisagree.teledrive.presentation.navigation.BottomBarHeight
 import com.drdisagree.teledrive.presentation.navigation.LocalBottomBarHeight
 import com.drdisagree.teledrive.presentation.navigation.Route
 import com.drdisagree.teledrive.presentation.navigation.TopLevelDestination
-import com.drdisagree.teledrive.presentation.navigation.navigateOnce
 import com.drdisagree.teledrive.presentation.platform.LocalAppVersion
 import com.drdisagree.teledrive.presentation.platform.LocalUrlOpener
 import com.drdisagree.teledrive.presentation.theme.TeleDriveTheme
@@ -99,6 +98,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import com.drdisagree.teledrive.presentation.common.platformConfiguration
+import com.drdisagree.teledrive.presentation.navigation.isReadyForNavigation
 
 @Composable
 fun TeleDriveApp(
@@ -483,9 +483,14 @@ private fun navigateTopLevel(
     navController: NavHostController,
     destination: TopLevelDestination
 ) {
-    navController.navigateOnce(destination.route) {
-        popUpTo(Route.Home) { inclusive = destination.route == Route.Home }
+    if (!navController.isReadyForNavigation) return
+    while (navController.previousBackStackEntry?.destination?.hasRoute(Route.Home::class) == false) {
+        if (!navController.popBackStack()) break
+    }
+    navController.navigate(destination.route) {
+        popUpTo(Route.Home) { saveState = true }
         launchSingleTop = true
+        restoreState = true
     }
 }
 
