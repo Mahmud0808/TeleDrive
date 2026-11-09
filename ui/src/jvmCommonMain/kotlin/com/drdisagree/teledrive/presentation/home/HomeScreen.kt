@@ -60,7 +60,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -151,8 +150,8 @@ import com.drdisagree.teledrive.resources.home_session_progress
 import com.drdisagree.teledrive.resources.home_status_connected
 import com.drdisagree.teledrive.resources.home_status_connecting
 import com.drdisagree.teledrive.resources.home_status_offline
-import com.drdisagree.teledrive.resources.home_status_rebuilding
 import com.drdisagree.teledrive.resources.home_status_syncing
+import com.drdisagree.teledrive.resources.home_status_rebuilding
 import com.drdisagree.teledrive.resources.home_storage_percent
 import com.drdisagree.teledrive.resources.home_storage_percent_min
 import com.drdisagree.teledrive.resources.home_sync_now
@@ -227,6 +226,12 @@ fun HomeScreen(
     }
 
     val snackbarHostState = remember { SnackbarHostState() }
+    val status = rememberConnectionStatus(
+        offline = state.offline,
+        connection = state.connection,
+        known = !state.loading,
+        claimFirstConnect = viewModel::claimFirstConnect
+    )
     CollectSnackbarMessages(viewModel.messages, snackbarHostState)
 
     Scaffold(
@@ -236,11 +241,6 @@ fun HomeScreen(
             LargeFlexibleTopAppBar(
                 title = { Text(stringResource(Res.string.app_name)) },
                 subtitle = {
-                    val status = rememberConnectionStatus(
-                        offline = state.offline,
-                        connection = state.connection,
-                        known = !state.loading
-                    )
                     AnimatedVisibility(
                         visible = status != null,
                         enter = fadeIn() + expandVertically(),
@@ -816,47 +816,50 @@ private fun BackupCard(
 
 /** Only shown when connectivity needs attention; a recovery shows briefly, then the row goes. */
 @Composable
-private fun rememberConnectionStatus(
+internal fun rememberConnectionStatus(
     offline: Boolean,
     connection: TelegramConnectionState,
-    known: Boolean
+    known: Boolean,
+    claimFirstConnect: () -> Boolean
 ): ConnectionStatus? {
-    if (!known) return null
-    val settled = !offline && connection == TelegramConnectionState.READY
-    var wasSettled by rememberSaveable { mutableStateOf(settled) }
-    var showRecovered by remember { mutableStateOf(false) }
-
-    LaunchedEffect(settled) {
-        if (settled && !wasSettled) {
-            showRecovered = true
-            delay(RECOVERED_VISIBLE_MS.milliseconds)
-            showRecovered = false
-        }
-        wasSettled = settled
-    }
-
-    return when {
+    val problem = when {
+        !known -> null
         offline -> ConnectionStatus(
             ConnectionIndicator.OFFLINE,
             Res.string.home_status_offline
         )
+
+        connection == TelegramConnectionState.READY -> null
 
         connection == TelegramConnectionState.UPDATING -> ConnectionStatus(
             ConnectionIndicator.WORKING,
             Res.string.home_status_syncing
         )
 
-        connection != TelegramConnectionState.READY -> ConnectionStatus(
+        else -> ConnectionStatus(
             ConnectionIndicator.WORKING,
             Res.string.home_status_connecting
         )
+    }
+    var shown by remember { mutableStateOf<ConnectionStatus?>(null) }
+    var showRecovered by remember { mutableStateOf(false) }
 
-        showRecovered -> ConnectionStatus(
-            ConnectionIndicator.CONNECTED,
-            Res.string.home_status_connected
-        )
+    LaunchedEffect(problem, known) {
+        if (problem != null) {
+            showRecovered = false
+            shown = problem
+        } else if (shown != null || (known && claimFirstConnect())) {
+            shown = null
+            showRecovered = true
+            delay(RECOVERED_VISIBLE_MS.milliseconds)
+            showRecovered = false
+        }
+    }
 
-        else -> null
+    return shown ?: if (showRecovered) {
+        ConnectionStatus(ConnectionIndicator.CONNECTED, Res.string.home_status_connected)
+    } else {
+        null
     }
 }
 

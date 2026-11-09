@@ -30,6 +30,7 @@ import com.drdisagree.teledrive.resources.home_backing_up_new_files
 import com.drdisagree.teledrive.resources.home_nothing_new_to_back_up
 import com.drdisagree.teledrive.resources.home_queued_files
 import com.drdisagree.teledrive.resources.home_switched_drive
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -227,6 +228,8 @@ class HomeViewModel(
 
     fun syncNow() = publishScheduler.kick()
 
+    fun claimFirstConnect(): Boolean = firstConnectClaimed.compareAndSet(false, true)
+
     private val lockedPromptDismissed = MutableStateFlow(false)
 
     val lockedFilesPrompt: StateFlow<Int> = combine(
@@ -280,5 +283,6 @@ class HomeViewModel(
 
     private companion object {
         const val COUNTS_DEBOUNCE_MS = 300L
+        val firstConnectClaimed = AtomicBoolean(false)
     }
 }

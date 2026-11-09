@@ -28,7 +28,7 @@ class ConnectivityNetworkMonitor(
                 network: Network,
                 networkCapabilities: NetworkCapabilities
             ) {
-                trySend(statusOf(networkCapabilities))
+                trySend(currentStatus())
             }
 
             override fun onLost(network: Network) {
