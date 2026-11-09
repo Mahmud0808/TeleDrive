@@ -71,7 +71,17 @@ kotlin {
     }
 }
 
+val composeResourcesWithLegacyCodes = tasks.register<Sync>("composeResourcesWithLegacyCodes") {
+    from("src/commonMain/composeResources")
+    from("src/commonMain/composeResources/values-id") { into("values-in") }
+    into(layout.buildDirectory.dir("generated/composeResourcesWithLegacyCodes"))
+}
+
 compose.resources {
     packageOfResClass = "com.drdisagree.teledrive.resources"
     publicResClass = true
+    customDirectory(
+        sourceSetName = "commonMain",
+        directoryProvider = layout.dir(composeResourcesWithLegacyCodes.map { it.destinationDir })
+    )
 }
