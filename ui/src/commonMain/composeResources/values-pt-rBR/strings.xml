@@ -76,6 +76,7 @@
     <string name="nav_settings">Configurações</string>
 
     <!-- Shared labels and dialogs -->
+    <string name="common_loading">Carregando</string>
     <string name="common_actions">Mais ações</string>
     <string name="common_add">Adicionar</string>
     <string name="common_add_favorites">Adicionar aos favoritos</string>

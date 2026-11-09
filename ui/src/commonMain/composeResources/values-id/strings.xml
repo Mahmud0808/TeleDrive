@@ -65,6 +65,7 @@
     <string name="nav_settings">Pengaturan</string>
 
     <!-- Shared labels and dialogs -->
+    <string name="common_loading">Memuat</string>
     <string name="common_actions">Tindakan lainnya</string>
     <string name="common_add">Tambah</string>
     <string name="common_add_favorites">Tambahkan ke favorit</string>

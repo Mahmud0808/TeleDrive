@@ -130,7 +130,6 @@ import com.drdisagree.teledrive.presentation.components.ConfirmDialog
 import com.drdisagree.teledrive.presentation.components.EmptyState
 import com.drdisagree.teledrive.presentation.components.FileGridItem
 import com.drdisagree.teledrive.presentation.components.FileListItem
-import com.drdisagree.teledrive.presentation.components.LoadingState
 import com.drdisagree.teledrive.presentation.components.RenameDialog
 import com.drdisagree.teledrive.presentation.components.SortMenu
 import com.drdisagree.teledrive.presentation.components.keyboardCollection
@@ -143,6 +142,7 @@ import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
 import com.drdisagree.teledrive.presentation.navigation.LocalBottomBarInset
 import com.drdisagree.teledrive.presentation.preview.PreviewSequence
 import com.drdisagree.teledrive.presentation.common.rememberPosition
+import com.drdisagree.teledrive.presentation.components.skeleton.CollectionSkeleton
 
 @Composable
 private fun DayHeaderRow(dayStartMillis: Long, modifier: Modifier = Modifier) {
@@ -573,7 +573,19 @@ fun GalleryScreen(
 
             if (state.tab == GalleryTab.ALBUMS && !state.isAlbumView) {
                 if (!state.loaded) {
-                    LoadingState()
+                    CollectionSkeleton(
+                        columns = state.albumGridSize,
+                        contentPadding = PaddingValues(
+                            start = 12.dp,
+                            end = 12.dp,
+                            top = 12.dp,
+                            bottom = 12.dp + padding.calculateBottomPadding() +
+                                    LocalBottomBarInset.current
+                        ),
+                        horizontalSpacing = 10.dp,
+                        verticalSpacing = 10.dp,
+                        item = { brush -> AlbumCardSkeleton(brush) }
+                    )
                     return@Column
                 }
                 AlbumGrid(
@@ -635,7 +647,21 @@ fun GalleryScreen(
                 modifier = Modifier.fillMaxSize()
             ) {
                 when {
-                    media.isInitialLoad || !state.loaded -> LoadingState()
+                    media.isInitialLoad || !state.loaded -> {
+                        val list = state.viewMode == ViewMode.LIST
+                        val edge = if (list) 8.dp else 12.dp
+                        GallerySkeleton(
+                            columns = state.gridSize,
+                            list = list,
+                            contentPadding = PaddingValues(
+                                start = edge,
+                                end = edge,
+                                top = edge,
+                                bottom = edge + padding.calculateBottomPadding() +
+                                        LocalBottomBarInset.current
+                            )
+                        )
+                    }
 
                     media.itemCount == 0 -> EmptyState(
                         icon = Icons.Outlined.Photo,

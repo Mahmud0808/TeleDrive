@@ -104,6 +104,7 @@
     <string name="nav_settings">Настройки</string>
 
     <!-- Shared labels and dialogs -->
+    <string name="common_loading">Загрузка</string>
     <string name="common_actions">Действия</string>
     <string name="common_add">Добавить</string>
     <string name="common_add_favorites">В избранное</string>

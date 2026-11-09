@@ -52,12 +52,12 @@ import com.drdisagree.teledrive.presentation.components.FileListItem
 import com.drdisagree.teledrive.presentation.components.FolderRow
 import com.drdisagree.teledrive.presentation.components.keyboardCollection
 import com.drdisagree.teledrive.presentation.components.keyboardCollectionItem
-import com.drdisagree.teledrive.presentation.components.LoadingState
 import com.drdisagree.teledrive.presentation.components.MenuAction
 import com.drdisagree.teledrive.presentation.components.label
 import com.drdisagree.teledrive.presentation.components.liftedTopAppBarColors
 import com.drdisagree.teledrive.presentation.components.rememberKeyboardCollection
 import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
+import com.drdisagree.teledrive.presentation.components.skeleton.CollectionSkeleton
 import com.drdisagree.teledrive.presentation.preview.PreviewSequence
 import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.app_backed_up
@@ -200,7 +200,15 @@ fun SearchScreen(
             }
 
             when {
-                state.searching -> LoadingState()
+                state.searching -> CollectionSkeleton(
+                    columns = 1,
+                    contentPadding = PaddingValues(
+                        start = 12.dp,
+                        end = 12.dp,
+                        top = 12.dp,
+                        bottom = 12.dp + padding.calculateBottomPadding()
+                    )
+                )
                 !state.searched -> EmptyState(
                     icon = Icons.Outlined.Search,
                     title = stringResource(Res.string.app_search_drive),

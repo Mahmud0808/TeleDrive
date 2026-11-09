@@ -132,7 +132,6 @@ import com.drdisagree.teledrive.presentation.components.FolderGridItem
 import com.drdisagree.teledrive.presentation.components.FolderInfoSheet
 import com.drdisagree.teledrive.presentation.components.FolderPickerDialog
 import com.drdisagree.teledrive.presentation.components.FolderRow
-import com.drdisagree.teledrive.presentation.components.LoadingState
 import com.drdisagree.teledrive.presentation.components.MenuAction
 import com.drdisagree.teledrive.presentation.components.RefreshAction
 import com.drdisagree.teledrive.presentation.components.RefreshableContent
@@ -144,6 +143,7 @@ import com.drdisagree.teledrive.presentation.components.pinchZoom
 import com.drdisagree.teledrive.presentation.components.rememberDragSelect
 import com.drdisagree.teledrive.presentation.components.rememberKeyboardCollection
 import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
+import com.drdisagree.teledrive.presentation.components.skeleton.CollectionSkeleton
 import com.drdisagree.teledrive.presentation.navigation.FabBottomBarInset
 import com.drdisagree.teledrive.presentation.navigation.LocalBottomBarInset
 import com.drdisagree.teledrive.presentation.platform.FileDropArea
@@ -700,7 +700,18 @@ fun FilesScreen(
                         modifier = Modifier.fillMaxSize()
                     ) {
                         if (isLoading) {
-                            LoadingState()
+                            CollectionSkeleton(
+                                columns = if (state.viewMode == ViewMode.GRID) state.gridSize else 1,
+                                contentPadding = PaddingValues(
+                                    start = 12.dp,
+                                    end = 12.dp,
+                                    top = 12.dp,
+                                    bottom = 100.dp + padding.calculateBottomPadding() +
+                                            LocalBottomBarInset.current
+                                ),
+                                horizontalSpacing = 10.dp,
+                                verticalSpacing = 10.dp
+                            )
                         } else if (isEmpty) {
                             EmptyState(
                                 icon = Icons.Outlined.FolderOff,

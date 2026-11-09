@@ -16,6 +16,7 @@ import com.drdisagree.teledrive.data.repository.ActiveChannel
 import com.drdisagree.teledrive.domain.model.BackupTrigger
 import com.drdisagree.teledrive.domain.model.DriveChannel
 import com.drdisagree.teledrive.domain.model.StorageSlice
+import com.drdisagree.teledrive.domain.model.UserPreferences
 import com.drdisagree.teledrive.domain.repository.BackupRepository
 import com.drdisagree.teledrive.domain.repository.ChannelRepository
 import com.drdisagree.teledrive.domain.repository.FileRepository
@@ -227,6 +228,11 @@ class HomeViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), PendingSync())
 
     fun syncNow() = publishScheduler.kick()
+
+    val sections: StateFlow<HomeSections> = settingsRepository.preferences
+        .map(HomeSections::of)
+        .distinctUntilChanged()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeSections.of(UserPreferences()))
 
     fun claimFirstConnect(): Boolean = firstConnectClaimed.compareAndSet(false, true)
 
