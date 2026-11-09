@@ -22,7 +22,8 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -511,8 +512,17 @@ private fun PreviewPage(
         if (storedTextScale != textScale) textScale = storedTextScale
     }
     val pinchToScale = Modifier.pointerInput(file.id) {
-        detectTransformGestures { _, _, zoom, _ ->
-            textScale = (textScale * zoom).coerceIn(TEXT_SCALE_MIN, TEXT_SCALE_MAX)
+        awaitEachGesture {
+            do {
+                val event = awaitPointerEvent()
+                if (event.changes.count { it.pressed } >= 2) {
+                    val zoom = event.calculateZoom()
+                    if (zoom != 1f) {
+                        textScale = (textScale * zoom).coerceIn(TEXT_SCALE_MIN, TEXT_SCALE_MAX)
+                        event.changes.forEach { it.consume() }
+                    }
+                }
+            } while (event.changes.any { it.pressed })
         }
     }
     // Written once the pinch settles, not on every frame of the gesture.
