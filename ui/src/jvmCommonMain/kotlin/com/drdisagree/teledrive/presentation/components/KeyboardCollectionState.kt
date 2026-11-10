@@ -9,6 +9,7 @@ import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
@@ -56,11 +57,16 @@ class KeyboardCollectionState internal constructor(
     private var focusOnItem = false
     private var focusInItem = false
     private var focusedIndex = -1
+    internal var containerTabStop = false
+    internal var containerFocused by mutableStateOf(false)
+        private set
+    private var itemFocusAllowed = false
 
     internal fun requester(index: Int): FocusRequester =
         requesters.getOrPut(index) { FocusRequester() }
 
     internal fun canFocus(index: Int): Boolean {
+        if (containerTabStop && !itemFocusAllowed) return false
         val visible = cells()
         val anchor = if (isItem(current) && visible.any { it.index == current }) {
             current
@@ -77,7 +83,15 @@ class KeyboardCollectionState internal constructor(
         if (hasFocus) current = index
     }
 
+    internal fun onContainerFocusChanged(focused: Boolean, hasFocus: Boolean) {
+        containerFocused = focused
+        if (!hasFocus) itemFocusAllowed = false
+    }
+
     internal fun handle(event: KeyEvent, shortcuts: CollectionShortcuts): Boolean {
+        if (event.type == KeyEventType.KeyDown && containerTabStop && containerFocused) {
+            return enterFromContainer(event)
+        }
         if (event.type != KeyEventType.KeyDown || !focusInItem) return false
         restorePending = false
         KeyboardHandoff.armed = false
@@ -166,6 +180,21 @@ class KeyboardCollectionState internal constructor(
         focusNow(current)
     }
 
+    private fun enterFromContainer(event: KeyEvent): Boolean {
+        val plain = !event.isCtrlPressed && !event.isMetaPressed && !event.isAltPressed &&
+                !event.isShiftPressed
+        if (!plain || event.key !in ENTER_KEYS) return false
+        itemFocusAllowed = true
+        focusIndex(
+            when (event.key) {
+                Key.MoveHome -> firstItem()
+                Key.MoveEnd -> lastItem()
+                else -> current.takeIf(isItem) ?: firstItem()
+            }
+        )
+        return true
+    }
+
     private fun firstItem(): Int = (0 until totalCount()).firstOrNull(isItem) ?: 0
 
     private fun lastItem(): Int =
@@ -222,6 +251,7 @@ class KeyboardCollectionState internal constructor(
 
     private suspend fun focusNow(index: Int) {
         if (totalCount() == 0) return
+        itemFocusAllowed = true
         var target = index.coerceIn(0, totalCount() - 1)
         while (target > 0 && !isItem(target)) target--
         current = target
@@ -236,6 +266,14 @@ class KeyboardCollectionState internal constructor(
 
     private companion object {
         const val FOCUS_ATTEMPTS = 10
+        val ENTER_KEYS = setOf(
+            Key.DirectionDown,
+            Key.DirectionUp,
+            Key.DirectionLeft,
+            Key.DirectionRight,
+            Key.MoveHome,
+            Key.MoveEnd
+        )
     }
 }
 

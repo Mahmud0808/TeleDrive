@@ -122,6 +122,56 @@ class KeyboardCollectionTest {
     }
 
     @Test
+    fun `tab stops on a labeled list, arrows enter it and shift tab returns to it`() {
+        items.addAll((0 until 6).map { "item-$it" })
+        rule.setContent {
+            Column {
+                BasicText("before", Modifier.testTag("before").clickable {})
+                val gridState = rememberLazyGridState()
+                val keyboard = rememberKeyboardCollection(gridState, 3)
+                LazyVerticalGrid(
+                    state = gridState,
+                    columns = GridCells.Fixed(3),
+                    modifier = Modifier
+                        .testTag("grid")
+                        .size(300.dp, 200.dp)
+                        .keyboardCollection(keyboard, items.size, label = "Files")
+                ) {
+                    items(items.size, key = { items[it] }) { index ->
+                        BasicText(
+                            items[index],
+                            Modifier
+                                .keyboardCollectionItem(keyboard, index)
+                                .testTag(items[index])
+                                .size(60.dp)
+                                .clickable {}
+                        )
+                    }
+                }
+                BasicText("after", Modifier.testTag("after").clickable {})
+            }
+        }
+        rule.onNodeWithTag("before").requestFocus()
+
+        rule.onNodeWithTag("before").performKeyInput { pressKey(Key.Tab) }
+        rule.onNodeWithTag("grid").assertIsFocused()
+
+        rule.onNodeWithTag("grid").performKeyInput { pressKey(Key.DirectionDown) }
+        rule.waitForIdle()
+        rule.onNodeWithTag("item-0").assertIsFocused()
+
+        rule.onNodeWithTag("item-0").performKeyInput { pressKey(Key.Tab) }
+        rule.onNodeWithTag("after").assertIsFocused()
+
+        rule.onNodeWithTag("after").performKeyInput {
+            keyDown(Key.ShiftLeft)
+            pressKey(Key.Tab)
+            keyUp(Key.ShiftLeft)
+        }
+        rule.onNodeWithTag("grid").assertIsFocused()
+    }
+
+    @Test
     fun `arrows move by row and column`() {
         setGrid(columns = 3)
         rule.onNodeWithTag("item-0").requestFocus()
