@@ -67,10 +67,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -391,7 +394,8 @@ fun HomeScreen(
                             horizontalArrangement = Arrangement.spacedBy(10.dp),
                             modifier = Modifier.keyboardCollection(
                                 recentKeyboard,
-                                state.recentFiles.size
+                                state.recentFiles.size,
+                                label = stringResource(Res.string.home_section_recent)
                             )
                         ) {
                             itemsIndexed(state.recentFiles, key = { _, it -> it.id }) { index, file ->
@@ -885,16 +889,18 @@ private fun StorageCard(slices: List<StorageSlice>, modifier: Modifier = Modifie
         shape = MaterialTheme.shapes.extraLarge
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
-            Text(
-                text = Formatters.bytes(totalBytes),
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = pluralStringResource(Res.plurals.file_count, totalFiles, totalFiles),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Column(modifier = Modifier.semantics(mergeDescendants = true) {}) {
+                Text(
+                    text = Formatters.bytes(totalBytes),
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = pluralStringResource(Res.plurals.file_count, totalFiles, totalFiles),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
             Spacer(Modifier.height(16.dp))
             StorageBar(slices = slices, totalBytes = totalBytes)
             Spacer(Modifier.height(16.dp))
@@ -930,65 +936,72 @@ private val LegendTextStyle: TextStyle
 
 @Composable
 private fun StorageLegend(slices: List<StorageSlice>, totalBytes: Long) {
-    Row(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.weight(1f)) {
-            slices.forEach { slice ->
-                Row(
-                    modifier = Modifier.padding(vertical = LEGEND_ROW_GAP),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(LEGEND_DOT)
-                            .clip(CircleShape)
-                            .background(slice.category.chartColor())
-                    )
-                    Spacer(Modifier.width(12.dp))
-                    Text(
-                        text = slice.category.label(),
-                        style = LegendTextStyle,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            }
+    val percents = slices.map { slice ->
+        val percent = slice.totalBytes * 100f / totalBytes
+        if (percent < 1f) {
+            stringResource(Res.string.home_storage_percent_min)
+        } else {
+            stringResource(Res.string.home_storage_percent, percent.roundToInt())
         }
-        Spacer(Modifier.width(16.dp))
-        Column(horizontalAlignment = Alignment.End) {
-            slices.forEach { slice ->
-                val percent = slice.totalBytes * 100f / totalBytes
-                Text(
-                    text = if (percent < 1f) {
-                        stringResource(Res.string.home_storage_percent_min)
-                    } else {
-                        stringResource(Res.string.home_storage_percent, percent.roundToInt())
-                    },
-                    style = LegendTextStyle,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    modifier = Modifier.padding(vertical = LEGEND_ROW_GAP)
+    }
+    val sizes = slices.map { Formatters.bytes(it.totalBytes) }
+    val style = LegendTextStyle
+    val measurer = rememberTextMeasurer()
+    val density = LocalDensity.current
+    val percentWidth = with(density) {
+        percents.maxOf { measurer.measure(it, style).size.width }.toDp()
+    }
+    val sizeWidth = with(density) {
+        sizes.maxOf { measurer.measure(it, style).size.width }.toDp()
+    }
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        slices.forEachIndexed { index, slice ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .semantics(mergeDescendants = true) {}
+                    .padding(vertical = LEGEND_ROW_GAP),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(LEGEND_DOT)
+                        .clip(CircleShape)
+                        .background(slice.category.chartColor())
                 )
-            }
-        }
-        Spacer(Modifier.width(16.dp))
-        Column(horizontalAlignment = Alignment.End) {
-            slices.forEach { slice ->
+                Spacer(Modifier.width(12.dp))
                 Text(
-                    text = Formatters.bytes(slice.totalBytes),
-                    style = LegendTextStyle,
+                    text = slice.category.label(),
+                    style = style,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
-                    modifier = Modifier.padding(vertical = LEGEND_ROW_GAP)
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+                Spacer(Modifier.width(16.dp))
+                Text(
+                    text = percents[index],
+                    style = style,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier.width(percentWidth)
+                )
+                Spacer(Modifier.width(16.dp))
+                Text(
+                    text = sizes[index],
+                    style = style,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier.width(sizeWidth)
                 )
             }
         }
     }
 }
 
-/**
- * A disabled schedule outranks a stale timestamp, which means nothing while nothing is scheduled.
- */
 @Composable
 private fun backupFreshnessLabel(
     autoBackupEnabled: Boolean,

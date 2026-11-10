@@ -99,6 +99,8 @@ class KeyboardCollectionState internal constructor(
             vertical && event.key == Key.DirectionUp -> moveRows(-1).let { true }
             across && event.key == Key.DirectionRight -> step(1).let { true }
             across && event.key == Key.DirectionLeft -> step(-1).let { true }
+            plain && horizontal && event.key == Key.DirectionDown -> step(1)
+            plain && horizontal && event.key == Key.DirectionUp -> step(-1)
             onItem && event.key == Key.DirectionRight -> shortcuts.onExpand.fire(index)
             onItem && event.key == Key.DirectionLeft -> shortcuts.onCollapse.fire(index)
             plain && event.key == Key.MoveHome -> focusIndex(firstItem()).let { true }
@@ -169,10 +171,12 @@ class KeyboardCollectionState internal constructor(
     private fun lastItem(): Int =
         (totalCount() - 1 downTo 0).firstOrNull(isItem) ?: (totalCount() - 1).coerceAtLeast(0)
 
-    private fun step(direction: Int) {
+    private fun step(direction: Int): Boolean {
         var target = current + direction
         while (target in 0 until totalCount() && !isItem(target)) target += direction
-        if (target in 0 until totalCount()) focusIndex(target)
+        if (target !in 0 until totalCount()) return false
+        focusIndex(target)
+        return true
     }
 
     private fun moveRows(direction: Int) {
