@@ -105,6 +105,13 @@ class DesktopFolderSyncService(
 
     suspend fun setEnabled(enabled: Boolean) = mutex.withLock {
         if (_status.value.source.isBlank()) return@withLock
+        if (enabled && settings.preferences.first().deleteAfterUpload) {
+            _status.value = _status.value.copy(
+                enabled = false,
+                message = "Desative 'Excluir após upload' nas configurações antes de sincronizar."
+            )
+            return@withLock
+        }
         config.setProperty("enabled", enabled.toString())
         persist(config, configFile)
         _status.value = _status.value.copy(
@@ -123,7 +130,17 @@ class DesktopFolderSyncService(
             _status.value = current.copy(message = "Pasta de origem não encontrada.")
             return@withLock
         }
-        val channel = settings.preferences.first().storageChatId
+        val preferences = settings.preferences.first()
+        if (preferences.deleteAfterUpload) {
+            config.setProperty("enabled", "false")
+            persist(config, configFile)
+            _status.value = current.copy(
+                enabled = false,
+                message = "Sincronização pausada: desative 'Excluir após upload' para preservar arquivos locais."
+            )
+            return@withLock
+        }
+        val channel = preferences.storageChatId
         if (channel == null || channel.toString() != config.getProperty("channel")) {
             _status.value = current.copy(
                 message = "Canal diferente do configurado. Pause e selecione a pasta novamente."
