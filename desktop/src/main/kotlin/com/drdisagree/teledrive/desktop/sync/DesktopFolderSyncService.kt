@@ -136,16 +136,16 @@ class DesktopFolderSyncService(
         var failures = 0
         val now = System.currentTimeMillis()
         // Walk only within the source tree. Symbolic-link directories are never followed.
-        for (file in source.walkTopDown().onEnter { !Files.isSymbolicLink(it.toPath()) }) {
-            if (!file.isFile || !file.canRead() || Files.isSymbolicLink(file.toPath())) continue
-            if (now - file.lastModified() < 5_000L) continue
-            val relative = file.relativeTo(source).invariantSeparatorsPath
+        for (candidate in FolderSyncScanner.candidates(source, now)) {
+            val file = candidate.file
+            val relative = candidate.relativePath
             val key = Base64.getUrlEncoder().withoutPadding()
                 .encodeToString(relative.toByteArray(Charsets.UTF_8))
-            val signature = "${file.length()}:${file.lastModified()}"
+            val signature = candidate.signature
             val previous = inventory.getProperty(key)
-            if (previous != null) {
-                if (previous != signature) changed++
+            if (previous == signature) continue
+            if (previous != null && previous != "pending:$signature") {
+                changed++
                 continue
             }
             val parent = relative.substringBeforeLast('/', "")
@@ -164,9 +164,11 @@ class DesktopFolderSyncService(
                         val accepted = uploadedAlready ||
                             transfers.enqueueUpload(imported.value.id) is AppResult.Success
                         if (accepted) {
-                            inventory.setProperty(key, signature)
+                            inventory.setProperty(
+                                key, if (uploadedAlready) signature else "pending:$signature"
+                            )
                             persist(inventory, inventoryFile)
-                            queued++
+                            if (!uploadedAlready && previous == null) queued++
                         } else failures++
                     }
                     is AppResult.Failure -> failures++
