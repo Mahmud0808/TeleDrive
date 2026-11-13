@@ -5,8 +5,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.MenuBar
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
@@ -24,6 +27,8 @@ import com.drdisagree.teledrive.core.media.ThumbnailStore
 import com.drdisagree.teledrive.core.media.thumbnailCacheKey
 import com.drdisagree.teledrive.core.publish.PublishScheduler
 import com.drdisagree.teledrive.desktop.di.desktopModule
+import com.drdisagree.teledrive.desktop.sync.DesktopFolderSyncDialog
+import com.drdisagree.teledrive.desktop.sync.DesktopFolderSyncService
 import com.drdisagree.teledrive.desktop.resources.Res
 import com.drdisagree.teledrive.desktop.resources.Res as DesktopRes
 import com.drdisagree.teledrive.desktop.resources.app_already_running
@@ -83,7 +88,21 @@ fun main() {
         getKoin().get<PublishScheduler>().kick()
         runCatching { getKoin().get<TrashRepository>().repairTrashTree() }
     }
+    val folderSyncService = DesktopFolderSyncService(
+        storagePaths,
+        getKoin().get<FileRepository>(),
+        getKoin().get<TransferRepository>(),
+        getKoin().get<SettingsRepository>()
+    )
     application {
+        var showFolderSync by remember { mutableStateOf(false) }
+        if (showFolderSync) {
+            DesktopFolderSyncDialog(
+                service = folderSyncService,
+                scope = backgroundScope,
+                onClose = { showFolderSync = false }
+            )
+        }
         val windowState = rememberWindowState(width = 1200.dp, height = 800.dp)
         val fullscreenController = remember {
             FullscreenController(
@@ -104,6 +123,11 @@ fun main() {
             icon = painterResource(Res.drawable.app_icon),
             state = windowState
         ) {
+            MenuBar {
+                Menu("Ferramentas") {
+                    Item("Sincronização de pastas...", onClick = { showFolderSync = true })
+                }
+            }
             window.minimumSize = Dimension(MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT)
             setSingletonImageLoaderFactory { context ->
                 ImageLoader.Builder(context)
