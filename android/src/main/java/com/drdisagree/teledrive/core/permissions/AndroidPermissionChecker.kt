@@ -25,19 +25,19 @@ class AndroidPermissionChecker(
             Environment.isExternalStorageManager()
 
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ->
-            Environment.isExternalStorageLegacy() && hasLegacyReadAccess()
+            Environment.isExternalStorageLegacy() && hasLegacyStorageAccess()
 
-        else -> hasLegacyReadAccess()
+        else -> hasLegacyStorageAccess()
     }
 
     private fun ignoresBatteryOptimizations(): Boolean =
         context.getSystemService(PowerManager::class.java)
             ?.isIgnoringBatteryOptimizations(context.packageName) == true
 
-    private fun hasLegacyReadAccess(): Boolean =
+    private fun hasLegacyStorageAccess(): Boolean =
         ContextCompat.checkSelfPermission(
             context,
-            Manifest.permission.READ_EXTERNAL_STORAGE
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
         ) == PackageManager.PERMISSION_GRANTED
 
     override fun statuses(): Map<AppPermission, Boolean> =

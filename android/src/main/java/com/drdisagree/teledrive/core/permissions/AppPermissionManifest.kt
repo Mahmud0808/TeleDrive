@@ -6,19 +6,21 @@ import android.os.Build
 /** Null when the permission is not a runtime permission on this device. */
 val AppPermission.manifestPermission: String?
     get() = when (this) {
-        AppPermission.MEDIA_IMAGES ->
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                Manifest.permission.READ_MEDIA_IMAGES
-            } else {
-                Manifest.permission.READ_EXTERNAL_STORAGE
-            }
+        AppPermission.MEDIA_IMAGES -> when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> Manifest.permission.READ_MEDIA_IMAGES
+            Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q ->
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
 
-        AppPermission.MEDIA_VIDEO ->
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                Manifest.permission.READ_MEDIA_VIDEO
-            } else {
-                Manifest.permission.READ_EXTERNAL_STORAGE
-            }
+            else -> Manifest.permission.READ_EXTERNAL_STORAGE
+        }
+
+        AppPermission.MEDIA_VIDEO -> when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> Manifest.permission.READ_MEDIA_VIDEO
+            Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q ->
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+
+            else -> Manifest.permission.READ_EXTERNAL_STORAGE
+        }
 
         AppPermission.NOTIFICATIONS ->
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
