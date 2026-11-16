@@ -971,7 +971,7 @@
         <item>Segui il sistema</item>
     </string-array>
     <string-array name="language_labels">
-        <item>System default</item>
+        <item>Predefinito di sistema</item>
         <item>English</item>
         <item>Русский</item>
         <item>Português (Brasil)</item>

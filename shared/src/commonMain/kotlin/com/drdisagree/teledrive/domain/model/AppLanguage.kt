@@ -7,7 +7,7 @@ enum class AppLanguage(val code: String) {
     PORTUGUESE_BR("pt-BR"),
     CHINESE_SIMPLIFIED("zh-CN"),
     SPANISH("es"),
-    INDONESIAN("id");
+    INDONESIAN("id"),
     ITALIAN("it");
 
     companion object {
