@@ -49,6 +49,7 @@ import com.drdisagree.teledrive.resources.settings_delete_after_upload_summary
 import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.language_english
 import com.drdisagree.teledrive.resources.language_indonesian
+import com.drdisagree.teledrive.resources.language_italian
 import com.drdisagree.teledrive.resources.language_labels
 import com.drdisagree.teledrive.resources.language_chinese
 import com.drdisagree.teledrive.resources.language_spanish
@@ -990,6 +991,7 @@ private fun AppearanceSection(state: SettingsUiState, viewModel: SettingsViewMod
                     AppLanguage.CHINESE_SIMPLIFIED -> stringResource(Res.string.language_chinese)
                     AppLanguage.SPANISH -> stringResource(Res.string.language_spanish)
                     AppLanguage.INDONESIAN -> stringResource(Res.string.language_indonesian)
+                    AppLanguage.ITALIAN -> stringResource(Res.string.language_italian)
                 },
                 onClick = { showLanguageDialog = true }
             )

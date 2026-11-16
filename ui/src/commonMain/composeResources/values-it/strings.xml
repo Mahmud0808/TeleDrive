@@ -1,0 +1,984 @@
+<resources>
+    <!-- App-wide -->
+	<string name="app_name">TeleDrive</string>
+    <string name="app_backed_up">Salvato</string>
+    <string name="app_drive_recreated">Il tuo drive è stato eliminato su Telegram, pertanto ne è stato creato uno nuovo e vuoto</string>
+    <string name="app_no_results">Nessun risultato</string>
+    <string name="app_not_backed_up">Non salvato</string>
+    <string name="app_nothing_matches_search">La ricerca non ha prodotto risultati.</string>
+    <string name="app_search_drive">Cerca nel tuo drive</string>
+    <string name="app_search_files">Cerca file</string>
+    <string name="app_search_name_filter_type">Cerca per nome, oppure filtra per tipo e stato del salvataggio.</string>
+    <plurals name="file_count">
+        <item quantity="one">%1$d file</item>
+        <item quantity="other">%1$d file</item>
+    </plurals>
+    <plurals name="folder_count">
+        <item quantity="one">%1$d cartella</item>
+        <item quantity="other">%1$d cartelle</item>
+    </plurals>
+    <plurals name="backup_age_minutes">
+        <item quantity="one">%1$d minuto fa</item>
+        <item quantity="other">%1$d minuti fa</item>
+    </plurals>
+    <plurals name="backup_age_hours">
+        <item quantity="one">%1$d ora fa</item>
+        <item quantity="other">%1$d ore fa</item>
+    </plurals>
+    <plurals name="backup_age_days">
+        <item quantity="one">%1$d giorno fa</item>
+        <item quantity="other">%1$d giorni fa</item>
+    </plurals>
+    <plurals name="item_count">
+        <item quantity="one">%1$d elemento</item>
+        <item quantity="other">%1$d elementi</item>
+    </plurals>
+    <plurals name="rebuild_indexed_files">
+        <item quantity="one">Indicizzato %1$d file</item>
+        <item quantity="other">Indicizzati %1$d file</item>
+    </plurals>
+    <plurals name="rebuild_locked_files">
+        <item quantity="one">%1$d file crittografato ignorato. Ripristina il backup della tua chiave per indicizzarlo.</item>
+        <item quantity="other">%1$d file crittografati ignorati. Ripristina il backup della tua chiave per indicizzarli.</item>
+    </plurals>
+    <plurals name="home_encrypted_message">
+        <item quantity="one">%1$d file su questa unità è crittografato. Ripristina la tua chiave di crittografia per visualizzarlo.</item>
+        <item quantity="other">%1$d file su questa unità sono crittografati. Ripristina la tua chiave di crittografia per visualizzarli.</item>
+    </plurals>
+    <plurals name="channels_encrypted_files">
+        <item quantity="one">%1$d file crittografato</item>
+        <item quantity="other">%1$d file crittografati</item>
+	</plurals>
+    <string name="home_encrypted_title">Trovati file crittografati</string>
+    <string name="home_encrypted_open_settings">Apri impostazioni</string>
+    <string name="home_encrypted_later">Dopo</string>
+    <plurals name="home_saving_changes_left">
+        <item quantity="one">%1$d file rimanente</item>
+        <item quantity="other">%1$d file rimanenti</item>
+    </plurals>
+    <plurals name="home_back_up_pending">
+        <item quantity="one">Backup di %1$d file</item>
+        <item quantity="other">Backup di %1$d file</item>
+    </plurals>
+    <plurals name="home_queued_files">
+        <item quantity="one">%1$d file in coda</item>
+        <item quantity="other">%1$d file in coda</item>
+    </plurals>
+    <plurals name="transfers_more_queued">
+        <item quantity="one">Altro %1$d non mostrato</item>
+        <item quantity="other">Altri %1$d non mostrati</item>
+    </plurals>
+	
+	<!-- Bottom navigation -->
+    <string name="nav_files">File</string>
+    <string name="nav_gallery">Galleria</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_settings">Impostazioni</string>
+
+    <!-- Shared labels and dialogs -->
+    <string name="common_loading">Caricamento</string>
+    <string name="common_actions">Altre azioni</string>
+    <string name="common_add">Aggiungi</string>
+    <string name="common_add_favorites">Aggiungi ai preferiti</string>
+    <string name="common_back">Indietro</string>
+    <string name="common_backup_failed">Backup non riuscito</string>
+    <string name="common_backup_not_backed_up">Non sottoposto a backup</string>
+    <string name="common_backup_queued">In coda</string>
+    <string name="common_backup_uploading">Caricamento in corso</string>
+    <string name="common_cancel">Annulla</string>
+    <string name="common_category_archives">Archivi</string>
+    <string name="common_category_audio">Audio</string>
+    <string name="common_category_documents">Documenti</string>
+    <string name="common_category_other">Altro</string>
+    <string name="common_category_photos">Foto</string>
+    <string name="common_category_videos">Video</string>
+    <string name="common_clear">Cancella</string>
+    <string name="common_clear_selection">Deseleziona tutto</string>
+    <string name="common_collapse">Comprimi</string>
+    <string name="common_confirm_trash_count_title">Spostare %1$d elementi nel cestino?</string>
+    <string name="common_content_description_favorite">Aggiungi ai preferiti</string>
+    <string name="common_make_available_offline">Rendi disponibile offline</string>
+    <string name="common_organize">Organizza</string>
+    <string name="common_storage_actions">Spazio di archiviazione</string>
+    <string name="common_remove_from_offline">Rimuovi dall\'accesso offline</string>
+    <string name="common_content_description_available_offline">Disponibile offline</string>
+    <string name="common_content_description_selected">Selezionato</string>
+    <string name="common_create">Crea</string>
+    <string name="common_delete_forever">Elimina definitivamente</string>
+    <string name="common_deselect_all">Deseleziona tutto</string>
+    <string name="common_dismiss">Ignora</string>
+    <string name="common_download">Scarica</string>
+    <string name="common_drive_root">Radice dell\'unità</string>
+    <string name="common_empty">Svuota</string>
+    <string name="common_expand">Espandi</string>
+    <string name="common_file_size_and_date">%1$s \u00b7 %2$s</string>
+    <string name="common_folder_name">Nome cartella</string>
+    <string name="common_free_space">Libera spazio</string>
+    <string name="common_grant_permissions">Concedi autorizzazioni</string>
+    <string name="common_move_trash">Sposta nel cestino</string>
+    <string name="common_name">Nome</string>
+    <string name="common_no_subfolders">Nessuna sottocartella qui</string>
+    <string name="common_one_level">Livello superiore</string>
+    <string name="common_pause">Metti in pausa</string>
+    <string name="common_refresh">Aggiorna</string>
+    <string name="common_rename">Rinomina</string>
+    <string name="common_rename_file">Rinomina file</string>
+    <string name="common_restore">Ripristina</string>
+    <string name="common_restore_trash_emptied">Puoi ripristinarli dal cestino finché non viene svuotato.</string>
+    <string name="common_resume">Riprendi</string>
+    <string name="common_retry">Riprova</string>
+    <string name="common_save">Salva</string>
+    <string name="common_select_all">Seleziona tutto</string>
+    <string name="common_open">Apri</string>
+    <string name="common_select">Seleziona</string>
+    <string name="common_selection_count">%1$d selezionati</string>
+    <string name="common_share">Condividi</string>
+    <string name="common_storage_channels">Canali di archiviazione</string>
+    <string name="common_try_again">Riprova</string>
+    <string name="common_upload">Carica</string>
+	
+	<!-- Dates -->
+    <string name="date_days_ago">%1$d giorni fa</string>
+    <string name="date_today">Oggi</string>
+    <string name="date_yesterday">Ieri</string>
+
+    <!-- App lock -->
+    <string name="lock_no_screen_lock">Il blocco schermo non è disponibile su questo dispositivo. Sblocco in corso.</string>
+    <string name="lock_prompt_title">Sblocca TeleDrive</string>
+    <string name="lock_screen_title">TeleDrive è bloccato</string>
+    <string name="lock_too_many_attempts">Troppi tentativi. Riprova più tardi.</string>
+    <string name="lock_unlock">Sblocca</string>
+    <string name="session_broken_action">Accedi di nuovo</string>
+    <string name="session_broken_message">Questo dispositivo non è più in grado di leggere la sessione di Telegram salvata. Di solito accade dopo aver ripristinato un backup su un altro dispositivo o aver modificato il blocco schermo. I tuoi file sono al sicuro nel canale. Accedi nuovamente per accedervi.</string>
+    <string name="session_broken_title">Sessione illeggibile</string>
+
+    <!-- Onboarding flow -->
+    <string name="onboarding_action_continue">Continua</string>
+    <string name="onboarding_continue">Continua</string>
+    <string name="onboarding_continue_without">Continua senza</string>
+    <string name="onboarding_files_live_own_private">I tuoi file si trovano nel tuo canale Telegram privato. Il tuo account, il tuo spazio di archiviazione, il tuo controllo.</string>
+    <string name="onboarding_get_started">Inizia</string>
+    <string name="onboarding_got">Ho capito</string>
+    <string name="onboarding_opening">Apertura in corso</string>
+    <string name="onboarding_sign">Accedi</string>
+    <string name="onboarding_step">fase di configurazione</string>
+    <string name="onboarding_step_counter">Passaggio %1$d di %2$d</string>
+    <string name="onboarding_verify">Verifica</string>
+
+    <!-- Onboarding: API credentials -->
+    <string name="onboarding_api_access">Accesso API</string>
+    <string name="onboarding_api_hash">API hash</string>
+    <string name="onboarding_api_hash_short">L\'API hash sembra troppo breve</string>
+    <string name="onboarding_api_id">API ID</string>
+    <string name="onboarding_api_id_number">L\'API ID deve essere un numero</string>
+    <string name="onboarding_choose_api_dev_tools">Seleziona "API development tools" e crea un\'app. Puoi usare qualsiasi nome.</string>
+    <string name="onboarding_copy_api_keys">Copia l\'api_id e l\'api_hash in TeleDrive.</string>
+    <string name="onboarding_get_api_keys">Ottieni le tue chiavi API</string>
+    <string name="onboarding_my_telegram_org">my.telegram.org</string>
+    <string name="onboarding_one_time_setup_keys">Configurazione una tantum. Le tue chiavi rimangono su questo dispositivo, crittografate.</string>
+    <string name="onboarding_open_dev_page">Apri la pagina per sviluppatori di Telegram ed effettua l\'accesso</string>
+    <string name="onboarding_set_up_proxy">Configura un proxy</string>
+    <string name="onboarding_telegram_blocked">Telegram è bloccato su questa rete?</string>
+    <string name="onboarding_where_i_get_these">Dove posso trovare questi dati?</string>
+	
+	<!-- Onboarding: phone and code -->
+    <string name="onboarding_choose_country">Seleziona paese</string>
+    <string name="onboarding_code">Codice</string>
+    <string name="onboarding_code_sent">È stato inviato un codice di verifica.</string>
+    <string name="onboarding_code_via_call">Riceverai una chiamata al numero %1$s che ti detterà il codice.</string>
+    <string name="onboarding_code_via_email">Un codice è stato inviato al numero %1$s .</string>
+    <string name="onboarding_code_via_flash_call">Telegram effettuerà una chiamata al numero %1$s per poi interromperla. Il codice corrisponde al numero che ti ha chiamato.</string>
+    <string name="onboarding_code_via_fragment">Il tuo codice ti attende su Fragment per il numero %1$s . Vai su fragment.com per leggerlo.</string>
+    <string name="onboarding_code_via_missed_call">Telegram effettuerà una chiamata al numero %1$s per poi interromperla. Il codice è costituito dalle ultime cifre del numero chiamante.</string>
+    <string name="onboarding_code_via_sms">Un codice è stato inviato via SMS al numero %1$s .</string>
+    <string name="onboarding_code_via_sms_phrase">Telegram ha inviato una frase via SMS al numero %1$s . Inserisci la frase.</string>
+    <string name="onboarding_code_via_sms_word">Telegram ha inviato una parola via SMS al numero %1$s . Inserisci la parola.</string>
+    <string name="onboarding_code_via_telegram">Telegram ha inviato un codice sugli altri tuoi dispositivi.</string>
+    <string name="onboarding_country">Paese</string>
+    <string name="onboarding_email_code_title">Inserisci il codice ricevuto via email</string>
+    <string name="onboarding_email_continue">Invia codice</string>
+    <string name="onboarding_email_description">Questo account utilizza un indirizzo email per l\'accesso. Inseriscilo per ricevere il codice.</string>
+    <string name="onboarding_email_label">Indirizzo email</string>
+    <string name="onboarding_email_title">Email per l\'accesso</string>
+    <string name="onboarding_enter_code">Inserisci il codice</string>
+    <string name="onboarding_enter_password">Inserisci la tua password di Telegram.</string>
+    <string name="onboarding_enter_phone">Inserisci il tuo numero di telefono</string>
+    <string name="onboarding_include_country_code_like">Includi il prefisso internazionale, ad esempio +1 o +49</string>
+    <string name="onboarding_no_account">Questo numero non è associato ad alcun account Telegram. Creane uno nell\'app ufficiale di Telegram.</string>
+    <string name="onboarding_no_country_match">Nessun paese corrisponde alla ricerca.</string>
+    <string name="onboarding_number">Il tuo numero</string>
+    <string name="onboarding_password">Password</string>
+    <string name="onboarding_phone_number">Numero di telefono</string>
+    <string name="onboarding_phone_number_telegram_account">Il numero di telefono associato al tuo account Telegram, comprensivo di prefisso internazionale.</string>
+    <string name="onboarding_resend_code">Invia di nuovo il codice</string>
+    <string name="onboarding_search_country">Cerca paese</string>
+    <string name="onboarding_send_code">Invia codice</string>
+    <string name="onboarding_two_step_verification">Verifica in due passaggi</string>
+
+    <!-- Onboarding: QR sign-in -->
+    <string name="onboarding_qr_code_description">Codice QR per l\'accesso</string>
+    <string name="onboarding_qr_confirm_instead">Conferma invece da questo telefono</string>
+    <string name="onboarding_qr_description">Apri Telegram su un dispositivo su cui hai già effettuato l\'accesso, quindi scansiona questo codice.</string>
+    <string name="onboarding_qr_open_failed">Impossibile aprire Telegram su questo dispositivo.</string>
+    <string name="onboarding_qr_open_telegram">Conferma tramite Telegram</string>
+    <string name="onboarding_qr_same_device_description">Telegram è installato qui. Conferma l\'accesso per completare l\'operazione.</string>
+    <string name="onboarding_qr_scan_instead">​​Scansiona da un altro dispositivo</string>
+    <string name="onboarding_qr_sign_in">Accedi tramite codice QR</string>
+    <string name="onboarding_qr_step_1">Apri Telegram sull\'altro tuo dispositivo</string>
+    <string name="onboarding_qr_step_2">Vai in Impostazioni, quindi su Dispositivi</string>
+    <string name="onboarding_qr_step_3">Tocca "Collega dispositivo desktop" e scansiona questo codice</string>
+    <string name="onboarding_qr_title">Scansiona per accedere</string>
+    <string name="onboarding_qr_use_phone">Usa invece il numero di telefono</string>
+    <string name="onboarding_qr_waiting">In attesa della scansione</string>
+	
+	<!-- Onboarding: permissions -->
+    <string name="onboarding_allow_all_files">Consenti l\'accesso a tutti i file</string>
+    <string name="onboarding_allow_media">Consenti l\'accesso ai file multimediali</string>
+    <string name="onboarding_files_access_covers_documents">L\'accesso a tutti i file include documenti, download e le cartelle della scheda SD. Senza di esso, non è possibile eseguire il backup di tali cartelle.</string>
+    <string name="onboarding_storage_access">Accesso all\'archiviazione</string>
+    <string name="onboarding_teledrive_needs_media_files">TeleDrive necessita dell\'accesso ai tuoi file multimediali e agli altri file per effettuarne il backup, e alle notifiche per mostrare l\'avanzamento dei trasferimenti.</string>
+
+    <!-- Onboarding: drive setup -->
+    <string name="onboarding_channel_files_in_channel">%1$d file in questo canale</string>
+    <string name="onboarding_choose_drive">Scegli un\'unità</string>
+    <string name="onboarding_drive_created_desc">È stato creato un canale privato nel tuo account. Tutto ciò di cui esegui il backup verrà salvato lì e solo tu potrai accedervi.</string>
+    <string name="onboarding_drive_ready">La tua unità è pronta</string>
+    <string name="onboarding_looking_for_drives">Ricerca delle unità in corso</string>
+    <string name="onboarding_no_drive_yet">Impossibile creare un\'unità</string>
+    <string name="onboarding_pick_drive_desc">Il tuo account dispone già di canali TeleDrive. Seleziona quello da aprire su questo dispositivo; puoi cambiarlo o aggiungerne altri nelle Impostazioni.</string>
+    <string name="onboarding_single_drive_desc">I file vengono salvati in questo canale privato sul tuo account. Puoi aggiungere altre unità in seguito tramite le Impostazioni.</string>
+
+    <!-- Onboarding: backup setup -->
+    <string name="onboarding_choose_what_back_change">Scegli cosa includere nel backup. Puoi modificare questa impostazione in qualsiasi momento nelle Impostazioni.</string>
+    <string name="onboarding_section_behavior">Comportamento</string>
+    <string name="onboarding_section_folders">Cartelle</string>
+    <string name="onboarding_toggle_auto_backup">Backup automatico</string>
+    <string name="onboarding_toggle_camera">Fotocamera (DCIM)</string>
+    <string name="onboarding_toggle_movies">Filmati</string>
+    <string name="onboarding_toggle_pictures">Immagini</string>
+    <string name="onboarding_toggle_wifi_only">Solo Wi-Fi</string>
+
+    <!-- Home -->
+    <string name="home_active_transfers">%1$d trasferimenti attivi</string>
+    <string name="home_backing_up">Backup in corso…</string>
+    <string name="home_backup_waiting_charger">In attesa del caricabatterie</string>
+    <string name="home_backup_waiting_wifi">In attesa di una rete Wi-Fi</string>
+    <string name="home_backing_up_new_files">Backup dei nuovi file in corso</string>
+    <string name="home_backup_all_in_telegram">Tutti i file sono su Telegram</string>
+    <string name="home_backup_at">Ultimo backup: %1$s</string>
+    <string name="home_backup_auto_off">Backup automatico disattivato</string>
+    <string name="home_backup_just_now">Ultimo backup: proprio ora</string>
+    <string name="home_backup_never">Nessun backup ancora eseguito</string>
+    <string name="home_backup_nothing_to_back_up">Nulla da sottoporre a backup</string>
+    <string name="home_backup_paused">Backup in pausa</string>
+    <string name="home_cancel_backup_action">Annulla backup</string>
+    <string name="home_cancel_backup_title">Annullare il backup?</string>
+    <string name="home_choose_folders">Seleziona cartelle</string>
+    <string name="home_deleted_files_kept_removal">I file eliminati vengono conservati prima della rimozione definitiva</string>
+    <string name="home_failed_count">%1$d non riusciti</string>
+    <string name="home_lock_app">Blocca app</string>
+    <string name="home_not_backed_up_count">%1$d non sottoposti a backup</string>
+    <string name="home_nothing_new_to_back_up">Nessun nuovo file da sottoporre a backup</string>
+    <string name="home_open_drives">Cambia unità</string>
+    <string name="home_queued_uploads_discarded_files">I caricamenti in coda verranno eliminati. I file già caricati rimarranno su Telegram e potrai riavviare il backup in un secondo momento.</string>
+    <string name="home_saving_changes">Salvataggio delle modifiche su Telegram</string>
+    <string name="home_saving_folder_changes">Modifiche alle cartelle in attesa</string>
+    <string name="home_scan_now">Scansiona ora</string>
+    <string name="home_scanning">Scansione in corso…</string>
+    <string name="home_sync_now">Sincronizza ora</string>
+    <string name="home_section_favorites">Preferiti</string>
+    <string name="home_section_recent">Recenti</string>
+    <string name="home_section_storage">Archiviazione</string>
+    <string name="home_session_progress">%1$d di %2$d file</string>
+    <string name="home_status_connected">Connesso</string>
+    <string name="home_status_connecting">Connessione in corso…</string>
+    <string name="home_status_offline">Offline</string>
+    <string name="home_status_rebuilding">Ricostruzione dell\'indice in corso…</string>
+    <string name="home_status_syncing">Sincronizzazione in corso…</string>
+    <string name="home_storage_percent">%1$d %</string>
+    <string name="home_storage_percent_min">&lt;1%</string>
+    <string name="home_switched_drive">Passato a %1$s</string>
+    <string name="home_transfer_history">Cronologia trasferimenti</string>
+    <string name="home_transfer_history_subtitle">Caricamenti e download</string>
+    <string name="home_waiting_count">%1$d in attesa</string>
+	
+	<!-- Search -->
+    <string name="search_section_files">File</string>
+    <string name="search_open_folder">Apri cartella contenente</string>
+    <string name="search_section_folders">Cartelle</string>
+
+    <!-- Files -->
+    <string name="files">File</string>
+    <string name="files_add_files">Carica file</string>
+    <string name="files_add_folder">Carica cartella</string>
+    <string name="files_archive">Archivio</string>
+    <string name="files_back_import_appear">Qui appaiono i file di cui hai effettuato il backup o che hai importato.</string>
+    <string name="files_copy">Copia in…</string>
+    <string name="files_copy_here">Copia qui</string>
+    <string name="files_copy_to">Copia in</string>
+    <string name="files_delete_local">Elimina copia locale</string>
+    <string name="files_delete_local_copies">Eliminare le copie locali?</string>
+    <string name="files_drop_folders_unsupported">Non è possibile caricare cartelle</string>
+    <string name="files_drop_to_upload">Trascina i file per caricarli</string>
+    <string name="files_hide">Nascondi</string>
+    <string name="files_import_copied">%1$d file copiati; erano già presenti su Telegram</string>
+    <string name="files_import_duplicates">%1$d file già presenti nel tuo drive</string>
+    <string name="files_import_failed">Impossibile importare i file selezionati</string>
+    <string name="files_folder_exists_title">“ %1$s ” esiste già</string>
+    <string name="files_folders_exist_title">Queste cartelle esistono già</string>
+    <string name="files_folder_exists_message">L\'unione aggiunge i nuovi file alla cartella esistente. In alternativa, mantieni entrambi i caricamenti in una cartella separata denominata “ %1$s ”.</string>
+    <string name="files_folders_exist_message">L\'unione aggiunge i nuovi file alle cartelle esistenti. In alternativa, mantieni i caricamenti in cartelle separate, aggiungendo un numero a ciascun nome.</string>
+    <string name="files_folder_merge">Unisci</string>
+    <string name="files_folder_keep_both">Mantieni entrambi</string>
+    <string name="files_import_preparing">Preparazione dei file per il caricamento…</string>
+    <string name="files_import_restored">Ripristinati %1$d elementi dal cestino</string>
+    <string name="files_import_uploading">Caricamento di %1$d elementi</string>
+    <string name="files_import_uploading_copied">Caricamento di %1$d elementi; %2$d erano già presenti su Telegram</string>
+    <string name="files_import_uploading_duplicates">Caricamento di %1$d elementi; %2$d erano già presenti nel tuo drive</string>
+    <string name="files_import_uploading_failed">Caricamento di %1$d elementi; %2$d non riusciti</string>
+    <string name="files_import_uploading_restored">Caricamento di %1$d elementi; %2$d ripristinati</string>
+    <string name="files_move">Sposta</string>
+    <string name="files_move_here">Sposta qui</string>
+    <string name="files_move_to">Sposta in</string>
+    <string name="files_new_folder">Nuova cartella</string>
+    <string name="files_nothing_here_yet">Ancora nessun elemento</string>
+    <string name="files_only_files_verified_telegram">Da questo dispositivo verranno rimossi solo i file per i quali è presente un backup verificato su Telegram.</string>
+    <string name="files_rename_file">Rinomina file</string>
+    <string name="files_rename_folder">Rinomina cartella</string>
+    <string name="files_root_name">File</string>
+    <string name="files_search">Cerca</string>
+    <string name="files_share_destination_confirm">Salva qui</string>
+    <string name="files_share_destination_title">Salva i file condivisi in</string>
+    <string name="files_share_needs_local">Scarica questi file prima di condividerli</string>
+    <string name="files_show_in_file_manager">Mostra nel gestore file</string>
+    <string name="files_sort">Ordina</string>
+    <string name="files_sort_ascending">Crescente</string>
+    <string name="files_sort_backup_status">Stato del backup</string>
+    <string name="files_sort_date_added">Data di aggiunta</string>
+    <string name="files_sort_date_modified">Data di modifica</string>
+    <string name="files_sort_descending">Decrescente</string>
+    <string name="files_sort_name">Nome</string>
+    <string name="files_sort_size">Dimensione</string>
+    <string name="files_sort_type">Tipo</string>
+    <string name="files_unhide">Mostra</string>
+    <string name="files_copied_all">Copiati %1$d elementi</string>
+    <string name="files_copied_partial">Copiati %1$d di %2$d elementi</string>
+    <string name="files_cut_count">%1$d elementi tagliati. Apri una cartella e premi Ctrl+V per spostarli</string>
+    <string name="files_moving_to_trash">Spostamento di %1$d elementi nel cestino…</string>
+    <string name="files_queued_for_download">%1$d elementi in coda per il download</string>
+    <string name="files_queued_for_upload">%1$d elementi in coda per il caricamento</string>
+    <string name="files_queued_partial">%1$d elementi in coda, %2$d non riusciti</string>
+    <string name="files_removed_local_copies">Rimosse %1$d copie locali</string>
+    <string name="files_kept_offline_copies">Mantenuti %1$d file disponibili offline</string>
+    <string name="files_sync_result">%1$d nuovi, %2$d aggiornati</string>
+	
+	<!-- File and folder info -->
+    <string name="info_added">Aggiunto</string>
+    <string name="info_backup">Backup</string>
+    <string name="info_backup_done">Salvato su Telegram</string>
+    <string name="info_backup_failed">Non riuscito</string>
+    <string name="info_backup_none">Non salvato</string>
+    <string name="info_backup_queued">In coda</string>
+    <string name="info_backup_uploading">Caricamento in corso</string>
+    <string name="info_contents">Contenuti</string>
+    <string name="info_created">Creato</string>
+    <string name="info_details">Informazioni</string>
+    <string name="info_duration">Durata</string>
+    <string name="info_encrypted">Crittografato</string>
+    <string name="info_extension">Estensione</string>
+    <string name="info_favorite">Preferito</string>
+    <string name="info_local_copy">Copia locale</string>
+    <string name="info_modified">Modificato</string>
+    <string name="info_no">No</string>
+    <string name="info_path">Percorso</string>
+    <string name="info_resolution">Risoluzione</string>
+    <string name="info_sha256">SHA-256</string>
+    <string name="info_size">Dimensioni</string>
+    <string name="info_type">Tipo</string>
+    <string name="info_yes">Sì</string>
+
+    <!-- Notes -->
+    <string name="note_body_hint">Testo, link o entrambi</string>
+    <string name="note_bold">Grassetto</string>
+    <string name="note_bullet">Elenco puntato</string>
+    <string name="note_code">Codice</string>
+    <string name="note_edit">Modifica nota</string>
+    <string name="note_edit_action">Modifica testo</string>
+    <string name="note_heading">Intestazione</string>
+    <string name="note_italic">Corsivo</string>
+    <string name="note_link">Link</string>
+    <string name="note_link_text">testo</string>
+    <string name="note_link_url">https://</string>
+    <string name="note_new">Nuova nota</string>
+    <string name="note_not_editable">Qui è possibile modificare solo file di testo</string>
+    <string name="note_quote">Citazione</string>
+    <string name="note_save">Salva</string>
+    <string name="note_saved">Nota salvata</string>
+    <string name="note_strikethrough">Barrato</string>
+    <string name="note_title_hint">Titolo (opzionale)</string>
+
+    <!-- Gallery -->
+    <string name="album_not_in_folder">Nessuna cartella</string>
+    <string name="gallery_albums_appear_organise_media">Gli album compaiono man mano che organizzi i file multimediali in cartelle.</string>
+    <string name="gallery_no_albums">Nessun album</string>
+    <string name="gallery_no_media">Nessun elemento multimediale</string>
+    <string name="gallery_photos_videos_appear_here">Foto e video appariranno qui dopo l\'importazione o il salvataggio.</string>
+    <string name="gallery_tab_albums">Album</string>
+    <string name="gallery_tab_all">Tutti</string>
+    <string name="gallery_tab_photos">Foto</string>
+    <string name="gallery_tab_videos">Video</string>
+    <string name="gallery_title">Galleria</string>
+	
+	<!-- Preview -->
+    <string name="preview_add_favorites">Aggiungi ai preferiti</string>
+    <string name="preview_added_favorites">Aggiunto ai preferiti</string>
+    <string name="preview_archive">Archivio</string>
+    <string name="preview_archive_failed">Impossibile aprire l\'archivio</string>
+    <string name="preview_archive_format_title">Archivio %1$s</string>
+    <string name="preview_archive_packed_summary">%1$s compresso da %2$s</string>
+    <string name="preview_archive_packed_summary_saved">%1$s compresso da %2$s , %3$d % più piccolo</string>
+    <string name="preview_archived">Archiviato</string>
+    <string name="preview_back_10_seconds">Indietro di 10 secondi</string>
+    <string name="preview_chevron">chevron</string>
+    <string name="preview_confirm_trash_file_message">\" %1$s \" verrà spostato nel cestino. Sarà possibile ripristinarlo in seguito.</string>
+    <string name="preview_download_view">Scarica per visualizzare</string>
+    <string name="preview_extraction_supported_yet_download">L\'estrazione non è ancora supportata. Scarica l\'archivio per aprirlo.</string>
+    <string name="preview_fetch_failed">Impossibile recuperare il file</string>
+    <string name="preview_file_info">Informazioni file</string>
+    <string name="preview_forward_10_seconds">Avanti di 10 secondi</string>
+    <string name="preview_hidden">Nascosto</string>
+    <string name="preview_image_undecodable">Questo formato immagine non può essere visualizzato qui. Scaricalo e aprilo con un\'altra app.</string>
+    <string name="preview_local_copy_removed">Copia locale rimossa</string>
+    <string name="preview_move_to_trash">Spostare nel cestino?</string>
+    <string name="preview_next">File successivo</string>
+    <string name="preview_no_copy_available">Nessuna copia locale o remota disponibile</string>
+    <string name="preview_no_preview">Nessuna anteprima</string>
+    <string name="preview_no_preview_for_type">Nessuna anteprima per questo tipo di file</string>
+    <string name="preview_nothing_to_remove">Nulla da rimuovere</string>
+    <string name="preview_only_zip">È possibile esplorare solo archivi ZIP.</string>
+    <string name="preview_open_link">Apri link</string>
+    <string name="preview_page_number">Pagina %1$d</string>
+    <string name="preview_pdf_open_failed">Impossibile aprire il PDF</string>
+    <string name="preview_playback_speed">Velocità di riproduzione</string>
+    <string name="preview_preparing">Preparazione di %1$s</string>
+    <string name="preview_previous">File precedente</string>
+    <string name="preview_progress_bytes">%1$s di %2$s</string>
+    <string name="preview_read_failed">Impossibile leggere il file</string>
+    <string name="preview_remove_favorites">Rimuovi dai preferiti</string>
+    <string name="preview_removed_favorites">Rimosso dai preferiti</string>
+    <string name="preview_requires_download">Questo file è %1$s e non è stato scaricato su questo dispositivo.</string>
+    <string name="preview_share_chooser_title">Condividi</string>
+    <string name="preview_share_copy">Condividi una copia</string>
+    <string name="preview_truncated_download_view">\nAnteprima troncata. Scarica per visualizzare il file completo.</string>
+    <string name="preview_unarchive">Estrai archivio</string>
+    <string name="preview_unarchived">Estratto</string>
+    <string name="preview_unhidden">Reso visibile</string>
+
+    <!-- Player -->
+    <string name="player_audio_track">Traccia audio</string>
+    <string name="player_subtitles">Sottotitoli</string>
+    <string name="player_subtitles_off">Disattivati ​​</string>
+    <string name="player_track">Traccia</string>
+    <string name="player_lock_controls">Blocca controlli</string>
+    <string name="player_unlock_controls">Sblocca controlli</string>
+    <string name="player_brightness">Luminosità</string>
+    <string name="player_toggle_controls">Mostra o nascondi i controlli</string>
+    <string name="player_volume">Volume</string>
+    <string name="player_track_unsupported">Non supportato su questo dispositivo</string>
+    <string name="player_codec_unsupported">Questo dispositivo non è in grado di decodificare il video. Scaricalo e riproducilo con un\'altra app.</string>
+    <string name="player_exit_full_screen">Esci da schermo intero</string>
+    <string name="player_fewer_controls">Meno controlli</string>
+    <string name="player_full_screen">Schermo intero</string>
+    <string name="player_hide_subtitles">Nascondi sottotitoli</string>
+    <string name="player_more_controls">Altri controlli</string>
+    <string name="player_mute">Disattiva audio</string>
+    <string name="player_picture_in_picture">Picture-in-picture</string>
+    <string name="player_pause">Pausa</string>
+    <string name="player_play">Riproduci</string>
+    <string name="player_playback_failed">Riproduzione non riuscita</string>
+    <string name="player_repeat_off">Ripetizione disattivata</string>
+    <string name="player_repeat_one">Ripeti uno</string>
+    <string name="player_replay">Riproduci di nuovo</string>
+    <string name="player_scaling">Ridimensionamento</string>
+    <string name="player_skip_back">Indietro di 10 secondi</string>
+    <string name="player_skip_forward">Avanti di 10 secondi</string>
+    <string name="player_show_subtitles">Mostra sottotitoli</string>
+    <string name="player_unmute">Attiva audio</string>
+	
+	<!-- Collections -->
+    <string name="collection_archived_empty">I file archiviati non sono d\'intralcio, ma ne viene conservato un backup.</string>
+    <string name="collection_archived_subtitle">Nascosti dalla visualizzazione principale</string>
+    <string name="collection_archived_title">Archiviati</string>
+    <string name="collection_empty_title">Nessun elemento in %1$s</string>
+    <string name="collection_favorites_empty">Aggiungi un file ai preferiti per conservarlo qui.</string>
+    <string name="collection_favorites_subtitle">File aggiunti ai preferiti</string>
+    <string name="collection_favorites_title">Preferiti</string>
+    <string name="collection_hidden_empty">I file nascosti sono esclusi dalla navigazione e dalla galleria.</string>
+    <string name="collection_hidden_subtitle">Visibili solo qui</string>
+    <string name="collection_hidden_title">Nascosti</string>
+    <string name="collection_offline_title">File offline</string>
+    <string name="collection_offline_subtitle">Apri senza connessione internet</string>
+    <string name="collection_offline_empty">Rendi un file o una cartella disponibile offline per aprirlo senza connessione internet.</string>
+    <string name="collection_offline_on_device">%1$s su questo dispositivo</string>
+    <string name="collection_offline_downloading">Download in corso</string>
+    <string name="collection_offline_not_downloaded">Non ancora scaricato</string>
+    <string name="collection_offline_download_missing">Scarica i file mancanti</string>
+    <string name="collection_remove_from">Rimuovi da %1$s</string>
+
+    <!-- Trash -->
+    <string name="trash">Cestino</string>
+    <string name="trash_auto_clear_after_days">Gli elementi vengono eliminati definitivamente dopo %1$d giorni.</string>
+    <string name="trash_delete_permanently">Eliminare definitivamente?</string>
+    <string name="trash_delete_selected_message">%1$d elementi, inclusi tutti i contenuti delle eventuali cartelle selezionate, verranno eliminati definitivamente da questo dispositivo e da Telegram.</string>
+    <string name="trash_empty">Il cestino è vuoto</string>
+    <string name="trash_empty_trash_action">Svuota cestino</string>
+    <string name="trash_empty_trash_title">Svuotare il cestino?</string>
+    <string name="trash_items_permanently_deleted_device">Tutti gli elementi verranno eliminati definitivamente da questo dispositivo e da Telegram. L\'operazione è irreversibile.</string>
+    <string name="trash_kept_until_removed">Gli elementi eliminati rimangono qui finché non li rimuovi.</string>
+    <string name="trash_restores_with_folder">Ripristinato insieme alla cartella</string>
+    <string name="trash_trashed_at">Spostato nel cestino: %1$s</string>
+    <string name="trash_delete_partial">Impossibile eliminare %1$d elementi su %2$d</string>
+    <string name="trash_deleted_permanently">%1$d elementi eliminati definitivamente</string>
+    <string name="trash_emptying">Svuotamento del cestino in corso…</string>
+    <string name="trash_restored">%1$d elementi ripristinati</string>
+    <string name="trash_restored_partial">%1$d elementi ripristinati, %2$d non riusciti</string>
+    <plurals name="trash_deleting_items"><item quantity="one">Eliminazione di %1$d elemento…</item><item quantity="other">Eliminazione di %1$d elementi…</item></plurals>
+    <plurals name="trash_restoring_items"><item quantity="one">Ripristino di %1$d elemento…</item><item quantity="other">Ripristino di %1$d elementi…</item></plurals>
+
+    <!-- Transfers -->
+    <string name="transfer_stage_joining">Unione delle parti</string>
+    <string name="transfer_stage_sealing">Crittografia della parte in corso</string>
+    <string name="transfer_stage_verifying">Controllo file</string>
+    <string name="transfer_type_backup">Backup</string>
+    <string name="transfer_type_download">Download</string>
+    <string name="transfer_type_restore">Ripristino</string>
+    <string name="transfer_type_upload">Caricamento</string>
+    <string name="transfers">Trasferimenti</string>
+    <string name="transfers_cancel">Annulla tutto</string>
+    <string name="transfers_cancel_transfers">Annullare tutti i trasferimenti?</string>
+    <string name="transfers_clear_finished">Rimuovi completati</string>
+    <string name="transfers_clear_finished_transfers">Rimuovere i trasferimenti completati?</string>
+    <string name="transfers_completed_canceled_entries_removed">Gli elementi completati o annullati verranno rimossi da questo elenco. I tuoi file non subiranno modifiche.</string>
+    <string name="transfers_failed">Non riuscito</string>
+    <string name="transfers_failed_downloads">Download non riusciti</string>
+    <string name="transfers_failed_transfers">Trasferimenti non riusciti</string>
+    <string name="transfers_failed_uploads">Caricamenti non riusciti</string>
+    <string name="transfers_no_transfers">Nessun trasferimento</string>
+    <string name="transfers_pause">Metti tutto in pausa</string>
+    <string name="transfers_queued_running_paused_failed">I trasferimenti in coda, in corso, in pausa o non riusciti verranno annullati. I file già caricati rimarranno su Telegram.</string>
+    <string name="transfers_resume">Riprendi tutto</string>
+    <string name="transfers_section_active">Attivi</string>
+    <string name="transfers_section_finished">Completati</string>
+    <string name="transfers_section_paused">In pausa</string>
+    <string name="transfers_uploads_downloads_appear_here">Qui vengono visualizzati i caricamenti e i download.</string>
+	
+	<!-- Drives and channels -->
+    <string name="channels_channel_container">contenitore del canale</string>
+    <string name="channels_create_one_teledrive_store">Creane uno e TeleDrive memorizzerà i tuoi file in quel canale privato.</string>
+    <string name="channels_creates_private_channel_account">Crea un canale privato nel tuo account. Il nome ti aiuta a distinguere i vari drive.</string>
+    <string name="channels_creating_drive">Creazione del drive</string>
+    <string name="channels_delete_confirm_hint">Digita %1$s per confermare</string>
+    <string name="channels_delete_message">Il canale e tutti i %1$d file in esso contenuti ( %2$s ) verranno eliminati definitivamente da Telegram. L\'operazione è irreversibile.</string>
+    <string name="channels_delete_telegram">Elimina da Telegram</string>
+    <string name="channels_delete_title">Eliminare %1$s ?</string>
+    <string name="channels_deleting">Eliminazione del canale</string>
+    <string name="channels_drive_actions">Azioni sul drive</string>
+    <string name="channels_drive_name">Nome del drive</string>
+    <string name="channels_look_drives">Cerca drive</string>
+    <string name="channels_looking_for_drives">Ricerca dei drive</string>
+    <string name="channels_new_drive">Nuovo drive</string>
+    <string name="channels_no_drives_yet">Nessun drive ancora presente</string>
+    <string name="channels_open_drive">Apri drive</string>
+    <string name="channels_opening_drive">Apertura del drive</string>
+    <string name="channels_removed_missing">Rimosso %1$d drive il cui canale non esiste più</string>
+    <string name="channels_rename_drive">Rinomina drive</string>
+    <string name="channels_renames_channel_telegram_well">Rinomina anche il canale su Telegram.</string>
+    <string name="channels_renaming">Ridenominazione</string>
+
+    <!-- Settings home -->
+    <string name="settings">Impostazioni</string>
+    <string name="settings_section_about_subtitle">Versione, link e aggiornamenti</string>
+    <string name="settings_section_about_title">Informazioni</string>
+    <string name="settings_section_account_subtitle">Sessione Telegram, sincronizzazione, disconnessione</string>
+    <string name="settings_section_account_title">Account</string>
+    <string name="settings_section_advanced_subtitle">Trasferimenti, tentativi, proxy, log</string>
+    <string name="settings_section_advanced_title">Avanzate</string>
+    <string name="settings_section_appearance_subtitle">Tema, griglia, layout</string>
+    <string name="settings_section_appearance_title">Aspetto</string>
+    <string name="settings_section_backup_subtitle">Cartelle, pianificazione, rete</string>
+    <string name="settings_section_backup_title">Backup</string>
+    <string name="settings_section_notifications_subtitle">Avvisi su avanzamento ed errori</string>
+    <string name="settings_section_notifications_title">Notifiche</string>
+    <string name="settings_section_permissions_subtitle">Accesso ai file multimediali, notifiche</string>
+    <string name="settings_section_permissions_title">Autorizzazioni</string>
+    <string name="settings_section_playback_subtitle">Streaming, audio in background</string>
+    <string name="settings_section_playback_title">Riproduzione</string>
+    <string name="settings_section_security_subtitle">Blocco app, crittografia</string>
+    <string name="settings_section_security_title">Sicurezza</string>
+    <string name="settings_section_storage_subtitle">Cache, svuotamento automatico del cestino</string>
+    <string name="settings_section_storage_title">Archiviazione</string>
+
+    <!-- Settings: account -->
+    <string name="settings_files_stay_telegram_channel">I tuoi file rimangono nel canale Telegram. Questo dispositivo elimina l\'indice, le anteprime e le cache, per poi ricostruirli al momento del nuovo accesso.</string>
+    <string name="settings_log">Disconnetti</string>
+    <string name="settings_log_telegram">Disconnettersi da Telegram?</string>
+    <string name="settings_reading_channel">Lettura del canale di archiviazione</string>
+    <string name="settings_rebuild_index_telegram">Ricostruisci indice da Telegram</string>
+    <string name="settings_removes_session_stored_api">Rimuove la sessione e le credenziali API memorizzate</string>
+    <string name="settings_restores_file_list">Ripristina l\'elenco dei file dal tuo canale di archiviazione</string>
+    <string name="settings_shown_channels_private_owned">I canali visualizzati sono privati, di tua proprietà e denominati TeleDrive.</string>
+    <string name="settings_state_connected">Connesso</string>
+    <string name="settings_state_connecting">Connessione in corso</string>
+    <string name="settings_state_syncing">Sincronizzazione in corso</string>
+    <string name="settings_state_waiting_network">In attesa di rete</string>
+    <string name="settings_switch_drives_create_another">Cambia drive, creane un altro o rimuovine uno</string>
+    <string name="settings_telegram_account">Account Telegram</string>
+
+    <!-- Settings: backup -->
+    <string name="settings_add">Aggiungi</string>
+    <string name="settings_add_another_folder">Aggiungi un\'altra cartella</string>
+    <string name="settings_automatic_backup">Backup automatico</string>
+    <string name="settings_back_new_media_instantly">Esegui subito il backup dei nuovi file multimediali</string>
+    <string name="settings_backup_folders_title">Cartelle di backup</string>
+    <string name="settings_backup_interval">Intervallo di backup</string>
+    <string name="settings_folder_unreadable">Impossibile leggere direttamente questa cartella</string>
+    <string name="settings_no_folders_selected">Nessuna cartella selezionata: il backup delle cartelle non verrà eseguito. I caricamenti manuali dall\'app File non sono interessati.</string>
+    <string name="settings_only_charging">Solo durante la ricarica</string>
+    <string name="settings_remove_backup_folder">Rimuovere la cartella di backup?</string>
+    <string name="settings_skip_files_larger_than">Ignora file più grandi di</string>
+    <string name="settings_uploads_photos_videos_soon">Carica foto e video non appena vengono rilevati</string>
+    <string name="settings_wi_fi_only">Esegui backup solo sotto Wi-Fi</string>
+    <string name="settings_wi_fi_only_summary">I backup automatici richiedono una rete senza limiti di traffico</string>
+	
+	<!-- Settings: storage -->
+    <string name="settings_auto_clear_trash">Svuotamento automatico</string>
+    <string name="settings_cache_current_size">Attualmente %1$s</string>
+    <string name="settings_cache_limit">Limite cache</string>
+    <string name="settings_cached_previews_thumbnails_temporary">Le anteprime, le miniature e i file temporanei memorizzati nella cache verranno rimossi. I tuoi file e backup non verranno toccati.</string>
+    <string name="settings_clear_cache_action">Svuota cache</string>
+    <string name="settings_clear_cache_title">Svuotare la cache?</string>
+    <string name="settings_download_location">Percorso di download</string>
+    <string name="settings_download_location_default">Downloads/TeleDrive</string>
+    <string name="settings_download_location_reset">Reimposta percorso di download</string>
+    <string name="settings_free_up_subtitle">%1$s di file di backup archiviati localmente</string>
+    <string name="settings_free_up_none">Nessun file di backup occupa spazio locale</string>
+    <string name="settings_clear_thumbnails_action">Elimina miniature</string>
+    <string name="settings_clear_thumbnails_title">Eliminare le miniature?</string>
+    <string name="settings_free_up_space_title">Liberare %1$s ?</string>
+    <string name="settings_delete_after_upload">Elimina copia locale dopo il backup</string>
+    <string name="settings_delete_after_upload_summary">Rimuove il file dal dispositivo una volta archiviato nel canale, a condizione che l\'hash corrisponda ancora. I file disponibili offline non vengono mai rimossi.</string>
+    <string name="settings_gallery_previews_regenerated_browse">Le anteprime nella galleria verranno rigenerate durante la navigazione. I tuoi file non verranno toccati.</string>
+    <string name="settings_local_copies_files_already">Le copie locali dei file già salvati su Telegram verranno eliminate dal dispositivo. Rimarranno nel tuo canale Telegram e potranno essere scaricate nuovamente.</string>
+
+    <!-- Settings: security -->
+    <string name="settings_app_lock">Blocco app</string>
+    <string name="settings_auto_lock">Blocco automatico dopo</string>
+    <string name="settings_back_encryption_key">Backup della chiave di crittografia</string>
+    <string name="settings_block_screenshots">Blocca screenshot</string>
+    <string name="settings_change_passphrase">Modifica passphrase di ripristino</string>
+    <string name="settings_confirm_removing_lock">Conferma la tua identità prima di rimuovere il blocco</string>
+    <string name="settings_encrypt_thumbnails">Crittografa miniature</string>
+    <string name="settings_encrypt_uploads">Crittografa caricamenti</string>
+    <string name="settings_encryption_stays_off">La crittografia rimane disattivata finché non viene impostata una passphrase</string>
+    <string name="settings_enter_passphrase_used_backing">Inserisci la passphrase utilizzata durante il backup della chiave.</string>
+    <string name="settings_files_sealed_leaving_device">I file vengono protetti prima di lasciare il dispositivo. È richiesta una passphrase di ripristino.</string>
+    <string name="settings_forgot_show_hint">Dimenticata? Mostra suggerimento</string>
+    <string name="settings_hides_app_screenshots_screen">Nasconde l\'app da screenshot, registrazioni dello schermo e dall\'anteprima delle app recenti</string>
+    <string name="settings_hint_optional">Suggerimento (opzionale)</string>
+    <string name="settings_key_backup_stored">Il backup della chiave è archiviato nel tuo canale Telegram</string>
+    <string name="settings_no_key_backup_found">Nessun backup della chiave trovato nel tuo canale di archiviazione.</string>
+    <string name="settings_no_recovery_passphrase">​​Nessuna passphrase di ripristino</string>
+    <string name="settings_passphrase">Passphrase</string>
+    <string name="settings_passphrase_min_length">Almeno %1$d caratteri</string>
+    <string name="settings_passphrases_do_not_match">Le passphrase non corrispondono</string>
+    <string name="settings_protects_cached_previews_device">Protegge le anteprime nella cache con una chiave specifica per il dispositivo. Non è richiesta alcuna passphrase. La galleria sarà più lenta.</string>
+    <string name="settings_reading_hint">Lettura suggerimento…</string>
+    <string name="settings_repeat_passphrase">Ripeti passphrase</string>
+    <string name="settings_require_fingerprint_screen_lock">Richiedi impronta digitale o blocco schermo</string>
+    <string name="settings_required_before_encrypt">Necessario per poter crittografare i caricamenti</string>
+    <string name="settings_required_encryption_key_wrapped">Obbligatorio per la crittografia. La tua chiave viene protetta tramite questa passphrase e archiviata nel tuo canale Telegram, consentendoti di recuperare i file su un nuovo dispositivo. Telegram non può mai vedere la passphrase.</string>
+    <string name="settings_restore_encryption_key">Ripristina chiave di crittografia</string>
+    <string name="settings_save_backup">Salva backup</string>
+    <string name="settings_set">Imposta</string>
+    <string name="settings_set_passphrase">Imposta passphrase di ripristino</string>
+    <string name="settings_stored_unencrypted_never_put">Archiviato senza crittografia. Non inserire mai qui la passphrase.</string>
+    <string name="settings_turn_off_app_lock">Disattiva blocco app</string>
+    <string name="settings_unlock_files_encrypted_earlier">Sblocca file crittografati con una passphrase precedente, su questo o su un altro dispositivo</string>
+    <string name="settings_uploads_stay_unencrypted_set">I caricamenti rimangono non crittografati finché non ne imposti una. I file già crittografati su questo dispositivo possono comunque essere inclusi.</string>
+    <string name="settings_nothing_to_remove">Nessun elemento da rimuovere</string>
+
+    <!-- Settings: appearance -->
+    <string name="settings_archived_shortcut">Collegamento ad "Archiviati"</string>
+    <string name="settings_compact_layout">Layout compatto</string>
+    <string name="settings_dynamic_color">Colori dinamici</string>
+    <string name="settings_gallery_grid_columns">Colonne nella griglia della galleria</string>
+    <string name="settings_gallery_grid_view">Visualizzazione a griglia nella galleria</string>
+    <string name="settings_grid_columns">Colonne nella griglia dei file</string>
+    <string name="settings_grid_view">Visualizzazione a griglia nei file</string>
+    <string name="settings_hidden_shortcut">Collegamento a "Nascosti"</string>
+    <string name="settings_recent_files">File recenti</string>
+    <string name="settings_recent_files_subtitle">Mostra i file aggiunti di recente nella schermata iniziale</string>
+    <string name="settings_shows_archived_collection_home">Mostra la raccolta "Archiviati" nella schermata iniziale</string>
+    <string name="settings_shows_hidden_collection_home">Mostra la raccolta "Nascosti" nella schermata iniziale</string>
+    <string name="settings_theme">Tema</string>
+    <string name="settings_language">Lingua</string>
+    <string name="language_system">Predefinito di sistema</string>
+    <string name="language_english">Inglese</string>
+    <string name="language_russian">Russo</string>
+    <string name="language_portuguese_br">Portoghese (Brasile)</string>
+    <string name="language_chinese">Cinese semplificato</string>
+    <string name="language_spanish">Spagnolo</string>
+    <string name="language_indonesian">Indonesiano</string>
+	<string name="language_italian">Italiano</string>
+    <string name="settings_tighter_list_rows_without">Righe dell\'elenco più ravvicinate, senza l\'indicazione di dimensioni e data</string>
+    <string name="settings_use_wallpaper_colors_available">Usa i colori dello sfondo, se disponibili</string>
+    <string name="theme_dark">Scuro</string>
+    <string name="theme_light">Chiaro</string>
+    <string name="theme_system">Segui le impostazioni di sistema</string>
+	
+	<!-- Settings: playback -->
+    <string name="settings_background_playback">Riproduzione in background</string>
+    <string name="settings_play_videos_load_instead">Riproduci i video durante il caricamento, senza doverli scaricare prima</string>
+    <string name="settings_stream_downloading">Riproduci in streaming prima del download</string>
+
+    <!-- Settings: notifications -->
+    <string name="settings_backup_results">Risultati del backup</string>
+    <string name="settings_failures">Errori</string>
+
+    <!-- Settings: advanced -->
+    <string name="settings_debug_logging">Log di debug</string>
+    <string name="settings_share_debug_log">Condividi log</string>
+    <string name="settings_share_debug_log_subtitle">Invia il log di debug da allegare a una segnalazione di bug</string>
+    <string name="settings_debug_log_empty">Nessun log disponibile. Riproduci il problema, quindi condividi il log.</string>
+    <string name="settings_link_previews">Anteprime dei link</string>
+    <string name="settings_link_previews_subtitle">Telegram recupera il titolo e l\'immagine per i link salvati</string>
+    <string name="settings_parallel_transfers">Trasferimenti paralleli</string>
+    <string name="settings_proxy">Proxy</string>
+    <string name="settings_proxy_subtitle">Accedi a Telegram anche dove è bloccato</string>
+    <string name="settings_retry_attempts">Tentativi di riprova</string>
+    <string name="settings_transfers_wi_fi_only">Trasferisci solo tramite Wi-Fi</string>
+    <string name="settings_transfers_wi_fi_only_summary">Si applica ai caricamenti e ai download avviati dall\'utente</string>
+
+    <!-- Exclusions -->
+    <string name="exclusions_change_file">Cambia file</string>
+    <string name="exclusions_change_folder">Cambia cartella</string>
+    <string name="exclusions_choose_file">Scegli file</string>
+    <string name="exclusions_choose_folder">Scegli cartella</string>
+    <string name="exclusions_dot_names">Nomi che iniziano con un punto</string>
+    <string name="exclusions_size_in_bytes">Dimensione in byte</string>
+    <string name="exclusions_type_extension">Estensione</string>
+    <string name="exclusions_type_file">File</string>
+    <string name="exclusions_type_folder">Cartella</string>
+    <string name="exclusions_type_hidden">File nascosti</string>
+    <string name="exclusions_type_max_size">Dimensione massima</string>
+    <string name="exclusions_type_mime">Tipo</string>
+    <string name="exclusions_type_pattern">Modello</string>
+    <string name="settings_add_exclusion">Aggiungi esclusione</string>
+    <string name="settings_choose_folder_device">Scegli una cartella qualsiasi sul dispositivo</string>
+    <string name="settings_excluded_files_folders_skipped">I file e le cartelle esclusi vengono ignorati dal backup automatico.</string>
+    <string name="settings_exclusion_remove_message">\"%1$s\" verrà nuovamente incluso nei backup.</string>
+    <string name="settings_exclusions">Esclusioni</string>
+    <string name="settings_files_folders_skipped_backup">File e cartelle ignorati dal backup</string>
+    <string name="settings_item_lives_app_cloud">Questo elemento si trova in un\'app o in un servizio cloud privo di un percorso sul dispositivo. Aggiungi invece una regola basata su un modello.</string>
+    <string name="settings_no_exclusions">Nessuna esclusione</string>
+    <string name="settings_remove">Rimuovi</string>
+    <string name="settings_remove_exclusion">Rimuovere l\'esclusione?</string>
+    <string name="settings_skips_every_file_folder">Ignora tutti i file e le cartelle il cui nome inizia con un punto, come .thumbnails o i file nel cestino (.trashed).</string>
+
+    <!-- Proxy -->
+    <string name="proxy_add">Aggiungi proxy</string>
+    <string name="proxy_add_one_first">Salva un proxy prima di attivare questa opzione</string>
+    <string name="proxy_delete_action">Elimina</string>
+    <string name="proxy_delete_message">%1$s verrà rimosso dall\'elenco.</string>
+    <string name="proxy_delete_title">Eliminare questo proxy?</string>
+    <string name="proxy_edit">Modifica</string>
+    <string name="proxy_endpoint">%1$s \u00b7 %2$s : %3$d</string>
+    <string name="proxy_host">Server</string>
+    <string name="proxy_import">Importa</string>
+    <string name="proxy_link">Link proxy</string>
+    <string name="proxy_link_imported">%1$s salvato</string>
+    <string name="proxy_link_not_recognised">Il link inserito non è un link proxy</string>
+    <string name="proxy_name_optional">Nome (opzionale)</string>
+    <string name="proxy_none_saved">Nessun proxy salvato</string>
+    <string name="proxy_none_saved_summary">Aggiungine uno o incolla un link ricevuto da qualcuno</string>
+    <string name="proxy_password_optional">Password (opzionale)</string>
+    <string name="proxy_paste_link">Incolla un link</string>
+    <string name="proxy_paste_link_summary">I proxy vengono solitamente condivisi tramite un link tg:// o t.me. Incollalo qui per compilare automaticamente i dettagli.</string>
+    <string name="proxy_port">Porta</string>
+    <string name="proxy_reachable">Telegram ha risposto</string>
+    <string name="proxy_route_needs_one">Salva un server qui sotto per attivare questa opzione</string>
+    <string name="proxy_route_off_summary">Telegram è raggiunto direttamente</string>
+    <string name="proxy_route_on_summary">Telegram è raggiunto tramite il server selezionato</string>
+    <string name="proxy_route_through">Instrada tramite proxy</string>
+    <string name="proxy_saved">Server salvati</string>
+    <string name="proxy_secret">Segreto</string>
+    <string name="proxy_test">Test</string>
+    <string name="proxy_server_reachable">Server raggiungibile; accedi per eseguire un test completo</string>
+    <string name="proxy_testing">In corso di test</string>
+    <string name="proxy_title">Proxy</string>
+    <string name="proxy_type_http">HTTP</string>
+    <string name="proxy_type_mtproto">MTProto</string>
+    <string name="proxy_type_socks5">SOCKS5</string>
+    <string name="proxy_unreachable">Nessuna risposta tramite questo server</string>
+    <string name="proxy_username_optional">Nome utente (facoltativo)</string>
+	
+	<!-- Backup folders -->
+    <string name="backup">Backup</string>
+    <string name="backup_folder_camera">Fotocamera (DCIM)</string>
+    <string name="backup_folder_documents">Documenti</string>
+    <string name="backup_folder_downloads">Download</string>
+    <string name="backup_folder_movies">Film</string>
+    <string name="backup_folder_pictures">Immagini</string>
+    <string name="backup_folder_remove_message">Il backup di %1$s verrà interrotto. I file già caricati rimarranno su Telegram.</string>
+    <string name="backup_folder_subtitle">%1$s · Tocca per rimuovere</string>
+    <string name="backup_interval_with_sweep">%1$s · scansione di recupero</string>
+    <string name="backup_paused">Backup in pausa</string>
+
+    <!-- Permissions -->
+    <string name="permission_all_files_rationale">Necessario per eseguire il backup di documenti, download e cartelle della scheda SD</string>
+    <string name="permission_all_files_title">Accesso a tutti i file</string>
+    <string name="permission_battery_rationale">Consente il caricamento e la sincronizzazione anche dopo la chiusura di TeleDrive</string>
+    <string name="permission_battery_title">Utilizzo della batteria senza restrizioni</string>
+    <string name="permission_missing_message">TeleDrive non può leggere %1$s senza la tua autorizzazione.</string>
+    <string name="permission_not_allowed">​​Non consentito · %1$s</string>
+    <string name="permission_notifications_rationale">Mostra l\'avanzamento dei trasferimenti e del backup</string>
+    <string name="permission_notifications_title">Notifiche</string>
+    <string name="permission_photos_rationale">Necessario per eseguire il backup delle foto</string>
+    <string name="permission_photos_title">Foto</string>
+    <string name="permission_separator"> e </string>
+    <string name="permission_videos_rationale">Necessario per eseguire il backup dei video</string>
+    <string name="permission_videos_title">Video</string>
+    <string name="permissions_allowed">Consentito</string>
+    <string name="permissions_not_allowed">Non consentito</string>
+    <string name="permissions_not_allowed_optional">Non consentito, facoltativo</string>
+
+    <!-- Folder Picker -->
+    <string name="picker_folder_create_failed">Impossibile creare la cartella</string>
+    <string name="picker_folder_unreadable">Impossibile leggere il contenuto della cartella</string>
+    <string name="picker_folder_unreadable_hint">Concedi l\'accesso a tutti i file nelle Impostazioni o utilizza il selettore di sistema (SAF) qui sotto.</string>
+    <string name="picker_internal_storage">Memoria Interna</string>
+    <string name="picker_select_this_folder">Seleziona questa cartella</string>
+    <string name="picker_title_select_folder">Seleziona Cartella</string>
+    <string name="picker_use_saf">Usa Il Selettore Di Sistema (SAF)</string>
+
+    <!-- About -->
+    <string name="about_auto_check">Controllo automatico</string>
+    <string name="about_auto_check_summary">Cerca una nuova versione una volta al giorno</string>
+    <string name="about_check_updates">Controlla aggiornamenti</string>
+    <string name="about_check_updates_summary">Confronta questa versione con l\'ultima disponibile</string>
+    <string name="about_checking">Controllo in corso…</string>
+    <string name="about_donate">Offrimi un caffè</string>
+    <string name="about_donate_summary">Sostieni il lavoro dietro l\'app</string>
+    <string name="about_no_update">Stai utilizzando l\'ultima versione</string>
+    <string name="about_section_project">Progetto</string>
+    <string name="about_section_updates">Aggiornamenti</string>
+    <string name="about_source_code">Codice sorgente</string>
+    <string name="about_source_code_summary">Esplora il progetto su GitHub</string>
+    <string name="about_tagline">Il tuo cloud personale, archiviato in un canale Telegram privato.</string>
+    <string name="about_telegram">Canale Telegram</string>
+    <string name="about_telegram_summary">Annunci sulle nuove versioni e discussioni</string>
+    <string name="about_update_download">Download</string>
+    <string name="about_update_from">Installata: %1$s , disponibile: %2$s</string>
+    <string name="about_update_later">Più tardi</string>
+    <string name="about_update_ready">La versione %1$s è pronta per il download</string>
+    <string name="about_update_title">Aggiorna alla versione %1$s</string>
+    <string name="about_version">Versione %1$s</string>
+
+    <!-- Snackbar messages -->
+    <string name="message_backing_up_new_folder">Backup di una nuova cartella in corso</string>
+    <string name="message_cache_cleared">Cache svuotata</string>
+    <string name="message_created_drive">Creato: %1$s</string>
+    <string name="message_download_queued">Download in coda</string>
+    <string name="message_key_backup_saved">Backup della chiave salvato su Telegram</string>
+    <string name="message_key_restored">Chiave di crittografia ripristinata, reindicizzazione in corso</string>
+    <string name="message_moved_count">Spostati: %1$d</string>
+    <string name="message_moved_to_trash">Spostato nel cestino</string>
+    <string name="message_moved_to_trash_count">%1$d elementi spostati nel cestino</string>
+    <string name="message_nothing_to_download">Nulla da scaricare</string>
+    <string name="message_rebuild_done">Ricostruito: %1$d aggiunti, %2$d aggiornati, %3$d rimossi</string>
+    <string name="message_renamed">Rinominato</string>
+    <string name="message_thumbnails_cleared">Anteprime eliminate</string>
+    <string name="message_trash_emptied">Cestino svuotato</string>
+    <string name="message_upload_queued">Caricamento in coda</string>
+    <string name="message_wrong_passphrase">Passphrase errata</string>
+
+    <!-- Error messages -->
+    <string name="error_authentication_failed">Autenticazione non riuscita</string>
+    <string name="error_backup_running">Un backup è già in corso</string>
+    <string name="error_channel_limit">Il tuo account Telegram ha raggiunto il limite massimo di canali e gruppi. Rimuovi o elimina alcuni elementi su Telegram, quindi riprova.</string>
+    <string name="error_encryption_failed">Crittografia non riuscita</string>
+    <string name="error_file_too_large">Il file è di %1$s . Il limite è %2$s</string>
+    <string name="error_folder_exists">Esiste già una cartella con questo nome</string>
+    <string name="error_folder_into_itself">Una cartella non può essere spostata al suo interno</string>
+    <string name="error_incorrect_code">Codice errato</string>
+    <string name="error_incorrect_password">Password errata</string>
+    <string name="error_insufficient_storage">Spazio insufficiente. Sono necessari %1$s , spazio disponibile: %2$s</string>
+    <string name="error_invalid_api">API ID o API hash non validi</string>
+    <string name="error_invalid_phone">Numero di telefono non valido</string>
+    <string name="error_key_unreadable">Questo dispositivo non è in grado di leggere la sua chiave di crittografia. Ripristina prima il backup della chiave utilizzando la relativa passphrase.</string>
+    <string name="error_last_drive">Questa è la tua unica unità. Creane un\'altra prima di eliminarla.</string>
+    <string name="error_no_internet">Nessuna connessione a Internet</string>
+    <string name="error_no_local_copy">Il file non ha una copia locale</string>
+    <string name="error_no_remote_copy">Il file non ha una copia remota</string>
+    <string name="error_not_found">Non trovato</string>
+    <string name="error_not_supported">Non supportato</string>
+    <string name="error_backup_folders_unreadable">Impossibile leggere le cartelle di backup selezionate. Concedi l\'accesso a tutti i file nelle Impostazioni.</string>
+    <string name="error_permission_denied">Autorizzazione negata</string>
+    <string name="error_rate_limited">Limite di frequenza di Telegram raggiunto. Riprova tra %1$d s</string>
+    <string name="error_sign_in_required">Accedi a Telegram per continuare</string>
+    <string name="error_telegram">Errore di Telegram: %1$s</string>
+    <string name="error_timed_out">Operazione scaduta</string>
+    <string name="error_transfer_incomplete">Trasferimento non completato</string>
+    <string name="error_unknown">Qualcosa è andato storto</string>
+
+    <!-- Settings choice labels -->
+    <string-array name="backup_interval_labels">
+        <item>Ogni ora</item>
+        <item>Ogni 2 ore</item>
+        <item>Ogni 4 ore</item>
+        <item>Ogni 6 ore</item>
+        <item>Ogni 12 ore</item>
+        <item>Giornaliero</item>
+        <item>Ogni 2 giorni</item>
+    </string-array>
+    <string-array name="backup_size_limit_labels">
+        <item>Nessun limite</item>
+        <item>100 MB</item>
+        <item>500 MB</item>
+        <item>1 GB</item>
+        <item>2 GB</item>
+        <item>4 GB</item>
+    </string-array>
+    <string-array name="lock_timeout_labels">
+        <item>Immediatamente</item>
+        <item>Dopo 1 minuto</item>
+        <item>Dopo 5 minuti</item>
+        <item>Dopo 10 minuti</item>
+        <item>Dopo 15 minuti</item>
+        <item>Dopo 30 minuti</item>
+    </string-array>
+    <string-array name="trash_clear_labels">
+        <item>Mai</item>
+        <item>Dopo un giorno</item>
+        <item>Dopo una settimana</item>
+        <item>Dopo un mese</item>
+        <item>Dopo 3 mesi</item>
+        <item>Dopo un anno</item>
+    </string-array>
+    <string-array name="theme_labels">
+        <item>Chiaro</item>
+        <item>Scuro</item>
+        <item>Segui il sistema</item>
+    </string-array>
+    <string-array name="language_labels">
+        <item>Predefinito di sistema</item>
+        <item>English</item>
+        <item>Русский</item>
+        <item>Português (Brasil)</item>
+        <item>简体中文</item>
+        <item>Español</item>
+        <item>Bahasa Indonesia</item>
+		<item>Italiano</item>
+    </string-array>
+</resources>
+	

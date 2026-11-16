@@ -729,6 +729,7 @@
     <string name="language_chinese">简体中文</string>
     <string name="language_spanish">Español</string>
     <string name="language_indonesian">Bahasa Indonesia</string>
+    <string name="language_italian">Italiano</string>
     <string name="settings_tighter_list_rows_without">Linhas de lista mais compactas, sem exibir tamanho e data</string>
     <string name="settings_use_wallpaper_colors_available">Usar as cores do papel de parede quando disponíveis</string>
     <string name="theme_dark">Escuro</string>
@@ -974,5 +975,6 @@
         <item>简体中文</item>
         <item>Español</item>
         <item>Bahasa Indonesia</item>
+        <item>Italiano</item>
     </string-array>
 </resources>
