@@ -990,6 +990,7 @@ private fun AppearanceSection(state: SettingsUiState, viewModel: SettingsViewMod
                     AppLanguage.CHINESE_SIMPLIFIED -> stringResource(Res.string.language_chinese)
                     AppLanguage.SPANISH -> stringResource(Res.string.language_spanish)
                     AppLanguage.INDONESIAN -> stringResource(Res.string.language_indonesian)
+                    AppLanguage.ITALIAN -> stringResource(Res.string.language_italian)
                 },
                 onClick = { showLanguageDialog = true }
             )
