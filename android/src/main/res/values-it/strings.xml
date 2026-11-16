@@ -1,0 +1,62 @@
+<resources>
+    <!-- App-wide -->
+    <string name="app_name">TeleDrive</string>
+
+    <!-- Shared labels and dialogs -->
+    <string name="common_actions">Altre azioni</string>
+    <string name="common_back">Indietro</string>
+    <string name="common_download">Scarica</string>
+    <string name="common_free_space">Libera spazio</string>
+    <string name="common_move_trash">Sposta nel cestino</string>
+    <string name="common_rename">Rinomina</string>
+    <string name="common_rename_file">Rinomina file</string>
+    <string name="common_upload">Carica</string>
+
+    <!-- Notes -->
+    <string name="note_edit_action">Modifica testo</string>
+
+    <!-- Transfers -->
+    <string name="transfer_error_decryption_failed">Decrittografia non riuscita</string>
+    <string name="transfer_error_download_ended">Download terminato in modo imprevisto</string>
+    <string name="transfer_error_download_stalled">Il download ha smesso di rispondere</string>
+    <string name="transfer_error_downloaded_missing">File scaricato mancante</string>
+    <string name="transfer_error_file_record_missing">Record del file mancante</string>
+    <string name="transfer_error_key_missing">Chiave di crittografia mancante. Ripristinala nelle Impostazioni.</string>
+    <string name="transfer_error_local_file_gone">Il file locale non è più presente</string>
+    <string name="transfer_error_no_file_reference">Il trasferimento non contiene alcun riferimento al file</string>
+    <string name="transfer_error_no_local_copy">Nessuna copia locale da caricare</string>
+    <string name="transfer_error_no_remote_copy">Il file non ha una copia remota</string>
+    <string name="transfer_error_save_failed">Impossibile salvare il download</string>
+    <string name="transfer_error_verify_failed">Il file scaricato non corrisponde all\'originale. Prova a scaricarlo di nuovo.</string>
+    <string name="transfer_error_destination_full">Spazio libero insufficiente nella destinazione dei download. Sono necessari %1$s .</string>
+    <string name="transfer_error_cache_full">Spazio libero insufficiente per i file temporanei di TeleDrive. Sono necessari %1$s .</string>
+    <string name="transfer_error_upload_ended">Caricamento terminato in modo imprevisto</string>
+    <string name="transfer_error_upload_stalled">Il caricamento ha smesso di rispondere</string>
+
+    <!-- Notifications -->
+    <string name="notification_backup_complete">Backup completato</string>
+    <string name="notification_backup_summary">%1$d file su %2$d sottoposti a backup</string>
+    <string name="notification_channel_backup">Backup</string>
+    <string name="notification_channel_backup_desc">Avanzamento e risultati del backup</string>
+    <string name="notification_channel_failures">Errori</string>
+    <string name="notification_channel_failures_desc">Trasferimenti e backup non riusciti</string>
+    <string name="notification_channel_transfers">Trasferimenti</string>
+    <string name="notification_channel_transfers_desc">Avanzamento di caricamenti e download</string>
+    <string name="notification_channel_updates">Aggiornamenti dell\'app</string>
+    <string name="notification_channel_updates_desc">Notifica la disponibilità di una nuova versione</string>
+    <string name="notification_download_failed">Download non riuscito</string>
+    <string name="notification_downloading_many">Download di %1$d file su %2$d in corso</string>
+    <string name="notification_downloading_one">Download di un file in corso</string>
+    <string name="notification_publish_progress">%1$d file su %2$d aggiornati</string>
+    <string name="notification_publish_waiting">Messo in pausa a causa del limite di Telegram · riprenderà tra %1$s</string>
+    <string name="notification_publish_title">Salvataggio delle modifiche su Telegram</string>
+    <string name="notification_transfer_and_more">%1$s e altri %2$d</string>
+    <string name="notification_transferring_many">Trasferimento di %1$d file su %2$d in corso</string>
+    <string name="notification_transfers_active">Trasferimenti in corso</string>
+    <string name="notification_update_message">%1$s  %2$s è pronto per il download</string>
+    <string name="notification_update_skip">Ignora questa versione</string>
+    <string name="notification_update_title">Aggiornamento disponibile</string>
+    <string name="notification_upload_failed">Caricamento non riuscito</string>
+    <string name="notification_uploading_many">Caricamento di %1$d file su %2$d in corso</string>
+    <string name="notification_uploading_one">Caricamento di un file in corso</string>
+</resources>
