@@ -703,6 +703,7 @@
     <string name="settings_auto_lock">Автоблокировка через</string>
     <string name="settings_back_encryption_key">Сохранить ключ шифрования</string>
     <string name="settings_block_screenshots">Запрет скриншотов</string>
+    <string name="settings_block_screenshots_app_lock">Всегда включено, пока включена Блокировка приложения</string>
     <string name="settings_change_passphrase">Сменить кодовую фразу</string>
     <string name="settings_confirm_removing_lock">Подтвердите личность перед снятием блокировки</string>
     <string name="settings_encrypt_thumbnails">Шифровать миниатюры</string>

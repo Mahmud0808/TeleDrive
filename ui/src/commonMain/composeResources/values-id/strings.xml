@@ -670,6 +670,7 @@
     <string name="settings_auto_lock">Kunci otomatis setelah</string>
     <string name="settings_back_encryption_key">Cadangkan kunci enkripsi</string>
     <string name="settings_block_screenshots">Blokir tangkapan layar</string>
+    <string name="settings_block_screenshots_app_lock">Selalu aktif saat Kunci aplikasi aktif</string>
     <string name="settings_change_passphrase">Ubah frasa sandi (passphrase) pemulihan</string>
     <string name="settings_confirm_removing_lock">Konfirmasikan bahwa ini adalah Anda sebelum mematikan kunci aplikasi</string>
     <string name="settings_encrypt_thumbnails">Enkripsi thumbnail</string>

@@ -675,6 +675,7 @@
     <string name="settings_auto_lock">Blocco automatico dopo</string>
     <string name="settings_back_encryption_key">Backup della chiave di crittografia</string>
     <string name="settings_block_screenshots">Blocca screenshot</string>
+    <string name="settings_block_screenshots_app_lock">Sempre attivo quando il Blocco app è attivo</string>
     <string name="settings_change_passphrase">Modifica passphrase di ripristino</string>
     <string name="settings_confirm_removing_lock">Conferma la tua identità prima di rimuovere il blocco</string>
     <string name="settings_encrypt_thumbnails">Crittografa miniature</string>

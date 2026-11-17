@@ -675,6 +675,7 @@
     <string name="settings_auto_lock">Auto-lock after</string>
     <string name="settings_back_encryption_key">Back up encryption key</string>
     <string name="settings_block_screenshots">Block screenshots</string>
+    <string name="settings_block_screenshots_app_lock">Always on while App lock is on</string>
     <string name="settings_change_passphrase">Change recovery passphrase</string>
     <string name="settings_confirm_removing_lock">Confirm it is you before removing the lock</string>
     <string name="settings_encrypt_thumbnails">Encrypt thumbnails</string>

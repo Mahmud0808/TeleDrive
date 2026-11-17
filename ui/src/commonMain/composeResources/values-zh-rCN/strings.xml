@@ -661,6 +661,7 @@
     <string name="settings_auto_lock">自动锁定时间</string>
     <string name="settings_back_encryption_key">备份加密密钥</string>
     <string name="settings_block_screenshots">禁止截屏</string>
+    <string name="settings_block_screenshots_app_lock">开启应用锁时始终启用</string>
     <string name="settings_change_passphrase">更改恢复口令</string>
     <string name="settings_confirm_removing_lock">关闭应用锁前请先验证身份</string>
     <string name="settings_encrypt_thumbnails">加密缩略图</string>

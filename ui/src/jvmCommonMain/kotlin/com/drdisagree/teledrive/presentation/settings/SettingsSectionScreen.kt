@@ -192,6 +192,7 @@ import com.drdisagree.teledrive.presentation.components.ConfirmDialog
 import com.drdisagree.teledrive.presentation.components.LoadingState
 import com.drdisagree.teledrive.presentation.components.liftedTopAppBarColors
 import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
+import com.drdisagree.teledrive.resources.settings_block_screenshots_app_lock
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -829,8 +830,13 @@ private fun SecuritySection(state: SettingsUiState, viewModel: SettingsViewModel
         add(visible = capabilities.supportsScreenCaptureBlocking) {
             SettingsSwitchRow(
                 title = stringResource(Res.string.settings_block_screenshots),
-                subtitle = stringResource(Res.string.settings_hides_app_screenshots_screen),
-                checked = prefs.blockScreenCapture,
+                subtitle = if (prefs.appLockEnabled) {
+                    stringResource(Res.string.settings_block_screenshots_app_lock)
+                } else {
+                    stringResource(Res.string.settings_hides_app_screenshots_screen)
+                },
+                checked = prefs.blockScreenCapture || prefs.appLockEnabled,
+                enabled = !prefs.appLockEnabled,
                 onChange = { value ->
                     viewModel.update { it.copy(blockScreenCapture = value) }
                 }
