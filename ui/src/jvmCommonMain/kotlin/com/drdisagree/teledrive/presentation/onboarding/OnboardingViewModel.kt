@@ -2,13 +2,13 @@ package com.drdisagree.teledrive.presentation.onboarding
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.drdisagree.teledrive.core.common.AppError
 import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.core.telegram.CodeDeliveryChannel
 import com.drdisagree.teledrive.core.telegram.TelegramAuthState
 import com.drdisagree.teledrive.core.telegram.TelegramCredentials
 import com.drdisagree.teledrive.core.transfer.MaintenanceScheduler
 import com.drdisagree.teledrive.domain.model.Country
-import com.drdisagree.teledrive.domain.model.DriveChannel
 import com.drdisagree.teledrive.domain.repository.ChannelRepository
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.repository.SyncRepository
@@ -268,7 +268,13 @@ class OnboardingViewModel(
     }
 
     private suspend fun loadOrCreateDrive() {
-        var channels = refreshChannels()
+        val refreshed = channelRepository.refresh()
+        refreshed.errorOrNull()?.let { error ->
+            showDriveFailure(error)
+            return
+        }
+
+        var channels = refreshed.getOrNull().orEmpty()
         var created = false
         var failure: UiText? = null
         if (channels.isEmpty()) {
@@ -276,7 +282,12 @@ class OnboardingViewModel(
                 is AppResult.Success -> created = true
                 is AppResult.Failure -> failure = result.error.toUiText()
             }
-            channels = refreshChannels()
+            val afterCreate = channelRepository.refresh()
+            afterCreate.errorOrNull()?.let { error ->
+                showDriveFailure(error)
+                return
+            }
+            channels = afterCreate.getOrNull().orEmpty()
         }
         _uiState.update {
             it.copy(
@@ -291,11 +302,23 @@ class OnboardingViewModel(
         }
     }
 
-    private suspend fun refreshChannels(): List<DriveChannel> =
-        when (val result = channelRepository.refresh()) {
-            is AppResult.Success -> result.value
-            is AppResult.Failure -> emptyList()
+    /**
+     * A failed lookup must not fall through to drive creation: that is how a
+     * slow or offline sign-in used to leave a duplicate TeleDrive channel
+     * behind. Show the error and let the drive step retry instead.
+     */
+    private fun showDriveFailure(error: AppError) {
+        _uiState.update {
+            it.copy(
+                step = OnboardingStep.CHANNEL_SELECT,
+                channels = emptyList(),
+                selectedChatId = null,
+                channelCreated = false,
+                error = error.toUiText(),
+                working = false
+            )
         }
+    }
 
     fun selectChannel(chatId: Long) = _uiState.update { it.copy(selectedChatId = chatId) }
 
