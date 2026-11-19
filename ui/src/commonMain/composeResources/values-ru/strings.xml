@@ -384,6 +384,7 @@
     <string name="files_sort_backup_status">Статус копии</string>
     <string name="files_sort_date_added">Дата добавления</string>
     <string name="files_sort_date_modified">Дата изменения</string>
+    <string name="files_sort_date_taken">Дата съёмки</string>
     <string name="files_sort_descending">По убыванию</string>
     <string name="files_sort_name">Имя</string>
     <string name="files_sort_size">Размер</string>

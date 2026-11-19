@@ -131,6 +131,7 @@ import com.drdisagree.teledrive.presentation.components.EmptyState
 import com.drdisagree.teledrive.presentation.components.FileGridItem
 import com.drdisagree.teledrive.presentation.components.FileListItem
 import com.drdisagree.teledrive.presentation.components.RenameDialog
+import com.drdisagree.teledrive.presentation.components.GALLERY_SORT_FIELDS
 import com.drdisagree.teledrive.presentation.components.SortMenu
 import com.drdisagree.teledrive.presentation.components.keyboardCollection
 import com.drdisagree.teledrive.presentation.components.keyboardCollectionItem
@@ -520,7 +521,8 @@ fun GalleryScreen(
                                 onSelect = { field, direction ->
                                     showSortMenu = false
                                     viewModel.setSort(field, direction)
-                                }
+                                },
+                                fields = GALLERY_SORT_FIELDS
                             )
                         }
                         RefreshAction(refreshing = refreshing, onRefresh = viewModel::refresh)

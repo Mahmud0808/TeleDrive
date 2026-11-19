@@ -46,6 +46,7 @@ cmpMaterial3 = "1.12.0-alpha03"
 cmpMaterialIcons = "1.7.3"
 jna = "5.19.1"
 vlcj = "4.12.1"
+metadataExtractor = "2.19.0"
 turbine = "1.2.1"
 coroutinesTest = "1.11.0"
 
@@ -131,6 +132,7 @@ cmp-ui-backhandler = { group = "org.jetbrains.compose.ui", name = "ui-backhandle
 cmp-ui-test-junit4 = { group = "org.jetbrains.compose.ui", name = "ui-test-junit4", version.ref = "composeMultiplatform" }
 jna-platform = { group = "net.java.dev.jna", name = "jna-platform", version.ref = "jna" }
 vlcj = { group = "uk.co.caprica", name = "vlcj", version.ref = "vlcj" }
+metadata-extractor = { group = "com.drewnoakes", name = "metadata-extractor", version.ref = "metadataExtractor" }
 
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

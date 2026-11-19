@@ -104,6 +104,7 @@ object FileQueryBuilder {
             FileSortField.NAME -> "name COLLATE NOCASE"
             FileSortField.SIZE -> "sizeBytes"
             FileSortField.DATE_MODIFIED -> "modifiedAt"
+            FileSortField.DATE_TAKEN -> "createdAt"
             FileSortField.DATE_ADDED -> "addedAt"
             FileSortField.TYPE -> "mimeType"
             FileSortField.BACKUP_STATUS -> "backupState"

@@ -8,6 +8,7 @@ import kotlin.io.encoding.Base64
 import com.drdisagree.teledrive.core.telegram.TelegramCredentials
 import com.drdisagree.teledrive.data.local.preferences.PreferenceKeys
 import com.drdisagree.teledrive.domain.model.AppLanguage
+import com.drdisagree.teledrive.domain.model.FileSortField
 import com.drdisagree.teledrive.domain.model.UserPreferences
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.Flow
@@ -142,7 +143,7 @@ class SettingsRepositoryImpl(
             gallerySortField = enumOrDefault(
                 this[PreferenceKeys.GALLERY_SORT_FIELD],
                 defaults.gallerySortField
-            ),
+            ).let { if (it == FileSortField.DATE_MODIFIED) FileSortField.DATE_TAKEN else it },
             gallerySortDirection = enumOrDefault(
                 this[PreferenceKeys.GALLERY_SORT_DIRECTION],
                 defaults.gallerySortDirection

@@ -16,7 +16,7 @@ data class GalleryUiState(
     val albumGridSize: Int = 3,
     val loaded: Boolean = false,
     val capabilities: SelectionCapabilities = SelectionCapabilities(),
-    val sortField: FileSortField = FileSortField.DATE_MODIFIED,
+    val sortField: FileSortField = FileSortField.DATE_TAKEN,
     val sortDirection: SortDirection = SortDirection.DESCENDING,
     val selection: Set<String> = emptySet()
 ) {

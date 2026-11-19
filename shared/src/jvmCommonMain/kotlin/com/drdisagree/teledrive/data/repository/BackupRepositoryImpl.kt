@@ -329,7 +329,7 @@ class BackupRepositoryImpl(
             width = media.width,
             height = media.height,
             durationMs = media.durationMs,
-            createdAt = source.lastModified().takeIf { it > 0 } ?: now,
+            createdAt = media.capturedAt ?: source.lastModified().takeIf { it > 0 } ?: now,
             modifiedAt = source.lastModified().takeIf { it > 0 } ?: now,
             addedAt = now
         )

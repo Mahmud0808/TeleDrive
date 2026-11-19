@@ -345,6 +345,7 @@
     <string name="files_sort_backup_status">Status cadangan</string>
     <string name="files_sort_date_added">Tanggal ditambahkan</string>
     <string name="files_sort_date_modified">Tanggal diubah</string>
+    <string name="files_sort_date_taken">Tanggal diambil</string>
     <string name="files_sort_descending">Menurun</string>
     <string name="files_sort_name">Nama</string>
     <string name="files_sort_size">Ukuran</string>

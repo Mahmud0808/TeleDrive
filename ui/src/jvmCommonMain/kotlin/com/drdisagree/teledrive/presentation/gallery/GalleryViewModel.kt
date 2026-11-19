@@ -195,7 +195,7 @@ class GalleryViewModel(
     ): PagingData<GalleryListItem> {
         val scope = spec.categories.joinToString("+") { it.name }
         val mapped = data.map<DriveFile, GalleryListItem> { GalleryListItem.Media(it, scope) }
-        if (spec.sortField != FileSortField.DATE_MODIFIED &&
+        if (spec.sortField != FileSortField.DATE_TAKEN &&
             spec.sortField != FileSortField.DATE_ADDED
         ) {
             return mapped
@@ -211,7 +211,7 @@ class GalleryViewModel(
     }
 
     private fun timestampFor(file: DriveFile, sortField: FileSortField): Long =
-        if (sortField == FileSortField.DATE_ADDED) file.addedAt else file.modifiedAt
+        if (sortField == FileSortField.DATE_ADDED) file.addedAt else file.createdAt
 
     private val _refreshing = MutableStateFlow(false)
     val refreshing: StateFlow<Boolean> = _refreshing.asStateFlow()

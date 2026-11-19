@@ -68,6 +68,19 @@ class BackupScanTest {
         assertEquals(before + 1, kicks)
     }
 
+    @Test
+    fun `a backed up photo is dated by when it was taken, not when the file was written`() =
+        runBlocking {
+            val photo = File(media, "old.jpg").apply { writeText("a") }
+            val taken = 1_683_000_000_000L
+
+            backups(exclude = null, capturedAt = taken).startBackup(BackupTrigger.MANUAL)
+
+            val entity = database.fileDao().byLocalPath(photo.absolutePath, TEST_CHAT)!!
+            assertEquals(taken, entity.createdAt)
+            assertEquals(photo.lastModified(), entity.modifiedAt)
+        }
+
     private fun transfers() = TransferRepositoryImpl(
         transferDao = database.transferDao(),
         fileDao = database.fileDao(),
@@ -95,7 +108,7 @@ class BackupScanTest {
         override val externalStorageRoot: File = root
     }
 
-    private fun backups(exclude: String?) = BackupRepositoryImpl(
+    private fun backups(exclude: String?, capturedAt: Long? = null) = BackupRepositoryImpl(
         backupDao = database.backupDao(),
         fileDao = database.fileDao(),
         transferDao = database.transferDao(),
@@ -112,7 +125,8 @@ class BackupScanTest {
         settingsRepository = harness.settings,
         decideBackupAction = DecideBackupActionUseCase(EvaluateExclusionsUseCase()),
         mediaMetadataExtractor = object : MediaMetadataExtractor {
-            override fun extract(file: File, mimeType: String) = MediaInfo(null, null, null)
+            override fun extract(file: File, mimeType: String) =
+                MediaInfo(null, null, null, capturedAt)
         },
         folderPathResolver = harness.folderPaths,
         fileRepository = object : FileRepository by unused() {

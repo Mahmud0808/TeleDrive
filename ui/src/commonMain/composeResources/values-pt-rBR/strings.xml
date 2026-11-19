@@ -356,6 +356,7 @@
     <string name="files_sort_backup_status">Status do backup</string>
     <string name="files_sort_date_added">Data de adição</string>
     <string name="files_sort_date_modified">Data de modificação</string>
+    <string name="files_sort_date_taken">Data de captura</string>
     <string name="files_sort_descending">Decrescente</string>
     <string name="files_sort_name">Nome</string>
     <string name="files_sort_size">Tamanho</string>

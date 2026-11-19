@@ -342,6 +342,7 @@
     <string name="files_sort_backup_status">备份状态</string>
     <string name="files_sort_date_added">添加日期</string>
     <string name="files_sort_date_modified">修改日期</string>
+    <string name="files_sort_date_taken">拍摄日期</string>
     <string name="files_sort_descending">降序</string>
     <string name="files_sort_name">名称</string>
     <string name="files_sort_size">大小</string>

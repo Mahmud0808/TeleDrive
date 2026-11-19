@@ -18,6 +18,7 @@ import com.drdisagree.teledrive.resources.files_sort_ascending
 import com.drdisagree.teledrive.resources.files_sort_backup_status
 import com.drdisagree.teledrive.resources.files_sort_date_added
 import com.drdisagree.teledrive.resources.files_sort_date_modified
+import com.drdisagree.teledrive.resources.files_sort_date_taken
 import com.drdisagree.teledrive.resources.files_sort_descending
 import com.drdisagree.teledrive.resources.files_sort_name
 import com.drdisagree.teledrive.resources.files_sort_size
@@ -30,10 +31,11 @@ internal fun SortMenu(
     current: FileSortField,
     direction: SortDirection,
     onDismiss: () -> Unit,
-    onSelect: (FileSortField, SortDirection) -> Unit
+    onSelect: (FileSortField, SortDirection) -> Unit,
+    fields: List<FileSortField> = FILE_SORT_FIELDS
 ) {
     DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
-        FileSortField.entries.forEach { field ->
+        fields.forEach { field ->
             val selected = field == current
             val ascending = direction == SortDirection.ASCENDING
             DropdownMenuItem(
@@ -44,6 +46,7 @@ internal fun SortMenu(
                                 FileSortField.NAME -> Res.string.files_sort_name
                                 FileSortField.SIZE -> Res.string.files_sort_size
                                 FileSortField.DATE_MODIFIED -> Res.string.files_sort_date_modified
+                                FileSortField.DATE_TAKEN -> Res.string.files_sort_date_taken
                                 FileSortField.DATE_ADDED -> Res.string.files_sort_date_added
                                 FileSortField.TYPE -> Res.string.files_sort_type
                                 FileSortField.BACKUP_STATUS -> Res.string.files_sort_backup_status
@@ -82,5 +85,9 @@ internal fun SortMenu(
         }
     }
 }
+
+internal val FILE_SORT_FIELDS = FileSortField.entries - FileSortField.DATE_TAKEN
+
+internal val GALLERY_SORT_FIELDS = FileSortField.entries - FileSortField.DATE_MODIFIED
 
 private val SORT_ICON_SIZE = 18.dp

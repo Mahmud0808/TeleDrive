@@ -2,6 +2,7 @@ package com.drdisagree.teledrive.core.media
 
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
+import androidx.exifinterface.media.ExifInterface
 import com.drdisagree.teledrive.core.files.MimeTypes
 import java.io.File
 
@@ -19,9 +20,21 @@ class AndroidMediaMetadataExtractor : MediaMetadataExtractor {
         MediaInfo(
             width = options.outWidth.takeIf { it > 0 },
             height = options.outHeight.takeIf { it > 0 },
-            durationMs = null
+            durationMs = null,
+            capturedAt = imageCapturedAt(file)
         )
     }.getOrDefault(MediaInfo(null, null, null))
+
+    private fun imageCapturedAt(file: File): Long? = runCatching {
+        val exif = ExifInterface(file)
+        CaptureTime.fromExif(
+            exif.getAttribute(ExifInterface.TAG_DATETIME_ORIGINAL),
+            exif.getAttribute(ExifInterface.TAG_OFFSET_TIME_ORIGINAL)
+        ) ?: CaptureTime.fromExif(
+            exif.getAttribute(ExifInterface.TAG_DATETIME_DIGITIZED),
+            exif.getAttribute(ExifInterface.TAG_OFFSET_TIME_DIGITIZED)
+        )
+    }.getOrNull()
 
     private fun videoInfo(file: File): MediaInfo = runCatching {
         val retriever = MediaMetadataRetriever()
@@ -36,7 +49,10 @@ class AndroidMediaMetadataExtractor : MediaMetadataExtractor {
                 )?.toIntOrNull(),
                 durationMs = retriever.extractMetadata(
                     MediaMetadataRetriever.METADATA_KEY_DURATION
-                )?.toLongOrNull()
+                )?.toLongOrNull(),
+                capturedAt = CaptureTime.fromMediaDate(
+                    retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DATE)
+                )
             )
         } finally {
             retriever.release()

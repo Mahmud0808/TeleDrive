@@ -356,6 +356,7 @@
     <string name="files_sort_backup_status">Estado del respaldo</string>
     <string name="files_sort_date_added">Fecha de adición</string>
     <string name="files_sort_date_modified">Fecha de modificación</string>
+    <string name="files_sort_date_taken">Fecha de captura</string>
     <string name="files_sort_descending">Descendente</string>
     <string name="files_sort_name">Nombre</string>
     <string name="files_sort_size">Tamaño</string>

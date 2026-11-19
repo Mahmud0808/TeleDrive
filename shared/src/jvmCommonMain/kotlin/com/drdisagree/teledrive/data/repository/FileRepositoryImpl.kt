@@ -17,6 +17,7 @@ import com.drdisagree.teledrive.core.files.LocalCopyDeleter
 import com.drdisagree.teledrive.core.files.Markdown
 import com.drdisagree.teledrive.core.files.MimeTypes
 import com.drdisagree.teledrive.core.files.NoteStore
+import com.drdisagree.teledrive.core.media.MediaMetadataExtractor
 import com.drdisagree.teledrive.core.publish.PublishScheduler
 import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.core.telegram.TelegramDownloadEvent
@@ -66,7 +67,8 @@ class FileRepositoryImpl(
     private val streamCrypto: StreamCrypto,
     private val wrappedKeyRepository: WrappedKeyRepository,
     private val settingsRepository: SettingsRepository,
-    private val fileImporter: FileImporter
+    private val fileImporter: FileImporter,
+    private val mediaMetadataExtractor: MediaMetadataExtractor
 ) : FileRepository {
 
     override suspend fun resolveImportFolder(relativePath: String, parentId: String?): String? =
@@ -527,6 +529,7 @@ class FileRepositoryImpl(
         val name = displayName ?: source.name
         val mime = MimeTypes.fromFileName(name)
         val now = System.currentTimeMillis()
+        val capturedAt = mediaMetadataExtractor.extract(source, mime).capturedAt
         val entity = FileEntity(
             id = UUID.randomUUID().toString(),
             chatId = activeChannel.id(),
@@ -541,7 +544,7 @@ class FileRepositoryImpl(
             remoteFileId = null,
             remoteUniqueId = null,
             backupState = BackupState.NONE,
-            createdAt = source.lastModified().takeIf { it > 0 } ?: now,
+            createdAt = capturedAt ?: source.lastModified().takeIf { it > 0 } ?: now,
             modifiedAt = source.lastModified().takeIf { it > 0 } ?: now,
             addedAt = now
         )
