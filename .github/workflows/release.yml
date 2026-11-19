@@ -1,16 +1,48 @@
 name: Release
 
 on:
-  push:
-    tags: ["v*"]
   workflow_dispatch:
+    inputs:
+      ref:
+        description: Branch, tag or commit to build
+        required: true
+        default: master
+      attach_to_release:
+        description: Attach the builds to a draft release for this version
+        type: boolean
+        default: true
 
 jobs:
+  version:
+    name: Version
+    runs-on: ubuntu-latest
+    outputs:
+      name: ${{ steps.read.outputs.name }}
+      tag: ${{ steps.read.outputs.tag }}
+      sha: ${{ steps.read.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Read version
+        id: read
+        run: |
+          name=$(grep -oP '^appVersion = "\K[^"]+' gradle/libs.versions.toml)
+          code=$(grep -oP '^appVersionCode = "\K[^"]+' gradle/libs.versions.toml)
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          echo "tag=v$name" >> "$GITHUB_OUTPUT"
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "Version $name ($code) at $(git log -1 --oneline)"
+
   android:
     name: Android
     runs-on: ubuntu-latest
+    needs: version
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.version.outputs.sha }}
 
       - uses: actions/setup-java@v6
         with:
@@ -42,8 +74,11 @@ jobs:
   windows:
     name: Windows
     runs-on: windows-latest
+    needs: version
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.version.outputs.sha }}
 
       - uses: actions/setup-java@v6
         with:
@@ -71,8 +106,11 @@ jobs:
     name: Linux
     runs-on: ubuntu-latest
     continue-on-error: true
+    needs: version
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.version.outputs.sha }}
 
       - uses: actions/setup-java@v6
         with:
@@ -94,8 +132,11 @@ jobs:
     name: Linux AppImage
     runs-on: ubuntu-22.04
     continue-on-error: true
+    needs: version
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.version.outputs.sha }}
 
       - uses: actions/setup-java@v6
         with:
@@ -133,8 +174,11 @@ jobs:
     name: macOS
     runs-on: macos-latest
     continue-on-error: true
+    needs: version
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.version.outputs.sha }}
 
       - uses: actions/setup-java@v6
         with:
@@ -154,8 +198,8 @@ jobs:
 
   publish:
     name: Publish release
-    if: startsWith(github.ref, 'refs/tags/') && always() && needs.android.result == 'success' && needs.windows.result == 'success'
-    needs: [android, windows, linux, appimage, macos]
+    if: always() && inputs.attach_to_release && needs.android.result == 'success' && needs.windows.result == 'success'
+    needs: [version, android, windows, linux, appimage, macos]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -185,6 +229,9 @@ jobs:
 
       - uses: softprops/action-gh-release@v3
         with:
+          tag_name: ${{ needs.version.outputs.tag }}
+          name: TeleDrive ${{ needs.version.outputs.tag }}
+          target_commitish: ${{ needs.version.outputs.sha }}
           draft: true
           files: |
             artifacts/*.apk
