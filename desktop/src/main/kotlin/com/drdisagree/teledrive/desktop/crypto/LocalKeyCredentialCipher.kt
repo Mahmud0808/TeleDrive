@@ -18,17 +18,22 @@ class LocalKeyCredentialCipher(
 ) : CredentialCipher {
 
     private val random = SecureRandom()
+    private val keyFile = File(File(storagePaths.filesDir, "keys"), "master.key")
 
-    private val masterKey: ByteArray by lazy {
-        val file = File(File(storagePaths.filesDir, "keys"), "master.key")
-        if (file.exists()) {
-            file.readBytes()
-        } else {
-            val fresh = ByteArray(KEY_SIZE).also(random::nextBytes)
-            file.parentFile?.mkdirs()
-            file.writeBytes(fresh)
-            fresh
-        }
+    /**
+     * Read the key on every use instead of caching it: signing out wipes the
+     * keys directory, and a cached value would keep encrypting new credentials
+     * with a key that no longer exists on disk. The next start would then read
+     * the newly generated file and fail to decrypt them.
+     */
+    @Synchronized
+    private fun masterKey(): ByteArray {
+        val stored = if (keyFile.exists()) keyFile.readBytes() else null
+        if (stored != null && stored.size == KEY_SIZE) return stored
+        val fresh = ByteArray(KEY_SIZE).also(random::nextBytes)
+        keyFile.parentFile?.mkdirs()
+        keyFile.writeBytes(fresh)
+        return fresh
     }
 
     override fun encrypt(plaintext: ByteArray): ByteArray {
@@ -36,7 +41,7 @@ class LocalKeyCredentialCipher(
         val cipher = Cipher.getInstance(TRANSFORMATION)
         cipher.init(
             Cipher.ENCRYPT_MODE,
-            SecretKeySpec(masterKey, ALGORITHM),
+            SecretKeySpec(masterKey(), ALGORITHM),
             GCMParameterSpec(TAG_BITS, nonce)
         )
         val sealed = cipher.doFinal(plaintext)
@@ -49,7 +54,7 @@ class LocalKeyCredentialCipher(
         val cipher = Cipher.getInstance(TRANSFORMATION)
         cipher.init(
             Cipher.DECRYPT_MODE,
-            SecretKeySpec(masterKey, ALGORITHM),
+            SecretKeySpec(masterKey(), ALGORITHM),
             GCMParameterSpec(TAG_BITS, nonce)
         )
         return cipher.doFinal(sealed)

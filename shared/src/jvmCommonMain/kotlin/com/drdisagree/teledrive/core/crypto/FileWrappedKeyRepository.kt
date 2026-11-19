@@ -20,7 +20,7 @@ class FileWrappedKeyRepository(
      */
     @Synchronized
     override fun getOrCreate(name: String, sizeBytes: Int): ByteArray {
-        cache[name]?.let { return it }
+        cachedOrNull(name)?.let { return it }
         val file = keyFile(name)
         if (file.exists()) {
             val stored = runCatching { cipher.decrypt(file.readBytes()) }.getOrNull()
@@ -49,13 +49,25 @@ class FileWrappedKeyRepository(
      */
     @Synchronized
     override fun get(name: String): ByteArray? {
-        cache[name]?.let { return it }
+        cachedOrNull(name)?.let { return it }
         val file = keyFile(name)
         if (!file.exists()) return null
         return runCatching { cipher.decrypt(file.readBytes()) }
             .onFailure { SafeLog.w(TAG, "Wrapped key $name cannot be unwrapped") }
             .getOrNull()
             ?.also { cache[name] = it }
+    }
+
+    /**
+     * The cache must never outlive its file: wiping the keys directory (sign
+     * out) deletes the wrapped keys, and reusing a cached copy would encrypt
+     * the new session database with a key that is no longer on disk.
+     */
+    private fun cachedOrNull(name: String): ByteArray? {
+        val cached = cache[name] ?: return null
+        if (keyFile(name).exists()) return cached
+        cache.remove(name)
+        return null
     }
 
     @Synchronized
