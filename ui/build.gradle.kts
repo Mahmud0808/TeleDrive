@@ -43,6 +43,7 @@ kotlin {
                 implementation(compose.desktop.currentOs)
                 implementation(libs.cmp.ui.test.junit4)
                 implementation(libs.junit)
+                implementation(libs.kotlinx.coroutines.test)
             }
         }
         commonMain {

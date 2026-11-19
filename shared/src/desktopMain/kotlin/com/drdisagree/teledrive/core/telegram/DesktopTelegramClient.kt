@@ -1,6 +1,7 @@
 package com.drdisagree.teledrive.core.telegram
 
 import com.drdisagree.teledrive.core.common.SafeLog
+import com.drdisagree.teledrive.core.common.runCatchingCancellable
 import com.drdisagree.teledrive.core.files.AppStoragePaths
 import com.drdisagree.teledrive.domain.model.Country
 import com.drdisagree.teledrive.domain.model.LinkMetadata
@@ -473,7 +474,7 @@ class DesktopTelegramClient(
             awaitAuthorized()
             knownChatId?.let { candidate ->
                 if (isStorageChat(candidate)) {
-                    runCatching {
+                    runCatchingCancellable {
                         val chat = send<TdApi.Chat>(TdApi.GetChat(candidate))
                         SafeLog.d(TAG, "Using drive '${chat.title}' #$candidate")
                     }
@@ -643,11 +644,11 @@ class DesktopTelegramClient(
         val knownIds = known.map { it.chatId }.toSet()
 
         val candidates = LinkedHashSet<Long>()
-        runCatching { send(TdApi.SearchChatsOnServer(STORAGE_CHAT_TITLE, null, CHAT_SEARCH_LIMIT)) }
+        runCatchingCancellable { send(TdApi.SearchChatsOnServer(STORAGE_CHAT_TITLE, null, CHAT_SEARCH_LIMIT)) }
             .getOrNull()?.chatIds?.forEach { candidates.add(it) }
         for (chatList in listOf(TdApi.ChatListMain(), TdApi.ChatListArchive())) {
             loadEveryChat(chatList)
-            runCatching { send(TdApi.GetChats(chatList, CHAT_LIST_LIMIT)) }
+            runCatchingCancellable { send(TdApi.GetChats(chatList, CHAT_LIST_LIMIT)) }
                 .getOrNull()?.chatIds?.forEach { candidates.add(it) }
         }
         val discovered = validateCandidates(
@@ -662,11 +663,11 @@ class DesktopTelegramClient(
 
     private suspend fun validateCandidates(candidates: Set<Long>): List<StorageChannel> =
         candidates.mapNotNull { chatId ->
-            runCatching {
+            runCatchingCancellable {
                 val chat = send<TdApi.Chat>(TdApi.GetChat(chatId))
-                val type = chat.type as? TdApi.ChatTypeSupergroup ?: return@runCatching null
-                if (!type.isChannel || !isDriveTitle(chat.title)) return@runCatching null
-                if (!isOwnPrivateChannel(type.supergroupId)) return@runCatching null
+                val type = chat.type as? TdApi.ChatTypeSupergroup ?: return@runCatchingCancellable null
+                if (!type.isChannel || !isDriveTitle(chat.title)) return@runCatchingCancellable null
+                if (!isOwnPrivateChannel(type.supergroupId)) return@runCatchingCancellable null
                 StorageChannel(
                     chatId = chatId,
                     title = chat.title,
@@ -677,7 +678,7 @@ class DesktopTelegramClient(
         }
 
     /** User files only: the folder state and key backup documents are not counted. */
-    private suspend fun documentCount(chatId: Long): Int = runCatching {
+    private suspend fun documentCount(chatId: Long): Int = runCatchingCancellable {
         val total = searchCount(chatId, "")
         val internal = INTERNAL_DOCUMENT_NAMES.sumOf { name -> searchCount(chatId, name) }
         (total - internal).coerceAtLeast(0)
@@ -696,21 +697,21 @@ class DesktopTelegramClient(
         )
     ).totalCount
 
-    private suspend fun isStorageChat(chatId: Long): Boolean = runCatching {
+    private suspend fun isStorageChat(chatId: Long): Boolean = runCatchingCancellable {
         val chat = send(TdApi.GetChat(chatId))
         SafeLog.d(TAG, "Validating stored storage chat")
-        val type = chat.type as? TdApi.ChatTypeSupergroup ?: return@runCatching false
-        if (!type.isChannel) return@runCatching false
+        val type = chat.type as? TdApi.ChatTypeSupergroup ?: return@runCatchingCancellable false
+        if (!type.isChannel) return@runCatchingCancellable false
         val fullInfo = send(TdApi.GetSupergroupFullInfo(type.supergroupId))
-        if (fullInfo.description.contains(STORAGE_CHAT_MARKER)) return@runCatching true
-        if (!isDriveTitle(chat.title)) return@runCatching false
-        if (!isOwnPrivateChannel(type.supergroupId)) return@runCatching false
+        if (fullInfo.description.contains(STORAGE_CHAT_MARKER)) return@runCatchingCancellable true
+        if (!isDriveTitle(chat.title)) return@runCatchingCancellable false
+        if (!isOwnPrivateChannel(type.supergroupId)) return@runCatchingCancellable false
         writeMarker(chatId, fullInfo.description)
         true
     }.onFailure { SafeLog.d(TAG, "Stored storage chat rejected: ${it.message}") }
         .getOrDefault(false)
 
-    private suspend fun isOwnPrivateChannel(supergroupId: Long): Boolean = runCatching {
+    private suspend fun isOwnPrivateChannel(supergroupId: Long): Boolean = runCatchingCancellable {
         val supergroup = send(TdApi.GetSupergroup(supergroupId))
         supergroup.status is TdApi.ChatMemberStatusCreator &&
                 supergroup.usernames?.activeUsernames.isNullOrEmpty()
@@ -723,7 +724,7 @@ class DesktopTelegramClient(
         } else {
             description + MARKER_SEPARATOR + STORAGE_CHAT_MARKER
         }
-        runCatching { send(TdApi.SetChatDescription(chatId, updated)) }
+        runCatchingCancellable { send(TdApi.SetChatDescription(chatId, updated)) }
             .onSuccess { SafeLog.d(TAG, "Restored storage marker on existing channel") }
             .onFailure { SafeLog.w(TAG, "Could not restore storage marker", it) }
     }
@@ -735,10 +736,10 @@ class DesktopTelegramClient(
     private suspend fun findStorageChat(): Long? {
         val candidates = LinkedHashSet<Long>()
 
-        runCatching { send(TdApi.SearchChatsOnServer(STORAGE_CHAT_TITLE, null, CHAT_SEARCH_LIMIT)) }
+        runCatchingCancellable { send(TdApi.SearchChatsOnServer(STORAGE_CHAT_TITLE, null, CHAT_SEARCH_LIMIT)) }
             .onFailure { SafeLog.d(TAG, "Server chat search failed: ${it.message}") }
             .getOrNull()?.chatIds?.forEach { candidates.add(it) }
-        runCatching { send(TdApi.SearchChats(STORAGE_CHAT_TITLE, null, CHAT_SEARCH_LIMIT)) }
+        runCatchingCancellable { send(TdApi.SearchChats(STORAGE_CHAT_TITLE, null, CHAT_SEARCH_LIMIT)) }
             .onFailure { SafeLog.d(TAG, "Local chat search failed: ${it.message}") }
             .getOrNull()?.chatIds?.forEach { candidates.add(it) }
 
@@ -746,7 +747,7 @@ class DesktopTelegramClient(
 
         for (chatList in listOf(TdApi.ChatListMain(), TdApi.ChatListArchive())) {
             loadEveryChat(chatList)
-            runCatching { send(TdApi.GetChats(chatList, CHAT_LIST_LIMIT)) }
+            runCatchingCancellable { send(TdApi.GetChats(chatList, CHAT_LIST_LIMIT)) }
                 .onFailure { SafeLog.d(TAG, "Chat list read failed: ${it.message}") }
                 .getOrNull()?.chatIds?.forEach { candidates.add(it) }
         }
@@ -760,9 +761,9 @@ class DesktopTelegramClient(
      */
     private suspend fun matchStorageChat(chatIds: Collection<Long>): Long? {
         val titled = chatIds.mapNotNull { chatId ->
-            runCatching {
+            runCatchingCancellable {
                 val chat = send(TdApi.GetChat(chatId))
-                val type = chat.type as? TdApi.ChatTypeSupergroup ?: return@runCatching null
+                val type = chat.type as? TdApi.ChatTypeSupergroup ?: return@runCatchingCancellable null
                 if (!type.isChannel || chat.title != STORAGE_CHAT_TITLE) {
                     null
                 } else {
@@ -779,14 +780,14 @@ class DesktopTelegramClient(
         }
         val chosen = usable.minByOrNull { it.second } ?: return null
         if (marked.isEmpty()) {
-            val fullInfo = runCatching { send(TdApi.GetSupergroupFullInfo(chosen.second)) }
+            val fullInfo = runCatchingCancellable { send(TdApi.GetSupergroupFullInfo(chosen.second)) }
                 .getOrNull()
             writeMarker(chosen.first, fullInfo?.description.orEmpty())
         }
         return chosen.first
     }
 
-    private suspend fun hasStorageMarker(supergroupId: Long): Boolean = runCatching {
+    private suspend fun hasStorageMarker(supergroupId: Long): Boolean = runCatchingCancellable {
         send(TdApi.GetSupergroupFullInfo(supergroupId)).description
             .contains(STORAGE_CHAT_MARKER)
     }.onFailure { SafeLog.d(TAG, "Channel description unavailable: ${it.message}") }
@@ -799,7 +800,7 @@ class DesktopTelegramClient(
     private suspend fun loadEveryChat(chatList: TdApi.ChatList) {
         var page = 0
         while (page++ < MAX_CHAT_LIST_PAGES) {
-            val loaded = runCatching { send(TdApi.LoadChats(chatList, CHAT_LIST_PAGE)) }
+            val loaded = runCatchingCancellable { send(TdApi.LoadChats(chatList, CHAT_LIST_PAGE)) }
             if (loaded.isFailure) {
                 SafeLog.d(TAG, "Chat list page $page ended: ${loaded.exceptionOrNull()?.message}")
                 return
@@ -811,12 +812,12 @@ class DesktopTelegramClient(
     /** Only an own private channel with the drive title is adopted. */
     private suspend fun adoptStorageChat(chatIds: Collection<Long>): Long? {
         for (chatId in chatIds) {
-            val adopted = runCatching {
+            val adopted = runCatchingCancellable {
                 val chat = send(TdApi.GetChat(chatId))
-                if (chat.title != STORAGE_CHAT_TITLE) return@runCatching null
-                val type = chat.type as? TdApi.ChatTypeSupergroup ?: return@runCatching null
-                if (!type.isChannel) return@runCatching null
-                if (!isOwnPrivateChannel(type.supergroupId)) return@runCatching null
+                if (chat.title != STORAGE_CHAT_TITLE) return@runCatchingCancellable null
+                val type = chat.type as? TdApi.ChatTypeSupergroup ?: return@runCatchingCancellable null
+                if (!type.isChannel) return@runCatchingCancellable null
+                if (!isOwnPrivateChannel(type.supergroupId)) return@runCatchingCancellable null
                 val fullInfo = send(TdApi.GetSupergroupFullInfo(type.supergroupId))
                 writeMarker(chatId, fullInfo.description)
                 SafeLog.d(TAG, "Adopted existing storage channel")
