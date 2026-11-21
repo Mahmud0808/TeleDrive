@@ -100,7 +100,8 @@ class RemoteChangesSyncTest {
                     messageId = 30,
                     remoteFileId = "remote-30",
                     remoteUniqueId = "unique-30",
-                    state = BackupState.BACKED_UP
+                    state = BackupState.BACKED_UP,
+                    encrypted = false
                 )
             }
         }

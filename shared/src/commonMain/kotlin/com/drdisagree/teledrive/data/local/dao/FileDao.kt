@@ -320,6 +320,7 @@ interface FileDao {
         """UPDATE files SET chatId = :chatId, messageId = :messageId,
            remoteFileId = :remoteFileId, remoteUniqueId = :remoteUniqueId,
            iconFileId = COALESCE(:iconFileId, iconFileId),
+           isEncrypted = :encrypted,
            backupState = :state WHERE id = :id"""
     )
     suspend fun setRemoteMapping(
@@ -329,6 +330,7 @@ interface FileDao {
         remoteFileId: String?,
         remoteUniqueId: String?,
         state: BackupState,
+        encrypted: Boolean,
         iconFileId: String? = null
     )
 

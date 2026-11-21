@@ -231,6 +231,7 @@ class TransferExecutor(
                             remoteFileId = document.remoteFileId,
                             remoteUniqueId = document.uniqueFileId,
                             state = BackupState.BACKED_UP,
+                            encrypted = encrypt,
                             iconFileId = iconFileId
                         )
                         fileDao.setRemoteBase(entity.id, FileBase.of(manifest).toText())
@@ -353,6 +354,7 @@ class TransferExecutor(
                                 remoteFileId = first.remoteFileId,
                                 remoteUniqueId = first.remoteUniqueId,
                                 state = BackupState.BACKED_UP,
+                                encrypted = encrypt,
                                 iconFileId = manifest.iconFileId
                             )
                             fileDao.setRemoteBase(entity.id, FileBase.of(manifest).toText())

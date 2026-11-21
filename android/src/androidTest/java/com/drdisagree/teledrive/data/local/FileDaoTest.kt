@@ -149,10 +149,11 @@ class FileDaoTest {
     fun remoteMappingUpdate() = runBlocking {
         database.fileDao().upsert(file("a"))
         database.fileDao().setRemoteMapping(
-            "a", 42L, 99L, "remote", "unique", BackupState.BACKED_UP
+            "a", 42L, 99L, "remote", "unique", BackupState.BACKED_UP, encrypted = true
         )
         val updated = database.fileDao().byId("a")
         assertEquals(42L, updated?.chatId)
+        assertEquals(true, updated?.isEncrypted)
         assertEquals(BackupState.BACKED_UP, updated?.backupState)
         assertEquals("a", database.fileDao().byRemoteUniqueId("unique")?.id)
     }
