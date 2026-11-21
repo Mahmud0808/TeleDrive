@@ -13,6 +13,7 @@ HERE=$(dirname "$(readlink -f "$0")")
 APPIMAGETOOL=${APPIMAGETOOL:-appimagetool}
 LINUXDEPLOY=${LINUXDEPLOY:-linuxdeploy}
 VLC_LIB_DIR=${VLC_LIB_DIR:-/usr/lib/x86_64-linux-gnu}
+SSL_LIB_DIR=${SSL_LIB_DIR:-/usr/lib/x86_64-linux-gnu}
 
 SKIPPED_PLUGINS="control gui lua services_discovery vaapi vdpau visualization"
 KEPT_VIDEO_OUTPUTS="libvmem_plugin.so libvdummy_plugin.so"
@@ -69,6 +70,9 @@ CACHE_GEN=$VLC_LIB_DIR/vlc/vlc-cache-gen
 if [ -x "$CACHE_GEN" ]; then
     "$CACHE_GEN" "$PLUGINS"
 fi
+
+mkdir -p "$LIBS/openssl3"
+cp -L "$SSL_LIB_DIR/libssl.so.3" "$SSL_LIB_DIR/libcrypto.so.3" "$LIBS/openssl3/"
 
 install -m 755 "$HERE/AppRun" "$APPDIR/AppRun"
 install -m 644 "$HERE/teledrive.desktop" "$APPDIR/teledrive.desktop"
