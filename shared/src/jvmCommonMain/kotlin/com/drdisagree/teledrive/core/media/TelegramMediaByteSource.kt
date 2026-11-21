@@ -43,7 +43,7 @@ class TelegramMediaByteSource(
         val info = telegramClient.resolveFile(remoteFileId)
         fileId = info.fileId
         totalSize = info.sizeBytes
-        if (!info.isDownloadingCompleted) {
+        if (!info.hasLocalCopy) {
             telegramClient.requestFileRange(fileId, 0, 0)
         }
     }
@@ -52,7 +52,7 @@ class TelegramMediaByteSource(
         val info = telegramClient.getFileInfo(fileId)
         if (covers(info, readPosition, count)) return
 
-        val downloading = info.isDownloadingCompleted || info.isDownloadingActive
+        val downloading = info.hasLocalCopy || info.isDownloadingActive
         if (!downloading ||
             readPosition < info.downloadOffset ||
             readPosition > info.downloadOffset + info.downloadedPrefixSize
@@ -69,7 +69,7 @@ class TelegramMediaByteSource(
     }
 
     private fun covers(info: TelegramFileInfo, readPosition: Long, count: Long): Boolean {
-        if (info.isDownloadingCompleted) return true
+        if (info.isDownloadingCompleted) return info.hasLocalCopy
         val start = info.downloadOffset
         val end = start + info.downloadedPrefixSize
         return readPosition >= start && readPosition + count <= end

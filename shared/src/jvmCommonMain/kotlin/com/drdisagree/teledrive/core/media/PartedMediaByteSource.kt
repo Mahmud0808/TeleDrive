@@ -96,7 +96,7 @@ class PartedMediaByteSource(
 
         val remoteFileId = part.remoteFileId
         val info = telegramClient.resolveFile(remoteFileId)
-        if (!info.isDownloadingCompleted) {
+        if (!info.hasLocalCopy) {
             telegramClient.requestFileRange(info.fileId, 0, 0)
         }
         val salt = if (encrypted) {
@@ -133,7 +133,7 @@ class PartedMediaByteSource(
         val info = telegramClient.getFileInfo(fileId)
         if (covers(info, readPosition, count)) return
 
-        val downloading = info.isDownloadingCompleted || info.isDownloadingActive
+        val downloading = info.hasLocalCopy || info.isDownloadingActive
         if (!downloading ||
             readPosition < info.downloadOffset ||
             readPosition > info.downloadOffset + info.downloadedPrefixSize
@@ -150,7 +150,7 @@ class PartedMediaByteSource(
     }
 
     private fun covers(info: TelegramFileInfo, readPosition: Long, count: Long): Boolean {
-        if (info.isDownloadingCompleted) return true
+        if (info.isDownloadingCompleted) return info.hasLocalCopy
         val start = info.downloadOffset
         val end = start + info.downloadedPrefixSize
         return readPosition >= start && readPosition + count <= end
