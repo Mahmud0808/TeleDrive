@@ -68,6 +68,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -224,13 +225,13 @@ private fun MainScaffold(
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
 
-    val isTopLevel = TopLevelDestination.entries.any { destination ->
-        currentDestination?.hasRoute(destination.route::class) == true
-    }
     val windowSizeClass = currentWindowAdaptiveInfoV2().windowSizeClass
     val useRail = windowSizeClass.isWidthAtLeastBreakpoint(
         WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND
     )
+    val isTopLevel = TopLevelDestination.entries.any { destination ->
+        currentDestination.belongsTo(destination, useRail)
+    }
 
     val startDestination: Route = if (onboardingComplete) Route.Home else Route.Onboarding
 
@@ -290,10 +291,14 @@ private fun MainScaffold(
             NavigationRail(containerColor = MaterialTheme.colorScheme.surfaceContainer) {
                 TopLevelDestination.entries.forEach { destination ->
                     val selected =
-                        currentDestination?.hasRoute(destination.route::class) == true
+                        currentDestination.belongsTo(destination, useRail)
                     NavigationRailItem(
                         selected = selected,
-                        onClick = { if (!selected) navigateTopLevel(navController, destination) },
+                        onClick = {
+                            if (currentDestination?.hasRoute(destination.route::class) != true) {
+                                navigateTopLevel(navController, destination)
+                            }
+                        },
                         icon = {
                             Icon(
                                 if (selected) destination.selectedIcon else destination.icon,
@@ -330,7 +335,7 @@ private fun MainScaffold(
             }
             var navSlots by remember { mutableStateOf(emptyMap<Int, DpRect>()) }
             val topLevelIndex = TopLevelDestination.entries.indexOfFirst { destination ->
-                currentDestination?.hasRoute(destination.route::class) == true
+                currentDestination.belongsTo(destination, useRail)
             }
             var selectedNavIndex by remember { mutableIntStateOf(0) }
             LaunchedEffect(topLevelIndex) {
@@ -491,6 +496,22 @@ private val BAR_HEIGHT = 64.dp
 private val PILL_HEIGHT = 44.dp
 private val BAR_PADDING = (BAR_HEIGHT - PILL_HEIGHT) / 2
 private val ITEM_PADDING = 12.dp
+
+private fun NavDestination?.belongsTo(destination: TopLevelDestination, rail: Boolean): Boolean {
+    if (this == null) return false
+    if (hasRoute(destination.route::class)) return true
+    return when (destination) {
+        TopLevelDestination.GALLERY -> hasRoute(Route.GalleryAlbum::class)
+        TopLevelDestination.SETTINGS -> rail && (
+                hasRoute(Route.SettingsSection::class) ||
+                        hasRoute(Route.Channels::class) ||
+                        hasRoute(Route.Exclusions::class) ||
+                        hasRoute(Route.Proxy::class)
+                )
+
+        else -> false
+    }
+}
 
 private fun navigateTopLevel(
     navController: NavHostController,

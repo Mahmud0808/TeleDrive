@@ -136,12 +136,14 @@ fun AppNavHost(
             }
         }
         composable<Route.GalleryAlbum> {
-            GalleryScreen(
-                onOpenFile = { id, sequence ->
-                    navController.navigateOnce(sequence.routeFor(id))
-                },
-                onBack = { navController.popBackStackOnce() }
-            )
+            UnderBottomBar {
+                GalleryScreen(
+                    onOpenFile = { id, sequence ->
+                        navController.navigateOnce(sequence.routeFor(id))
+                    },
+                    onBack = { navController.popBackStackOnce() }
+                )
+            }
         }
         composable<Route.Preview>(
             enterTransition = { NavigationTransitions.previewEnter() },
