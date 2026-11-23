@@ -555,31 +555,25 @@ fun FilesScreen(
             Scaffold(
                 snackbarHost = {},
                 topBar = {
-                    if (state.selectionMode) {
+                    if (state.selectionMode && !plainClick) {
                         TopAppBar(
                             colors = liftedTopAppBarColors(lifted),
                             title = {
                                 Text(
-                                    text = if (plainClick) {
-                                        stringResource(Res.string.files)
-                                    } else {
-                                        stringResource(
-                                            Res.string.common_selection_count,
-                                            state.selectionCount
-                                        )
-                                    },
+                                    text = stringResource(
+                                        Res.string.common_selection_count,
+                                        state.selectionCount
+                                    ),
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
                             },
                             navigationIcon = {
-                                if (!plainClick) {
-                                    IconButton(onClick = viewModel::clearSelection) {
-                                        Icon(
-                                            Icons.Filled.Close,
-                                            contentDescription = stringResource(Res.string.common_clear_selection)
-                                        )
-                                    }
+                                IconButton(onClick = viewModel::clearSelection) {
+                                    Icon(
+                                        Icons.Filled.Close,
+                                        contentDescription = stringResource(Res.string.common_clear_selection)
+                                    )
                                 }
                             },
                             actions = {
@@ -675,7 +669,7 @@ fun FilesScreen(
                 },
                 floatingActionButton = {
                     AnimatedVisibility(
-                        visible = fabVisible && !state.selectionMode,
+                        visible = fabVisible && (!state.selectionMode || plainClick),
                         enter = scaleIn() + fadeIn(),
                         exit = scaleOut() + fadeOut()
                     ) {

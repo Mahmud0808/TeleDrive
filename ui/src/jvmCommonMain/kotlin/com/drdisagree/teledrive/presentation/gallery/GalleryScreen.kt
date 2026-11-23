@@ -106,6 +106,7 @@ import com.drdisagree.teledrive.presentation.components.keyboardCollectionItem
 import com.drdisagree.teledrive.presentation.components.liftedTopAppBarColors
 import com.drdisagree.teledrive.presentation.components.pinchZoom
 import com.drdisagree.teledrive.presentation.components.pointerBackground
+import com.drdisagree.teledrive.presentation.components.pointerSelection
 import com.drdisagree.teledrive.presentation.components.rememberDragSelect
 import com.drdisagree.teledrive.presentation.components.rememberKeyboardCollection
 import com.drdisagree.teledrive.presentation.components.rememberPointerItems
@@ -225,13 +226,21 @@ private fun AlbumGrid(
     }
     val gridState = rememberLazyGridState()
     val keyboard = rememberKeyboardCollection(gridState, columns)
+    val pointer = LocalPlatformCapabilities.current.usesPointerSelection
+    var highlighted by remember { mutableStateOf<String?>(null) }
     LazyVerticalGrid(
         state = gridState,
         columns = GridCells.Fixed(columns),
         modifier = Modifier
             .fillMaxSize()
             .keyboardCollection(keyboard, albums.size)
-            .pinchZoom(onZoomIn = onZoomIn, onZoomOut = onZoomOut),
+            .pinchZoom(onZoomIn = onZoomIn, onZoomOut = onZoomOut)
+            .pointerBackground(
+                enabled = pointer,
+                onClick = { highlighted = null },
+                onContextMenu = {},
+                onBack = null
+            ),
         contentPadding = PaddingValues(
             start = 12.dp,
             end = 12.dp,
@@ -245,10 +254,22 @@ private fun AlbumGrid(
             albums,
             key = { _, album -> album.folderId ?: UNFILED_ALBUM_KEY }
         ) { index, album ->
+            val key = album.folderId ?: UNFILED_ALBUM_KEY
             AlbumCard(
                 album = album,
                 onClick = { onOpenAlbum(album) },
+                selected = pointer && highlighted == key,
                 modifier = Modifier
+                    .pointerSelection(
+                        enabled = pointer,
+                        onClick = { highlighted = key },
+                        onOpen = {
+                            highlighted = null
+                            onOpenAlbum(album)
+                        },
+                        onDrag = {},
+                        onContextMenu = {}
+                    )
                     .keyboardCollectionItem(keyboard, index)
                     .animateItem()
             )
@@ -466,31 +487,25 @@ fun GalleryScreen(
                 )
             },
             topBar = {
-                if (state.selectionMode) {
+                if (state.selectionMode && !plainClick) {
                     TopAppBar(
                         colors = liftedTopAppBarColors(lifted),
                         title = {
                             Text(
-                                text = if (plainClick) {
-                                    state.albumTitle ?: stringResource(Res.string.gallery_title)
-                                } else {
-                                    stringResource(
-                                        Res.string.common_selection_count,
-                                        state.selection.size
-                                    )
-                                },
+                                text = stringResource(
+                                    Res.string.common_selection_count,
+                                    state.selection.size
+                                ),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
                         },
                         navigationIcon = {
-                            if (!plainClick) {
-                                IconButton(onClick = viewModel::clearSelection) {
-                                    Icon(
-                                        Icons.Filled.Close,
-                                        contentDescription = stringResource(Res.string.common_clear_selection)
-                                    )
-                                }
+                            IconButton(onClick = viewModel::clearSelection) {
+                                Icon(
+                                    Icons.Filled.Close,
+                                    contentDescription = stringResource(Res.string.common_clear_selection)
+                                )
                             }
                         },
                         actions = {

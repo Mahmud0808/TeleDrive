@@ -122,6 +122,8 @@ fun SearchScreen(
         emptyList()
     }
     val pointer = LocalPlatformCapabilities.current.usesPointerSelection
+    val clickSelected by viewModel.clickSelection.collectAsStateWithLifecycle()
+    val plainClick = pointer && clickSelected
     var contextMenuAt by remember { mutableStateOf<Offset?>(null) }
     var screenOrigin by remember { mutableStateOf(Offset.Zero) }
     var contextCreatedSelection by remember { mutableStateOf(false) }
@@ -190,7 +192,7 @@ fun SearchScreen(
         )
         Scaffold(
             topBar = {
-                if (state.selectionMode) {
+                if (state.selectionMode && !plainClick) {
                     SearchSelectionBar(
                         state = state,
                         lifted = lifted,
@@ -444,21 +446,17 @@ private fun SearchSelectionBar(
     viewModel: SearchViewModel,
     actions: List<MenuAction>
 ) {
-    val clickSelected by viewModel.clickSelection.collectAsStateWithLifecycle()
-    val plainClick = LocalPlatformCapabilities.current.usesPointerSelection && clickSelected
     TopAppBar(
         colors = liftedTopAppBarColors(lifted),
         title = {
-            if (!plainClick) Text(state.selection.size.toString())
+            Text(state.selection.size.toString())
         },
         navigationIcon = {
-            if (!plainClick) {
-                IconButton(onClick = viewModel::clearSelection) {
-                    Icon(
-                        Icons.Filled.Close,
-                        contentDescription = stringResource(Res.string.common_clear)
-                    )
-                }
+            IconButton(onClick = viewModel::clearSelection) {
+                Icon(
+                    Icons.Filled.Close,
+                    contentDescription = stringResource(Res.string.common_clear)
+                )
             }
         },
         actions = {
