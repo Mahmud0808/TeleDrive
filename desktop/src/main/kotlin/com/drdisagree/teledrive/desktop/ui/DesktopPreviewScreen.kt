@@ -52,6 +52,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -85,7 +86,10 @@ import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.desktop.media.ExternalMediaPlayer
 import com.drdisagree.teledrive.desktop.media.MediaStreamServer
 import com.drdisagree.teledrive.desktop.media.player.DesktopMediaPlayer
+import com.drdisagree.teledrive.desktop.media.player.LocalPlayerKeys
+import com.drdisagree.teledrive.desktop.media.player.PlayerKeys
 import com.drdisagree.teledrive.desktop.media.player.VlcPlayback
+import com.drdisagree.teledrive.desktop.resources.Res as DesktopRes
 import com.drdisagree.teledrive.desktop.resources.preview_open_externally
 import com.drdisagree.teledrive.desktop.resources.preview_open_failed
 import com.drdisagree.teledrive.desktop.resources.preview_stream
@@ -132,14 +136,13 @@ import com.drdisagree.teledrive.resources.preview_remove_favorites
 import com.drdisagree.teledrive.resources.preview_requires_download
 import com.drdisagree.teledrive.resources.preview_truncated_download_view
 import com.drdisagree.teledrive.resources.preview_unarchive
+import java.awt.Desktop
+import java.io.File
 import kotlinx.coroutines.flow.flowOf
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
-import java.awt.Desktop
-import java.io.File
-import com.drdisagree.teledrive.desktop.resources.Res as DesktopRes
 
 /**
  * Media never plays in the window; anything the shared resolver cannot render inline opens in the
@@ -167,6 +170,7 @@ fun DesktopPreviewScreen(
     var renameTarget by remember { mutableStateOf<DriveFile?>(null) }
     var trashTarget by remember { mutableStateOf<DriveFile?>(null) }
     var playerChromeVisible by remember { mutableStateOf(true) }
+    val playerKeys = remember { PlayerKeys() }
     LaunchedEffect(file?.id) { playerChromeVisible = true }
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -236,14 +240,20 @@ fun DesktopPreviewScreen(
                 .focusable()
                 .onPreviewKeyEvent { event ->
                     if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
+                    if (playerKeys.handler?.invoke(event) == true) return@onPreviewKeyEvent true
                     when (event.key) {
-                        Key.DirectionLeft -> {
+                        Key.DirectionLeft, Key.PageUp -> {
                             if (index > 0) index--
                             true
                         }
 
-                        Key.DirectionRight -> {
+                        Key.DirectionRight, Key.PageDown -> {
                             if (index < state.files.lastIndex) index++
+                            true
+                        }
+
+                        Key.Escape -> {
+                            onBack()
                             true
                         }
 
@@ -268,12 +278,14 @@ fun DesktopPreviewScreen(
                     },
                     contentKey = { it.second.id }
                 ) { (_, pageFile) ->
-                    PreviewPane(
-                        viewModel = viewModel,
-                        file = pageFile,
-                        snackbarHostState = snackbarHostState,
-                        onPlayerControlsVisibilityChange = { playerChromeVisible = it }
-                    )
+                    CompositionLocalProvider(LocalPlayerKeys provides playerKeys) {
+                        PreviewPane(
+                            viewModel = viewModel,
+                            file = pageFile,
+                            snackbarHostState = snackbarHostState,
+                            onPlayerControlsVisibilityChange = { playerChromeVisible = it }
+                        )
+                    }
                 }
             }
             AnimatedVisibility(

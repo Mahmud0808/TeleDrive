@@ -5,6 +5,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -36,8 +37,8 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -49,16 +50,23 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.isAltPressed
+import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.isMetaPressed
+import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import com.drdisagree.teledrive.desktop.ui.LocalFullscreenController
@@ -84,12 +92,12 @@ import com.drdisagree.teledrive.resources.player_unmute
 import java.awt.Point
 import java.awt.Toolkit
 import java.awt.image.BufferedImage
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 import uk.co.caprica.vlcj.media.TrackType
 import uk.co.caprica.vlcj.player.base.MediaPlayer
 import uk.co.caprica.vlcj.player.base.MediaPlayerEventAdapter
-import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -218,6 +226,81 @@ fun DesktopMediaPlayer(
         onControlsVisibilityChange(false)
     }
 
+    val playPause = {
+        when {
+            finished -> {
+                finished = false
+                player.controls().play()
+            }
+
+            playing -> player.controls().pause()
+            else -> player.controls().play()
+        }
+    }
+    val toggleMute = {
+        muted = !muted
+        player.audio().isMute = muted
+    }
+    val playerKeys = LocalPlayerKeys.current
+    val currentTimeMs by rememberUpdatedState(timeMs)
+    val currentDurationMs by rememberUpdatedState(durationMs)
+    val currentPlayPause by rememberUpdatedState(playPause)
+    val currentToggleMute by rememberUpdatedState(toggleMute)
+    DisposableEffect(playerKeys, player) {
+        val handler: (KeyEvent) -> Boolean = handler@{ event ->
+            if (event.isCtrlPressed || event.isAltPressed || event.isMetaPressed) {
+                return@handler false
+            }
+            val handled = when (event.key) {
+                Key.Spacebar, Key.K -> {
+                    currentPlayPause()
+                    true
+                }
+
+                Key.DirectionLeft, Key.DirectionRight -> {
+                    val step = if (event.key == Key.DirectionLeft) -SKIP_MS else SKIP_MS
+                    val limit = currentDurationMs.coerceAtLeast(0L)
+                    player.controls().setTime((currentTimeMs + step).coerceIn(0L, limit))
+                    true
+                }
+
+                Key.DirectionUp, Key.DirectionDown -> {
+                    val step = if (event.key == Key.DirectionUp) VOLUME_STEP else -VOLUME_STEP
+                    val volume = (player.audio().volume() + step).coerceIn(0, MAX_VOLUME)
+                    player.audio().setVolume(volume)
+                    if (muted && step > 0) currentToggleMute()
+                    true
+                }
+
+                Key.M -> {
+                    currentToggleMute()
+                    true
+                }
+
+                Key.F -> {
+                    if (!isAudio) fullscreenController?.toggle?.invoke()
+                    !isAudio
+                }
+
+                Key.Escape -> {
+                    val controller = fullscreenController
+                    if (controller != null && controller.isFullscreen()) {
+                        controller.toggle()
+                        true
+                    } else {
+                        false
+                    }
+                }
+
+                else -> false
+            }
+            if (handled) interactionTick++
+            handled
+        }
+        playerKeys?.handler = handler
+        onDispose { if (playerKeys?.handler === handler) playerKeys.handler = null }
+    }
+
     val blankCursor = remember {
         PointerIcon(
             Toolkit.getDefaultToolkit().createCustomCursor(
@@ -272,6 +355,13 @@ fun DesktopMediaPlayer(
                     contentScale = scaling.contentScale
                 )
             }
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .pointerInput(fullscreenController) {
+                        detectTapGestures(onDoubleTap = { fullscreenController?.toggle?.invoke() })
+                    }
+            )
         }
 
         if (buffering && !finished) {
@@ -307,22 +397,9 @@ fun DesktopMediaPlayer(
                     trackTick++
                 },
                 onInteraction = { interactionTick++ },
-                onPlayPause = {
-                    when {
-                        finished -> {
-                            finished = false
-                            player.controls().play()
-                        }
-
-                        playing -> player.controls().pause()
-                        else -> player.controls().play()
-                    }
-                },
+                onPlayPause = playPause,
                 onSeekTo = { millis -> player.controls().setTime(millis) },
-                onToggleMute = {
-                    muted = !muted
-                    player.audio().isMute = muted
-                },
+                onToggleMute = toggleMute,
                 onRate = { value ->
                     rate = value
                     player.controls().setRate(value)
@@ -640,6 +717,8 @@ private fun TrackMenuItem(label: String, selected: Boolean, onClick: () -> Unit)
     )
 }
 
+private const val VOLUME_STEP = 10
+private const val MAX_VOLUME = 200
 private const val CONTROLS_HIDE_DELAY_MS = 3_000L
 private const val MOVE_THRESHOLD_PX = 4f
 private const val SKIP_MS = 10_000L
