@@ -542,6 +542,7 @@ fun GalleryScreen(
                             }
                         },
                         actions = {
+                            RefreshAction(refreshing = refreshing, onRefresh = viewModel::refresh)
                             if (state.isAlbumView || state.tab != GalleryTab.ALBUMS) {
                                 var showSortMenu by remember { mutableStateOf(false) }
                                 IconButton(onClick = { showSortMenu = true }) {
@@ -562,7 +563,6 @@ fun GalleryScreen(
                                     fields = GALLERY_SORT_FIELDS
                                 )
                             }
-                            RefreshAction(refreshing = refreshing, onRefresh = viewModel::refresh)
                         }
                     )
                 }
