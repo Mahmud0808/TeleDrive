@@ -273,7 +273,6 @@ class FilesViewModel(
 
     fun clearSelection() {
         _allSelected.update { false }
-        _clickSelection.update { false }
         selection.update { emptySet() }
         folderSelection.update { emptySet() }
     }

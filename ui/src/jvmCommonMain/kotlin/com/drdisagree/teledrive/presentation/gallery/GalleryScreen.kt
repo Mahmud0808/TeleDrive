@@ -40,6 +40,7 @@ import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Photo
 import androidx.compose.material.icons.outlined.PhotoLibrary
 import androidx.compose.material3.ButtonGroupDefaults
@@ -93,6 +94,7 @@ import com.drdisagree.teledrive.presentation.components.ConfirmDialog
 import com.drdisagree.teledrive.presentation.components.EmptyState
 import com.drdisagree.teledrive.presentation.components.FileGridItem
 import com.drdisagree.teledrive.presentation.components.FileListItem
+import com.drdisagree.teledrive.presentation.components.FolderInfoSheet
 import com.drdisagree.teledrive.presentation.components.GALLERY_SORT_FIELDS
 import com.drdisagree.teledrive.presentation.components.LazyIndexLocator
 import com.drdisagree.teledrive.presentation.components.MenuAction
@@ -142,12 +144,14 @@ import com.drdisagree.teledrive.resources.files_archive
 import com.drdisagree.teledrive.resources.files_hide
 import com.drdisagree.teledrive.resources.files_move_here
 import com.drdisagree.teledrive.resources.files_move_to
+import com.drdisagree.teledrive.resources.files_rename_folder
 import com.drdisagree.teledrive.resources.files_sort
 import com.drdisagree.teledrive.resources.gallery_albums_appear_organise_media
 import com.drdisagree.teledrive.resources.gallery_no_albums
 import com.drdisagree.teledrive.resources.gallery_no_media
 import com.drdisagree.teledrive.resources.gallery_photos_videos_appear_here
 import com.drdisagree.teledrive.resources.gallery_title
+import com.drdisagree.teledrive.resources.info_details
 import com.drdisagree.teledrive.resources.nav_gallery
 import com.drdisagree.teledrive.resources.preview_remove_favorites
 import org.jetbrains.compose.resources.stringResource
@@ -213,6 +217,7 @@ private fun AlbumGrid(
     columns: Int,
     bottomPadding: Dp,
     onOpenAlbum: (MediaAlbum) -> Unit,
+    onAlbumMenu: (MediaAlbum, Offset) -> Unit,
     onZoomIn: () -> Unit,
     onZoomOut: () -> Unit
 ) {
@@ -268,7 +273,12 @@ private fun AlbumGrid(
                             onOpenAlbum(album)
                         },
                         onDrag = {},
-                        onContextMenu = {}
+                        onContextMenu = { at ->
+                            if (album.folderId != null) {
+                                highlighted = key
+                                onAlbumMenu(album, at)
+                            }
+                        }
                     )
                     .keyboardCollectionItem(keyboard, index)
                     .animateItem()
@@ -465,12 +475,112 @@ fun GalleryScreen(
     var contextMenuAt by remember { mutableStateOf<Offset?>(null) }
     var screenOrigin by remember { mutableStateOf(Offset.Zero) }
     var contextCreatedSelection by remember { mutableStateOf(false) }
+    var albumMenuAt by remember { mutableStateOf<Offset?>(null) }
+    var albumTrashId by remember { mutableStateOf<String?>(null) }
+    val albumFolder by viewModel.albumFolder.collectAsStateWithLifecycle()
+    val albumRename by viewModel.albumRename.collectAsStateWithLifecycle()
+    val albumInfo by viewModel.albumInfo.collectAsStateWithLifecycle()
+    val albumActions = albumFolder?.let { folder ->
+        val storage = listOf(
+            MenuAction(
+                label = stringResource(Res.string.common_download),
+                icon = Icons.Filled.Download
+            ) { viewModel.downloadAlbum(folder.id) }
+        )
+        val organize = listOf(
+            MenuAction(
+                label = stringResource(
+                    if (folder.isFavorite) {
+                        Res.string.preview_remove_favorites
+                    } else {
+                        Res.string.common_add_favorites
+                    }
+                ),
+                icon = if (folder.isFavorite) Icons.Filled.Star else Icons.Filled.StarOutline
+            ) { viewModel.setAlbumFavorite(folder.id, !folder.isFavorite) },
+            MenuAction(
+                label = stringResource(
+                    if (folder.isAvailableOffline) {
+                        Res.string.common_remove_from_offline
+                    } else {
+                        Res.string.common_make_available_offline
+                    }
+                ),
+                icon = Icons.Filled.OfflinePin
+            ) { viewModel.setAlbumAvailableOffline(folder.id, !folder.isAvailableOffline) },
+            MenuAction(
+                label = stringResource(Res.string.files_hide),
+                icon = Icons.Filled.VisibilityOff
+            ) { viewModel.setAlbumHidden(folder.id, true) },
+            MenuAction(
+                label = stringResource(Res.string.files_archive),
+                icon = Icons.Filled.Archive
+            ) { viewModel.setAlbumArchived(folder.id, true) }
+        )
+        listOf(
+            MenuAction(
+                label = stringResource(Res.string.common_rename),
+                icon = Icons.Filled.DriveFileRenameOutline
+            ) { viewModel.requestAlbumRename(folder) },
+            MenuAction(
+                label = stringResource(Res.string.common_storage_actions),
+                icon = Icons.Filled.Storage,
+                children = storage
+            ),
+            MenuAction(
+                label = stringResource(Res.string.common_organize),
+                icon = Icons.Filled.Tune,
+                children = organize
+            ),
+            MenuAction(
+                label = stringResource(Res.string.info_details),
+                icon = Icons.Outlined.Info
+            ) { viewModel.showAlbumInfo(folder) },
+            MenuAction(
+                label = stringResource(Res.string.common_move_trash),
+                icon = Icons.Filled.DeleteOutline
+            ) { albumTrashId = folder.id }
+        )
+    }.orEmpty()
+    albumRename?.let { folder ->
+        RenameDialog(
+            title = stringResource(Res.string.files_rename_folder),
+            initialValue = folder.name,
+            confirmLabel = stringResource(Res.string.common_rename),
+            onConfirm = viewModel::confirmAlbumRename,
+            onDismiss = viewModel::dismissAlbumRename
+        )
+    }
+    albumTrashId?.let { id ->
+        ConfirmDialog(
+            title = stringResource(Res.string.common_confirm_trash_count_title, 1),
+            message = stringResource(Res.string.common_restore_trash_emptied),
+            confirmLabel = stringResource(Res.string.common_move_trash),
+            destructive = true,
+            onConfirm = {
+                albumTrashId = null
+                viewModel.trashAlbum(id)
+            },
+            onDismiss = { albumTrashId = null }
+        )
+    }
+    albumInfo?.let { folder ->
+        FolderInfoSheet(folder = folder, onDismiss = viewModel::dismissAlbumInfo)
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .onGloballyPositioned { screenOrigin = it.positionInRoot() }
     ) {
+        PointerMenu(
+            at = albumMenuAt?.minus(screenOrigin),
+            actions = albumActions,
+            onDismiss = {
+                albumMenuAt = null
+                viewModel.dismissAlbumMenu()
+            }
+        )
         PointerMenu(
             at = contextMenuAt?.minus(screenOrigin),
             actions = selectionActions,
@@ -647,6 +757,12 @@ fun GalleryScreen(
                         columns = state.albumGridSize,
                         bottomPadding = padding.calculateBottomPadding() + LocalBottomBarInset.current,
                         onOpenAlbum = onOpenAlbum,
+                        onAlbumMenu = { album, at ->
+                            album.folderId?.let { id ->
+                                viewModel.openAlbumMenu(id)
+                                albumMenuAt = at
+                            }
+                        },
                         onZoomIn = viewModel::zoomAlbumsIn,
                         onZoomOut = viewModel::zoomAlbumsOut
                     )

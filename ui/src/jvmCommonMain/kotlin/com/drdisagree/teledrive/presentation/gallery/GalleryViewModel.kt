@@ -279,7 +279,6 @@ class GalleryViewModel(
 
     fun clearSelection() {
         _allSelected.update { false }
-        _clickSelection.update { false }
         selection.update { emptySet() }
     }
 
@@ -378,6 +377,80 @@ class GalleryViewModel(
 
     fun requestRename(id: String) {
         viewModelScope.launch { _renameTarget.value = fileRepository.getFile(id) }
+    }
+
+    private val _albumFolder = MutableStateFlow<DriveFolder?>(null)
+    val albumFolder: StateFlow<DriveFolder?> = _albumFolder.asStateFlow()
+
+    private val _albumRename = MutableStateFlow<DriveFolder?>(null)
+    val albumRename: StateFlow<DriveFolder?> = _albumRename.asStateFlow()
+
+    private val _albumInfo = MutableStateFlow<DriveFolder?>(null)
+    val albumInfo: StateFlow<DriveFolder?> = _albumInfo.asStateFlow()
+
+    fun openAlbumMenu(folderId: String) {
+        viewModelScope.launch { _albumFolder.value = fileRepository.getFolder(folderId) }
+    }
+
+    fun dismissAlbumMenu() {
+        _albumFolder.value = null
+    }
+
+    fun downloadAlbum(folderId: String) {
+        viewModelScope.launch {
+            val ids = fileRepository.fileIdsInTree(folderId)
+            ids.forEach { transferRepository.enqueueDownload(it).reportFailure() }
+            if (ids.isNotEmpty()) {
+                _messages.tryEmit(UiText.Resource(Res.string.files_queued_for_download, ids.size))
+            }
+        }
+    }
+
+    fun setAlbumFavorite(folderId: String, favorite: Boolean) {
+        viewModelScope.launch { fileRepository.setFolderFavorite(folderId, favorite) }
+    }
+
+    fun setAlbumAvailableOffline(folderId: String, available: Boolean) {
+        viewModelScope.launch {
+            val queued = makeAvailableOffline(emptyList(), listOf(folderId), available)
+            if (queued > 0) {
+                _messages.tryEmit(UiText.Resource(Res.string.files_queued_for_download, queued))
+            }
+        }
+    }
+
+    fun setAlbumHidden(folderId: String, hidden: Boolean) {
+        viewModelScope.launch { fileRepository.setFolderHidden(folderId, hidden) }
+    }
+
+    fun setAlbumArchived(folderId: String, archived: Boolean) {
+        viewModelScope.launch { fileRepository.setFolderArchived(folderId, archived) }
+    }
+
+    fun requestAlbumRename(folder: DriveFolder) {
+        _albumRename.value = folder
+    }
+
+    fun dismissAlbumRename() {
+        _albumRename.value = null
+    }
+
+    fun confirmAlbumRename(newName: String) {
+        val folder = _albumRename.value ?: return
+        _albumRename.value = null
+        viewModelScope.launch { fileRepository.renameFolder(folder.id, newName).reportFailure() }
+    }
+
+    fun trashAlbum(folderId: String) {
+        viewModelScope.launch { trashRepository.moveFolderToTrash(folderId).reportFailure() }
+    }
+
+    fun showAlbumInfo(folder: DriveFolder) {
+        _albumInfo.value = folder
+    }
+
+    fun dismissAlbumInfo() {
+        _albumInfo.value = null
     }
 
     fun dismissRename() {

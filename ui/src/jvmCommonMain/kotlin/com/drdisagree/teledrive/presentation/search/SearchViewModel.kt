@@ -120,10 +120,7 @@ class SearchViewModel(
         selection.update { current -> if (id in current) current - id else current + id }
     }
 
-    fun clearSelection() {
-        _clickSelection.update { false }
-        selection.update { emptySet() }
-    }
+    fun clearSelection() = selection.update { emptySet() }
 
     fun selectOnly(id: String, byClick: Boolean) {
         _clickSelection.update { byClick }
