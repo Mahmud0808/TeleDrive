@@ -367,8 +367,7 @@ class SyncRepositoryImpl(
                 document.caption.startsWith(ICON_MARKER)
 
     private fun isNewToLocal(document: RemoteDocument, known: KnownRows): Boolean {
-        val existing = known.byUniqueId[document.uniqueFileId] ?: return true
-        return existing.messageId != document.messageId
+        return known.sameMessage(document) == null
     }
 
     private suspend fun existingForPage(documents: List<RemoteDocument>): KnownRows {
@@ -380,18 +379,16 @@ class SyncRepositoryImpl(
         } else {
             fileDao.byIds(fileIds).associateBy { it.id }
         }
-        val byUniqueId = if (uniqueIds.isEmpty()) {
+        val byMessage = if (uniqueIds.isEmpty()) {
             emptyMap()
         } else {
-            fileDao.byRemoteUniqueIds(uniqueIds).mapNotNull { entity ->
-                entity.remoteUniqueId?.let { it to entity }
-            }.toMap()
+            fileDao.byRemoteUniqueIds(uniqueIds).associateBy { it.chatId to it.messageId }
         }
         val parts = if (fileIds.isEmpty()) emptyList() else filePartDao.partsOfAll(fileIds)
         return KnownRows(
             manifests = manifests,
             byId = byId,
-            byUniqueId = byUniqueId,
+            byMessage = byMessage,
             splitCounts = splitCounts(manifests.values, byId, parts),
             firstPartStored = parts.filter { it.partIndex == 0 }.map { it.fileId }.toSet()
         )
@@ -470,7 +467,7 @@ class SyncRepositoryImpl(
     ): ReconcileResult {
         val manifest = known.manifests[document]
         val existing = manifest?.let { known.byId[it.fileId] }
-            ?: known.byUniqueId[document.uniqueFileId]
+            ?: known.sameMessage(document)
 
         val damagedSplitCount = splitCountOfDamagedFirstPart(document, known)
         if (manifest != null && manifest.isPart) {
