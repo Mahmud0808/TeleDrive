@@ -219,7 +219,7 @@ fun PreviewScreen(
     val pagedFile = state.files[pagerState.currentPage.coerceAtMost(state.files.lastIndex)]
     // The pager holds a snapshot, so the open row is read live and edits made elsewhere show at
     // once.
-    val liveFile by viewModel.observeFile(pagedFile.id)
+    val liveFile by remember(pagedFile.id) { viewModel.observeFile(pagedFile.id) }
         .collectAsStateWithLifecycle(initialValue = pagedFile)
     val currentFile = liveFile ?: pagedFile
 

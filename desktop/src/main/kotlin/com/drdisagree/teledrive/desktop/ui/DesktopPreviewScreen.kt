@@ -132,6 +132,7 @@ import com.drdisagree.teledrive.resources.preview_remove_favorites
 import com.drdisagree.teledrive.resources.preview_requires_download
 import com.drdisagree.teledrive.resources.preview_truncated_download_view
 import com.drdisagree.teledrive.resources.preview_unarchive
+import kotlinx.coroutines.flow.flowOf
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -154,7 +155,13 @@ fun DesktopPreviewScreen(
     LaunchedEffect(state.closed) { if (state.closed) onBack() }
 
     var index by remember(state.ready) { mutableStateOf(state.initialIndex) }
-    val file = state.files.getOrNull(index.coerceIn(0, (state.files.size - 1).coerceAtLeast(0)))
+    val pagedFile = state.files.getOrNull(
+        index.coerceIn(0, (state.files.size - 1).coerceAtLeast(0))
+    )
+    val liveFile by remember(pagedFile?.id) {
+        pagedFile?.let { viewModel.observeFile(it.id) } ?: flowOf(null)
+    }.collectAsState(initial = pagedFile)
+    val file = liveFile ?: pagedFile
     val infoTarget by viewModel.infoTarget.collectAsState()
     var showOverflow by remember { mutableStateOf(false) }
     var renameTarget by remember { mutableStateOf<DriveFile?>(null) }
