@@ -63,6 +63,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.isSpecified
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -139,6 +141,10 @@ import com.drdisagree.teledrive.resources.preview_unarchive
 import java.awt.Desktop
 import java.io.File
 import kotlinx.coroutines.flow.flowOf
+import me.saket.telephoto.zoomable.ZoomSpec
+import me.saket.telephoto.zoomable.ZoomableContentLocation
+import me.saket.telephoto.zoomable.rememberZoomableState
+import me.saket.telephoto.zoomable.zoomable
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -283,7 +289,8 @@ fun DesktopPreviewScreen(
                             viewModel = viewModel,
                             file = pageFile,
                             snackbarHostState = snackbarHostState,
-                            onPlayerControlsVisibilityChange = { playerChromeVisible = it }
+                            onPlayerControlsVisibilityChange = { playerChromeVisible = it },
+                            onImageClick = { playerChromeVisible = !playerChromeVisible }
                         )
                     }
                 }
@@ -475,7 +482,8 @@ private fun PreviewPane(
     viewModel: PreviewViewModel,
     file: DriveFile,
     snackbarHostState: SnackbarHostState,
-    onPlayerControlsVisibilityChange: (Boolean) -> Unit
+    onPlayerControlsVisibilityChange: (Boolean) -> Unit,
+    onImageClick: () -> Unit
 ) {
     val content by viewModel.contentFor(file).collectAsState()
     val urlOpener = LocalUrlOpener.current
@@ -544,13 +552,32 @@ private fun PreviewPane(
                         title = stringResource(Res.string.preview_image_undecodable)
                     )
                 } else {
+                    val zoomState = rememberZoomableState(
+                        zoomSpec = ZoomSpec(maxZoomFactor = MAX_ZOOM)
+                    )
+                    var imageSize by remember(current.model) { mutableStateOf(Size.Unspecified) }
+                    LaunchedEffect(imageSize) {
+                        if (imageSize.isSpecified) {
+                            zoomState.setContentLocation(
+                                ZoomableContentLocation.scaledInsideAndCenterAligned(imageSize)
+                            )
+                        }
+                    }
                     AsyncImage(
                         model = current.model,
                         contentDescription = file.name,
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .zoomable(state = zoomState, onClick = { onImageClick() }),
                         contentScale = ContentScale.Fit,
                         onState = { state ->
-                            if (state is AsyncImagePainter.State.Error) undecodable = true
+                            when (state) {
+                                is AsyncImagePainter.State.Error -> undecodable = true
+                                is AsyncImagePainter.State.Success ->
+                                    imageSize = state.painter.intrinsicSize
+
+                                else -> Unit
+                            }
                         }
                     )
                 }
@@ -854,3 +881,5 @@ private fun openExternally(path: String): Boolean = runCatching {
     check(target.exists())
     Desktop.getDesktop().open(target)
 }.isSuccess
+
+private const val MAX_ZOOM = 6f

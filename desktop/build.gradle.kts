@@ -50,6 +50,8 @@ dependencies {
     implementation(libs.cmp.material3)
     implementation(libs.kotlinx.coroutines.swing)
     implementation(libs.coil.compose)
+    implementation(libs.telephoto.zoomable)
+    implementation(libs.telephoto.zoomable)
     implementation(platform(libs.koin.bom))
     implementation(libs.koin.core)
     implementation(libs.koin.compose)
