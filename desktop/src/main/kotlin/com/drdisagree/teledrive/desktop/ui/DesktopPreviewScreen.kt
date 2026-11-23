@@ -161,7 +161,7 @@ fun DesktopPreviewScreen(
     val liveFile by remember(pagedFile?.id) {
         pagedFile?.let { viewModel.observeFile(it.id) } ?: flowOf(null)
     }.collectAsState(initial = pagedFile)
-    val file = liveFile ?: pagedFile
+    val file = liveFile?.takeIf { it.id == pagedFile?.id } ?: pagedFile
     val infoTarget by viewModel.infoTarget.collectAsState()
     var showOverflow by remember { mutableStateOf(false) }
     var renameTarget by remember { mutableStateOf<DriveFile?>(null) }
