@@ -319,6 +319,11 @@
     <string name="files_folders_exist_message">Opsi Gabungkan akan menambahkan file baru ke dalam folder yang ada. Simpan Keduanya akan memisahkan folder dengan tambahan nomor pada namanya.</string>
     <string name="files_folder_merge">Gabungkan</string>
     <string name="files_folder_keep_both">Simpan keduanya</string>
+    <string name="files_files_exist_title">File ini sudah ada</string>
+    <string name="files_file_exists_message">Ganti akan memindahkan file yang ada ke Tempat sampah. Simpan keduanya akan mengunggah file baru dengan tambahan nomor pada namanya.</string>
+    <string name="files_files_exist_message">Ganti akan memindahkan file yang ada ke Tempat sampah. Simpan keduanya akan mengunggah file baru dengan tambahan nomor pada setiap namanya.</string>
+    <string name="files_file_replace">Ganti</string>
+    <string name="files_file_keep_both">Simpan keduanya</string>
     <string name="files_import_preparing">Menyiapkan file untuk diunggah…</string>
     <string name="files_import_restored">%1$d dipulihkan dari tempat sampah</string>
     <string name="files_import_uploading">Mengunggah %1$d</string>

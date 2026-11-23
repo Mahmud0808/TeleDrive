@@ -137,6 +137,7 @@ class TransferExecutor(
             fileDao.upsert(entity.copy(sizeBytes = uploadSize, contentHash = contentHash))
         }
         val supersededMessageId = entity.messageId
+            ?.takeIf { transfer.type != TransferType.BACKUP }
             ?.takeIf { entity.chatId == chatId && filePartDao.countOf(entity.id) == 0 }
 
         val rawIconPath = thumbnailStore.uploadThumbnailFile(entity.id)?.absolutePath

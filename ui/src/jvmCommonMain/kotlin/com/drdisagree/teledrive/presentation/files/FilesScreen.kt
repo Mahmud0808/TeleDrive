@@ -187,6 +187,11 @@ import com.drdisagree.teledrive.resources.files_copy_here
 import com.drdisagree.teledrive.resources.files_copy_to
 import com.drdisagree.teledrive.resources.files_delete_local
 import com.drdisagree.teledrive.resources.files_delete_local_copies
+import com.drdisagree.teledrive.resources.files_file_exists_message
+import com.drdisagree.teledrive.resources.files_file_keep_both
+import com.drdisagree.teledrive.resources.files_file_replace
+import com.drdisagree.teledrive.resources.files_files_exist_message
+import com.drdisagree.teledrive.resources.files_files_exist_title
 import com.drdisagree.teledrive.resources.files_folder_exists_message
 import com.drdisagree.teledrive.resources.files_folder_exists_title
 import com.drdisagree.teledrive.resources.files_folder_keep_both
@@ -208,8 +213,8 @@ import com.drdisagree.teledrive.resources.files_share_destination_title
 import com.drdisagree.teledrive.resources.files_show_in_file_manager
 import com.drdisagree.teledrive.resources.files_sort
 import com.drdisagree.teledrive.resources.info_details
-import com.drdisagree.teledrive.resources.note_edit_action
 import com.drdisagree.teledrive.resources.nav_files
+import com.drdisagree.teledrive.resources.note_edit_action
 import com.drdisagree.teledrive.resources.note_new
 import com.drdisagree.teledrive.resources.preview_remove_favorites
 import com.drdisagree.teledrive.resources.preview_share_chooser_title
@@ -795,6 +800,52 @@ fun FilesScreen(
                         onClick = viewModel::keepBothFolders,
                         shapes = ButtonDefaults.shapes()
                     ) { Text(stringResource(Res.string.files_folder_keep_both)) }
+                }
+            }
+        )
+    }
+
+    val fileConflict by viewModel.fileConflict.collectAsStateWithLifecycle()
+    fileConflict?.let { conflict ->
+        val single = conflict.pending.singleOrNull()
+        AlertDialog(
+            onDismissRequest = viewModel::cancelFileImport,
+            title = {
+                Text(
+                    if (single != null) {
+                        stringResource(Res.string.files_folder_exists_title, single.file.name)
+                    } else {
+                        stringResource(Res.string.files_files_exist_title)
+                    }
+                )
+            },
+            text = {
+                Text(
+                    stringResource(
+                        if (single != null) {
+                            Res.string.files_file_exists_message
+                        } else {
+                            Res.string.files_files_exist_message
+                        }
+                    )
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = viewModel::replaceExistingFiles,
+                    shapes = ButtonDefaults.shapes()
+                ) { Text(stringResource(Res.string.files_file_replace)) }
+            },
+            dismissButton = {
+                Row {
+                    TextButton(
+                        onClick = viewModel::cancelFileImport,
+                        shapes = ButtonDefaults.shapes()
+                    ) { Text(stringResource(Res.string.common_cancel)) }
+                    TextButton(
+                        onClick = viewModel::keepBothFiles,
+                        shapes = ButtonDefaults.shapes()
+                    ) { Text(stringResource(Res.string.files_file_keep_both)) }
                 }
             }
         )

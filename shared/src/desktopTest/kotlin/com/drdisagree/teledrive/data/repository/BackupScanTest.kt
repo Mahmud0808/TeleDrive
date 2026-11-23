@@ -1,7 +1,9 @@
 package com.drdisagree.teledrive.data.repository
 
+import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.core.dispatchers.DispatcherProvider
 import com.drdisagree.teledrive.core.files.AppStoragePaths
+import com.drdisagree.teledrive.core.files.Hashing
 import com.drdisagree.teledrive.core.files.StorageInspector
 import com.drdisagree.teledrive.core.media.MediaInfo
 import com.drdisagree.teledrive.core.media.MediaMetadataExtractor
@@ -9,6 +11,9 @@ import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.core.telegram.TelegramLimits
 import com.drdisagree.teledrive.core.transfer.CountingBackupSessionTracker
 import com.drdisagree.teledrive.core.transfer.TransferScheduler
+import com.drdisagree.teledrive.data.local.entity.BackupRecordEntity
+import com.drdisagree.teledrive.domain.model.BackupSessionStatus
+import com.drdisagree.teledrive.domain.model.BackupState
 import com.drdisagree.teledrive.domain.model.BackupTrigger
 import com.drdisagree.teledrive.domain.model.Exclusion
 import com.drdisagree.teledrive.domain.model.ExclusionType
@@ -25,6 +30,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -80,6 +87,70 @@ class BackupScanTest {
             assertEquals(taken, entity.createdAt)
             assertEquals(photo.lastModified(), entity.modifiedAt)
         }
+
+    @Test
+    fun `a different file at a backed up path keeps the old backup and gets a numbered name`() =
+        runBlocking {
+            val path = File(media, "doc.pdf").apply { writeText("first") }
+            backups(exclude = null).startBackup(BackupTrigger.MANUAL)
+            val old = database.fileDao().byLocalPath(path.absolutePath, TEST_CHAT)!!
+            markBackedUp(old.id, path)
+
+            path.delete()
+            path.writeText("a different document")
+            backups(exclude = null).startBackup(BackupTrigger.MANUAL)
+
+            val kept = database.fileDao().byId(old.id)!!
+            assertEquals(10L, kept.messageId)
+            assertEquals("doc.pdf", kept.name)
+            assertNull(kept.localPath)
+            val added = database.fileDao().byLocalPath(path.absolutePath, TEST_CHAT)!!
+            assertNotEquals(old.id, added.id)
+            assertEquals("doc (1).pdf", added.name)
+            assertNull(added.messageId)
+        }
+
+    @Test
+    fun `an unchanged backed up file is not uploaded again`() = runBlocking {
+        val path = File(media, "doc.pdf").apply { writeText("first") }
+        backups(exclude = null).startBackup(BackupTrigger.MANUAL)
+        val old = database.fileDao().byLocalPath(path.absolutePath, TEST_CHAT)!!
+        markBackedUp(old.id, path)
+
+        assertEquals(
+            AppResult.Success(null),
+            backups(exclude = null).startBackup(BackupTrigger.MANUAL)
+        )
+        assertEquals(old.id, database.fileDao().byLocalPath(path.absolutePath, TEST_CHAT)!!.id)
+    }
+
+    private suspend fun markBackedUp(fileId: String, source: File) {
+        database.backupDao().activeSession()?.let {
+            database.backupDao().setSessionStatus(it.id, BackupSessionStatus.COMPLETED, 1)
+        }
+        database.fileDao().setRemoteMapping(
+            id = fileId,
+            chatId = TEST_CHAT,
+            messageId = 10,
+            remoteFileId = "r10",
+            remoteUniqueId = "u10",
+            state = BackupState.BACKED_UP,
+            encrypted = false,
+            iconFileId = null
+        )
+        database.backupDao().upsertRecord(
+            BackupRecordEntity(
+                id = "record",
+                sourcePath = source.absolutePath,
+                fileId = fileId,
+                sizeBytes = source.length(),
+                modifiedAt = source.lastModified(),
+                contentHash = Hashing.sha256(source),
+                backedUpAt = 1,
+                chatId = TEST_CHAT
+            )
+        )
+    }
 
     private fun transfers() = TransferRepositoryImpl(
         transferDao = database.transferDao(),

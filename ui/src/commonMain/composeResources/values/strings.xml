@@ -330,6 +330,11 @@
     <string name="files_folders_exist_message">Merge adds the new files to the existing folders. Keep both uploads separate folders with a number added to each name.</string>
     <string name="files_folder_merge">Merge</string>
     <string name="files_folder_keep_both">Keep both</string>
+    <string name="files_files_exist_title">These files already exist</string>
+    <string name="files_file_exists_message">Replace moves the existing file to Trash. Keep both uploads the new file with a number added to its name.</string>
+    <string name="files_files_exist_message">Replace moves the existing files to Trash. Keep both uploads the new files with a number added to each name.</string>
+    <string name="files_file_replace">Replace</string>
+    <string name="files_file_keep_both">Keep both</string>
     <string name="files_import_preparing">Preparing files for upload…</string>
     <string name="files_import_restored">Restored %1$d from trash</string>
     <string name="files_import_uploading">Uploading %1$d</string>

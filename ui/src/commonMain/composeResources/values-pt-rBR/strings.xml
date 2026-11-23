@@ -330,6 +330,11 @@
     <string name="files_folders_exist_message">Mesclar adiciona os novos arquivos às pastas existentes. Manter ambas envia pastas separadas com um número no nome.</string>
     <string name="files_folder_merge">Mesclar</string>
     <string name="files_folder_keep_both">Manter ambas</string>
+    <string name="files_files_exist_title">Estes arquivos já existem</string>
+    <string name="files_file_exists_message">Substituir move o arquivo existente para a Lixeira. Manter ambos envia o novo arquivo com um número no nome.</string>
+    <string name="files_files_exist_message">Substituir move os arquivos existentes para a Lixeira. Manter ambos envia os novos arquivos com um número em cada nome.</string>
+    <string name="files_file_replace">Substituir</string>
+    <string name="files_file_keep_both">Manter ambos</string>
     <string name="files_import_preparing">Preparando arquivos para envio…</string>
     <string name="files_import_restored">%1$d restaurados da lixeira</string>
     <string name="files_import_uploading">Enviando %1$d</string>

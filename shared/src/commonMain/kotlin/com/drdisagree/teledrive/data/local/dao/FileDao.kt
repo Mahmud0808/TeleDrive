@@ -526,6 +526,13 @@ interface FileDao {
     suspend fun namesInFolder(folderId: String?): List<String>
 
     @Query(
+        """SELECT id FROM files
+           WHERE folderId IS :folderId AND trashedAt IS NULL AND chatId IS :chatId
+             AND name = :name COLLATE NOCASE"""
+    )
+    suspend fun idsNamedInFolder(folderId: String?, name: String, chatId: Long?): List<String>
+
+    @Query(
         """SELECT name FROM files
            WHERE folderId IS :folderId AND trashedAt IS NULL AND id != :excludeId"""
     )

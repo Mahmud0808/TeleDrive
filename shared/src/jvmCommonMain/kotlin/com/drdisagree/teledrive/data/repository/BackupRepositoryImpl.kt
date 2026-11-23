@@ -287,7 +287,9 @@ class BackupRepositoryImpl(
         folderId: String?,
         chatId: Long?
     ): String {
-        fileDao.byLocalPath(source.absolutePath, chatId)?.let { existing ->
+        val linked = fileDao.byLocalPath(source.absolutePath, chatId)
+        if (linked?.messageId != null) fileDao.setLocalPath(linked.id, null)
+        linked?.takeIf { it.messageId == null }?.let { existing ->
             val changed = existing.sizeBytes != source.length() ||
                     existing.modifiedAt != source.lastModified()
             if (changed) {
@@ -316,7 +318,7 @@ class BackupRepositoryImpl(
             id = UUID.randomUUID().toString(),
             chatId = chatId,
             folderId = folderId,
-            name = source.name,
+            name = fileDao.freeNameIn(folderId, source.name),
             sizeBytes = source.length(),
             mimeType = mime,
             category = FileCategory.fromMimeType(mime),

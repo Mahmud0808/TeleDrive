@@ -131,9 +131,18 @@ class TrashRepositoryImpl(
         if (orphaned.isNotEmpty()) {
             fileDao.move(orphaned.map { it.id }, null, System.currentTimeMillis())
         }
+        renameClashes(ids)
         markFolderStateDirty()
         markFilesDirty(ids)
         return AppResult.Success(Unit)
+    }
+
+    private suspend fun renameClashes(ids: List<String>) {
+        val now = System.currentTimeMillis()
+        ids.chunked(SQL_BATCH).flatMap { fileDao.byIds(it) }.forEach { restored ->
+            val free = fileDao.freeNameIn(restored.folderId, restored.name, restored.id)
+            if (free != restored.name) fileDao.rename(restored.id, free, now)
+        }
     }
 
     override suspend fun restoreFolder(id: String): AppResult<Unit> {

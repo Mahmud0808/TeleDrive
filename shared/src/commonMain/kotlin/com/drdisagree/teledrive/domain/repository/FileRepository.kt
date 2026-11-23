@@ -69,6 +69,8 @@ interface FileRepository {
 
     suspend fun folderNamesIn(parentId: String?): List<String>
 
+    suspend fun fileIdsNamed(folderId: String?, name: String): List<String>
+
     suspend fun renameFile(id: String, newName: String): AppResult<Unit>
 
     suspend fun renameFolder(id: String, newName: String): AppResult<Unit>

@@ -236,6 +236,9 @@ class FileRepositoryImpl(
     override suspend fun folderNamesIn(parentId: String?): List<String> =
         folderDao.namesIn(parentId, activeChannel.id())
 
+    override suspend fun fileIdsNamed(folderId: String?, name: String): List<String> =
+        fileDao.idsNamedInFolder(folderId, name, activeChannel.id())
+
     override suspend fun createFolder(parentId: String?, name: String): AppResult<DriveFolder> {
         val sanitized = FileNameUtils.sanitize(name)
         val siblings = folderDao.namesIn(parentId, activeChannel.id())
@@ -522,11 +525,14 @@ class FileRepositoryImpl(
         val source = File(localPath)
         if (!source.exists() || !source.isFile) return AppResult.Failure(AppError.NotFound)
         fileDao.byLocalPath(localPath, activeChannel.id())?.takeIf { it.trashedAt == null }?.let {
-            return AppResult.Success(it.toDomain())
+            if (it.messageId == null || holdsSameContent(it, source)) {
+                return AppResult.Success(it.toDomain())
+            }
+            fileDao.setLocalPath(it.id, null)
         }
         reviveTrashedCopy(localPath) { folderId }?.let { return AppResult.Success(it) }
 
-        val name = displayName ?: source.name
+        val name = fileDao.freeNameIn(folderId, displayName ?: source.name)
         val mime = MimeTypes.fromFileName(name)
         val now = System.currentTimeMillis()
         val capturedAt = mediaMetadataExtractor.extract(source, mime).capturedAt
@@ -660,7 +666,7 @@ class FileRepositoryImpl(
 
         // Rows without a remote copy do not count, so an interrupted upload can be retried.
         fileDao.byLocalPath(source.absolutePath, activeChannel.id())
-            ?.takeIf { it.trashedAt == null && it.messageId != null }
+            ?.takeIf { it.trashedAt == null && it.messageId != null && holdsSameContent(it, source) }
             ?.let { return it.toDomain() }
 
         val candidates = fileDao.liveMatchesBySize(source.length(), activeChannel.id())
@@ -668,6 +674,12 @@ class FileRepositoryImpl(
 
         val localHash = Hashing.sha256(source) ?: return null
         return candidates.firstOrNull { it.contentHash == localHash }?.toDomain()
+    }
+
+    private fun holdsSameContent(entity: FileEntity, source: File): Boolean {
+        if (entity.sizeBytes != source.length()) return false
+        val hash = entity.contentHash ?: return true
+        return Hashing.sha256(source) == hash
     }
 
     override suspend fun reviveTrashedCopy(

@@ -358,6 +358,11 @@
     <string name="files_folders_exist_message">При объединении новые файлы добавятся в существующие папки. Если оставить обе, загрузятся отдельные папки с номером в названии.</string>
     <string name="files_folder_merge">Объединить</string>
     <string name="files_folder_keep_both">Оставить обе</string>
+    <string name="files_files_exist_title">Эти файлы уже существуют</string>
+    <string name="files_file_exists_message">При замене существующий файл переместится в корзину. Если оставить оба, новый файл загрузится с номером в названии.</string>
+    <string name="files_files_exist_message">При замене существующие файлы переместятся в корзину. Если оставить оба, новые файлы загрузятся с номером в названии.</string>
+    <string name="files_file_replace">Заменить</string>
+    <string name="files_file_keep_both">Оставить оба</string>
     <string name="files_import_preparing">Подготовка файлов к загрузке…</string>
     <string name="files_import_restored">Восстановлено %1$d из корзины</string>
     <string name="files_import_uploading">Загрузка %1$d</string>

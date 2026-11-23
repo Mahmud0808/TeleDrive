@@ -330,6 +330,11 @@
     <string name="files_folders_exist_message">L\'unione aggiunge i nuovi file alle cartelle esistenti. In alternativa, mantieni i caricamenti in cartelle separate, aggiungendo un numero a ciascun nome.</string>
     <string name="files_folder_merge">Unisci</string>
     <string name="files_folder_keep_both">Mantieni entrambi</string>
+    <string name="files_files_exist_title">Questi file esistono già</string>
+    <string name="files_file_exists_message">Sostituisci sposta il file esistente nel Cestino. Mantieni entrambi carica il nuovo file con un numero aggiunto al nome.</string>
+    <string name="files_files_exist_message">Sostituisci sposta i file esistenti nel Cestino. Mantieni entrambi carica i nuovi file con un numero aggiunto a ciascun nome.</string>
+    <string name="files_file_replace">Sostituisci</string>
+    <string name="files_file_keep_both">Mantieni entrambi</string>
     <string name="files_import_preparing">Preparazione dei file per il caricamento…</string>
     <string name="files_import_restored">Ripristinati %1$d elementi dal cestino</string>
     <string name="files_import_uploading">Caricamento di %1$d elementi</string>

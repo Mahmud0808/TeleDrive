@@ -330,6 +330,11 @@
     <string name="files_folders_exist_message">Combinar agrega los archivos nuevos a las carpetas existentes. Conservar ambas deja carpetas separadas con un número añadido a cada nombre.</string>
     <string name="files_folder_merge">Combinar</string>
     <string name="files_folder_keep_both">Conservar ambas</string>
+    <string name="files_files_exist_title">Estos archivos ya existen</string>
+    <string name="files_file_exists_message">Reemplazar mueve el archivo existente a la Papelera. Conservar ambos sube el archivo nuevo con un número añadido a su nombre.</string>
+    <string name="files_files_exist_message">Reemplazar mueve los archivos existentes a la Papelera. Conservar ambos sube los archivos nuevos con un número añadido a cada nombre.</string>
+    <string name="files_file_replace">Reemplazar</string>
+    <string name="files_file_keep_both">Conservar ambos</string>
     <string name="files_import_preparing">Preparando archivos para subir…</string>
     <string name="files_import_restored">Se restauraron %1$d de la papelera</string>
     <string name="files_import_uploading">Subiendo %1$d</string>

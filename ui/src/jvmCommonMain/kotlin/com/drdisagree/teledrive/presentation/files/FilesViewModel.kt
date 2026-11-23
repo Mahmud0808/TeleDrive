@@ -10,6 +10,7 @@ import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.core.files.DeleteConsentRequest
 import com.drdisagree.teledrive.core.files.FileImporter
 import com.drdisagree.teledrive.core.files.ImportSource
+import com.drdisagree.teledrive.core.files.ImportedFile
 import com.drdisagree.teledrive.core.files.MimeTypes
 import com.drdisagree.teledrive.core.files.PendingShare
 import com.drdisagree.teledrive.domain.model.DriveFile
@@ -660,6 +661,9 @@ class FilesViewModel(
         _folderConflict.value = null
     }
 
+    private val _fileConflict = MutableStateFlow<FileConflict?>(null)
+    val fileConflict: StateFlow<FileConflict?> = _fileConflict.asStateFlow()
+
     private suspend fun runImport(sources: List<ImportSource>, target: String?) {
         _messages.tryEmit(UiText.Resource(Res.string.files_import_preparing))
         var imported = 0
@@ -667,6 +671,7 @@ class FilesViewModel(
         var duplicates = 0
         var copied = 0
         var failed = 0
+        val clashes = mutableListOf<PendingImport>()
         for (source in sources) {
             val destination = fileRepository.resolveImportFolder(
                 source.relativeFolder,
@@ -691,26 +696,66 @@ class FilesViewModel(
                 fileImporter.discard(file)
                 continue
             }
-            when (
-                val result = fileRepository.importLocalFile(file.path, destination, file.name)
-            ) {
-                is AppResult.Success -> {
-                    val drive = result.value
-                    if (drive.hasRemoteCopy) {
-                        restored++
-                    } else {
-                        transferRepository.enqueueUpload(drive.id)
-                        imported++
-                    }
-                }
-
-                is AppResult.Failure -> {
-                    fileImporter.discard(file)
-                    failed++
-                }
+            val clashing = fileRepository.fileIdsNamed(destination, file.name)
+            if (clashing.isNotEmpty()) {
+                clashes += PendingImport(file, destination, clashing)
+                continue
+            }
+            when (uploadImported(file, destination)) {
+                ImportOutcome.IMPORTED -> imported++
+                ImportOutcome.RESTORED -> restored++
+                ImportOutcome.FAILED -> failed++
             }
         }
-        _messages.tryEmit(importSummary(imported, restored, duplicates, copied, failed))
+        if (imported + restored + duplicates + copied + failed > 0) {
+            _messages.tryEmit(importSummary(imported, restored, duplicates, copied, failed))
+        }
+        if (clashes.isNotEmpty()) _fileConflict.value = FileConflict(clashes)
+    }
+
+    private suspend fun uploadImported(file: ImportedFile, destination: String?): ImportOutcome =
+        when (val result = fileRepository.importLocalFile(file.path, destination, file.name)) {
+            is AppResult.Success -> if (result.value.hasRemoteCopy) {
+                ImportOutcome.RESTORED
+            } else {
+                transferRepository.enqueueUpload(result.value.id)
+                ImportOutcome.IMPORTED
+            }
+
+            is AppResult.Failure -> {
+                fileImporter.discard(file)
+                ImportOutcome.FAILED
+            }
+        }
+
+    fun replaceExistingFiles() = resolveFileConflict(replace = true)
+
+    fun keepBothFiles() = resolveFileConflict(replace = false)
+
+    private fun resolveFileConflict(replace: Boolean) {
+        val conflict = _fileConflict.getAndUpdate { null } ?: return
+        importScope.launch {
+            if (replace) {
+                trashRepository.moveFilesToTrash(
+                    conflict.pending.flatMap { it.clashingIds }.distinct()
+                )
+            }
+            val outcomes = conflict.pending.map { uploadImported(it.file, it.destination) }
+            _messages.tryEmit(
+                importSummary(
+                    imported = outcomes.count { it == ImportOutcome.IMPORTED },
+                    restored = outcomes.count { it == ImportOutcome.RESTORED },
+                    duplicates = 0,
+                    copied = 0,
+                    failed = outcomes.count { it == ImportOutcome.FAILED }
+                )
+            )
+        }
+    }
+
+    fun cancelFileImport() {
+        val conflict = _fileConflict.getAndUpdate { null } ?: return
+        conflict.pending.forEach { fileImporter.discard(it.file) }
     }
 
     private fun importSummary(
