@@ -1,27 +1,21 @@
 package com.drdisagree.teledrive.presentation.gallery
 
-import com.drdisagree.teledrive.core.common.AppError
-import com.drdisagree.teledrive.presentation.common.UiText
-import com.drdisagree.teledrive.presentation.common.toUiText
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import com.drdisagree.teledrive.domain.model.DriveFolder
-import com.drdisagree.teledrive.core.common.AppResult
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import androidx.paging.insertSeparators
 import androidx.paging.map
-import com.drdisagree.teledrive.resources.Res
-import com.drdisagree.teledrive.resources.files_cut_count
-import com.drdisagree.teledrive.resources.files_queued_for_download
+import com.drdisagree.teledrive.core.common.AppError
+import com.drdisagree.teledrive.core.common.AppResult
 import com.drdisagree.teledrive.domain.model.DriveFile
+import com.drdisagree.teledrive.domain.model.DriveFolder
 import com.drdisagree.teledrive.domain.model.FileCategory
 import com.drdisagree.teledrive.domain.model.FileQuerySpec
 import com.drdisagree.teledrive.domain.model.FileSortField
+import com.drdisagree.teledrive.domain.model.GalleryDay
+import com.drdisagree.teledrive.domain.model.GalleryEntry
 import com.drdisagree.teledrive.domain.model.MediaAlbum
 import com.drdisagree.teledrive.domain.model.SortDirection
 import com.drdisagree.teledrive.domain.repository.FileRepository
@@ -29,25 +23,33 @@ import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.repository.SyncRepository
 import com.drdisagree.teledrive.domain.repository.TransferRepository
 import com.drdisagree.teledrive.domain.repository.TrashRepository
-import com.drdisagree.teledrive.presentation.files.CutItems
-import com.drdisagree.teledrive.presentation.files.FileClipboard
 import com.drdisagree.teledrive.domain.usecase.MakeAvailableOfflineUseCase
 import com.drdisagree.teledrive.presentation.common.Formatters
 import com.drdisagree.teledrive.presentation.common.ListPosition
+import com.drdisagree.teledrive.presentation.common.UiText
+import com.drdisagree.teledrive.presentation.common.toUiText
 import com.drdisagree.teledrive.presentation.components.GridZoomLevel
 import com.drdisagree.teledrive.presentation.components.MAX_GRID_COLUMNS
 import com.drdisagree.teledrive.presentation.components.MIN_GRID_COLUMNS
 import com.drdisagree.teledrive.presentation.components.SelectionCapabilities
 import com.drdisagree.teledrive.presentation.components.zoomedIn
 import com.drdisagree.teledrive.presentation.components.zoomedOut
+import com.drdisagree.teledrive.presentation.files.CutItems
+import com.drdisagree.teledrive.presentation.files.FileClipboard
 import com.drdisagree.teledrive.presentation.navigation.Route
 import com.drdisagree.teledrive.presentation.preview.PreviewSequence
+import com.drdisagree.teledrive.resources.Res
+import com.drdisagree.teledrive.resources.files_cut_count
+import com.drdisagree.teledrive.resources.files_queued_for_download
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -59,7 +61,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class GalleryViewModel(
@@ -149,7 +150,7 @@ class GalleryViewModel(
 
     val pagedMedia: Flow<PagingData<GalleryListItem>> = spec
         .flatMapLatest { current ->
-            fileRepository.pagedFiles(current).map { data -> withDayHeaders(data, current) }
+            pagedItems(current)
         }
         .cachedIn(viewModelScope)
 
@@ -191,24 +192,29 @@ class GalleryViewModel(
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), GalleryUiState())
 
-    private fun withDayHeaders(
-        data: PagingData<DriveFile>,
-        spec: FileQuerySpec
-    ): PagingData<GalleryListItem> {
-        val scope = spec.categories.joinToString("+") { it.name }
-        val mapped = data.map<DriveFile, GalleryListItem> { GalleryListItem.Media(it, scope) }
-        if (spec.sortField != FileSortField.DATE_TAKEN &&
-            spec.sortField != FileSortField.DATE_ADDED
-        ) {
-            return mapped
+    val days: StateFlow<List<GalleryDay>> = spec
+        .flatMapLatest { current ->
+            if (current.isDated()) fileRepository.galleryDays(current) else flowOf(emptyList())
         }
-        return mapped.insertSeparators { before, after ->
-            val next = (after as? GalleryListItem.Media)?.file ?: return@insertSeparators null
-            val nextDay = Formatters.dayStart(timestampFor(next, spec.sortField))
-            val previous = (before as? GalleryListItem.Media)?.file
-            val previousDay = previous
-                ?.let { Formatters.dayStart(timestampFor(it, spec.sortField)) }
-            if (previousDay == nextDay) null else GalleryListItem.DayHeader(nextDay, scope)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    private fun FileQuerySpec.isDated(): Boolean =
+        sortField == FileSortField.DATE_TAKEN || sortField == FileSortField.DATE_ADDED
+
+    private fun pagedItems(spec: FileQuerySpec): Flow<PagingData<GalleryListItem>> {
+        val scope = spec.categories.joinToString("+") { it.name }
+        if (!spec.isDated()) {
+            return fileRepository.pagedFiles(spec).map { data ->
+                data.map<DriveFile, GalleryListItem> { GalleryListItem.Media(it, scope) }
+            }
+        }
+        return fileRepository.pagedGallery(spec).map { data ->
+            data.map { entry ->
+                when (entry) {
+                    is GalleryEntry.Day -> GalleryListItem.DayHeader(entry.dayStartMillis, scope)
+                    is GalleryEntry.Item -> GalleryListItem.Media(entry.file, scope)
+                }
+            }
         }
     }
 

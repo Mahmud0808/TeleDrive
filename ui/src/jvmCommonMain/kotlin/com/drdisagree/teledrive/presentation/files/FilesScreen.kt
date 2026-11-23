@@ -126,6 +126,8 @@ import com.drdisagree.teledrive.presentation.components.BottomBarSnackbarHost
 import com.drdisagree.teledrive.presentation.components.CollectionShortcuts
 import com.drdisagree.teledrive.presentation.components.ConfirmDialog
 import com.drdisagree.teledrive.presentation.components.EmptyState
+import com.drdisagree.teledrive.presentation.components.FastScroller
+import com.drdisagree.teledrive.presentation.components.FastScrollerGutter
 import com.drdisagree.teledrive.presentation.components.FileGridItem
 import com.drdisagree.teledrive.presentation.components.FileInfoSheet
 import com.drdisagree.teledrive.presentation.components.FileListItem
@@ -150,6 +152,9 @@ import com.drdisagree.teledrive.presentation.components.rememberKeyboardCollecti
 import com.drdisagree.teledrive.presentation.components.rememberPointerItems
 import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
 import com.drdisagree.teledrive.presentation.components.skeleton.CollectionSkeleton
+import com.drdisagree.teledrive.presentation.components.skeleton.GridItemSkeleton
+import com.drdisagree.teledrive.presentation.components.skeleton.ListItemSkeleton
+import com.drdisagree.teledrive.presentation.components.skeleton.rememberShimmerBrush
 import com.drdisagree.teledrive.presentation.navigation.FabBottomBarInset
 import com.drdisagree.teledrive.presentation.navigation.LocalBottomBarInset
 import com.drdisagree.teledrive.presentation.platform.FileDropArea
@@ -506,10 +511,18 @@ fun FilesScreen(
         snapshotFlow { files.itemCount to files.loadState.refresh }
             .first { (count, refresh) -> count > 0 && refresh !is LoadState.Loading }
 
+        var start = 0
         var rounds = 0
-        while (rounds++ < FOCUS_PAGE_LIMIT) {
-            val index = (0 until files.itemCount)
-                .firstOrNull { files.peek(it)?.id == target }
+        while (start < files.itemCount && rounds++ < FOCUS_PAGE_LIMIT) {
+            val end = minOf(start + FOCUS_WINDOW, files.itemCount)
+            val missing = (start until end).firstOrNull { files.peek(it) == null }
+            if (missing != null) {
+                files[missing]
+                withTimeoutOrNull(FOCUS_PAGE_WAIT_MS.milliseconds) {
+                    snapshotFlow { files.peek(missing) }.first { it != null }
+                } ?: return@LaunchedEffect
+            }
+            val index = (start until end).firstOrNull { files.peek(it)?.id == target }
             if (index != null) {
                 gridState.animateScrollToItem(state.folders.size + index)
                 highlightedFileId = target
@@ -517,15 +530,7 @@ fun FilesScreen(
                 highlightedFileId = null
                 return@LaunchedEffect
             }
-            if (files.loadState.append.endOfPaginationReached) return@LaunchedEffect
-
-            val loaded = files.itemCount
-            files[loaded - 1]
-            val grew = withTimeoutOrNull(FOCUS_PAGE_WAIT_MS.milliseconds) {
-                snapshotFlow { files.itemCount to files.loadState.append.endOfPaginationReached }
-                    .first { (count, ended) -> count > loaded || ended }
-            }
-            if (grew == null) return@LaunchedEffect
+            start = end
         }
     }
 
@@ -1243,136 +1248,160 @@ private fun FilesContent(
         },
         onEnd = viewModel::endRangeSelection
     )
-    LazyVerticalGrid(
-        state = gridState,
-        columns = GridCells.Fixed(columns),
-        modifier = Modifier
-            .fillMaxSize()
-            .keyboardCollection(
-                keyboard,
-                itemCount,
-                shortcuts,
-                label = stringResource(Res.string.nav_files)
-            )
-            .pinchZoom(onZoomIn = viewModel::zoomIn, onZoomOut = viewModel::zoomOut)
-            .then(if (pointer) locator.modifier else dragSelect)
-            .pointerBackground(
-                enabled = pointer,
-                onClick = viewModel::clearSelection,
-                onContextMenu = onBackgroundMenu,
-                onBack = onBack
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyVerticalGrid(
+            state = gridState,
+            columns = GridCells.Fixed(columns),
+            modifier = Modifier
+                .fillMaxSize()
+                .keyboardCollection(
+                    keyboard,
+                    itemCount,
+                    shortcuts,
+                    label = stringResource(Res.string.nav_files)
+                )
+                .pinchZoom(onZoomIn = viewModel::zoomIn, onZoomOut = viewModel::zoomOut)
+                .then(if (pointer) locator.modifier else dragSelect)
+                .pointerBackground(
+                    enabled = pointer,
+                    onClick = viewModel::clearSelection,
+                    onContextMenu = onBackgroundMenu,
+                    onBack = onBack
+                ),
+            contentPadding = padding.add(
+                horizontal = 12.dp,
+                top = 12.dp,
+                bottom = 100.dp,
+                end = if (pointer) FastScrollerGutter - 8.dp else 0.dp
             ),
-        contentPadding = padding.add(horizontal = 12.dp, top = 12.dp, bottom = 100.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        items(
-            count = state.folders.size,
-            key = { "folder-${state.folders[it].id}" },
-            span = {
-                if (state.viewMode == ViewMode.GRID) GridItemSpan(1)
-                else GridItemSpan(maxLineSpan)
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            items(
+                count = state.folders.size,
+                key = { "folder-${state.folders[it].id}" },
+                span = {
+                    if (state.viewMode == ViewMode.GRID) GridItemSpan(1)
+                    else GridItemSpan(maxLineSpan)
+                }
+            ) { index ->
+                val folder = state.folders[index]
+                val folderSelected = folder.id in state.folderSelection
+                if (state.viewMode == ViewMode.GRID) {
+                    FolderGridItem(
+                        folder = folder,
+                        selected = folderSelected,
+                        checked = folderSelected && ticks,
+                        onClick = {
+                            if (state.selectionMode && !pointer) {
+                                viewModel.toggleFolderSelection(folder.id)
+                            } else {
+                                onOpenFolder(folder.id)
+                            }
+                        },
+                        onLongClick = { viewModel.toggleFolderSelection(folder.id) },
+                        modifier = Modifier
+                            .then(pointerItem(index))
+                            .keyboardCollectionItem(keyboard, index)
+                            .animateItem()
+                    )
+                } else {
+                    FolderRow(
+                        folder = folder,
+                        selected = folderSelected,
+                        checked = folderSelected && ticks,
+                        onClick = {
+                            if (state.selectionMode && !pointer) {
+                                viewModel.toggleFolderSelection(folder.id)
+                            } else {
+                                onOpenFolder(folder.id)
+                            }
+                        },
+                        onLongClick = { viewModel.toggleFolderSelection(folder.id) },
+                        modifier = Modifier
+                            .then(pointerItem(index))
+                            .keyboardCollectionItem(keyboard, index)
+                            .animateItem()
+                    )
+                }
             }
-        ) { index ->
-            val folder = state.folders[index]
-            val folderSelected = folder.id in state.folderSelection
-            if (state.viewMode == ViewMode.GRID) {
-                FolderGridItem(
-                    folder = folder,
-                    selected = folderSelected,
-                    checked = folderSelected && ticks,
-                    onClick = {
-                        if (state.selectionMode && !pointer) {
-                            viewModel.toggleFolderSelection(folder.id)
-                        } else {
-                            onOpenFolder(folder.id)
-                        }
-                    },
-                    onLongClick = { viewModel.toggleFolderSelection(folder.id) },
-                    modifier = Modifier
-                        .then(pointerItem(index))
-                        .keyboardCollectionItem(keyboard, index)
-                        .animateItem()
-                )
-            } else {
-                FolderRow(
-                    folder = folder,
-                    selected = folderSelected,
-                    checked = folderSelected && ticks,
-                    onClick = {
-                        if (state.selectionMode && !pointer) {
-                            viewModel.toggleFolderSelection(folder.id)
-                        } else {
-                            onOpenFolder(folder.id)
-                        }
-                    },
-                    onLongClick = { viewModel.toggleFolderSelection(folder.id) },
-                    modifier = Modifier
-                        .then(pointerItem(index))
-                        .keyboardCollectionItem(keyboard, index)
-                        .animateItem()
-                )
-            }
-        }
 
-        items(
-            count = files.itemCount,
-            key = files.itemKey { "file-${it.id}" }
-        ) { index ->
-            val file = files[index] ?: return@items
-            val selected = file.id in state.selection
-            val highlighted = file.id == highlightedFileId
-            if (state.viewMode == ViewMode.GRID) {
-                FileGridItem(
-                    file = file,
-                    selected = selected,
-                    checked = selected && ticks,
-                    onClick = {
-                        if (state.selectionMode && !pointer) viewModel.toggleSelection(file.id)
-                        else onOpenFile(
-                            file.id,
-                            PreviewSequence(
-                                folderId = state.folderId,
-                                filterByFolder = true,
-                                sortField = state.sortField,
-                                sortDirection = state.sortDirection
+            items(
+                count = files.itemCount,
+                key = files.itemKey { "file-${it.id}" }
+            ) { index ->
+                val file = files[index]
+                if (file == null) {
+                    if (state.viewMode == ViewMode.GRID) {
+                        GridItemSkeleton(rememberShimmerBrush())
+                    } else {
+                        ListItemSkeleton(rememberShimmerBrush())
+                    }
+                    return@items
+                }
+                val selected = file.id in state.selection
+                val highlighted = file.id == highlightedFileId
+                if (state.viewMode == ViewMode.GRID) {
+                    FileGridItem(
+                        file = file,
+                        selected = selected,
+                        checked = selected && ticks,
+                        onClick = {
+                            if (state.selectionMode && !pointer) viewModel.toggleSelection(file.id)
+                            else onOpenFile(
+                                file.id,
+                                PreviewSequence(
+                                    folderId = state.folderId,
+                                    filterByFolder = true,
+                                    sortField = state.sortField,
+                                    sortDirection = state.sortDirection
+                                )
                             )
-                        )
-                    },
-                    onLongClick = { viewModel.toggleSelection(file.id) },
-                    modifier = Modifier
-                        .then(pointerItem(state.folders.size + index))
-                        .keyboardCollectionItem(keyboard, state.folders.size + index)
-                        .animateItem()
-                        .focusHighlight(highlighted)
-                )
-            } else {
-                FileListItem(
-                    file = file,
-                    selected = selected,
-                    checked = selected && ticks,
-                    selectionMode = state.selectionMode,
-                    onClick = {
-                        if (state.selectionMode && !pointer) viewModel.toggleSelection(file.id)
-                        else onOpenFile(
-                            file.id,
-                            PreviewSequence(
-                                folderId = state.folderId,
-                                filterByFolder = true,
-                                sortField = state.sortField,
-                                sortDirection = state.sortDirection
+                        },
+                        onLongClick = { viewModel.toggleSelection(file.id) },
+                        modifier = Modifier
+                            .then(pointerItem(state.folders.size + index))
+                            .keyboardCollectionItem(keyboard, state.folders.size + index)
+                            .animateItem()
+                            .focusHighlight(highlighted)
+                    )
+                } else {
+                    FileListItem(
+                        file = file,
+                        selected = selected,
+                        checked = selected && ticks,
+                        selectionMode = state.selectionMode,
+                        onClick = {
+                            if (state.selectionMode && !pointer) viewModel.toggleSelection(file.id)
+                            else onOpenFile(
+                                file.id,
+                                PreviewSequence(
+                                    folderId = state.folderId,
+                                    filterByFolder = true,
+                                    sortField = state.sortField,
+                                    sortDirection = state.sortDirection
+                                )
                             )
-                        )
-                    },
-                    onLongClick = { viewModel.toggleSelection(file.id) },
-                    modifier = Modifier
-                        .then(pointerItem(state.folders.size + index))
-                        .keyboardCollectionItem(keyboard, state.folders.size + index)
-                        .animateItem()
-                        .focusHighlight(highlighted)
-                )
+                        },
+                        onLongClick = { viewModel.toggleSelection(file.id) },
+                        modifier = Modifier
+                            .then(pointerItem(state.folders.size + index))
+                            .keyboardCollectionItem(keyboard, state.folders.size + index)
+                            .animateItem()
+                            .focusHighlight(highlighted)
+                    )
+                }
             }
         }
+        FastScroller(
+            state = gridState,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(
+                    top = padding.calculateTopPadding() + 12.dp,
+                    bottom = padding.calculateBottomPadding() + 16.dp
+                )
+        )
     }
 }
 
@@ -1460,7 +1489,8 @@ private fun Modifier.focusHighlight(active: Boolean): Modifier {
     }
 }
 
-private const val FOCUS_PAGE_LIMIT = 10
+private const val FOCUS_PAGE_LIMIT = 15
+private const val FOCUS_WINDOW = 60
 private const val FOCUS_PAGE_WAIT_MS = 5_000L
 private const val FOCUS_HIGHLIGHT_MS = 1_800L
 private const val FOCUS_TINT_ALPHA = 0.9f

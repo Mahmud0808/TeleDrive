@@ -11,6 +11,8 @@ import androidx.room.Update
 import com.drdisagree.teledrive.data.local.entity.AlbumSummary
 import com.drdisagree.teledrive.data.local.entity.FileEntity
 import com.drdisagree.teledrive.data.local.entity.FolderEntity
+import com.drdisagree.teledrive.data.local.entity.GalleryDayRow
+import com.drdisagree.teledrive.data.local.entity.GalleryRowEntity
 import com.drdisagree.teledrive.data.local.entity.HomeAggregates
 import com.drdisagree.teledrive.data.local.entity.LocalCopyRef
 import com.drdisagree.teledrive.domain.model.BackupState
@@ -98,6 +100,12 @@ interface FileDao {
 
     @RawQuery(observedEntities = [FileEntity::class, FolderEntity::class])
     fun pagingSource(query: RoomRawQuery): PagingSource<Int, FileEntity>
+
+    @RawQuery(observedEntities = [FileEntity::class, FolderEntity::class])
+    fun galleryPagingSource(query: RoomRawQuery): PagingSource<Int, GalleryRowEntity>
+
+    @RawQuery(observedEntities = [FileEntity::class, FolderEntity::class])
+    fun observeGalleryDays(query: RoomRawQuery): Flow<List<GalleryDayRow>>
 
     @RawQuery(observedEntities = [FileEntity::class, FolderEntity::class])
     fun observeList(query: RoomRawQuery): Flow<List<FileEntity>>

@@ -7,6 +7,8 @@ import com.drdisagree.teledrive.domain.model.DriveFile
 import com.drdisagree.teledrive.domain.model.DriveFolder
 import com.drdisagree.teledrive.domain.model.FileQuerySpec
 import com.drdisagree.teledrive.domain.model.FileSortField
+import com.drdisagree.teledrive.domain.model.GalleryDay
+import com.drdisagree.teledrive.domain.model.GalleryEntry
 import com.drdisagree.teledrive.domain.model.LinkMetadata
 import com.drdisagree.teledrive.domain.model.MediaAlbum
 import com.drdisagree.teledrive.domain.model.SortDirection
@@ -16,6 +18,10 @@ import kotlinx.coroutines.flow.Flow
 interface FileRepository {
 
     fun pagedFiles(spec: FileQuerySpec): Flow<PagingData<DriveFile>>
+
+    fun pagedGallery(spec: FileQuerySpec): Flow<PagingData<GalleryEntry>>
+
+    fun galleryDays(spec: FileQuerySpec): Flow<List<GalleryDay>>
 
     fun observeFiles(spec: FileQuerySpec): Flow<List<DriveFile>>
 

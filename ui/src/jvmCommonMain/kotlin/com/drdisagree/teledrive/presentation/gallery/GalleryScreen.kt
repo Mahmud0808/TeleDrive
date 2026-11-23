@@ -64,6 +64,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -79,12 +80,14 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
+import com.drdisagree.teledrive.domain.model.FileSortField
 import com.drdisagree.teledrive.domain.model.MediaAlbum
 import com.drdisagree.teledrive.domain.model.ViewMode
 import com.drdisagree.teledrive.presentation.common.AppBackHandler
 import com.drdisagree.teledrive.presentation.common.CollectSnackbarMessages
 import com.drdisagree.teledrive.presentation.common.DayBucket
 import com.drdisagree.teledrive.presentation.common.Formatters
+import com.drdisagree.teledrive.presentation.common.add
 import com.drdisagree.teledrive.presentation.common.isInitialLoad
 import com.drdisagree.teledrive.presentation.common.rememberPosition
 import com.drdisagree.teledrive.presentation.components.ActionMenu
@@ -92,11 +95,14 @@ import com.drdisagree.teledrive.presentation.components.BottomBarSnackbarHost
 import com.drdisagree.teledrive.presentation.components.CollectionShortcuts
 import com.drdisagree.teledrive.presentation.components.ConfirmDialog
 import com.drdisagree.teledrive.presentation.components.EmptyState
+import com.drdisagree.teledrive.presentation.components.FastScroller
+import com.drdisagree.teledrive.presentation.components.FastScrollerGutter
 import com.drdisagree.teledrive.presentation.components.FileGridItem
 import com.drdisagree.teledrive.presentation.components.FileListItem
 import com.drdisagree.teledrive.presentation.components.FolderInfoSheet
 import com.drdisagree.teledrive.presentation.components.GALLERY_SORT_FIELDS
 import com.drdisagree.teledrive.presentation.components.LazyIndexLocator
+import com.drdisagree.teledrive.presentation.components.LineModel
 import com.drdisagree.teledrive.presentation.components.MenuAction
 import com.drdisagree.teledrive.presentation.components.PointerMenu
 import com.drdisagree.teledrive.presentation.components.RefreshAction
@@ -114,6 +120,9 @@ import com.drdisagree.teledrive.presentation.components.rememberKeyboardCollecti
 import com.drdisagree.teledrive.presentation.components.rememberPointerItems
 import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
 import com.drdisagree.teledrive.presentation.components.skeleton.CollectionSkeleton
+import com.drdisagree.teledrive.presentation.components.skeleton.GridItemSkeleton
+import com.drdisagree.teledrive.presentation.components.skeleton.ListItemSkeleton
+import com.drdisagree.teledrive.presentation.components.skeleton.rememberShimmerBrush
 import com.drdisagree.teledrive.presentation.files.FolderPickerHost
 import com.drdisagree.teledrive.presentation.navigation.LocalBottomBarInset
 import com.drdisagree.teledrive.presentation.platform.LocalPlatformCapabilities
@@ -823,6 +832,28 @@ fun GalleryScreen(
                     onContextMenu = {},
                     onBack = onBack
                 )
+                val days by viewModel.days.collectAsStateWithLifecycle()
+                val lineModel = remember(days, state.viewMode, state.gridSize) {
+                    days.takeIf { it.isNotEmpty() }?.let { list ->
+                        LineModel.days(
+                            list.map { it.count },
+                            if (state.viewMode == ViewMode.LIST) 1 else state.gridSize
+                        )
+                    }
+                }
+                val dayStarts = remember(days) {
+                    var next = 0
+                    IntArray(days.size) { day -> next.also { next += days[day].count + 1 } }
+                }
+                val dateLabel: (Int) -> String? = { index ->
+                    var low = 0
+                    var high = dayStarts.lastIndex
+                    while (low < high) {
+                        val mid = (low + high + 1) / 2
+                        if (dayStarts[mid] <= index) low = mid else high = mid - 1
+                    }
+                    days.getOrNull(low)?.let { Formatters.date(it.dayStartMillis) }
+                }
                 val isMedia: (Int) -> Boolean = { index ->
                     index < media.itemCount && media.peek(index) is GalleryListItem.Media
                 }
@@ -874,134 +905,162 @@ fun GalleryScreen(
                             description = stringResource(Res.string.gallery_photos_videos_appear_here)
                         )
 
-                        state.viewMode == ViewMode.LIST -> LazyColumn(
-                            state = mediaListState,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .keyboardCollection(
-                                    listKeyboard,
-                                    media.itemCount,
-                                    shortcuts,
-                                    label = stringResource(Res.string.nav_gallery)
-                                )
-                                .pinchZoom(
-                                    onZoomIn = viewModel::zoomIn,
-                                    onZoomOut = viewModel::zoomOut
-                                )
-                                .then(if (pointer) locator.modifier else listDragSelect)
-                                .then(background),
-                            contentPadding = PaddingValues(
-                                start = 8.dp,
-                                end = 8.dp,
-                                top = 8.dp,
-                                bottom = 8.dp + padding.calculateBottomPadding() + LocalBottomBarInset.current
-                            )
-                        ) {
-                            items(
-                                count = media.itemCount,
-                                key = media.itemKey { it.key }
-                            ) { index ->
-                                when (val item = media[index]) {
-                                    is GalleryListItem.DayHeader -> DayHeaderRow(
-                                        dayStartMillis = item.dayStartMillis,
-                                        modifier = Modifier.animateItem()
+                        state.viewMode == ViewMode.LIST -> Box(Modifier.fillMaxSize()) {
+                            LazyColumn(
+                                state = mediaListState,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .keyboardCollection(
+                                        listKeyboard,
+                                        media.itemCount,
+                                        shortcuts,
+                                        label = stringResource(Res.string.nav_gallery)
                                     )
-
-                                    is GalleryListItem.Media -> {
-                                        val file = item.file
-                                        FileListItem(
-                                            file = file,
-                                            selected = file.id in state.selection,
-                                            checked = file.id in state.selection && ticks,
-                                            selectionMode = state.selectionMode,
-                                            onClick = {
-                                                if (state.selectionMode && !pointer) {
-                                                    viewModel.toggleSelection(file.id)
-                                                } else {
-                                                    onOpenFile(file.id, previewSequence)
-                                                }
-                                            },
-                                            onLongClick = { viewModel.toggleSelection(file.id) },
-                                            modifier = Modifier
-                                                .then(pointerItem(index))
-                                                .keyboardCollectionItem(listKeyboard, index)
-                                                .animateItem()
+                                    .pinchZoom(
+                                        onZoomIn = viewModel::zoomIn,
+                                        onZoomOut = viewModel::zoomOut
+                                    )
+                                    .then(if (pointer) locator.modifier else listDragSelect)
+                                    .then(background),
+                                contentPadding = PaddingValues(
+                                    start = 8.dp,
+                                    end = 8.dp,
+                                    top = 8.dp,
+                                    bottom = 8.dp + padding.calculateBottomPadding() + LocalBottomBarInset.current
+                                ).add(end = if (pointer) FastScrollerGutter - 8.dp else 0.dp)
+                            ) {
+                                items(
+                                    count = media.itemCount,
+                                    key = media.itemKey { it.key }
+                                ) { index ->
+                                    when (val item = media[index]) {
+                                        is GalleryListItem.DayHeader -> DayHeaderRow(
+                                            dayStartMillis = item.dayStartMillis,
+                                            modifier = Modifier.animateItem()
                                         )
-                                    }
 
-                                    null -> Unit
+                                        is GalleryListItem.Media -> {
+                                            val file = item.file
+                                            FileListItem(
+                                                file = file,
+                                                selected = file.id in state.selection,
+                                                checked = file.id in state.selection && ticks,
+                                                selectionMode = state.selectionMode,
+                                                onClick = {
+                                                    if (state.selectionMode && !pointer) {
+                                                        viewModel.toggleSelection(file.id)
+                                                    } else {
+                                                        onOpenFile(file.id, previewSequence)
+                                                    }
+                                                },
+                                                onLongClick = { viewModel.toggleSelection(file.id) },
+                                                modifier = Modifier
+                                                    .then(pointerItem(index))
+                                                    .keyboardCollectionItem(listKeyboard, index)
+                                                    .animateItem()
+                                            )
+                                        }
+
+                                        null -> ListItemSkeleton(rememberShimmerBrush())
+                                    }
                                 }
                             }
+                            FastScroller(
+                                state = mediaListState,
+                                model = lineModel,
+                                label = dateLabel,
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .padding(
+                                        top = 8.dp,
+                                        bottom = padding.calculateBottomPadding() +
+                                                LocalBottomBarInset.current + 8.dp
+                                    )
+                            )
                         }
 
-                        else -> LazyVerticalGrid(
-                            state = mediaGridState,
-                            columns = GridCells.Fixed(state.gridSize),
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .keyboardCollection(
-                                    gridKeyboard,
-                                    media.itemCount,
-                                    shortcuts,
-                                    label = stringResource(Res.string.nav_gallery)
-                                )
-                                .pinchZoom(
-                                    onZoomIn = viewModel::zoomIn,
-                                    onZoomOut = viewModel::zoomOut
-                                )
-                                .then(if (pointer) locator.modifier else gridDragSelect)
-                                .then(background),
-                            contentPadding = PaddingValues(
-                                start = 12.dp,
-                                end = 12.dp,
-                                top = 12.dp,
-                                bottom = 12.dp + padding.calculateBottomPadding() + LocalBottomBarInset.current
-                            ),
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            verticalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            items(
-                                count = media.itemCount,
-                                key = media.itemKey { it.key },
-                                span = { index ->
-                                    if (media.peek(index) is GalleryListItem.DayHeader) {
-                                        GridItemSpan(maxLineSpan)
-                                    } else {
-                                        GridItemSpan(1)
-                                    }
-                                }
-                            ) { index ->
-                                when (val item = media[index]) {
-                                    is GalleryListItem.DayHeader -> DayHeaderRow(
-                                        dayStartMillis = item.dayStartMillis,
-                                        modifier = Modifier.animateItem()
+                        else -> Box(Modifier.fillMaxSize()) {
+                            LazyVerticalGrid(
+                                state = mediaGridState,
+                                columns = GridCells.Fixed(state.gridSize),
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .keyboardCollection(
+                                        gridKeyboard,
+                                        media.itemCount,
+                                        shortcuts,
+                                        label = stringResource(Res.string.nav_gallery)
                                     )
-
-                                    is GalleryListItem.Media -> {
-                                        val file = item.file
-                                        FileGridItem(
-                                            file = file,
-                                            selected = file.id in state.selection,
-                                            checked = file.id in state.selection && ticks,
-                                            compact = true,
-                                            onClick = {
-                                                if (state.selectionMode && !pointer) {
-                                                    viewModel.toggleSelection(file.id)
-                                                } else {
-                                                    onOpenFile(file.id, previewSequence)
-                                                }
-                                            },
-                                            onLongClick = { viewModel.toggleSelection(file.id) },
-                                            modifier = Modifier
-                                                .then(pointerItem(index))
-                                                .keyboardCollectionItem(gridKeyboard, index)
-                                                .animateItem()
-                                        )
+                                    .pinchZoom(
+                                        onZoomIn = viewModel::zoomIn,
+                                        onZoomOut = viewModel::zoomOut
+                                    )
+                                    .then(if (pointer) locator.modifier else gridDragSelect)
+                                    .then(background),
+                                contentPadding = PaddingValues(
+                                    start = 12.dp,
+                                    end = 12.dp,
+                                    top = 12.dp,
+                                    bottom = 12.dp + padding.calculateBottomPadding() + LocalBottomBarInset.current
+                                ).add(end = if (pointer) FastScrollerGutter - 8.dp else 0.dp),
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                verticalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                items(
+                                    count = media.itemCount,
+                                    key = media.itemKey { it.key },
+                                    span = { index ->
+                                        if (media.peek(index) is GalleryListItem.DayHeader) {
+                                            GridItemSpan(maxLineSpan)
+                                        } else {
+                                            GridItemSpan(1)
+                                        }
                                     }
+                                ) { index ->
+                                    when (val item = media[index]) {
+                                        is GalleryListItem.DayHeader -> DayHeaderRow(
+                                            dayStartMillis = item.dayStartMillis,
+                                            modifier = Modifier.animateItem()
+                                        )
 
-                                    null -> Unit
+                                        is GalleryListItem.Media -> {
+                                            val file = item.file
+                                            FileGridItem(
+                                                file = file,
+                                                selected = file.id in state.selection,
+                                                checked = file.id in state.selection && ticks,
+                                                compact = true,
+                                                onClick = {
+                                                    if (state.selectionMode && !pointer) {
+                                                        viewModel.toggleSelection(file.id)
+                                                    } else {
+                                                        onOpenFile(file.id, previewSequence)
+                                                    }
+                                                },
+                                                onLongClick = { viewModel.toggleSelection(file.id) },
+                                                modifier = Modifier
+                                                    .then(pointerItem(index))
+                                                    .keyboardCollectionItem(gridKeyboard, index)
+                                                    .animateItem()
+                                            )
+                                        }
+
+                                        null -> GridItemSkeleton(rememberShimmerBrush(), compact = true)
+                                    }
                                 }
                             }
+                            FastScroller(
+                                state = mediaGridState,
+                                model = lineModel,
+                                label = dateLabel,
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .padding(
+                                        top = 8.dp,
+                                        bottom = padding.calculateBottomPadding() +
+                                                LocalBottomBarInset.current + 8.dp
+                                    )
+                            )
                         }
                     }
                 }

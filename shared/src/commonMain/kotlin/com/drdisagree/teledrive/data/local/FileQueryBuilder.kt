@@ -31,7 +31,75 @@ object FileQueryBuilder {
 
     fun buildIds(spec: FileQuerySpec): RoomRawQuery = query("id", spec)
 
+    fun buildGalleryDays(spec: FileQuerySpec): RoomRawQuery {
+        val filters = filters(spec)
+        val tables = filters.trees + galleryBase(spec, filters)
+        val sql = "WITH RECURSIVE ${tables.joinToString(", ")} " +
+                "SELECT day, COUNT(*) AS count FROM base GROUP BY day ORDER BY day ${directionOf(spec)}"
+        return raw(sql, filters.args)
+    }
+
+    private fun galleryBase(spec: FileQuerySpec, filters: QueryFilters): String {
+        val column = if (spec.sortField == FileSortField.DATE_ADDED) "addedAt" else "createdAt"
+        val day = "date($column / 1000, 'unixepoch', 'localtime')"
+        return "base AS (SELECT id, $column AS sortValue, $day AS day " +
+                "FROM files WHERE ${filters.where})"
+    }
+
+    fun buildGallery(spec: FileQuerySpec): RoomRawQuery {
+        val filters = filters(spec)
+        val direction = directionOf(spec)
+        val tables = filters.trees + listOf(
+            galleryBase(spec, filters),
+            "entries AS (SELECT 0 AS isHeader, day, sortValue, id AS fileId FROM base " +
+                    "UNION ALL SELECT 1, day, NULL, NULL FROM base GROUP BY day)"
+        )
+        val sql = "WITH RECURSIVE ${tables.joinToString(", ")} " +
+                "SELECT entries.isHeader AS isHeader, entries.day AS day, files.* " +
+                "FROM entries LEFT JOIN files ON files.id = entries.fileId " +
+                "ORDER BY entries.day $direction, entries.isHeader DESC, " +
+                "entries.sortValue $direction, entries.fileId ASC"
+        return raw(sql, filters.args)
+    }
+
     private fun query(projection: String, spec: FileQuerySpec): RoomRawQuery {
+        val filters = filters(spec)
+        val orderColumn = when (spec.sortField) {
+            FileSortField.NAME -> "name COLLATE NOCASE"
+            FileSortField.SIZE -> "sizeBytes"
+            FileSortField.DATE_MODIFIED -> "modifiedAt"
+            FileSortField.DATE_TAKEN -> "createdAt"
+            FileSortField.DATE_ADDED -> "addedAt"
+            FileSortField.TYPE -> "mimeType"
+            FileSortField.BACKUP_STATUS -> "backupState"
+        }
+        val prefix = if (filters.trees.isEmpty()) {
+            ""
+        } else {
+            "WITH RECURSIVE ${filters.trees.joinToString(", ")} "
+        }
+        val sql = prefix + "SELECT $projection FROM files WHERE ${filters.where} " +
+                "ORDER BY $orderColumn ${directionOf(spec)}, id ASC"
+        return raw(sql, filters.args)
+    }
+
+    private fun directionOf(spec: FileQuerySpec): String = when (spec.sortDirection) {
+        SortDirection.ASCENDING -> "ASC"
+        SortDirection.DESCENDING -> "DESC"
+    }
+
+    private fun raw(sql: String, args: List<Any>): RoomRawQuery = RoomRawQuery(sql) { statement ->
+        args.forEachIndexed { index, value ->
+            when (value) {
+                is String -> statement.bindText(index + 1, value)
+                is Long -> statement.bindLong(index + 1, value)
+                is Int -> statement.bindLong(index + 1, value.toLong())
+                else -> error("Unsupported query argument: $value")
+            }
+        }
+    }
+
+    private fun filters(spec: FileQuerySpec): QueryFilters {
         val where = StringBuilder("trashedAt IS NULL")
         val args = mutableListOf<Any>()
         val trees = mutableListOf<String>()
@@ -100,33 +168,7 @@ object FileQueryBuilder {
             where.append(notUnder("archived_folders"))
         }
 
-        val orderColumn = when (spec.sortField) {
-            FileSortField.NAME -> "name COLLATE NOCASE"
-            FileSortField.SIZE -> "sizeBytes"
-            FileSortField.DATE_MODIFIED -> "modifiedAt"
-            FileSortField.DATE_TAKEN -> "createdAt"
-            FileSortField.DATE_ADDED -> "addedAt"
-            FileSortField.TYPE -> "mimeType"
-            FileSortField.BACKUP_STATUS -> "backupState"
-        }
-        val direction = when (spec.sortDirection) {
-            SortDirection.ASCENDING -> "ASC"
-            SortDirection.DESCENDING -> "DESC"
-        }
-
-        val prefix = if (trees.isEmpty()) "" else "WITH RECURSIVE ${trees.joinToString(", ")} "
-        val sql = prefix + "SELECT $projection FROM files WHERE $where " +
-                "ORDER BY $orderColumn $direction, id ASC"
-        return RoomRawQuery(sql) { statement ->
-            args.forEachIndexed { index, value ->
-                when (value) {
-                    is String -> statement.bindText(index + 1, value)
-                    is Long -> statement.bindLong(index + 1, value)
-                    is Int -> statement.bindLong(index + 1, value.toLong())
-                    else -> error("Unsupported query argument: $value")
-                }
-            }
-        }
+        return QueryFilters(trees, where.toString(), args)
     }
 
     private fun escapeLike(value: String): String =

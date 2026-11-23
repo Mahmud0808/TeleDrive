@@ -37,6 +37,8 @@ import com.drdisagree.teledrive.domain.model.DriveFolder
 import com.drdisagree.teledrive.domain.model.FileCategory
 import com.drdisagree.teledrive.domain.model.FileQuerySpec
 import com.drdisagree.teledrive.domain.model.FileSortField
+import com.drdisagree.teledrive.domain.model.GalleryDay
+import com.drdisagree.teledrive.domain.model.GalleryEntry
 import com.drdisagree.teledrive.domain.model.LinkMetadata
 import com.drdisagree.teledrive.domain.model.MediaAlbum
 import com.drdisagree.teledrive.domain.model.SortDirection
@@ -44,14 +46,16 @@ import com.drdisagree.teledrive.domain.model.StorageSlice
 import com.drdisagree.teledrive.domain.repository.FileRepository
 import com.drdisagree.teledrive.domain.repository.SettingsRepository
 import com.drdisagree.teledrive.domain.usecase.FolderCycleCheck
+import java.io.File
+import java.net.URI
+import java.time.LocalDate
+import java.time.ZoneId
+import java.util.UUID
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import java.io.File
-import java.net.URI
-import java.util.UUID
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class FileRepositoryImpl(
@@ -94,7 +98,8 @@ class FileRepositoryImpl(
                 config = PagingConfig(
                     pageSize = 60,
                     prefetchDistance = 120,
-                    enablePlaceholders = false
+                    enablePlaceholders = true,
+                    jumpThreshold = 240
                 ),
                 pagingSourceFactory = {
                     OffsetRefreshPagingSource(
@@ -103,6 +108,39 @@ class FileRepositoryImpl(
                 }
             ).flow.map { paging -> paging.map { it.toDomain() } }
         }
+
+    override fun pagedGallery(spec: FileQuerySpec): Flow<PagingData<GalleryEntry>> =
+        activeChannel.observe().flatMapLatest { chatId ->
+            Pager(
+                config = PagingConfig(
+                    pageSize = 90,
+                    prefetchDistance = 180,
+                    enablePlaceholders = true,
+                    jumpThreshold = 360
+                ),
+                pagingSourceFactory = {
+                    OffsetRefreshPagingSource(
+                        fileDao.galleryPagingSource(
+                            FileQueryBuilder.buildGallery(spec.copy(chatId = chatId))
+                        )
+                    )
+                }
+            ).flow.map { paging ->
+                paging.map { row ->
+                    row.file?.let { GalleryEntry.Item(it.toDomain()) }
+                        ?: GalleryEntry.Day(dayStartOf(row.day))
+                }
+            }
+        }
+
+    override fun galleryDays(spec: FileQuerySpec): Flow<List<GalleryDay>> =
+        activeChannel.observe().flatMapLatest { chatId ->
+            fileDao.observeGalleryDays(FileQueryBuilder.buildGalleryDays(spec.copy(chatId = chatId)))
+                .map { rows -> rows.map { GalleryDay(dayStartOf(it.day), it.count) } }
+        }
+
+    private fun dayStartOf(day: String): Long =
+        LocalDate.parse(day).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
 
     override fun observeFiles(spec: FileQuerySpec): Flow<List<DriveFile>> =
         activeChannel.observe().flatMapLatest { chatId ->
