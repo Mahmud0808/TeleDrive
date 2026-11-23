@@ -32,6 +32,7 @@
     <string name="transfer_error_cache_full">No hay espacio libre suficiente para los archivos temporales de TeleDrive. Se necesitan %1$s.</string>
     <string name="transfer_error_upload_ended">La subida terminó de forma inesperada</string>
     <string name="transfer_error_upload_stalled">La subida dejó de responder</string>
+    <string name="transfer_error_upload_damaged">La subida no coincide con el archivo original. Vuelve a intentarlo para subirlo de nuevo.</string>
 
     <!-- Notifications -->
     <string name="notification_backup_complete">Respaldo completado</string>
@@ -57,6 +58,7 @@
     <string name="notification_update_skip">Omitir esta versión</string>
     <string name="notification_update_title">Actualización disponible</string>
     <string name="notification_upload_failed">Falló la subida</string>
+    <string name="notification_upload_damaged">Subida dañada</string>
     <string name="notification_uploading_many">Subiendo %1$d de %2$d archivos</string>
     <string name="notification_uploading_one">Subiendo un archivo</string>
 </resources>

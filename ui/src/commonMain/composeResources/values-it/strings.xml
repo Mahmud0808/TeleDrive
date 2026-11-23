@@ -335,6 +335,9 @@
     <string name="files_files_exist_message">Sostituisci sposta i file esistenti nel Cestino. Mantieni entrambi carica i nuovi file con un numero aggiunto a ciascun nome.</string>
     <string name="files_file_replace">Sostituisci</string>
     <string name="files_file_keep_both">Mantieni entrambi</string>
+    <string name="upload_damaged_title">Caricamento danneggiato</string>
+    <string name="upload_damaged_message_one">“%1$s” non è stato caricato correttamente, quindi la copia danneggiata è stata rimossa. Il file su questo dispositivo è stato conservato. Riprova da Trasferimenti.</string>
+    <string name="upload_damaged_message_many">Questi file non sono stati caricati correttamente, quindi le copie danneggiate sono state rimosse. I file su questo dispositivo sono stati conservati. Riprova da Trasferimenti.</string>
     <string name="files_import_preparing">Preparazione dei file per il caricamento…</string>
     <string name="files_import_restored">Ripristinati %1$d elementi dal cestino</string>
     <string name="files_import_uploading">Caricamento di %1$d elementi</string>

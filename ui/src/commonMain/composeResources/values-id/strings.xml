@@ -324,6 +324,9 @@
     <string name="files_files_exist_message">Ganti akan memindahkan file yang ada ke Tempat sampah. Simpan keduanya akan mengunggah file baru dengan tambahan nomor pada setiap namanya.</string>
     <string name="files_file_replace">Ganti</string>
     <string name="files_file_keep_both">Simpan keduanya</string>
+    <string name="upload_damaged_title">Unggahan rusak</string>
+    <string name="upload_damaged_message_one">"%1$s" tidak terunggah dengan benar, jadi salinan yang rusak dihapus. File di perangkat ini tetap disimpan. Coba lagi dari Transfer.</string>
+    <string name="upload_damaged_message_many">File ini tidak terunggah dengan benar, jadi salinan yang rusak dihapus. File di perangkat ini tetap disimpan. Coba lagi dari Transfer.</string>
     <string name="files_import_preparing">Menyiapkan file untuk diunggah…</string>
     <string name="files_import_restored">%1$d dipulihkan dari tempat sampah</string>
     <string name="files_import_uploading">Mengunggah %1$d</string>

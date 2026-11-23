@@ -65,6 +65,7 @@
     <string name="transfer_error_local_file_gone">O arquivo local não existe mais</string>
     <string name="transfer_error_upload_ended">O envio foi interrompido inesperadamente</string>
     <string name="transfer_error_upload_stalled">O envio parou de responder</string>
+    <string name="transfer_error_upload_damaged">O envio não corresponde ao arquivo original. Tente enviá-lo novamente.</string>
     <string name="transfer_error_download_ended">O download foi interrompido inesperadamente</string>
     <string name="transfer_error_download_stalled">O download parou de responder</string>
     <string name="transfer_error_downloaded_missing">Arquivo baixado não encontrado</string>

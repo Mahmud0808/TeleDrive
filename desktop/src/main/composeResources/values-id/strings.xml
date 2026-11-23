@@ -65,6 +65,7 @@
     <string name="transfer_error_local_file_gone">File lokal sudah tidak ada</string>
     <string name="transfer_error_upload_ended">Proses unggah berhenti secara tak terduga</string>
     <string name="transfer_error_upload_stalled">Proses unggah berhenti merespons</string>
+    <string name="transfer_error_upload_damaged">Unggahan tidak cocok dengan file aslinya. Coba unggah lagi.</string>
     <string name="transfer_error_download_ended">Unduhan berhenti secara tak terduga</string>
     <string name="transfer_error_download_stalled">Unduhan berhenti merespons</string>
     <string name="transfer_error_downloaded_missing">File yang diunduh hilang</string>

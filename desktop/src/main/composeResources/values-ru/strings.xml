@@ -65,6 +65,7 @@
     <string name="transfer_error_local_file_gone">Локальный файл удален</string>
     <string name="transfer_error_upload_ended">Загрузка неожиданно завершилась</string>
     <string name="transfer_error_upload_stalled">Загрузка перестала отвечать</string>
+    <string name="transfer_error_upload_damaged">Загруженный файл не совпадает с оригиналом. Повторите загрузку.</string>
     <string name="transfer_error_download_ended">Скачивание неожиданно завершилось</string>
     <string name="transfer_error_download_stalled">Скачивание перестало отвечать</string>
     <string name="transfer_error_downloaded_missing">Скачанный файл отсутствует</string>

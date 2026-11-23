@@ -16,6 +16,7 @@ import com.drdisagree.teledrive.desktop.resources.transfer_error_no_file_referen
 import com.drdisagree.teledrive.desktop.resources.transfer_error_no_local_copy
 import com.drdisagree.teledrive.desktop.resources.transfer_error_no_remote_copy
 import com.drdisagree.teledrive.desktop.resources.transfer_error_save_failed
+import com.drdisagree.teledrive.desktop.resources.transfer_error_upload_damaged
 import com.drdisagree.teledrive.desktop.resources.transfer_error_upload_ended
 import com.drdisagree.teledrive.desktop.resources.transfer_error_upload_stalled
 import com.drdisagree.teledrive.desktop.resources.transfer_error_verify_failed
@@ -38,6 +39,8 @@ class DesktopTransferErrorMessages : TransferErrorMessages {
     override val uploadEnded by resource(Res.string.transfer_error_upload_ended)
 
     override val uploadStalled by resource(Res.string.transfer_error_upload_stalled)
+
+    override val uploadDamaged by resource(Res.string.transfer_error_upload_damaged)
 
     override val downloadEnded by resource(Res.string.transfer_error_download_ended)
 

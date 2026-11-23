@@ -32,6 +32,7 @@
     <string name="transfer_error_cache_full">Not enough free space for TeleDrive\'s temporary files. Needs %1$s.</string>
     <string name="transfer_error_upload_ended">Upload ended unexpectedly</string>
     <string name="transfer_error_upload_stalled">Upload stopped responding</string>
+    <string name="transfer_error_upload_damaged">The upload didn't match the original file. Retry to upload it again.</string>
 
     <!-- Notifications -->
     <string name="notification_backup_complete">Backup complete</string>
@@ -57,6 +58,7 @@
     <string name="notification_update_skip">Skip this version</string>
     <string name="notification_update_title">Update available</string>
     <string name="notification_upload_failed">Upload failed</string>
+    <string name="notification_upload_damaged">Upload damaged</string>
     <string name="notification_uploading_many">Uploading %1$d of %2$d files</string>
     <string name="notification_uploading_one">Uploading a file</string>
 </resources>

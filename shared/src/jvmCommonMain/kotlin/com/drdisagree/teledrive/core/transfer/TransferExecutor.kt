@@ -14,6 +14,7 @@ import com.drdisagree.teledrive.core.media.ThumbnailStore
 import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.core.telegram.TelegramDownloadEvent
 import com.drdisagree.teledrive.core.telegram.TelegramException
+import com.drdisagree.teledrive.core.telegram.RemoteDocument
 import com.drdisagree.teledrive.core.telegram.TelegramLimits
 import com.drdisagree.teledrive.core.telegram.TelegramUploadEvent
 import com.drdisagree.teledrive.data.local.dao.BackupDao
@@ -22,6 +23,7 @@ import com.drdisagree.teledrive.data.local.dao.FilePartDao
 import com.drdisagree.teledrive.data.local.dao.TransferDao
 import com.drdisagree.teledrive.data.local.entity.BackupRecordEntity
 import com.drdisagree.teledrive.data.local.entity.FileEntity
+import com.drdisagree.teledrive.data.local.entity.FilePartEntity
 import com.drdisagree.teledrive.data.local.entity.TransferEntity
 import com.drdisagree.teledrive.data.remote.telegram.ManifestCodec
 import com.drdisagree.teledrive.data.remote.telegram.RemoteFileManifest
@@ -69,7 +71,8 @@ class TransferExecutor(
     private val partUploader: PartUploader,
     private val partDownloader: PartDownloader,
     private val apkIconUploader: ApkIconUploader,
-    private val localCopyDeleter: LocalCopyDeleter
+    private val localCopyDeleter: LocalCopyDeleter,
+    private val uploadVerifier: UploadVerifier
 ) {
 
     /**
@@ -225,6 +228,21 @@ class TransferExecutor(
 
                     is TelegramUploadEvent.Completed -> {
                         val document = event.document
+                        val check = if (encrypt) {
+                            verifySealed(document, sourceFile, uploadSize, stagingFile)
+                        } else {
+                            UploadCheck.VERIFIED
+                        }
+                        if (check == UploadCheck.DAMAGED) {
+                            runCatching {
+                                telegramClient.deleteMessages(
+                                    document.chatId,
+                                    listOf(document.messageId)
+                                )
+                            }
+                            outcome = TransferOutcome.Failed(messages.uploadDamaged, damaged = true)
+                            return@collect
+                        }
                         fileDao.setRemoteMapping(
                             id = entity.id,
                             chatId = document.chatId,
@@ -257,7 +275,9 @@ class TransferExecutor(
                                     telegramClient.deleteMessages(chatId, listOf(stale))
                                 }
                             }
-                        releaseLocalCopy(transfer.type, entity, localPath, contentHash)
+                        if (check == UploadCheck.VERIFIED) {
+                            releaseLocalCopy(transfer.type, entity, localPath, contentHash)
+                        }
                         transferDao.setCompleted(transfer.id, System.currentTimeMillis())
                         outcome = TransferOutcome.Completed
                     }
@@ -342,6 +362,17 @@ class TransferExecutor(
                         }
 
                         is PartUploadEvent.Completed -> {
+                            val check = piecesOf(event.parts)
+                                ?.let { uploadVerifier.verify(sourceFile, it, encrypt) }
+                                ?: UploadCheck.UNVERIFIED
+                            if (check == UploadCheck.DAMAGED) {
+                                partUploader.discardParts(entity.id)
+                                outcome = TransferOutcome.Failed(
+                                    messages.uploadDamaged,
+                                    damaged = true
+                                )
+                                return@collect
+                            }
                             val first = event.parts.firstOrNull()
                                 ?: error("Upload finished with no parts")
                             event.contentHash
@@ -378,7 +409,9 @@ class TransferExecutor(
                                     telegramClient.deleteMessages(chatId, listOf(stale))
                                 }
                             }
-                            releaseLocalCopy(transfer.type, entity, localPath, contentHash)
+                            if (check == UploadCheck.VERIFIED) {
+                                releaseLocalCopy(transfer.type, entity, localPath, contentHash)
+                            }
                             transferDao.setCompleted(transfer.id, System.currentTimeMillis())
                             outcome = TransferOutcome.Completed
                         }
@@ -615,6 +648,28 @@ class TransferExecutor(
         }
         val cleanup = localCopyDeleter.delete(listOf(localPath))
         if (cleanup.deletedCount > 0) fileDao.setLocalPath(entity.id, null)
+    }
+
+    private suspend fun verifySealed(
+        document: RemoteDocument,
+        source: File,
+        plainSize: Long,
+        staging: File?
+    ): UploadCheck {
+        val storedSize = staging?.length() ?: return UploadCheck.UNVERIFIED
+        staging.delete()
+        val piece = UploadedPiece(document.chatId, document.messageId, 0, plainSize, storedSize)
+        return uploadVerifier.verify(source, listOf(piece), encrypted = true)
+    }
+
+    private fun piecesOf(parts: List<FilePartEntity>): List<UploadedPiece>? = parts.map { part ->
+        UploadedPiece(
+            chatId = part.chatId ?: return null,
+            messageId = part.messageId ?: return null,
+            plainOffset = part.plainOffset,
+            plainSize = part.plainSize,
+            storedSize = part.storedSize
+        )
     }
 
     private suspend fun checkControl(transferId: String) {

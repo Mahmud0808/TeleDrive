@@ -160,7 +160,8 @@ class BackupHoldDrainTest {
                 unused(), database.filePartDao(), StreamCrypto(), unused(), unused()
             ),
             apkIconUploader = ApkIconUploader(unused(), unused(), StreamCrypto(), unused(), unused()),
-            localCopyDeleter = unused()
+            localCopyDeleter = unused(),
+            uploadVerifier = UploadVerifier(unused(), StreamCrypto(), unused())
         )
         return TransferQueueDrainer(
             transferDao = transfers,
@@ -170,7 +171,8 @@ class BackupHoldDrainTest {
             settingsRepository = settings,
             networkMonitor = FakeNetworkMonitor(network),
             powerMonitor = FakePowerMonitor(charging),
-            backupResumeScheduler = resume
+            backupResumeScheduler = resume,
+            damagedUploadNotifier = {}
         )
     }
 }

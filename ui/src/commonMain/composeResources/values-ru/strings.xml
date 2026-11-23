@@ -363,6 +363,9 @@
     <string name="files_files_exist_message">При замене существующие файлы переместятся в корзину. Если оставить оба, новые файлы загрузятся с номером в названии.</string>
     <string name="files_file_replace">Заменить</string>
     <string name="files_file_keep_both">Оставить оба</string>
+    <string name="upload_damaged_title">Загрузка повреждена</string>
+    <string name="upload_damaged_message_one">«%1$s» загрузился с ошибкой, поэтому повреждённая копия удалена. Файл на этом устройстве сохранён. Повторите загрузку в разделе «Передачи».</string>
+    <string name="upload_damaged_message_many">Эти файлы загрузились с ошибкой, поэтому повреждённые копии удалены. Файлы на этом устройстве сохранены. Повторите загрузку в разделе «Передачи».</string>
     <string name="files_import_preparing">Подготовка файлов к загрузке…</string>
     <string name="files_import_restored">Восстановлено %1$d из корзины</string>
     <string name="files_import_uploading">Загрузка %1$d</string>

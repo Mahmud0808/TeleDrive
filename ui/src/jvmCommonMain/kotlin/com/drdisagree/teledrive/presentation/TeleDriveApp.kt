@@ -80,6 +80,7 @@ import com.drdisagree.teledrive.domain.model.AppTheme
 import com.drdisagree.teledrive.presentation.applock.LockScreen
 import com.drdisagree.teledrive.presentation.components.LocalCompactLayout
 import com.drdisagree.teledrive.presentation.components.SessionBrokenDialog
+import com.drdisagree.teledrive.presentation.components.DamagedUploadsDialog
 import com.drdisagree.teledrive.presentation.components.UpdateDialog
 import com.drdisagree.teledrive.presentation.navigation.AppNavHost
 import com.drdisagree.teledrive.presentation.navigation.BottomBarHeight
@@ -129,6 +130,7 @@ fun TeleDriveApp(
 
     val pendingUpdate by viewModel.pendingUpdate.collectAsStateWithLifecycle()
     val sessionBroken by viewModel.sessionBroken.collectAsStateWithLifecycle()
+    val damagedUploadNames by viewModel.damagedUploadNames.collectAsStateWithLifecycle()
     val urlOpener = LocalUrlOpener.current
 
     val systemLocaleList = LocalLocaleList.current
@@ -186,6 +188,12 @@ fun TeleDriveApp(
             }
             if (sessionBroken) {
                 SessionBrokenDialog(onSignInAgain = viewModel::resetSession)
+            }
+            if (damagedUploadNames.isNotEmpty() && !state.loading && !state.locked) {
+                DamagedUploadsDialog(
+                    fileNames = damagedUploadNames,
+                    onDismiss = viewModel::dismissDamagedUploads
+                )
             }
             pendingUpdate?.takeIf { !state.loading && !state.locked }?.let { release ->
                 UpdateDialog(

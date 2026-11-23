@@ -65,6 +65,7 @@
     <string name="transfer_error_local_file_gone">El archivo local ya no existe</string>
     <string name="transfer_error_upload_ended">La subida terminó de forma inesperada</string>
     <string name="transfer_error_upload_stalled">La subida dejó de responder</string>
+    <string name="transfer_error_upload_damaged">La subida no coincide con el archivo original. Vuelve a intentarlo para subirlo de nuevo.</string>
     <string name="transfer_error_download_ended">La descarga terminó de forma inesperada</string>
     <string name="transfer_error_download_stalled">La descarga dejó de responder</string>
     <string name="transfer_error_downloaded_missing">Falta el archivo descargado</string>

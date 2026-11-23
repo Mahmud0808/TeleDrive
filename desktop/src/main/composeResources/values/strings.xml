@@ -65,6 +65,7 @@
     <string name="transfer_error_local_file_gone">Local file is gone</string>
     <string name="transfer_error_upload_ended">Upload ended unexpectedly</string>
     <string name="transfer_error_upload_stalled">Upload stopped responding</string>
+    <string name="transfer_error_upload_damaged">The upload didn't match the original file. Retry to upload it again.</string>
     <string name="transfer_error_download_ended">Download ended unexpectedly</string>
     <string name="transfer_error_download_stalled">Download stopped responding</string>
     <string name="transfer_error_downloaded_missing">Downloaded file missing</string>

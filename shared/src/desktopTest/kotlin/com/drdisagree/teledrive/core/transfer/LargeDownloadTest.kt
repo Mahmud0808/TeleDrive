@@ -220,7 +220,8 @@ class LargeDownloadTest {
                 telegram, database.filePartDao(), StreamCrypto(), unused(), dispatchers
             ),
             apkIconUploader = ApkIconUploader(unused(), unused(), StreamCrypto(), unused(), unused()),
-            localCopyDeleter = unused()
+            localCopyDeleter = unused(),
+            uploadVerifier = UploadVerifier(telegram, StreamCrypto(), unused())
         )
     }
 }

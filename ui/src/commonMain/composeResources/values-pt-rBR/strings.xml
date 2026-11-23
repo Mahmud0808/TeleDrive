@@ -335,6 +335,9 @@
     <string name="files_files_exist_message">Substituir move os arquivos existentes para a Lixeira. Manter ambos envia os novos arquivos com um número em cada nome.</string>
     <string name="files_file_replace">Substituir</string>
     <string name="files_file_keep_both">Manter ambos</string>
+    <string name="upload_damaged_title">Envio danificado</string>
+    <string name="upload_damaged_message_one">“%1$s” não foi enviado corretamente, então a cópia danificada foi removida. O arquivo neste dispositivo foi mantido. Tente novamente em Transferências.</string>
+    <string name="upload_damaged_message_many">Estes arquivos não foram enviados corretamente, então as cópias danificadas foram removidas. Os arquivos neste dispositivo foram mantidos. Tente novamente em Transferências.</string>
     <string name="files_import_preparing">Preparando arquivos para envio…</string>
     <string name="files_import_restored">%1$d restaurados da lixeira</string>
     <string name="files_import_uploading">Enviando %1$d</string>

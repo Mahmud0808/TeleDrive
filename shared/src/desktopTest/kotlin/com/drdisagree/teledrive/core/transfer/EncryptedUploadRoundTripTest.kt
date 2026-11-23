@@ -12,6 +12,7 @@ import com.drdisagree.teledrive.core.media.ThumbnailStore
 import com.drdisagree.teledrive.core.telegram.RemoteDocument
 import com.drdisagree.teledrive.core.telegram.TelegramClient
 import com.drdisagree.teledrive.core.telegram.TelegramDownloadEvent
+import com.drdisagree.teledrive.core.telegram.TelegramFileInfo
 import com.drdisagree.teledrive.core.telegram.TelegramLimits
 import com.drdisagree.teledrive.core.telegram.TelegramUploadEvent
 import com.drdisagree.teledrive.data.local.entity.FileEntity
@@ -33,11 +34,13 @@ import java.nio.file.Files
 import kotlin.random.Random
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -51,6 +54,8 @@ class EncryptedUploadRoundTripTest {
     private val uploaded = File(workDir, "uploaded.tde")
     private val saved = File(workDir, "saved.mp3")
     private val key = ByteArray(32) { it.toByte() }
+    private val deleted = mutableListOf<Long>()
+    private var corruptUpload = false
 
     @After
     fun tearDown() {
@@ -74,6 +79,33 @@ class EncryptedUploadRoundTripTest {
 
             assertArrayEquals(original, saved.readBytes())
         }
+
+    @Test
+    fun `an encrypted upload that does not read back is removed and the local file kept`() =
+        runBlocking {
+            corruptUpload = true
+            record()
+            transfer("up", TransferType.UPLOAD)
+
+            val outcome = executor().execute(byId("up"))
+
+            assertTrue((outcome as TransferOutcome.Failed).damaged)
+            assertEquals(listOf(10L), deleted)
+            val row = database.fileDao().byId("f1")!!
+            assertNull(row.messageId)
+            assertEquals(source.absolutePath, row.localPath)
+            assertTrue(source.isFile)
+        }
+
+    private fun storedInfo() = TelegramFileInfo(
+        fileId = 5,
+        sizeBytes = uploaded.length(),
+        localPath = null,
+        isDownloadingCompleted = false,
+        isDownloadingActive = true,
+        downloadOffset = 0,
+        downloadedPrefixSize = uploaded.length()
+    )
 
     private suspend fun byId(id: String) = database.transferDao().byId(id)!!
 
@@ -143,6 +175,12 @@ class EncryptedUploadRoundTripTest {
                 thumbnailPath: String?
             ): Flow<TelegramUploadEvent> {
                 File(localPath).copyTo(uploaded, overwrite = true)
+                if (corruptUpload) {
+                    val bytes = uploaded.readBytes()
+                    bytes[bytes.size / 2] = (bytes[bytes.size / 2] + 1).toByte()
+                    bytes[40] = (bytes[40] + 1).toByte()
+                    uploaded.writeBytes(bytes)
+                }
                 return flowOf(
                     TelegramUploadEvent.Completed(
                         RemoteDocument(
@@ -164,6 +202,35 @@ class EncryptedUploadRoundTripTest {
                 flowOf(TelegramDownloadEvent.Completed(uploaded.absolutePath, uploaded.length()))
 
             override suspend fun deleteLocalCopy(remoteFileId: String) = Unit
+
+            override suspend fun getDocument(chatId: Long, messageId: Long) = RemoteDocument(
+                chatId = chatId,
+                messageId = messageId,
+                remoteFileId = "r10",
+                uniqueFileId = "u10",
+                fileName = "uploaded.tde",
+                mimeType = "application/octet-stream",
+                sizeBytes = uploaded.length(),
+                caption = "",
+                dateSeconds = 1
+            ).takeIf { messageId !in deleted }
+
+            override suspend fun resolveFile(remoteFileId: String) = storedInfo()
+
+            override suspend fun getFileInfo(fileId: Int) = storedInfo()
+
+            override suspend fun requestFileRange(fileId: Int, offset: Long, limit: Long) = Unit
+
+            override suspend fun readFilePart(fileId: Int, offset: Long, count: Long): ByteArray =
+                uploaded.readBytes().copyOfRange(offset.toInt(), (offset + count).toInt())
+
+            override fun fileUpdates(fileId: Int): Flow<TelegramFileInfo> = emptyFlow()
+
+            override suspend fun cancelFileDownload(fileId: Int) = Unit
+
+            override suspend fun deleteMessages(chatId: Long, messageIds: List<Long>) {
+                deleted += messageIds
+            }
         }
         val thumbnails = object : ThumbnailStore {
             override suspend fun thumbnailBytes(fileId: String): ByteArray? = null
@@ -236,7 +303,8 @@ class EncryptedUploadRoundTripTest {
                 telegram, database.filePartDao(), StreamCrypto(), keys, dispatchers
             ),
             apkIconUploader = icons,
-            localCopyDeleter = unused()
+            localCopyDeleter = unused(),
+            uploadVerifier = UploadVerifier(telegram, StreamCrypto(), keys)
         )
     }
 }

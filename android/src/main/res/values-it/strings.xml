@@ -32,6 +32,7 @@
     <string name="transfer_error_cache_full">Spazio libero insufficiente per i file temporanei di TeleDrive. Sono necessari %1$s .</string>
     <string name="transfer_error_upload_ended">Caricamento terminato in modo imprevisto</string>
     <string name="transfer_error_upload_stalled">Il caricamento ha smesso di rispondere</string>
+    <string name="transfer_error_upload_damaged">Il caricamento non corrisponde al file originale. Riprova per caricarlo di nuovo.</string>
 
     <!-- Notifications -->
     <string name="notification_backup_complete">Backup completato</string>
@@ -57,6 +58,7 @@
     <string name="notification_update_skip">Ignora questa versione</string>
     <string name="notification_update_title">Aggiornamento disponibile</string>
     <string name="notification_upload_failed">Caricamento non riuscito</string>
+    <string name="notification_upload_damaged">Caricamento danneggiato</string>
     <string name="notification_uploading_many">Caricamento di %1$d file su %2$d in corso</string>
     <string name="notification_uploading_one">Caricamento di un file in corso</string>
 </resources>

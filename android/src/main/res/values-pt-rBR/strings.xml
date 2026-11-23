@@ -32,6 +32,7 @@
     <string name="transfer_error_cache_full">Não há espaço livre suficiente para os arquivos temporários do TeleDrive. São necessários %1$s.</string>
     <string name="transfer_error_upload_ended">O envio foi interrompido inesperadamente</string>
     <string name="transfer_error_upload_stalled">O envio parou de responder</string>
+    <string name="transfer_error_upload_damaged">O envio não corresponde ao arquivo original. Tente enviá-lo novamente.</string>
 
     <!-- Notifications -->
     <string name="notification_backup_complete">Backup concluído</string>
@@ -57,6 +58,7 @@
     <string name="notification_update_skip">Pular esta versão</string>
     <string name="notification_update_title">Atualização disponível</string>
     <string name="notification_upload_failed">Falha no envio</string>
+    <string name="notification_upload_damaged">Envio danificado</string>
     <string name="notification_uploading_many">Enviando %1$d de %2$d arquivos</string>
     <string name="notification_uploading_one">Enviando um arquivo</string>
 </resources>

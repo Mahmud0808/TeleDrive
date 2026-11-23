@@ -65,6 +65,7 @@
     <string name="transfer_error_local_file_gone">Il file locale non è più presente</string>
     <string name="transfer_error_upload_ended">Caricamento terminato in modo imprevisto</string>
     <string name="transfer_error_upload_stalled">Il caricamento ha smesso di rispondere</string>
+    <string name="transfer_error_upload_damaged">Il caricamento non corrisponde al file originale. Riprova per caricarlo di nuovo.</string>
     <string name="transfer_error_download_ended">Download terminato in modo imprevisto</string>
     <string name="transfer_error_download_stalled">Il download ha smesso di rispondere</string>
     <string name="transfer_error_downloaded_missing">File scaricato mancante</string>

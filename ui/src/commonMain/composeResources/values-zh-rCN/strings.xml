@@ -321,6 +321,9 @@
     <string name="files_files_exist_message">替换会把现有文件移到回收站。保留两者会上传名称带编号的新文件。</string>
     <string name="files_file_replace">替换</string>
     <string name="files_file_keep_both">保留两者</string>
+    <string name="upload_damaged_title">上传已损坏</string>
+    <string name="upload_damaged_message_one">“%1$s”未正确上传，已删除损坏的副本。此设备上的文件已保留。请在“传输”中重试。</string>
+    <string name="upload_damaged_message_many">这些文件未正确上传，已删除损坏的副本。此设备上的文件已保留。请在“传输”中重试。</string>
     <string name="files_import_preparing">正在准备上传文件…</string>
     <string name="files_import_restored">已从回收站恢复 %1$d 个</string>
     <string name="files_import_uploading">正在上传 %1$d 个</string>

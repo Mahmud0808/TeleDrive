@@ -32,6 +32,7 @@
     <string name="transfer_error_cache_full">Tidak ada cukup ruang kosong untuk file sementara TeleDrive. Membutuhkan %1$s.</string>
     <string name="transfer_error_upload_ended">Proses unggah berhenti secara tak terduga</string>
     <string name="transfer_error_upload_stalled">Proses unggah berhenti merespons</string>
+    <string name="transfer_error_upload_damaged">Unggahan tidak cocok dengan file aslinya. Coba unggah lagi.</string>
 
     <!-- Notifications -->
     <string name="notification_backup_complete">Pencadangan selesai</string>
@@ -57,6 +58,7 @@
     <string name="notification_update_skip">Lewati versi ini</string>
     <string name="notification_update_title">Pembaruan tersedia</string>
     <string name="notification_upload_failed">Unggahan gagal</string>
+    <string name="notification_upload_damaged">Unggahan rusak</string>
     <string name="notification_uploading_many">Mengunggah %1$d dari %2$d file</string>
     <string name="notification_uploading_one">Mengunggah satu file</string>
 </resources>

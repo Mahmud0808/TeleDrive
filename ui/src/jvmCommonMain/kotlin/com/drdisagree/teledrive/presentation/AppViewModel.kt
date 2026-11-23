@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.drdisagree.teledrive.core.security.AppLockManager
 import com.drdisagree.teledrive.core.telegram.TelegramAuthState
+import com.drdisagree.teledrive.core.transfer.DamagedUploads
 import com.drdisagree.teledrive.domain.model.BackupTrigger
 import com.drdisagree.teledrive.domain.model.LayoutDensity
 import com.drdisagree.teledrive.domain.repository.BackupRepository
@@ -42,8 +43,11 @@ class AppViewModel(
     private val channelRepository: ChannelRepository,
     private val appLockManager: AppLockManager,
     private val localDataWiper: LocalDataWiper,
-    private val updateChecker: UpdateChecker
+    private val updateChecker: UpdateChecker,
+    private val damagedUploads: DamagedUploads
 ) : ViewModel() {
+
+    val damagedUploadNames: StateFlow<List<String>> = damagedUploads.pending
 
     private val _sessionBroken = MutableStateFlow(false)
     val sessionBroken: StateFlow<Boolean> = _sessionBroken.asStateFlow()
@@ -177,6 +181,8 @@ class AppViewModel(
     fun dismissUpdate() {
         _pendingUpdate.value = null
     }
+
+    fun dismissDamagedUploads() = damagedUploads.dismiss()
 
     fun unlock() = appLockManager.unlock()
 

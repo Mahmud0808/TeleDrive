@@ -335,6 +335,9 @@
     <string name="files_files_exist_message">Reemplazar mueve los archivos existentes a la Papelera. Conservar ambos sube los archivos nuevos con un número añadido a cada nombre.</string>
     <string name="files_file_replace">Reemplazar</string>
     <string name="files_file_keep_both">Conservar ambos</string>
+    <string name="upload_damaged_title">Subida dañada</string>
+    <string name="upload_damaged_message_one">“%1$s” no se subió correctamente, así que se eliminó la copia dañada. El archivo de este dispositivo se conservó. Reinténtalo desde Transferencias.</string>
+    <string name="upload_damaged_message_many">Estos archivos no se subieron correctamente, así que se eliminaron las copias dañadas. Los archivos de este dispositivo se conservaron. Reinténtalos desde Transferencias.</string>
     <string name="files_import_preparing">Preparando archivos para subir…</string>
     <string name="files_import_restored">Se restauraron %1$d de la papelera</string>
     <string name="files_import_uploading">Subiendo %1$d</string>

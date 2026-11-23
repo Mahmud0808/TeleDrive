@@ -180,7 +180,8 @@ class SplitReuploadCancelTest {
                 telegram, database.filePartDao(), StreamCrypto(), unused(), dispatchers
             ),
             apkIconUploader = icons,
-            localCopyDeleter = unused()
+            localCopyDeleter = unused(),
+            uploadVerifier = UploadVerifier(telegram, StreamCrypto(), unused())
         )
     }
 }

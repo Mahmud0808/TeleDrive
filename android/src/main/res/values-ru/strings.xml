@@ -32,6 +32,7 @@
     <string name="transfer_error_cache_full">Недостаточно свободного места для временных файлов TeleDrive. Нужно %1$s.</string>
     <string name="transfer_error_upload_ended">Загрузка неожиданно завершилась</string>
     <string name="transfer_error_upload_stalled">Загрузка перестала отвечать</string>
+    <string name="transfer_error_upload_damaged">Загруженный файл не совпадает с оригиналом. Повторите загрузку.</string>
 
     <!-- Notifications -->
     <string name="notification_backup_complete">Резервное копирование завершено</string>
@@ -57,6 +58,7 @@
     <string name="notification_update_skip">Пропустить эту версию</string>
     <string name="notification_update_title">Доступно обновление</string>
     <string name="notification_upload_failed">Ошибка загрузки</string>
+    <string name="notification_upload_damaged">Загрузка повреждена</string>
     <string name="notification_uploading_many">Отправка файлов: %1$d из %2$d</string>
     <string name="notification_uploading_one">Отправка файла</string>
 </resources>

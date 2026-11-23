@@ -7,6 +7,8 @@ val transferEngineModule = module {
     singleOf(::ApkIconUploader)
     singleOf(::PartUploader)
     singleOf(::PartDownloader)
+    single { UploadVerifier(get(), get(), get()) }
+    singleOf(::DamagedUploads)
     singleOf(::TransferExecutor)
     singleOf(::TransferQueueDrainer)
 }

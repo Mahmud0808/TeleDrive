@@ -39,6 +39,7 @@ import com.drdisagree.teledrive.core.telegram.TelegramPacer
 import com.drdisagree.teledrive.core.transfer.BackupResumeScheduler
 import com.drdisagree.teledrive.core.transfer.BackupSessionTracker
 import com.drdisagree.teledrive.core.transfer.CountingBackupSessionTracker
+import com.drdisagree.teledrive.core.transfer.DamagedUploadNotifier
 import com.drdisagree.teledrive.core.transfer.MaintenanceScheduler
 import com.drdisagree.teledrive.core.transfer.TransferErrorMessages
 import com.drdisagree.teledrive.core.transfer.TransferScheduler
@@ -85,6 +86,7 @@ import com.drdisagree.teledrive.desktop.permissions.DesktopPermissionChecker
 import com.drdisagree.teledrive.desktop.power.DesktopPowerMonitor
 import com.drdisagree.teledrive.desktop.publish.DesktopPublishScheduler
 import com.drdisagree.teledrive.desktop.transfer.DesktopBackupResumeScheduler
+import com.drdisagree.teledrive.desktop.transfer.DesktopDamagedUploadNotifier
 import com.drdisagree.teledrive.desktop.transfer.DesktopMaintenanceScheduler
 import com.drdisagree.teledrive.desktop.transfer.DesktopTransferErrorMessages
 import com.drdisagree.teledrive.desktop.transfer.DesktopTransferScheduler
@@ -133,6 +135,7 @@ val desktopModule = module {
     singleOf(::DesktopNetworkMonitor) bind NetworkMonitor::class
     singleOf(::DesktopPowerMonitor) bind PowerMonitor::class
     singleOf(::DesktopTransferErrorMessages) bind TransferErrorMessages::class
+    singleOf(::DesktopDamagedUploadNotifier) bind DamagedUploadNotifier::class
     singleOf(::DesktopDownloadWriter) bind DownloadWriter::class
     singleOf(::MediaStreamServer)
     singleOf(::ExternalMediaPlayer)

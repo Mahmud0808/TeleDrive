@@ -16,6 +16,8 @@ interface TransferErrorMessages {
 
     val uploadStalled: String
 
+    val uploadDamaged: String
+
     val downloadEnded: String
 
     val downloadStalled: String

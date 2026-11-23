@@ -32,7 +32,8 @@ class TransferQueueDrainer(
     private val settingsRepository: SettingsRepository,
     private val networkMonitor: NetworkMonitor,
     private val powerMonitor: PowerMonitor,
-    private val backupResumeScheduler: BackupResumeScheduler
+    private val backupResumeScheduler: BackupResumeScheduler,
+    private val damagedUploadNotifier: DamagedUploadNotifier
 ) {
 
     private val claimLock = Mutex()
@@ -192,7 +193,11 @@ class TransferQueueDrainer(
                             current.fileId?.let { fileId ->
                                 fileDao.setBackupStateIfLocalOnly(fileId, BackupState.FAILED)
                             }
-                            onTerminalFailure(current)
+                            if (outcome.damaged) {
+                                damagedUploadNotifier.report(current.displayName)
+                            } else {
+                                onTerminalFailure(current)
+                            }
                         }
                         refreshSession(current.backupSessionId)
                         return

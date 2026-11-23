@@ -29,6 +29,9 @@ class ResourceTransferErrorMessages(
     override val uploadStalled: String
         get() = context.getString(R.string.transfer_error_upload_stalled)
 
+    override val uploadDamaged: String
+        get() = context.getString(R.string.transfer_error_upload_damaged)
+
     override val downloadEnded: String
         get() = context.getString(R.string.transfer_error_download_ended)
 
