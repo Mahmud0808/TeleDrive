@@ -15,4 +15,6 @@ class DesktopPlatformCapabilities : PlatformCapabilities {
     override val supportsScreenCaptureBlocking: Boolean = false
 
     override val supportsDynamicColor: Boolean = false
+
+    override val usesPointerSelection: Boolean = true
 }

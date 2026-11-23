@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.OfflinePin
 import androidx.compose.material.icons.filled.Star
@@ -31,6 +32,7 @@ import com.drdisagree.teledrive.domain.model.DriveFolder
 import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.common_content_description_available_offline
 import com.drdisagree.teledrive.resources.common_content_description_favorite
+import com.drdisagree.teledrive.resources.common_content_description_selected
 import com.drdisagree.teledrive.resources.common_select
 import org.jetbrains.compose.resources.stringResource
 
@@ -41,7 +43,8 @@ fun FolderGridItem(
     selected: Boolean = false,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    checked: Boolean = selected
 ) {
     Column(
         modifier = modifier
@@ -69,6 +72,17 @@ fun FolderGridItem(
                 modifier = Modifier.size(48.dp),
                 tint = MaterialTheme.colorScheme.primary
             )
+            if (checked) {
+                Icon(
+                    imageVector = Icons.Filled.CheckCircle,
+                    contentDescription = stringResource(Res.string.common_content_description_selected),
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(6.dp)
+                        .size(22.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
         }
         Column(modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {

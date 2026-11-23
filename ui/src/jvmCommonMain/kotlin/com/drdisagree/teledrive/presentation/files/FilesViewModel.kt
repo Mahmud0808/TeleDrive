@@ -114,6 +114,8 @@ class FilesViewModel(
 
     private var rangeBase: Pair<Set<String>, Set<String>>? = null
     private val _allSelected = MutableStateFlow(false)
+    private val _clickSelection = MutableStateFlow(false)
+    val clickSelection: StateFlow<Boolean> = _clickSelection.asStateFlow()
     val allSelected: StateFlow<Boolean> = _allSelected.asStateFlow()
 
     private val _messages = MutableSharedFlow<UiText>(extraBufferCapacity = 8)
@@ -255,6 +257,7 @@ class FilesViewModel(
 
     fun toggleSelection(fileId: String) {
         _allSelected.update { false }
+        _clickSelection.update { false }
         selection.update { current ->
             if (fileId in current) current - fileId else current + fileId
         }
@@ -262,6 +265,7 @@ class FilesViewModel(
 
     fun toggleFolderSelection(folderId: String) {
         _allSelected.update { false }
+        _clickSelection.update { false }
         folderSelection.update { current ->
             if (folderId in current) current - folderId else current + folderId
         }
@@ -269,6 +273,7 @@ class FilesViewModel(
 
     fun clearSelection() {
         _allSelected.update { false }
+        _clickSelection.update { false }
         selection.update { emptySet() }
         folderSelection.update { emptySet() }
     }
@@ -279,7 +284,22 @@ class FilesViewModel(
             folderSelection.update { uiState.value.folders.map { folder -> folder.id }.toSet() }
             selection.update { ids.toSet() }
             _allSelected.update { true }
+            _clickSelection.update { false }
         }
+    }
+
+    fun selectOnly(fileId: String?, folderId: String?, byClick: Boolean) {
+        _allSelected.update { false }
+        _clickSelection.update { byClick }
+        selection.update { setOfNotNull(fileId) }
+        folderSelection.update { setOfNotNull(folderId) }
+    }
+
+    fun selectRange(fileIds: List<String>, folderIds: List<String>) {
+        _allSelected.update { false }
+        _clickSelection.update { false }
+        selection.update { fileIds.toSet() }
+        folderSelection.update { folderIds.toSet() }
     }
 
     fun startRangeSelection() {
@@ -289,6 +309,7 @@ class FilesViewModel(
     fun extendRangeSelection(fileIds: List<String>, folderIds: List<String>) {
         val base = rangeBase ?: return
         _allSelected.update { false }
+        _clickSelection.update { false }
         selection.update { base.first + fileIds }
         folderSelection.update { base.second + folderIds }
     }

@@ -97,7 +97,9 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
@@ -125,23 +127,27 @@ import com.drdisagree.teledrive.presentation.components.CollectionShortcuts
 import com.drdisagree.teledrive.presentation.components.ConfirmDialog
 import com.drdisagree.teledrive.presentation.components.EmptyState
 import com.drdisagree.teledrive.presentation.components.FileGridItem
-import com.drdisagree.teledrive.presentation.components.SortMenu
 import com.drdisagree.teledrive.presentation.components.FileInfoSheet
 import com.drdisagree.teledrive.presentation.components.FileListItem
 import com.drdisagree.teledrive.presentation.components.FolderGridItem
 import com.drdisagree.teledrive.presentation.components.FolderInfoSheet
 import com.drdisagree.teledrive.presentation.components.FolderPickerDialog
 import com.drdisagree.teledrive.presentation.components.FolderRow
+import com.drdisagree.teledrive.presentation.components.LazyIndexLocator
 import com.drdisagree.teledrive.presentation.components.MenuAction
+import com.drdisagree.teledrive.presentation.components.PointerMenu
 import com.drdisagree.teledrive.presentation.components.RefreshAction
 import com.drdisagree.teledrive.presentation.components.RefreshableContent
 import com.drdisagree.teledrive.presentation.components.RenameDialog
+import com.drdisagree.teledrive.presentation.components.SortMenu
 import com.drdisagree.teledrive.presentation.components.keyboardCollection
 import com.drdisagree.teledrive.presentation.components.keyboardCollectionItem
 import com.drdisagree.teledrive.presentation.components.liftedTopAppBarColors
 import com.drdisagree.teledrive.presentation.components.pinchZoom
+import com.drdisagree.teledrive.presentation.components.pointerBackground
 import com.drdisagree.teledrive.presentation.components.rememberDragSelect
 import com.drdisagree.teledrive.presentation.components.rememberKeyboardCollection
+import com.drdisagree.teledrive.presentation.components.rememberPointerItems
 import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
 import com.drdisagree.teledrive.presentation.components.skeleton.CollectionSkeleton
 import com.drdisagree.teledrive.presentation.navigation.FabBottomBarInset
@@ -152,6 +158,7 @@ import com.drdisagree.teledrive.presentation.platform.LocalFileRevealer
 import com.drdisagree.teledrive.presentation.platform.LocalFileSharer
 import com.drdisagree.teledrive.presentation.platform.LocalFolderPicker
 import com.drdisagree.teledrive.presentation.platform.LocalMultiFilePicker
+import com.drdisagree.teledrive.presentation.platform.LocalPlatformCapabilities
 import com.drdisagree.teledrive.presentation.platform.PickResult
 import com.drdisagree.teledrive.presentation.preview.PreviewSequence
 import com.drdisagree.teledrive.resources.Res
@@ -288,6 +295,186 @@ fun FilesScreen(
     working?.let { BlockingProgressDialog(message = it.resolve()) }
 
     AppBackHandler(enabled = state.selectionMode) { viewModel.clearSelection() }
+    val clickSelected by viewModel.clickSelection.collectAsStateWithLifecycle()
+    val plainClick = LocalPlatformCapabilities.current.usesPointerSelection && clickSelected
+
+    val selectionActions = if (state.selectionMode) {
+        val fileRevealer = LocalFileRevealer.current
+        val revealPath = state.capabilities.soleLocalPath
+            ?.takeIf { path -> remember(path) { File(path).exists() } }
+        val editableNote = state.capabilities.canEditNote &&
+                state.selectionCount == 1 &&
+                state.folderSelection.isEmpty()
+        val filesOnly = !state.folderInSelection
+
+        val organize = buildList {
+            add(
+                MenuAction(
+                    label = stringResource(
+                        if (state.allSelectedFavorite) {
+                            Res.string.preview_remove_favorites
+                        } else {
+                            Res.string.common_add_favorites
+                        }
+                    ),
+                    icon = if (state.allSelectedFavorite) {
+                        Icons.Filled.Star
+                    } else {
+                        Icons.Filled.StarOutline
+                    }
+                ) { viewModel.favoriteSelected(!state.allSelectedFavorite) }
+            )
+            add(
+                MenuAction(
+                    label = stringResource(
+                        if (state.allSelectedAvailableOffline) {
+                            Res.string.common_remove_from_offline
+                        } else {
+                            Res.string.common_make_available_offline
+                        }
+                    ),
+                    icon = Icons.Filled.OfflinePin
+                ) { viewModel.setSelectedAvailableOffline(!state.allSelectedAvailableOffline) }
+            )
+            add(
+                MenuAction(
+                    label = stringResource(Res.string.files_hide),
+                    icon = Icons.Filled.VisibilityOff
+                ) { viewModel.hideSelected(true) }
+            )
+            add(
+                MenuAction(
+                    label = stringResource(Res.string.files_archive),
+                    icon = Icons.Filled.Archive
+                ) { viewModel.archiveSelected(true) }
+            )
+        }
+
+        val storage = buildList {
+            if (state.folderInSelection || state.capabilities.canDownload) {
+                add(
+                    MenuAction(
+                        label = stringResource(Res.string.common_download),
+                        icon = Icons.Filled.Download
+                    ) { viewModel.downloadSelected() }
+                )
+            }
+            if (filesOnly && state.capabilities.canUpload) {
+                add(
+                    MenuAction(
+                        label = stringResource(Res.string.common_upload),
+                        icon = Icons.Filled.Upload
+                    ) { viewModel.uploadSelected() }
+                )
+            }
+            if (filesOnly && state.capabilities.canFreeUpSpace) {
+                add(
+                    MenuAction(
+                        label = stringResource(Res.string.common_free_space),
+                        icon = Icons.Filled.CleaningServices
+                    ) { confirmDeleteLocal = true }
+                )
+            }
+            if (fileRevealer != null && revealPath != null) {
+                add(
+                    MenuAction(
+                        label = stringResource(Res.string.files_show_in_file_manager),
+                        icon = Icons.Filled.FolderOpen
+                    ) { fileRevealer.reveal(revealPath) }
+                )
+            }
+        }
+
+        val actions = buildList {
+            if (filesOnly) {
+                add(
+                    MenuAction(
+                        label = stringResource(Res.string.common_share),
+                        icon = Icons.Filled.Share
+                    ) { viewModel.shareSelected() }
+                )
+            }
+            if (state.selectionCount == 1) {
+                add(
+                    MenuAction(
+                        label = stringResource(Res.string.common_rename),
+                        icon = Icons.Filled.DriveFileRenameOutline
+                    ) { viewModel.requestRenameSelected() }
+                )
+            }
+            if (filesOnly) {
+                add(
+                    MenuAction(
+                        label = stringResource(Res.string.files_copy),
+                        icon = Icons.Filled.ContentCopy
+                    ) { showCopyPicker = true }
+                )
+            }
+            if (storage.isNotEmpty()) {
+                add(
+                    MenuAction(
+                        label = stringResource(Res.string.common_storage_actions),
+                        icon = Icons.Filled.Storage,
+                        children = storage
+                    )
+                )
+            }
+            add(
+                MenuAction(
+                    label = stringResource(Res.string.common_organize),
+                    icon = Icons.Filled.Tune,
+                    children = organize
+                )
+            )
+            if (editableNote) {
+                add(
+                    MenuAction(
+                        label = stringResource(Res.string.note_edit_action),
+                        icon = Icons.Filled.EditNote
+                    ) { viewModel.editSelectedNote() }
+                )
+            }
+            if (state.selectionCount + state.folderSelection.size == 1) {
+                add(
+                    MenuAction(
+                        label = stringResource(Res.string.info_details),
+                        icon = Icons.Outlined.Info
+                    ) { viewModel.showInfoForSelection() }
+                )
+            }
+            add(
+                MenuAction(
+                    label = stringResource(Res.string.common_move_trash),
+                    icon = Icons.Filled.DeleteOutline
+                ) { confirmTrash = true }
+            )
+        }
+        actions
+    } else {
+        emptyList()
+    }
+    var contextMenuAt by remember { mutableStateOf<Offset?>(null) }
+    var backgroundMenuAt by remember { mutableStateOf<Offset?>(null) }
+    var screenOrigin by remember { mutableStateOf(Offset.Zero) }
+    var contextCreatedSelection by remember { mutableStateOf(false) }
+    val backgroundActions = listOf(
+        MenuAction(
+            label = stringResource(Res.string.files_new_folder),
+            icon = Icons.Filled.CreateNewFolder
+        ) { showCreateFolder = true },
+        MenuAction(
+            label = stringResource(Res.string.files_add_files),
+            icon = Icons.Filled.Upload
+        ) { onPickUploads() },
+        MenuAction(
+            label = stringResource(Res.string.files_add_folder),
+            icon = Icons.Filled.DriveFolderUpload
+        ) { onPickUploadFolder() },
+        MenuAction(
+            label = stringResource(Res.string.note_new),
+            icon = Icons.Filled.EditNote
+        ) { onNewNote(state.folderId) }
+    )
 
     val gridState = rememberLazyGridState()
     gridState.rememberPosition(viewModel.listPosition, state.folders.size + files.itemCount)
@@ -347,7 +534,24 @@ fun FilesScreen(
     val fabLift by animateDpAsState(targetValue = snackbarHeight, label = "fabLift")
 
     FileDropArea(onDropped = { references -> viewModel.importAndUpload(references) }) {
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .onGloballyPositioned { screenOrigin = it.positionInRoot() }
+        ) {
+            PointerMenu(
+                at = contextMenuAt?.minus(screenOrigin),
+                actions = selectionActions,
+                onDismiss = { acted ->
+                    contextMenuAt = null
+                    if (!acted && contextCreatedSelection) viewModel.clearSelection()
+                }
+            )
+            PointerMenu(
+                at = backgroundMenuAt?.minus(screenOrigin),
+                actions = backgroundActions,
+                onDismiss = { backgroundMenuAt = null }
+            )
             Scaffold(
                 snackbarHost = {},
                 topBar = {
@@ -356,20 +560,26 @@ fun FilesScreen(
                             colors = liftedTopAppBarColors(lifted),
                             title = {
                                 Text(
-                                    text = stringResource(
-                                        Res.string.common_selection_count,
-                                        state.selectionCount
-                                    ),
+                                    text = if (plainClick) {
+                                        stringResource(Res.string.files)
+                                    } else {
+                                        stringResource(
+                                            Res.string.common_selection_count,
+                                            state.selectionCount
+                                        )
+                                    },
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
                             },
                             navigationIcon = {
-                                IconButton(onClick = viewModel::clearSelection) {
-                                    Icon(
-                                        Icons.Filled.Close,
-                                        contentDescription = stringResource(Res.string.common_clear_selection)
-                                    )
+                                if (!plainClick) {
+                                    IconButton(onClick = viewModel::clearSelection) {
+                                        Icon(
+                                            Icons.Filled.Close,
+                                            contentDescription = stringResource(Res.string.common_clear_selection)
+                                        )
+                                    }
                                 }
                             },
                             actions = {
@@ -404,161 +614,10 @@ fun FilesScreen(
                                             contentDescription = stringResource(Res.string.common_actions)
                                         )
                                     }
-                                    val fileRevealer = LocalFileRevealer.current
-                                    val revealPath = state.capabilities.soleLocalPath
-                                        ?.takeIf { path -> remember(path) { File(path).exists() } }
-                                    val editableNote = state.capabilities.canEditNote &&
-                                            state.selectionCount == 1 &&
-                                            state.folderSelection.isEmpty()
-                                    val filesOnly = !state.folderInSelection
-
-                                    val organize = buildList {
-                                        add(
-                                            MenuAction(
-                                                label = stringResource(
-                                                    if (state.allSelectedFavorite) {
-                                                        Res.string.preview_remove_favorites
-                                                    } else {
-                                                        Res.string.common_add_favorites
-                                                    }
-                                                ),
-                                                icon = if (state.allSelectedFavorite) {
-                                                    Icons.Filled.Star
-                                                } else {
-                                                    Icons.Filled.StarOutline
-                                                }
-                                            ) { viewModel.favoriteSelected(!state.allSelectedFavorite) }
-                                        )
-                                        add(
-                                            MenuAction(
-                                                label = stringResource(
-                                                    if (state.allSelectedAvailableOffline) {
-                                                        Res.string.common_remove_from_offline
-                                                    } else {
-                                                        Res.string.common_make_available_offline
-                                                    }
-                                                ),
-                                                icon = Icons.Filled.OfflinePin
-                                            ) { viewModel.setSelectedAvailableOffline(!state.allSelectedAvailableOffline) }
-                                        )
-                                        add(
-                                            MenuAction(
-                                                label = stringResource(Res.string.files_hide),
-                                                icon = Icons.Filled.VisibilityOff
-                                            ) { viewModel.hideSelected(true) }
-                                        )
-                                        add(
-                                            MenuAction(
-                                                label = stringResource(Res.string.files_archive),
-                                                icon = Icons.Filled.Archive
-                                            ) { viewModel.archiveSelected(true) }
-                                        )
-                                    }
-
-                                    val storage = buildList {
-                                        if (state.folderInSelection || state.capabilities.canDownload) {
-                                            add(
-                                                MenuAction(
-                                                    label = stringResource(Res.string.common_download),
-                                                    icon = Icons.Filled.Download
-                                                ) { viewModel.downloadSelected() }
-                                            )
-                                        }
-                                        if (filesOnly && state.capabilities.canUpload) {
-                                            add(
-                                                MenuAction(
-                                                    label = stringResource(Res.string.common_upload),
-                                                    icon = Icons.Filled.Upload
-                                                ) { viewModel.uploadSelected() }
-                                            )
-                                        }
-                                        if (filesOnly && state.capabilities.canFreeUpSpace) {
-                                            add(
-                                                MenuAction(
-                                                    label = stringResource(Res.string.common_free_space),
-                                                    icon = Icons.Filled.CleaningServices
-                                                ) { confirmDeleteLocal = true }
-                                            )
-                                        }
-                                        if (fileRevealer != null && revealPath != null) {
-                                            add(
-                                                MenuAction(
-                                                    label = stringResource(Res.string.files_show_in_file_manager),
-                                                    icon = Icons.Filled.FolderOpen
-                                                ) { fileRevealer.reveal(revealPath) }
-                                            )
-                                        }
-                                    }
-
-                                    val actions = buildList {
-                                        if (filesOnly) {
-                                            add(
-                                                MenuAction(
-                                                    label = stringResource(Res.string.common_share),
-                                                    icon = Icons.Filled.Share
-                                                ) { viewModel.shareSelected() }
-                                            )
-                                        }
-                                        if (state.selectionCount == 1) {
-                                            add(
-                                                MenuAction(
-                                                    label = stringResource(Res.string.common_rename),
-                                                    icon = Icons.Filled.DriveFileRenameOutline
-                                                ) { viewModel.requestRenameSelected() }
-                                            )
-                                        }
-                                        if (filesOnly) {
-                                            add(
-                                                MenuAction(
-                                                    label = stringResource(Res.string.files_copy),
-                                                    icon = Icons.Filled.ContentCopy
-                                                ) { showCopyPicker = true }
-                                            )
-                                        }
-                                        if (storage.isNotEmpty()) {
-                                            add(
-                                                MenuAction(
-                                                    label = stringResource(Res.string.common_storage_actions),
-                                                    icon = Icons.Filled.Storage,
-                                                    children = storage
-                                                )
-                                            )
-                                        }
-                                        add(
-                                            MenuAction(
-                                                label = stringResource(Res.string.common_organize),
-                                                icon = Icons.Filled.Tune,
-                                                children = organize
-                                            )
-                                        )
-                                        if (editableNote) {
-                                            add(
-                                                MenuAction(
-                                                    label = stringResource(Res.string.note_edit_action),
-                                                    icon = Icons.Filled.EditNote
-                                                ) { viewModel.editSelectedNote() }
-                                            )
-                                        }
-                                        if (state.selectionCount + state.folderSelection.size == 1) {
-                                            add(
-                                                MenuAction(
-                                                    label = stringResource(Res.string.info_details),
-                                                    icon = Icons.Outlined.Info
-                                                ) { viewModel.showInfoForSelection() }
-                                            )
-                                        }
-                                        add(
-                                            MenuAction(
-                                                label = stringResource(Res.string.common_move_trash),
-                                                icon = Icons.Filled.DeleteOutline
-                                            ) { confirmTrash = true }
-                                        )
-                                    }
-
                                     ActionMenu(
                                         expanded = showSelectionOverflow,
                                         onDismissRequest = { showSelectionOverflow = false },
-                                        actions = actions
+                                        actions = selectionActions
                                     )
                                 }
                             }
@@ -725,6 +784,11 @@ fun FilesScreen(
                             )
                         } else {
                             FilesContent(
+                                onContextMenu = { at, created ->
+                                    contextMenuAt = at
+                                    contextCreatedSelection = created
+                                },
+                                onBackgroundMenu = { backgroundMenuAt = it },
                                 highlightedFileId = highlightedFileId,
                                 gridState = gridState,
                                 state = state,
@@ -1056,6 +1120,8 @@ private const val INLINE_CRUMBS = 3
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun FilesContent(
+    onContextMenu: (Offset, Boolean) -> Unit,
+    onBackgroundMenu: (Offset) -> Unit,
     highlightedFileId: String?,
     gridState: LazyGridState,
     state: FilesUiState,
@@ -1078,6 +1144,69 @@ private fun FilesContent(
         }
     }
     val selectIfNone: (Int) -> Unit = { index -> if (!state.selectionMode) toggleAt(index) }
+    val pointer = LocalPlatformCapabilities.current.usesPointerSelection
+    val openAt: (Int) -> Unit = { index ->
+        if (index < state.folders.size) {
+            onOpenFolder(state.folders[index].id)
+        } else {
+            files.peek(index - state.folders.size)?.let { file ->
+                onOpenFile(
+                    file.id,
+                    PreviewSequence(
+                        folderId = state.folderId,
+                        filterByFolder = true,
+                        sortField = state.sortField,
+                        sortDirection = state.sortDirection
+                    )
+                )
+            }
+        }
+    }
+    val selectedAt: (Int) -> Boolean = { index ->
+        if (index < state.folders.size) {
+            state.folders[index].id in state.folderSelection
+        } else {
+            files.peek(index - state.folders.size)?.id in state.selection
+        }
+    }
+    val selectOnlyAt: (Int, Boolean) -> Unit = { index, byClick ->
+        if (index < state.folders.size) {
+            viewModel.selectOnly(null, state.folders[index].id, byClick)
+        } else {
+            files.peek(index - state.folders.size)?.let {
+                viewModel.selectOnly(it.id, null, byClick)
+            }
+        }
+    }
+    val locator = remember { LazyIndexLocator() }
+    val clickSelection by viewModel.clickSelection.collectAsStateWithLifecycle()
+    val pointerItems = rememberPointerItems(
+        resetKey = state.folderId,
+        selectionActive = state.selectionMode,
+        itemCount = itemCount,
+        clickSelection = clickSelection,
+        isSelected = selectedAt,
+        selectOnly = selectOnlyAt,
+        toggle = toggleAt,
+        selectRange = { range ->
+            val folderIds = mutableListOf<String>()
+            val fileIds = mutableListOf<String>()
+            for (position in range) {
+                if (position < state.folders.size) {
+                    folderIds += state.folders[position].id
+                } else {
+                    files.peek(position - state.folders.size)?.let { fileIds += it.id }
+                }
+            }
+            viewModel.selectRange(fileIds, folderIds)
+        },
+        open = openAt,
+        isSelectable = { it < state.folders.size + files.itemCount },
+        indexAt = { locator.indexAt(gridState, it) },
+        onContextMenu = onContextMenu
+    )
+    val pointerItem = pointerItems.item
+    val ticks = !pointerItems.clickSelection
     val shortcuts = CollectionShortcuts(
         onToggleSelect = toggleAt,
         onSelectAll = viewModel::selectAll,
@@ -1132,7 +1261,13 @@ private fun FilesContent(
                 label = stringResource(Res.string.nav_files)
             )
             .pinchZoom(onZoomIn = viewModel::zoomIn, onZoomOut = viewModel::zoomOut)
-            .then(dragSelect),
+            .then(if (pointer) locator.modifier else dragSelect)
+            .pointerBackground(
+                enabled = pointer,
+                onClick = viewModel::clearSelection,
+                onContextMenu = onBackgroundMenu,
+                onBack = onBack
+            ),
         contentPadding = padding.add(horizontal = 12.dp, top = 12.dp, bottom = 100.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -1151,12 +1286,17 @@ private fun FilesContent(
                 FolderGridItem(
                     folder = folder,
                     selected = folderSelected,
+                    checked = folderSelected && ticks,
                     onClick = {
-                        if (state.selectionMode) viewModel.toggleFolderSelection(folder.id)
-                        else onOpenFolder(folder.id)
+                        if (state.selectionMode && !pointer) {
+                            viewModel.toggleFolderSelection(folder.id)
+                        } else {
+                            onOpenFolder(folder.id)
+                        }
                     },
                     onLongClick = { viewModel.toggleFolderSelection(folder.id) },
                     modifier = Modifier
+                        .then(pointerItem(index))
                         .keyboardCollectionItem(keyboard, index)
                         .animateItem()
                 )
@@ -1164,12 +1304,17 @@ private fun FilesContent(
                 FolderRow(
                     folder = folder,
                     selected = folderSelected,
+                    checked = folderSelected && ticks,
                     onClick = {
-                        if (state.selectionMode) viewModel.toggleFolderSelection(folder.id)
-                        else onOpenFolder(folder.id)
+                        if (state.selectionMode && !pointer) {
+                            viewModel.toggleFolderSelection(folder.id)
+                        } else {
+                            onOpenFolder(folder.id)
+                        }
                     },
                     onLongClick = { viewModel.toggleFolderSelection(folder.id) },
                     modifier = Modifier
+                        .then(pointerItem(index))
                         .keyboardCollectionItem(keyboard, index)
                         .animateItem()
                 )
@@ -1187,8 +1332,9 @@ private fun FilesContent(
                 FileGridItem(
                     file = file,
                     selected = selected,
+                    checked = selected && ticks,
                     onClick = {
-                        if (state.selectionMode) viewModel.toggleSelection(file.id)
+                        if (state.selectionMode && !pointer) viewModel.toggleSelection(file.id)
                         else onOpenFile(
                             file.id,
                             PreviewSequence(
@@ -1201,6 +1347,7 @@ private fun FilesContent(
                     },
                     onLongClick = { viewModel.toggleSelection(file.id) },
                     modifier = Modifier
+                        .then(pointerItem(state.folders.size + index))
                         .keyboardCollectionItem(keyboard, state.folders.size + index)
                         .animateItem()
                         .focusHighlight(highlighted)
@@ -1209,9 +1356,10 @@ private fun FilesContent(
                 FileListItem(
                     file = file,
                     selected = selected,
+                    checked = selected && ticks,
                     selectionMode = state.selectionMode,
                     onClick = {
-                        if (state.selectionMode) viewModel.toggleSelection(file.id)
+                        if (state.selectionMode && !pointer) viewModel.toggleSelection(file.id)
                         else onOpenFile(
                             file.id,
                             PreviewSequence(
@@ -1224,6 +1372,7 @@ private fun FilesContent(
                     },
                     onLongClick = { viewModel.toggleSelection(file.id) },
                     modifier = Modifier
+                        .then(pointerItem(state.folders.size + index))
                         .keyboardCollectionItem(keyboard, state.folders.size + index)
                         .animateItem()
                         .focusHighlight(highlighted)

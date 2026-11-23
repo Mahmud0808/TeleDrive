@@ -15,6 +15,8 @@ interface PlatformCapabilities {
     val supportsScreenCaptureBlocking: Boolean
 
     val supportsDynamicColor: Boolean
+
+    val usesPointerSelection: Boolean
 }
 
 val LocalPlatformCapabilities = staticCompositionLocalOf<PlatformCapabilities> {

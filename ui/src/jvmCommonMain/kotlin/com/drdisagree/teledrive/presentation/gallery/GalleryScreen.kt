@@ -1,36 +1,5 @@
 package com.drdisagree.teledrive.presentation.gallery
 
-import androidx.compose.material.icons.automirrored.filled.DriveFileMove
-import androidx.compose.material.icons.automirrored.filled.Sort
-import androidx.compose.material.icons.filled.Archive
-import androidx.compose.material.icons.filled.DeleteOutline
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.DriveFileRenameOutline
-import androidx.compose.material.icons.filled.OfflinePin
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.StarOutline
-import androidx.compose.material.icons.filled.Storage
-import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material.icons.filled.Upload
-import androidx.compose.material.icons.filled.VisibilityOff
-import com.drdisagree.teledrive.presentation.components.ActionMenu
-import com.drdisagree.teledrive.presentation.components.MenuAction
-import com.drdisagree.teledrive.resources.common_make_available_offline
-import com.drdisagree.teledrive.resources.common_organize
-import com.drdisagree.teledrive.resources.common_remove_from_offline
-import com.drdisagree.teledrive.resources.common_storage_actions
-import com.drdisagree.teledrive.resources.files_archive
-import com.drdisagree.teledrive.resources.files_hide
-import com.drdisagree.teledrive.resources.files_sort
-import com.drdisagree.teledrive.resources.preview_remove_favorites
-import androidx.compose.material3.SnackbarHostState
-import com.drdisagree.teledrive.presentation.common.CollectSnackbarMessages
-import com.drdisagree.teledrive.presentation.components.BottomBarSnackbarHost
-import com.drdisagree.teledrive.presentation.components.CollectionShortcuts
-import com.drdisagree.teledrive.presentation.files.FolderPickerHost
-import com.drdisagree.teledrive.resources.files_move_to
-import com.drdisagree.teledrive.resources.files_move_here
-import com.drdisagree.teledrive.presentation.common.AppBackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -47,17 +16,30 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.DriveFileMove
+import androidx.compose.material.icons.automirrored.filled.Sort
+import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Deselect
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.DriveFileRenameOutline
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.OfflinePin
 import androidx.compose.material.icons.filled.SelectAll
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.StarOutline
+import androidx.compose.material.icons.filled.Storage
+import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.Upload
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.outlined.Photo
 import androidx.compose.material.icons.outlined.PhotoLibrary
 import androidx.compose.material3.ButtonGroupDefaults
@@ -69,6 +51,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.TopAppBar
@@ -85,16 +68,53 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import org.jetbrains.compose.resources.stringResource
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.koin.compose.viewmodel.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
+import com.drdisagree.teledrive.domain.model.MediaAlbum
+import com.drdisagree.teledrive.domain.model.ViewMode
+import com.drdisagree.teledrive.presentation.common.AppBackHandler
+import com.drdisagree.teledrive.presentation.common.CollectSnackbarMessages
+import com.drdisagree.teledrive.presentation.common.DayBucket
+import com.drdisagree.teledrive.presentation.common.Formatters
+import com.drdisagree.teledrive.presentation.common.isInitialLoad
+import com.drdisagree.teledrive.presentation.common.rememberPosition
+import com.drdisagree.teledrive.presentation.components.ActionMenu
+import com.drdisagree.teledrive.presentation.components.BottomBarSnackbarHost
+import com.drdisagree.teledrive.presentation.components.CollectionShortcuts
+import com.drdisagree.teledrive.presentation.components.ConfirmDialog
+import com.drdisagree.teledrive.presentation.components.EmptyState
+import com.drdisagree.teledrive.presentation.components.FileGridItem
+import com.drdisagree.teledrive.presentation.components.FileListItem
+import com.drdisagree.teledrive.presentation.components.GALLERY_SORT_FIELDS
+import com.drdisagree.teledrive.presentation.components.LazyIndexLocator
+import com.drdisagree.teledrive.presentation.components.MenuAction
+import com.drdisagree.teledrive.presentation.components.PointerMenu
+import com.drdisagree.teledrive.presentation.components.RefreshAction
+import com.drdisagree.teledrive.presentation.components.RefreshableContent
+import com.drdisagree.teledrive.presentation.components.RenameDialog
+import com.drdisagree.teledrive.presentation.components.SortMenu
+import com.drdisagree.teledrive.presentation.components.keyboardCollection
+import com.drdisagree.teledrive.presentation.components.keyboardCollectionItem
+import com.drdisagree.teledrive.presentation.components.liftedTopAppBarColors
+import com.drdisagree.teledrive.presentation.components.pinchZoom
+import com.drdisagree.teledrive.presentation.components.pointerBackground
+import com.drdisagree.teledrive.presentation.components.rememberDragSelect
+import com.drdisagree.teledrive.presentation.components.rememberKeyboardCollection
+import com.drdisagree.teledrive.presentation.components.rememberPointerItems
+import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
+import com.drdisagree.teledrive.presentation.components.skeleton.CollectionSkeleton
+import com.drdisagree.teledrive.presentation.files.FolderPickerHost
+import com.drdisagree.teledrive.presentation.navigation.LocalBottomBarInset
+import com.drdisagree.teledrive.presentation.platform.LocalPlatformCapabilities
+import com.drdisagree.teledrive.presentation.preview.PreviewSequence
 import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.common_actions
 import com.drdisagree.teledrive.resources.common_add_favorites
@@ -103,47 +123,34 @@ import com.drdisagree.teledrive.resources.common_clear_selection
 import com.drdisagree.teledrive.resources.common_confirm_trash_count_title
 import com.drdisagree.teledrive.resources.common_deselect_all
 import com.drdisagree.teledrive.resources.common_download
+import com.drdisagree.teledrive.resources.common_make_available_offline
 import com.drdisagree.teledrive.resources.common_move_trash
+import com.drdisagree.teledrive.resources.common_organize
+import com.drdisagree.teledrive.resources.common_remove_from_offline
 import com.drdisagree.teledrive.resources.common_rename
 import com.drdisagree.teledrive.resources.common_rename_file
 import com.drdisagree.teledrive.resources.common_restore_trash_emptied
 import com.drdisagree.teledrive.resources.common_select_all
 import com.drdisagree.teledrive.resources.common_selection_count
+import com.drdisagree.teledrive.resources.common_storage_actions
 import com.drdisagree.teledrive.resources.common_upload
 import com.drdisagree.teledrive.resources.date_days_ago
 import com.drdisagree.teledrive.resources.date_today
 import com.drdisagree.teledrive.resources.date_yesterday
+import com.drdisagree.teledrive.resources.files_archive
+import com.drdisagree.teledrive.resources.files_hide
+import com.drdisagree.teledrive.resources.files_move_here
+import com.drdisagree.teledrive.resources.files_move_to
+import com.drdisagree.teledrive.resources.files_sort
 import com.drdisagree.teledrive.resources.gallery_albums_appear_organise_media
 import com.drdisagree.teledrive.resources.gallery_no_albums
 import com.drdisagree.teledrive.resources.gallery_no_media
 import com.drdisagree.teledrive.resources.gallery_photos_videos_appear_here
 import com.drdisagree.teledrive.resources.gallery_title
 import com.drdisagree.teledrive.resources.nav_gallery
-import com.drdisagree.teledrive.domain.model.MediaAlbum
-import com.drdisagree.teledrive.domain.model.ViewMode
-import com.drdisagree.teledrive.presentation.common.DayBucket
-import com.drdisagree.teledrive.presentation.common.Formatters
-import com.drdisagree.teledrive.presentation.common.isInitialLoad
-import com.drdisagree.teledrive.presentation.components.RefreshAction
-import com.drdisagree.teledrive.presentation.components.RefreshableContent
-import com.drdisagree.teledrive.presentation.components.ConfirmDialog
-import com.drdisagree.teledrive.presentation.components.EmptyState
-import com.drdisagree.teledrive.presentation.components.FileGridItem
-import com.drdisagree.teledrive.presentation.components.FileListItem
-import com.drdisagree.teledrive.presentation.components.RenameDialog
-import com.drdisagree.teledrive.presentation.components.GALLERY_SORT_FIELDS
-import com.drdisagree.teledrive.presentation.components.SortMenu
-import com.drdisagree.teledrive.presentation.components.keyboardCollection
-import com.drdisagree.teledrive.presentation.components.keyboardCollectionItem
-import com.drdisagree.teledrive.presentation.components.liftedTopAppBarColors
-import com.drdisagree.teledrive.presentation.components.pinchZoom
-import com.drdisagree.teledrive.presentation.components.rememberDragSelect
-import com.drdisagree.teledrive.presentation.components.rememberKeyboardCollection
-import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
-import com.drdisagree.teledrive.presentation.navigation.LocalBottomBarInset
-import com.drdisagree.teledrive.presentation.preview.PreviewSequence
-import com.drdisagree.teledrive.presentation.common.rememberPosition
-import com.drdisagree.teledrive.presentation.components.skeleton.CollectionSkeleton
+import com.drdisagree.teledrive.resources.preview_remove_favorites
+import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 private fun DayHeaderRow(dayStartMillis: Long, modifier: Modifier = Modifier) {
@@ -328,469 +335,541 @@ fun GalleryScreen(
         mediaGridState.rememberPosition(viewModel.listPosition, media.itemCount)
     }
     val lifted by rememberToolbarLift(scrolled)
-
-    Scaffold(
-        snackbarHost = {
-            BottomBarSnackbarHost(
-                hostState = snackbarHostState,
-                applyInset = !state.selectionMode
+    val selectionActions = if (state.selectionMode) {
+        val storage = buildList {
+            if (state.capabilities.canDownload) {
+                add(
+                    MenuAction(
+                        label = stringResource(Res.string.common_download),
+                        icon = Icons.Filled.Download
+                    ) { viewModel.downloadSelected() }
+                )
+            }
+            if (state.capabilities.canUpload) {
+                add(
+                    MenuAction(
+                        label = stringResource(Res.string.common_upload),
+                        icon = Icons.Filled.Upload
+                    ) { viewModel.uploadSelected() }
+                )
+            }
+        }
+        val organize = buildList {
+            add(
+                MenuAction(
+                    label = stringResource(
+                        if (state.allSelectedFavorite) {
+                            Res.string.preview_remove_favorites
+                        } else {
+                            Res.string.common_add_favorites
+                        }
+                    ),
+                    icon = if (state.allSelectedFavorite) {
+                        Icons.Filled.Star
+                    } else {
+                        Icons.Filled.StarOutline
+                    }
+                ) { viewModel.favoriteSelected(!state.allSelectedFavorite) }
             )
-        },
-        topBar = {
-            if (state.selectionMode) {
-                TopAppBar(
-                    colors = liftedTopAppBarColors(lifted),
-                    title = {
-                        Text(
-                            text = stringResource(
-                                Res.string.common_selection_count,
-                                state.selection.size
-                            ),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = viewModel::clearSelection) {
-                            Icon(
-                                Icons.Filled.Close,
-                                contentDescription = stringResource(Res.string.common_clear_selection)
-                            )
+            add(
+                MenuAction(
+                    label = stringResource(
+                        if (state.allSelectedAvailableOffline) {
+                            Res.string.common_remove_from_offline
+                        } else {
+                            Res.string.common_make_available_offline
                         }
-                    },
-                    actions = {
-                        IconButton(
-                            onClick = {
-                                if (allSelected) viewModel.clearSelection() else viewModel.selectAll()
-                            }
-                        ) {
-                            Icon(
-                                imageVector = if (allSelected) {
-                                    Icons.Filled.Deselect
-                                } else {
-                                    Icons.Filled.SelectAll
-                                },
-                                contentDescription = if (allSelected) {
-                                    stringResource(Res.string.common_deselect_all)
-                                } else {
-                                    stringResource(Res.string.common_select_all)
-                                }
-                            )
-                        }
-                        Box {
-                            IconButton(onClick = { showSelectionOverflow = true }) {
-                                Icon(
-                                    Icons.Filled.MoreVert,
-                                    contentDescription = stringResource(Res.string.common_actions)
-                                )
-                            }
-                            val storage = buildList {
-                                if (state.capabilities.canDownload) {
-                                    add(
-                                        MenuAction(
-                                            label = stringResource(Res.string.common_download),
-                                            icon = Icons.Filled.Download
-                                        ) { viewModel.downloadSelected() }
-                                    )
-                                }
-                                if (state.capabilities.canUpload) {
-                                    add(
-                                        MenuAction(
-                                            label = stringResource(Res.string.common_upload),
-                                            icon = Icons.Filled.Upload
-                                        ) { viewModel.uploadSelected() }
-                                    )
-                                }
-                            }
-                            val organize = buildList {
-                                add(
-                                    MenuAction(
-                                        label = stringResource(
-                                            if (state.allSelectedFavorite) {
-                                                Res.string.preview_remove_favorites
-                                            } else {
-                                                Res.string.common_add_favorites
-                                            }
-                                        ),
-                                        icon = if (state.allSelectedFavorite) {
-                                            Icons.Filled.Star
-                                        } else {
-                                            Icons.Filled.StarOutline
-                                        }
-                                    ) { viewModel.favoriteSelected(!state.allSelectedFavorite) }
-                                )
-                                add(
-                                    MenuAction(
-                                        label = stringResource(
-                                            if (state.allSelectedAvailableOffline) {
-                                                Res.string.common_remove_from_offline
-                                            } else {
-                                                Res.string.common_make_available_offline
-                                            }
-                                        ),
-                                        icon = Icons.Filled.OfflinePin
-                                    ) { viewModel.setSelectedAvailableOffline(!state.allSelectedAvailableOffline) }
-                                )
-                                add(
-                                    MenuAction(
-                                        label = stringResource(Res.string.files_hide),
-                                        icon = Icons.Filled.VisibilityOff
-                                    ) { viewModel.hideSelected(true) }
-                                )
-                                add(
-                                    MenuAction(
-                                        label = stringResource(Res.string.files_archive),
-                                        icon = Icons.Filled.Archive
-                                    ) { viewModel.archiveSelected(true) }
-                                )
-                            }
-                            val actions = buildList {
-                                if (state.selection.size == 1) {
-                                    add(
-                                        MenuAction(
-                                            label = stringResource(Res.string.common_rename),
-                                            icon = Icons.Filled.DriveFileRenameOutline
-                                        ) { viewModel.requestRenameSelected() }
-                                    )
-                                }
-                                add(
-                                    MenuAction(
-                                        label = stringResource(Res.string.files_move_to),
-                                        icon = Icons.AutoMirrored.Filled.DriveFileMove
-                                    ) { showMovePicker = true }
-                                )
-                                if (storage.isNotEmpty()) {
-                                    add(
-                                        MenuAction(
-                                            label = stringResource(Res.string.common_storage_actions),
-                                            icon = Icons.Filled.Storage,
-                                            children = storage
-                                        )
-                                    )
-                                }
-                                add(
-                                    MenuAction(
-                                        label = stringResource(Res.string.common_organize),
-                                        icon = Icons.Filled.Tune,
-                                        children = organize
-                                    )
-                                )
-                                add(
-                                    MenuAction(
-                                        label = stringResource(Res.string.common_move_trash),
-                                        icon = Icons.Filled.DeleteOutline
-                                    ) { confirmTrash = true }
-                                )
-                            }
-                            ActionMenu(
-                                expanded = showSelectionOverflow,
-                                onDismissRequest = { showSelectionOverflow = false },
-                                actions = actions
-                            )
-                        }
-                    }
-                )
-            } else {
-                TopAppBar(
-                    colors = liftedTopAppBarColors(lifted),
-                    title = { Text(state.albumTitle ?: stringResource(Res.string.gallery_title)) },
-                    navigationIcon = {
-                        onBack?.let {
-                            IconButton(onClick = it) {
-                                Icon(
-                                    Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = stringResource(Res.string.common_back)
-                                )
-                            }
-                        }
-                    },
-                    actions = {
-                        if (state.isAlbumView || state.tab != GalleryTab.ALBUMS) {
-                            var showSortMenu by remember { mutableStateOf(false) }
-                            IconButton(onClick = { showSortMenu = true }) {
-                                Icon(
-                                    Icons.AutoMirrored.Filled.Sort,
-                                    contentDescription = stringResource(Res.string.files_sort)
-                                )
-                            }
-                            SortMenu(
-                                expanded = showSortMenu,
-                                current = state.sortField,
-                                direction = state.sortDirection,
-                                onDismiss = { showSortMenu = false },
-                                onSelect = { field, direction ->
-                                    showSortMenu = false
-                                    viewModel.setSort(field, direction)
-                                },
-                                fields = GALLERY_SORT_FIELDS
-                            )
-                        }
-                        RefreshAction(refreshing = refreshing, onRefresh = viewModel::refresh)
-                    }
+                    ),
+                    icon = Icons.Filled.OfflinePin
+                ) { viewModel.setSelectedAvailableOffline(!state.allSelectedAvailableOffline) }
+            )
+            add(
+                MenuAction(
+                    label = stringResource(Res.string.files_hide),
+                    icon = Icons.Filled.VisibilityOff
+                ) { viewModel.hideSelected(true) }
+            )
+            add(
+                MenuAction(
+                    label = stringResource(Res.string.files_archive),
+                    icon = Icons.Filled.Archive
+                ) { viewModel.archiveSelected(true) }
+            )
+        }
+        val actions = buildList {
+            if (state.selection.size == 1) {
+                add(
+                    MenuAction(
+                        label = stringResource(Res.string.common_rename),
+                        icon = Icons.Filled.DriveFileRenameOutline
+                    ) { viewModel.requestRenameSelected() }
                 )
             }
-        }
-    ) { padding ->
-        var tabsVisible by remember { mutableStateOf(true) }
-        val mediaScrolls by remember(scrolled) {
-            derivedStateOf { scrolled.canScrollForward || scrolled.canScrollBackward }
-        }
-        LaunchedEffect(state.tab) { tabsVisible = true }
-        LaunchedEffect(mediaScrolls) { if (!mediaScrolls) tabsVisible = true }
-        val tabScrollConnection = remember {
-            object : NestedScrollConnection {
-                @Suppress("SameReturnValue")
-                override fun onPreScroll(
-                    available: Offset,
-                    source: NestedScrollSource
-                ): Offset {
-                    if (!mediaScrolls) return Offset.Zero
-                    when {
-                        available.y < -TAB_SCROLL_THRESHOLD -> tabsVisible = false
-                        available.y > TAB_SCROLL_THRESHOLD -> tabsVisible = true
-                    }
-                    return Offset.Zero
-                }
+            add(
+                MenuAction(
+                    label = stringResource(Res.string.files_move_to),
+                    icon = Icons.AutoMirrored.Filled.DriveFileMove
+                ) { showMovePicker = true }
+            )
+            if (storage.isNotEmpty()) {
+                add(
+                    MenuAction(
+                        label = stringResource(Res.string.common_storage_actions),
+                        icon = Icons.Filled.Storage,
+                        children = storage
+                    )
+                )
             }
+            add(
+                MenuAction(
+                    label = stringResource(Res.string.common_organize),
+                    icon = Icons.Filled.Tune,
+                    children = organize
+                )
+            )
+            add(
+                MenuAction(
+                    label = stringResource(Res.string.common_move_trash),
+                    icon = Icons.Filled.DeleteOutline
+                ) { confirmTrash = true }
+            )
         }
+        actions
+    } else {
+        emptyList()
+    }
+    val pointer = LocalPlatformCapabilities.current.usesPointerSelection
+    val clickSelected by viewModel.clickSelection.collectAsStateWithLifecycle()
+    val plainClick = pointer && clickSelected
+    var contextMenuAt by remember { mutableStateOf<Offset?>(null) }
+    var screenOrigin by remember { mutableStateOf(Offset.Zero) }
+    var contextCreatedSelection by remember { mutableStateOf(false) }
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = padding.calculateTopPadding())
-                .nestedScroll(tabScrollConnection)
-        ) {
-            if (!state.isAlbumView) {
-                AnimatedVisibility(
-                    visible = tabsVisible,
-                    enter = expandVertically() + fadeIn(),
-                    exit = shrinkVertically() + fadeOut()
-                ) {
-                    GalleryTabSelector(
-                        selected = state.tab,
-                        onSelect = viewModel::setTab
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .onGloballyPositioned { screenOrigin = it.positionInRoot() }
+    ) {
+        PointerMenu(
+            at = contextMenuAt?.minus(screenOrigin),
+            actions = selectionActions,
+            onDismiss = { acted ->
+                contextMenuAt = null
+                if (!acted && contextCreatedSelection) viewModel.clearSelection()
+            }
+        )
+        Scaffold(
+            snackbarHost = {
+                BottomBarSnackbarHost(
+                    hostState = snackbarHostState,
+                    applyInset = !state.selectionMode
+                )
+            },
+            topBar = {
+                if (state.selectionMode) {
+                    TopAppBar(
+                        colors = liftedTopAppBarColors(lifted),
+                        title = {
+                            Text(
+                                text = if (plainClick) {
+                                    state.albumTitle ?: stringResource(Res.string.gallery_title)
+                                } else {
+                                    stringResource(
+                                        Res.string.common_selection_count,
+                                        state.selection.size
+                                    )
+                                },
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        },
+                        navigationIcon = {
+                            if (!plainClick) {
+                                IconButton(onClick = viewModel::clearSelection) {
+                                    Icon(
+                                        Icons.Filled.Close,
+                                        contentDescription = stringResource(Res.string.common_clear_selection)
+                                    )
+                                }
+                            }
+                        },
+                        actions = {
+                            IconButton(
+                                onClick = {
+                                    if (allSelected) viewModel.clearSelection() else viewModel.selectAll()
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = if (allSelected) {
+                                        Icons.Filled.Deselect
+                                    } else {
+                                        Icons.Filled.SelectAll
+                                    },
+                                    contentDescription = if (allSelected) {
+                                        stringResource(Res.string.common_deselect_all)
+                                    } else {
+                                        stringResource(Res.string.common_select_all)
+                                    }
+                                )
+                            }
+                            Box {
+                                IconButton(onClick = { showSelectionOverflow = true }) {
+                                    Icon(
+                                        Icons.Filled.MoreVert,
+                                        contentDescription = stringResource(Res.string.common_actions)
+                                    )
+                                }
+                                ActionMenu(
+                                    expanded = showSelectionOverflow,
+                                    onDismissRequest = { showSelectionOverflow = false },
+                                    actions = selectionActions
+                                )
+                            }
+                        }
+                    )
+                } else {
+                    TopAppBar(
+                        colors = liftedTopAppBarColors(lifted),
+                        title = { Text(state.albumTitle ?: stringResource(Res.string.gallery_title)) },
+                        navigationIcon = {
+                            onBack?.let {
+                                IconButton(onClick = it) {
+                                    Icon(
+                                        Icons.AutoMirrored.Filled.ArrowBack,
+                                        contentDescription = stringResource(Res.string.common_back)
+                                    )
+                                }
+                            }
+                        },
+                        actions = {
+                            if (state.isAlbumView || state.tab != GalleryTab.ALBUMS) {
+                                var showSortMenu by remember { mutableStateOf(false) }
+                                IconButton(onClick = { showSortMenu = true }) {
+                                    Icon(
+                                        Icons.AutoMirrored.Filled.Sort,
+                                        contentDescription = stringResource(Res.string.files_sort)
+                                    )
+                                }
+                                SortMenu(
+                                    expanded = showSortMenu,
+                                    current = state.sortField,
+                                    direction = state.sortDirection,
+                                    onDismiss = { showSortMenu = false },
+                                    onSelect = { field, direction ->
+                                        showSortMenu = false
+                                        viewModel.setSort(field, direction)
+                                    },
+                                    fields = GALLERY_SORT_FIELDS
+                                )
+                            }
+                            RefreshAction(refreshing = refreshing, onRefresh = viewModel::refresh)
+                        }
                     )
                 }
             }
+        ) { padding ->
+            var tabsVisible by remember { mutableStateOf(true) }
+            val mediaScrolls by remember(scrolled) {
+                derivedStateOf { scrolled.canScrollForward || scrolled.canScrollBackward }
+            }
+            LaunchedEffect(state.tab) { tabsVisible = true }
+            LaunchedEffect(mediaScrolls) { if (!mediaScrolls) tabsVisible = true }
+            val tabScrollConnection = remember {
+                object : NestedScrollConnection {
+                    @Suppress("SameReturnValue")
+                    override fun onPreScroll(
+                        available: Offset,
+                        source: NestedScrollSource
+                    ): Offset {
+                        if (!mediaScrolls) return Offset.Zero
+                        when {
+                            available.y < -TAB_SCROLL_THRESHOLD -> tabsVisible = false
+                            available.y > TAB_SCROLL_THRESHOLD -> tabsVisible = true
+                        }
+                        return Offset.Zero
+                    }
+                }
+            }
 
-            if (state.tab == GalleryTab.ALBUMS && !state.isAlbumView) {
-                if (!state.loaded) {
-                    CollectionSkeleton(
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = padding.calculateTopPadding())
+                    .nestedScroll(tabScrollConnection)
+            ) {
+                if (!state.isAlbumView) {
+                    AnimatedVisibility(
+                        visible = tabsVisible,
+                        enter = expandVertically() + fadeIn(),
+                        exit = shrinkVertically() + fadeOut()
+                    ) {
+                        GalleryTabSelector(
+                            selected = state.tab,
+                            onSelect = viewModel::setTab
+                        )
+                    }
+                }
+
+                if (state.tab == GalleryTab.ALBUMS && !state.isAlbumView) {
+                    if (!state.loaded) {
+                        CollectionSkeleton(
+                            columns = state.albumGridSize,
+                            contentPadding = PaddingValues(
+                                start = 12.dp,
+                                end = 12.dp,
+                                top = 12.dp,
+                                bottom = 12.dp + padding.calculateBottomPadding() +
+                                        LocalBottomBarInset.current
+                            ),
+                            horizontalSpacing = 10.dp,
+                            verticalSpacing = 10.dp,
+                            item = { brush -> AlbumCardSkeleton(brush) }
+                        )
+                        return@Column
+                    }
+                    AlbumGrid(
+                        albums = state.albums,
                         columns = state.albumGridSize,
-                        contentPadding = PaddingValues(
-                            start = 12.dp,
-                            end = 12.dp,
-                            top = 12.dp,
-                            bottom = 12.dp + padding.calculateBottomPadding() +
-                                    LocalBottomBarInset.current
-                        ),
-                        horizontalSpacing = 10.dp,
-                        verticalSpacing = 10.dp,
-                        item = { brush -> AlbumCardSkeleton(brush) }
+                        bottomPadding = padding.calculateBottomPadding() + LocalBottomBarInset.current,
+                        onOpenAlbum = onOpenAlbum,
+                        onZoomIn = viewModel::zoomAlbumsIn,
+                        onZoomOut = viewModel::zoomAlbumsOut
                     )
                     return@Column
                 }
-                AlbumGrid(
-                    albums = state.albums,
-                    columns = state.albumGridSize,
-                    bottomPadding = padding.calculateBottomPadding() + LocalBottomBarInset.current,
-                    onOpenAlbum = onOpenAlbum,
-                    onZoomIn = viewModel::zoomAlbumsIn,
-                    onZoomOut = viewModel::zoomAlbumsOut
+
+                val mediaIdAt: (Int) -> String? = { index ->
+                    (media.peek(index) as? GalleryListItem.Media)?.file?.id
+                }
+                val listDragSelect = rememberDragSelect(
+                    listState = mediaListState,
+                    onStart = viewModel::startRangeSelection,
+                    onRange = { range ->
+                        viewModel.extendRangeSelection(range.mapNotNull(mediaIdAt))
+                    },
+                    onEnd = viewModel::endRangeSelection
                 )
-                return@Column
-            }
-
-            val mediaIdAt: (Int) -> String? = { index ->
-                (media.peek(index) as? GalleryListItem.Media)?.file?.id
-            }
-            val listDragSelect = rememberDragSelect(
-                listState = mediaListState,
-                onStart = viewModel::startRangeSelection,
-                onRange = { range ->
-                    viewModel.extendRangeSelection(range.mapNotNull(mediaIdAt))
-                },
-                onEnd = viewModel::endRangeSelection
-            )
-            val gridDragSelect = rememberDragSelect(
-                gridState = mediaGridState,
-                onStart = viewModel::startRangeSelection,
-                onRange = { range ->
-                    viewModel.extendRangeSelection(range.mapNotNull(mediaIdAt))
-                },
-                onEnd = viewModel::endRangeSelection
-            )
-            val isMedia: (Int) -> Boolean = { index ->
-                index < media.itemCount && media.peek(index) is GalleryListItem.Media
-            }
-            val listKeyboard = rememberKeyboardCollection(mediaListState, isItem = isMedia)
-            val gridKeyboard = rememberKeyboardCollection(mediaGridState, state.gridSize, isMedia)
-            val selectIfNone: (Int) -> Unit = { index ->
-                if (!state.selectionMode) mediaIdAt(index)?.let(viewModel::toggleSelection)
-            }
-            val shortcuts = CollectionShortcuts(
-                onToggleSelect = { index -> mediaIdAt(index)?.let(viewModel::toggleSelection) },
-                onSelectAll = viewModel::selectAll,
-                onDelete = { index ->
-                    selectIfNone(index)
-                    if (viewModel.hasSelection()) confirmTrash = true
-                },
-                onRename = { index -> mediaIdAt(index)?.let(viewModel::requestRename) },
-                onCut = { index ->
-                    selectIfNone(index)
-                    viewModel.cutSelected()
-                },
-                onBack = onBack,
-                onClear = if (state.selectionMode) viewModel::clearSelection else null
-            )
-            RefreshableContent(
-                isRefreshing = refreshing,
-                onRefresh = viewModel::refresh,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                when {
-                    media.isInitialLoad || !state.loaded -> {
-                        val list = state.viewMode == ViewMode.LIST
-                        val edge = if (list) 8.dp else 12.dp
-                        GallerySkeleton(
-                            columns = state.gridSize,
-                            list = list,
-                            contentPadding = PaddingValues(
-                                start = edge,
-                                end = edge,
-                                top = edge,
-                                bottom = edge + padding.calculateBottomPadding() +
-                                        LocalBottomBarInset.current
-                            )
-                        )
+                val gridDragSelect = rememberDragSelect(
+                    gridState = mediaGridState,
+                    onStart = viewModel::startRangeSelection,
+                    onRange = { range ->
+                        viewModel.extendRangeSelection(range.mapNotNull(mediaIdAt))
+                    },
+                    onEnd = viewModel::endRangeSelection
+                )
+                val locator = remember { LazyIndexLocator() }
+                val clickSelection by viewModel.clickSelection.collectAsStateWithLifecycle()
+                val pointerItems = rememberPointerItems(
+                    resetKey = state.tab,
+                    selectionActive = state.selectionMode,
+                    itemCount = media.itemCount,
+                    clickSelection = clickSelection,
+                    isSelected = { index -> mediaIdAt(index) in state.selection },
+                    selectOnly = { index, byClick ->
+                        mediaIdAt(index)?.let { viewModel.selectOnly(it, byClick) }
+                    },
+                    toggle = { index -> mediaIdAt(index)?.let(viewModel::toggleSelection) },
+                    selectRange = { range -> viewModel.selectRange(range.mapNotNull(mediaIdAt)) },
+                    open = { index -> mediaIdAt(index)?.let { onOpenFile(it, previewSequence) } },
+                    isSelectable = { index -> mediaIdAt(index) != null },
+                    indexAt = { at ->
+                        if (state.viewMode == ViewMode.LIST) {
+                            locator.indexAt(mediaListState, at)
+                        } else {
+                            locator.indexAt(mediaGridState, at)
+                        }
+                    },
+                    onContextMenu = { at, created ->
+                        contextMenuAt = at
+                        contextCreatedSelection = created
                     }
-
-                    media.itemCount == 0 -> EmptyState(
-                        icon = Icons.Outlined.Photo,
-                        title = stringResource(Res.string.gallery_no_media),
-                        description = stringResource(Res.string.gallery_photos_videos_appear_here)
-                    )
-
-                    state.viewMode == ViewMode.LIST -> LazyColumn(
-                        state = mediaListState,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .keyboardCollection(
-                                listKeyboard,
-                                media.itemCount,
-                                shortcuts,
-                                label = stringResource(Res.string.nav_gallery)
-                            )
-                            .pinchZoom(
-                                onZoomIn = viewModel::zoomIn,
-                                onZoomOut = viewModel::zoomOut
-                            )
-                            .then(listDragSelect),
-                        contentPadding = PaddingValues(
-                            start = 8.dp,
-                            end = 8.dp,
-                            top = 8.dp,
-                            bottom = 8.dp + padding.calculateBottomPadding() + LocalBottomBarInset.current
-                        )
-                    ) {
-                        items(
-                            count = media.itemCount,
-                            key = media.itemKey { it.key }
-                        ) { index ->
-                            when (val item = media[index]) {
-                                is GalleryListItem.DayHeader -> DayHeaderRow(
-                                    dayStartMillis = item.dayStartMillis,
-                                    modifier = Modifier.animateItem()
+                )
+                val pointerItem = pointerItems.item
+                val ticks = !pointerItems.clickSelection
+                val background = Modifier.pointerBackground(
+                    enabled = pointer,
+                    onClick = viewModel::clearSelection,
+                    onContextMenu = {},
+                    onBack = onBack
+                )
+                val isMedia: (Int) -> Boolean = { index ->
+                    index < media.itemCount && media.peek(index) is GalleryListItem.Media
+                }
+                val listKeyboard = rememberKeyboardCollection(mediaListState, isItem = isMedia)
+                val gridKeyboard = rememberKeyboardCollection(mediaGridState, state.gridSize, isMedia)
+                val selectIfNone: (Int) -> Unit = { index ->
+                    if (!state.selectionMode) mediaIdAt(index)?.let(viewModel::toggleSelection)
+                }
+                val shortcuts = CollectionShortcuts(
+                    onToggleSelect = { index -> mediaIdAt(index)?.let(viewModel::toggleSelection) },
+                    onSelectAll = viewModel::selectAll,
+                    onDelete = { index ->
+                        selectIfNone(index)
+                        if (viewModel.hasSelection()) confirmTrash = true
+                    },
+                    onRename = { index -> mediaIdAt(index)?.let(viewModel::requestRename) },
+                    onCut = { index ->
+                        selectIfNone(index)
+                        viewModel.cutSelected()
+                    },
+                    onBack = onBack,
+                    onClear = if (state.selectionMode) viewModel::clearSelection else null
+                )
+                RefreshableContent(
+                    isRefreshing = refreshing,
+                    onRefresh = viewModel::refresh,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    when {
+                        media.isInitialLoad || !state.loaded -> {
+                            val list = state.viewMode == ViewMode.LIST
+                            val edge = if (list) 8.dp else 12.dp
+                            GallerySkeleton(
+                                columns = state.gridSize,
+                                list = list,
+                                contentPadding = PaddingValues(
+                                    start = edge,
+                                    end = edge,
+                                    top = edge,
+                                    bottom = edge + padding.calculateBottomPadding() +
+                                            LocalBottomBarInset.current
                                 )
+                            )
+                        }
 
-                                is GalleryListItem.Media -> {
-                                    val file = item.file
-                                    FileListItem(
-                                        file = file,
-                                        selected = file.id in state.selection,
-                                        selectionMode = state.selectionMode,
-                                        onClick = {
-                                            if (state.selectionMode) {
-                                                viewModel.toggleSelection(file.id)
-                                            } else {
-                                                onOpenFile(file.id, previewSequence)
-                                            }
-                                        },
-                                        onLongClick = { viewModel.toggleSelection(file.id) },
-                                        modifier = Modifier
-                                            .keyboardCollectionItem(listKeyboard, index)
-                                            .animateItem()
+                        media.itemCount == 0 -> EmptyState(
+                            icon = Icons.Outlined.Photo,
+                            title = stringResource(Res.string.gallery_no_media),
+                            description = stringResource(Res.string.gallery_photos_videos_appear_here)
+                        )
+
+                        state.viewMode == ViewMode.LIST -> LazyColumn(
+                            state = mediaListState,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .keyboardCollection(
+                                    listKeyboard,
+                                    media.itemCount,
+                                    shortcuts,
+                                    label = stringResource(Res.string.nav_gallery)
+                                )
+                                .pinchZoom(
+                                    onZoomIn = viewModel::zoomIn,
+                                    onZoomOut = viewModel::zoomOut
+                                )
+                                .then(if (pointer) locator.modifier else listDragSelect)
+                                .then(background),
+                            contentPadding = PaddingValues(
+                                start = 8.dp,
+                                end = 8.dp,
+                                top = 8.dp,
+                                bottom = 8.dp + padding.calculateBottomPadding() + LocalBottomBarInset.current
+                            )
+                        ) {
+                            items(
+                                count = media.itemCount,
+                                key = media.itemKey { it.key }
+                            ) { index ->
+                                when (val item = media[index]) {
+                                    is GalleryListItem.DayHeader -> DayHeaderRow(
+                                        dayStartMillis = item.dayStartMillis,
+                                        modifier = Modifier.animateItem()
                                     )
-                                }
 
-                                null -> Unit
+                                    is GalleryListItem.Media -> {
+                                        val file = item.file
+                                        FileListItem(
+                                            file = file,
+                                            selected = file.id in state.selection,
+                                            checked = file.id in state.selection && ticks,
+                                            selectionMode = state.selectionMode,
+                                            onClick = {
+                                                if (state.selectionMode && !pointer) {
+                                                    viewModel.toggleSelection(file.id)
+                                                } else {
+                                                    onOpenFile(file.id, previewSequence)
+                                                }
+                                            },
+                                            onLongClick = { viewModel.toggleSelection(file.id) },
+                                            modifier = Modifier
+                                                .then(pointerItem(index))
+                                                .keyboardCollectionItem(listKeyboard, index)
+                                                .animateItem()
+                                        )
+                                    }
+
+                                    null -> Unit
+                                }
                             }
                         }
-                    }
 
-                    else -> LazyVerticalGrid(
-                        state = mediaGridState,
-                        columns = GridCells.Fixed(state.gridSize),
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .keyboardCollection(
-                                gridKeyboard,
-                                media.itemCount,
-                                shortcuts,
-                                label = stringResource(Res.string.nav_gallery)
-                            )
-                            .pinchZoom(
-                                onZoomIn = viewModel::zoomIn,
-                                onZoomOut = viewModel::zoomOut
-                            )
-                            .then(gridDragSelect),
-                        contentPadding = PaddingValues(
-                            start = 12.dp,
-                            end = 12.dp,
-                            top = 12.dp,
-                            bottom = 12.dp + padding.calculateBottomPadding() + LocalBottomBarInset.current
-                        ),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        items(
-                            count = media.itemCount,
-                            key = media.itemKey { it.key },
-                            span = { index ->
-                                if (media.peek(index) is GalleryListItem.DayHeader) {
-                                    GridItemSpan(maxLineSpan)
-                                } else {
-                                    GridItemSpan(1)
-                                }
-                            }
-                        ) { index ->
-                            when (val item = media[index]) {
-                                is GalleryListItem.DayHeader -> DayHeaderRow(
-                                    dayStartMillis = item.dayStartMillis,
-                                    modifier = Modifier.animateItem()
+                        else -> LazyVerticalGrid(
+                            state = mediaGridState,
+                            columns = GridCells.Fixed(state.gridSize),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .keyboardCollection(
+                                    gridKeyboard,
+                                    media.itemCount,
+                                    shortcuts,
+                                    label = stringResource(Res.string.nav_gallery)
                                 )
-
-                                is GalleryListItem.Media -> {
-                                    val file = item.file
-                                    FileGridItem(
-                                        file = file,
-                                        selected = file.id in state.selection,
-                                        compact = true,
-                                        onClick = {
-                                            if (state.selectionMode) {
-                                                viewModel.toggleSelection(file.id)
-                                            } else {
-                                                onOpenFile(file.id, previewSequence)
-                                            }
-                                        },
-                                        onLongClick = { viewModel.toggleSelection(file.id) },
-                                        modifier = Modifier
-                                            .keyboardCollectionItem(gridKeyboard, index)
-                                            .animateItem()
-                                    )
+                                .pinchZoom(
+                                    onZoomIn = viewModel::zoomIn,
+                                    onZoomOut = viewModel::zoomOut
+                                )
+                                .then(if (pointer) locator.modifier else gridDragSelect)
+                                .then(background),
+                            contentPadding = PaddingValues(
+                                start = 12.dp,
+                                end = 12.dp,
+                                top = 12.dp,
+                                bottom = 12.dp + padding.calculateBottomPadding() + LocalBottomBarInset.current
+                            ),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            items(
+                                count = media.itemCount,
+                                key = media.itemKey { it.key },
+                                span = { index ->
+                                    if (media.peek(index) is GalleryListItem.DayHeader) {
+                                        GridItemSpan(maxLineSpan)
+                                    } else {
+                                        GridItemSpan(1)
+                                    }
                                 }
+                            ) { index ->
+                                when (val item = media[index]) {
+                                    is GalleryListItem.DayHeader -> DayHeaderRow(
+                                        dayStartMillis = item.dayStartMillis,
+                                        modifier = Modifier.animateItem()
+                                    )
 
-                                null -> Unit
+                                    is GalleryListItem.Media -> {
+                                        val file = item.file
+                                        FileGridItem(
+                                            file = file,
+                                            selected = file.id in state.selection,
+                                            checked = file.id in state.selection && ticks,
+                                            compact = true,
+                                            onClick = {
+                                                if (state.selectionMode && !pointer) {
+                                                    viewModel.toggleSelection(file.id)
+                                                } else {
+                                                    onOpenFile(file.id, previewSequence)
+                                                }
+                                            },
+                                            onLongClick = { viewModel.toggleSelection(file.id) },
+                                            modifier = Modifier
+                                                .then(pointerItem(index))
+                                                .keyboardCollectionItem(gridKeyboard, index)
+                                                .animateItem()
+                                        )
+                                    }
+
+                                    null -> Unit
+                                }
                             }
                         }
                     }

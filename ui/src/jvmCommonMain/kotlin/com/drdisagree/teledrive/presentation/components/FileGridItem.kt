@@ -46,7 +46,8 @@ fun FileGridItem(
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     modifier: Modifier = Modifier,
-    compact: Boolean = false
+    compact: Boolean = false,
+    checked: Boolean = selected
 ) {
     Column(
         modifier = modifier
@@ -70,7 +71,7 @@ fun FileGridItem(
                     .fillMaxWidth()
                     .aspectRatio(1f)
             )
-            if (selected) {
+            if (checked) {
                 Icon(
                     imageVector = Icons.Filled.CheckCircle,
                     contentDescription = stringResource(Res.string.common_content_description_selected),

@@ -13,6 +13,7 @@ import com.drdisagree.teledrive.domain.usecase.MakeAvailableOfflineUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -39,6 +40,8 @@ class SearchViewModel(
 ) : ViewModel() {
 
     private val selection = MutableStateFlow<Set<String>>(emptySet())
+    private val _clickSelection = MutableStateFlow(false)
+    val clickSelection: StateFlow<Boolean> = _clickSelection.asStateFlow()
 
     private val query = MutableStateFlow("")
     private val filters = MutableStateFlow(SearchFilters())
@@ -112,13 +115,28 @@ class SearchViewModel(
         state.copy(selection = selected.intersect(state.results.map { it.id }.toSet()))
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SearchUiState())
 
-    fun toggleSelection(id: String) = selection.update { current ->
-        if (id in current) current - id else current + id
+    fun toggleSelection(id: String) {
+        _clickSelection.update { false }
+        selection.update { current -> if (id in current) current - id else current + id }
     }
 
-    fun clearSelection() = selection.update { emptySet() }
+    fun clearSelection() {
+        _clickSelection.update { false }
+        selection.update { emptySet() }
+    }
+
+    fun selectOnly(id: String, byClick: Boolean) {
+        _clickSelection.update { byClick }
+        selection.update { setOf(id) }
+    }
+
+    fun selectRange(ids: List<String>) {
+        _clickSelection.update { false }
+        selection.update { ids.toSet() }
+    }
 
     fun selectAll() {
+        _clickSelection.update { false }
         selection.value = uiState.value.results.map { it.id }.toSet()
     }
 

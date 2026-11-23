@@ -90,5 +90,6 @@ class OnboardingViewModelTest {
         override val supportsAppLock = false
         override val supportsScreenCaptureBlocking = false
         override val supportsDynamicColor = false
+        override val usesPointerSelection = false
     }
 }

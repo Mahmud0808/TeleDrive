@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.OfflinePin
 import androidx.compose.material.icons.filled.Star
@@ -30,6 +31,7 @@ import com.drdisagree.teledrive.domain.model.DriveFolder
 import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.common_content_description_available_offline
 import com.drdisagree.teledrive.resources.common_content_description_favorite
+import com.drdisagree.teledrive.resources.common_content_description_selected
 import com.drdisagree.teledrive.resources.common_select
 import org.jetbrains.compose.resources.stringResource
 
@@ -41,7 +43,8 @@ fun FolderRow(
     selected: Boolean = false,
     showFavorite: Boolean = true,
     showAvailableOffline: Boolean = true,
-    onLongClick: () -> Unit = {}
+    onLongClick: () -> Unit = {},
+    checked: Boolean = selected
 ) {
     val compact = LocalCompactLayout.current
     Row(
@@ -73,6 +76,16 @@ fun FolderRow(
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary
             )
+            if (checked) {
+                Icon(
+                    imageVector = Icons.Filled.CheckCircle,
+                    contentDescription = stringResource(Res.string.common_content_description_selected),
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .size(18.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
         }
         Spacer(Modifier.width(if (compact) 10.dp else 14.dp))
         Column(modifier = Modifier.weight(1f)) {

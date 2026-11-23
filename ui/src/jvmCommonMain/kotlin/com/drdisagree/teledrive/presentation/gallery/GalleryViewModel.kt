@@ -101,6 +101,8 @@ class GalleryViewModel(
     private val selection = MutableStateFlow<Set<String>>(emptySet())
     private var rangeBase: Set<String>? = null
     private val _allSelected = MutableStateFlow(false)
+    private val _clickSelection = MutableStateFlow(false)
+    val clickSelection: StateFlow<Boolean> = _clickSelection.asStateFlow()
     val allSelected: StateFlow<Boolean> = _allSelected.asStateFlow()
 
     private val spec: Flow<FileQuerySpec> = combine(
@@ -271,11 +273,13 @@ class GalleryViewModel(
 
     fun toggleSelection(id: String) {
         _allSelected.update { false }
+        _clickSelection.update { false }
         selection.update { if (id in it) it - id else it + id }
     }
 
     fun clearSelection() {
         _allSelected.update { false }
+        _clickSelection.update { false }
         selection.update { emptySet() }
     }
 
@@ -285,7 +289,20 @@ class GalleryViewModel(
         viewModelScope.launch {
             selection.update { fileRepository.fileIds(spec.first()).toSet() }
             _allSelected.update { true }
+            _clickSelection.update { false }
         }
+    }
+
+    fun selectOnly(id: String, byClick: Boolean) {
+        _allSelected.update { false }
+        _clickSelection.update { byClick }
+        selection.update { setOf(id) }
+    }
+
+    fun selectRange(ids: List<String>) {
+        _allSelected.update { false }
+        _clickSelection.update { false }
+        selection.update { ids.toSet() }
     }
 
     fun startRangeSelection() {
@@ -295,6 +312,7 @@ class GalleryViewModel(
     fun extendRangeSelection(ids: List<String>) {
         val base = rangeBase ?: return
         _allSelected.update { false }
+        _clickSelection.update { false }
         selection.update { base + ids }
     }
 

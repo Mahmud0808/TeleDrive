@@ -47,7 +47,8 @@ fun FileListItem(
     modifier: Modifier = Modifier,
     showFavorite: Boolean = true,
     showAvailableOffline: Boolean = true,
-    status: (@Composable () -> Unit)? = null
+    status: (@Composable () -> Unit)? = null,
+    checked: Boolean = selected
 ) {
     val compact = LocalCompactLayout.current
     val background = if (selected) {
@@ -79,7 +80,7 @@ fun FileListItem(
                     .size(if (compact) 38.dp else 48.dp)
                     .clip(MaterialTheme.shapes.medium)
             )
-            if (selected) {
+            if (checked) {
                 Icon(
                     imageVector = Icons.Filled.CheckCircle,
                     contentDescription = stringResource(Res.string.common_content_description_selected),

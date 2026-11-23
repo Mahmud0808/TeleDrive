@@ -39,6 +39,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -50,14 +53,19 @@ import com.drdisagree.teledrive.presentation.components.CollectionShortcuts
 import com.drdisagree.teledrive.presentation.components.EmptyState
 import com.drdisagree.teledrive.presentation.components.FileListItem
 import com.drdisagree.teledrive.presentation.components.FolderRow
+import com.drdisagree.teledrive.presentation.components.LazyIndexLocator
+import com.drdisagree.teledrive.presentation.components.MenuAction
+import com.drdisagree.teledrive.presentation.components.PointerMenu
 import com.drdisagree.teledrive.presentation.components.keyboardCollection
 import com.drdisagree.teledrive.presentation.components.keyboardCollectionItem
-import com.drdisagree.teledrive.presentation.components.MenuAction
 import com.drdisagree.teledrive.presentation.components.label
 import com.drdisagree.teledrive.presentation.components.liftedTopAppBarColors
+import com.drdisagree.teledrive.presentation.components.pointerBackground
 import com.drdisagree.teledrive.presentation.components.rememberKeyboardCollection
+import com.drdisagree.teledrive.presentation.components.rememberPointerItems
 import com.drdisagree.teledrive.presentation.components.rememberToolbarLift
 import com.drdisagree.teledrive.presentation.components.skeleton.CollectionSkeleton
+import com.drdisagree.teledrive.presentation.platform.LocalPlatformCapabilities
 import com.drdisagree.teledrive.presentation.preview.PreviewSequence
 import com.drdisagree.teledrive.resources.Res
 import com.drdisagree.teledrive.resources.app_backed_up
@@ -108,6 +116,54 @@ fun SearchScreen(
     val keyboard = rememberKeyboardCollection(listState) { index ->
         index >= fileStart || index in folderStart until folderStart + state.folders.size
     }
+    val selectionActions = if (state.selectionMode) {
+        searchSelectionActions(state, viewModel, onOpenFolder)
+    } else {
+        emptyList()
+    }
+    val pointer = LocalPlatformCapabilities.current.usesPointerSelection
+    var contextMenuAt by remember { mutableStateOf<Offset?>(null) }
+    var screenOrigin by remember { mutableStateOf(Offset.Zero) }
+    var contextCreatedSelection by remember { mutableStateOf(false) }
+    val resultIdAt: (Int) -> String? = { index -> state.results.getOrNull(index)?.id }
+    val openResult: (Int) -> Unit = { index ->
+        state.results.getOrNull(index)?.let { file ->
+            onOpenFile(
+                file.id,
+                PreviewSequence(
+                    nameQuery = state.query.takeIf { it.isNotBlank() },
+                    categories = state.filters.category
+                        ?.let { category -> listOf(category) }
+                        .orEmpty(),
+                    sortField = state.filters.sortField,
+                    sortDirection = state.filters.sortDirection
+                )
+            )
+        }
+    }
+    val locator = remember { LazyIndexLocator() }
+    val clickSelection by viewModel.clickSelection.collectAsStateWithLifecycle()
+    val pointerItems = rememberPointerItems(
+        resetKey = state.query,
+        selectionActive = state.selectionMode,
+        itemCount = state.results.size,
+        clickSelection = clickSelection,
+        isSelected = { index -> resultIdAt(index) in state.selection },
+        selectOnly = { index, byClick ->
+            resultIdAt(index)?.let { viewModel.selectOnly(it, byClick) }
+        },
+        toggle = { index -> resultIdAt(index)?.let(viewModel::toggleSelection) },
+        selectRange = { range -> viewModel.selectRange(range.mapNotNull(resultIdAt)) },
+        open = openResult,
+        isSelectable = { resultIdAt(it) != null },
+        indexAt = { at -> locator.indexAt(listState, at)?.let { it - fileStart } },
+        onContextMenu = { at, created ->
+            contextMenuAt = at
+            contextCreatedSelection = created
+        }
+    )
+    val pointerItem = pointerItems.item
+    val ticks = !pointerItems.clickSelection
     val shortcuts = CollectionShortcuts(
         onToggleSelect = { index -> fileIdAt(index)?.let(viewModel::toggleSelection) },
         onSelectAll = viewModel::selectAll,
@@ -119,180 +175,203 @@ fun SearchScreen(
         onClear = if (state.selectionMode) viewModel::clearSelection else null
     )
 
-    Scaffold(
-        topBar = {
-            if (state.selectionMode) {
-                SearchSelectionBar(
-                    state = state,
-                    lifted = lifted,
-                    menuExpanded = showSelectionMenu,
-                    onMenuExpandedChange = { showSelectionMenu = it },
-                    viewModel = viewModel,
-                    onOpenFolder = onOpenFolder
-                )
-            } else {
-                TopAppBar(
-                    colors = liftedTopAppBarColors(lifted),
-                    title = {
-                        OutlinedTextField(
-                            value = state.query,
-                            onValueChange = viewModel::setQuery,
-                            placeholder = { Text(stringResource(Res.string.app_search_files)) },
-                            singleLine = true,
-                            modifier = Modifier.fillMaxWidth(),
-                            trailingIcon = {
-                                if (state.query.isNotEmpty()) {
-                                    IconButton(onClick = { viewModel.setQuery("") }) {
-                                        Icon(
-                                            Icons.Filled.Close,
-                                            contentDescription = stringResource(Res.string.common_clear)
-                                        )
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .onGloballyPositioned { screenOrigin = it.positionInRoot() }
+    ) {
+        PointerMenu(
+            at = contextMenuAt?.minus(screenOrigin),
+            actions = selectionActions,
+            onDismiss = { acted ->
+                contextMenuAt = null
+                if (!acted && contextCreatedSelection) viewModel.clearSelection()
+            }
+        )
+        Scaffold(
+            topBar = {
+                if (state.selectionMode) {
+                    SearchSelectionBar(
+                        state = state,
+                        lifted = lifted,
+                        menuExpanded = showSelectionMenu,
+                        onMenuExpandedChange = { showSelectionMenu = it },
+                        viewModel = viewModel,
+                        actions = selectionActions
+                    )
+                } else {
+                    TopAppBar(
+                        colors = liftedTopAppBarColors(lifted),
+                        title = {
+                            OutlinedTextField(
+                                value = state.query,
+                                onValueChange = viewModel::setQuery,
+                                placeholder = { Text(stringResource(Res.string.app_search_files)) },
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth(),
+                                trailingIcon = {
+                                    if (state.query.isNotEmpty()) {
+                                        IconButton(onClick = { viewModel.setQuery("") }) {
+                                            Icon(
+                                                Icons.Filled.Close,
+                                                contentDescription = stringResource(Res.string.common_clear)
+                                            )
+                                        }
                                     }
                                 }
-                            }
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = onBack) {
-                            Icon(
-                                Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(Res.string.common_back)
-                            )
-                        }
-                    }
-                )
-            }
-        }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = padding.calculateTopPadding())
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState())
-                    .padding(horizontal = 12.dp, vertical = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                FilterChip(
-                    selected = state.filters.backedUpOnly,
-                    onClick = { viewModel.setBackedUpOnly(!state.filters.backedUpOnly) },
-                    label = { Text(stringResource(Res.string.app_backed_up)) }
-                )
-                FilterChip(
-                    selected = state.filters.notBackedUpOnly,
-                    onClick = { viewModel.setNotBackedUpOnly(!state.filters.notBackedUpOnly) },
-                    label = { Text(stringResource(Res.string.app_not_backed_up)) }
-                )
-                FileCategory.entries.filter { it != FileCategory.OTHER }.forEach { category ->
-                    FilterChip(
-                        selected = state.filters.category == category,
-                        onClick = {
-                            viewModel.setCategory(
-                                if (state.filters.category == category) null else category
                             )
                         },
-                        label = { Text(category.label()) }
+                        navigationIcon = {
+                            IconButton(onClick = onBack) {
+                                Icon(
+                                    Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = stringResource(Res.string.common_back)
+                                )
+                            }
+                        }
                     )
                 }
             }
-
-            when {
-                state.searching -> CollectionSkeleton(
-                    columns = 1,
-                    contentPadding = PaddingValues(
-                        start = 12.dp,
-                        end = 12.dp,
-                        top = 12.dp,
-                        bottom = 12.dp + padding.calculateBottomPadding()
-                    )
-                )
-                !state.searched -> EmptyState(
-                    icon = Icons.Outlined.Search,
-                    title = stringResource(Res.string.app_search_drive),
-                    description = stringResource(Res.string.app_search_name_filter_type)
-                )
-
-                state.results.isEmpty() && state.folders.isEmpty() -> EmptyState(
-                    icon = Icons.Outlined.Search,
-                    title = stringResource(Res.string.app_no_results),
-                    description = stringResource(Res.string.app_nothing_matches_search)
-                )
-
-                else -> LazyColumn(
-                    state = listState,
+        ) { padding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = padding.calculateTopPadding())
+            ) {
+                Row(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .keyboardCollection(
-                            keyboard,
-                            state.folders.size + state.results.size,
-                            shortcuts
-                        ),
-                    contentPadding = PaddingValues(
-                        start = 12.dp,
-                        end = 12.dp,
-                        top = 12.dp,
-                        bottom = 12.dp + padding.calculateBottomPadding()
-                    )
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState())
+                        .padding(horizontal = 12.dp, vertical = 4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    if (state.folders.isNotEmpty()) {
-                        item(key = "folders_header") {
-                            SearchSectionHeader(
-                                title = stringResource(Res.string.search_section_folders),
-                                modifier = Modifier.animateItem()
+                    FilterChip(
+                        selected = state.filters.backedUpOnly,
+                        onClick = { viewModel.setBackedUpOnly(!state.filters.backedUpOnly) },
+                        label = { Text(stringResource(Res.string.app_backed_up)) }
+                    )
+                    FilterChip(
+                        selected = state.filters.notBackedUpOnly,
+                        onClick = { viewModel.setNotBackedUpOnly(!state.filters.notBackedUpOnly) },
+                        label = { Text(stringResource(Res.string.app_not_backed_up)) }
+                    )
+                    FileCategory.entries.filter { it != FileCategory.OTHER }.forEach { category ->
+                        FilterChip(
+                            selected = state.filters.category == category,
+                            onClick = {
+                                viewModel.setCategory(
+                                    if (state.filters.category == category) null else category
+                                )
+                            },
+                            label = { Text(category.label()) }
+                        )
+                    }
+                }
+
+                when {
+                    state.searching -> CollectionSkeleton(
+                        columns = 1,
+                        contentPadding = PaddingValues(
+                            start = 12.dp,
+                            end = 12.dp,
+                            top = 12.dp,
+                            bottom = 12.dp + padding.calculateBottomPadding()
+                        )
+                    )
+                    !state.searched -> EmptyState(
+                        icon = Icons.Outlined.Search,
+                        title = stringResource(Res.string.app_search_drive),
+                        description = stringResource(Res.string.app_search_name_filter_type)
+                    )
+
+                    state.results.isEmpty() && state.folders.isEmpty() -> EmptyState(
+                        icon = Icons.Outlined.Search,
+                        title = stringResource(Res.string.app_no_results),
+                        description = stringResource(Res.string.app_nothing_matches_search)
+                    )
+
+                    else -> LazyColumn(
+                        state = listState,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .keyboardCollection(
+                                keyboard,
+                                state.folders.size + state.results.size,
+                                shortcuts
                             )
-                        }
-                        itemsIndexed(state.folders, key = { _, it -> "folder_${it.id}" }) { index, folder ->
-                            FolderRow(
-                                folder = folder,
-                                onClick = { onOpenFolder(folder.id, null) },
-                                modifier = Modifier
-                                    .keyboardCollectionItem(keyboard, folderStart + index, index)
-                                    .animateItem()
-                            )
-                        }
-                        if (state.results.isNotEmpty()) {
-                            item(key = "files_header") {
+                            .then(locator.modifier)
+                        .pointerBackground(
+                                enabled = pointer,
+                                onClick = viewModel::clearSelection,
+                                onContextMenu = {},
+                                onBack = onBack
+                            ),
+                        contentPadding = PaddingValues(
+                            start = 12.dp,
+                            end = 12.dp,
+                            top = 12.dp,
+                            bottom = 12.dp + padding.calculateBottomPadding()
+                        )
+                    ) {
+                        if (state.folders.isNotEmpty()) {
+                            item(key = "folders_header") {
                                 SearchSectionHeader(
-                                    title = stringResource(Res.string.search_section_files),
+                                    title = stringResource(Res.string.search_section_folders),
                                     modifier = Modifier.animateItem()
                                 )
                             }
-                        }
-                    }
-                    itemsIndexed(state.results, key = { _, it -> it.id }) { index, file ->
-                        FileListItem(
-                            file = file,
-                            selected = file.id in state.selection,
-                            selectionMode = state.selectionMode,
-                            onClick = {
-                                if (state.selectionMode) {
-                                    viewModel.toggleSelection(file.id)
-                                } else {
-                                    onOpenFile(
-                                        file.id,
-                                        PreviewSequence(
-                                            nameQuery = state.query.takeIf { it.isNotBlank() },
-                                            categories = state.filters.category
-                                                ?.let { category -> listOf(category) }
-                                                .orEmpty(),
-                                            sortField = state.filters.sortField,
-                                            sortDirection = state.filters.sortDirection
-                                        )
+                            itemsIndexed(state.folders, key = { _, it -> "folder_${it.id}" }) { index, folder ->
+                                FolderRow(
+                                    folder = folder,
+                                    onClick = { onOpenFolder(folder.id, null) },
+                                    modifier = Modifier
+                                        .keyboardCollectionItem(keyboard, folderStart + index, index)
+                                        .animateItem()
+                                )
+                            }
+                            if (state.results.isNotEmpty()) {
+                                item(key = "files_header") {
+                                    SearchSectionHeader(
+                                        title = stringResource(Res.string.search_section_files),
+                                        modifier = Modifier.animateItem()
                                     )
                                 }
-                            },
-                            onLongClick = { viewModel.toggleSelection(file.id) },
-                            modifier = Modifier
-                                .keyboardCollectionItem(
-                                    keyboard,
-                                    fileStart + index,
-                                    state.folders.size + index
-                                )
-                                .animateItem()
-                        )
+                            }
+                        }
+                        itemsIndexed(state.results, key = { _, it -> it.id }) { index, file ->
+                            FileListItem(
+                                file = file,
+                                selected = file.id in state.selection,
+                                checked = file.id in state.selection && ticks,
+                                selectionMode = state.selectionMode,
+                                onClick = {
+                                    if (state.selectionMode && !pointer) {
+                                        viewModel.toggleSelection(file.id)
+                                    } else {
+                                        onOpenFile(
+                                            file.id,
+                                            PreviewSequence(
+                                                nameQuery = state.query.takeIf { it.isNotBlank() },
+                                                categories = state.filters.category
+                                                    ?.let { category -> listOf(category) }
+                                                    .orEmpty(),
+                                                sortField = state.filters.sortField,
+                                                sortDirection = state.filters.sortDirection
+                                            )
+                                        )
+                                    }
+                                },
+                                onLongClick = { viewModel.toggleSelection(file.id) },
+                                modifier = Modifier
+                                    .then(pointerItem(index))
+                                    .keyboardCollectionItem(
+                                        keyboard,
+                                        fileStart + index,
+                                        state.folders.size + index
+                                    )
+                                    .animateItem()
+                            )
+                        }
                     }
                 }
             }
@@ -300,19 +379,15 @@ fun SearchScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SearchSelectionBar(
+private fun searchSelectionActions(
     state: SearchUiState,
-    lifted: Boolean,
-    menuExpanded: Boolean,
-    onMenuExpandedChange: (Boolean) -> Unit,
     viewModel: SearchViewModel,
     onOpenFolder: (String, String?) -> Unit
-) {
+): List<MenuAction> {
     val selectedFile = state.selectedFiles.singleOrNull()
     val folderId = selectedFile?.folderId
-    val actions = buildList {
+    return buildList {
         if (folderId != null && selectedFile?.isArchived != true) {
             add(
                 MenuAction(
@@ -357,16 +432,33 @@ private fun SearchSelectionBar(
             ) { viewModel.trashSelected() }
         )
     }
+}
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SearchSelectionBar(
+    state: SearchUiState,
+    lifted: Boolean,
+    menuExpanded: Boolean,
+    onMenuExpandedChange: (Boolean) -> Unit,
+    viewModel: SearchViewModel,
+    actions: List<MenuAction>
+) {
+    val clickSelected by viewModel.clickSelection.collectAsStateWithLifecycle()
+    val plainClick = LocalPlatformCapabilities.current.usesPointerSelection && clickSelected
     TopAppBar(
         colors = liftedTopAppBarColors(lifted),
-        title = { Text(state.selection.size.toString()) },
+        title = {
+            if (!plainClick) Text(state.selection.size.toString())
+        },
         navigationIcon = {
-            IconButton(onClick = viewModel::clearSelection) {
-                Icon(
-                    Icons.Filled.Close,
-                    contentDescription = stringResource(Res.string.common_clear)
-                )
+            if (!plainClick) {
+                IconButton(onClick = viewModel::clearSelection) {
+                    Icon(
+                        Icons.Filled.Close,
+                        contentDescription = stringResource(Res.string.common_clear)
+                    )
+                }
             }
         },
         actions = {
