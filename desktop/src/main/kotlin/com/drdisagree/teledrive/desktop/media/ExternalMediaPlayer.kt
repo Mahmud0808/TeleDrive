@@ -10,9 +10,23 @@ class ExternalMediaPlayer {
 
     fun play(url: String): Boolean {
         candidates().firstOrNull { File(it).exists() }?.let { player ->
-            if (runCatching { ProcessBuilder(player, url).start() }.isSuccess) return true
+            if (runCatching { launch(player, url) }.isSuccess) return true
         }
         return runCatching { Desktop.getDesktop().browse(URI(url)) }.isSuccess
+    }
+
+    private fun launch(player: String, url: String) {
+        val bundle = player.substringBefore(".app/", "")
+            .takeIf { Platform.isMac() && it.isNotEmpty() }
+        val command = if (bundle != null) {
+            listOf("open", "-a", "$bundle.app", url)
+        } else {
+            listOf(player, url)
+        }
+        ProcessBuilder(command)
+            .redirectOutput(ProcessBuilder.Redirect.DISCARD)
+            .redirectError(ProcessBuilder.Redirect.DISCARD)
+            .start()
     }
 
     private fun candidates(): List<String> = when {

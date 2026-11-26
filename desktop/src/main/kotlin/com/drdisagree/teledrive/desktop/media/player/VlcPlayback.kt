@@ -3,6 +3,7 @@ package com.drdisagree.teledrive.desktop.media.player
 import com.drdisagree.teledrive.core.common.SafeLog
 import com.sun.jna.NativeLibrary
 import java.io.File
+import uk.co.caprica.vlcj.binding.support.runtime.RuntimeUtil
 import uk.co.caprica.vlcj.factory.MediaPlayerFactory
 import uk.co.caprica.vlcj.factory.discovery.NativeDiscovery
 
@@ -24,8 +25,14 @@ object VlcPlayback {
         val bundle = bundled()
         return if (bundle != null) {
             bundle.plugins?.let { setPluginPath(it) }
-            NativeLibrary.addSearchPath("libvlc", bundle.libraries.absolutePath)
-            NativeLibrary.addSearchPath("libvlccore", bundle.libraries.absolutePath)
+            NativeLibrary.addSearchPath(
+                RuntimeUtil.getLibVlcLibraryName(),
+                bundle.libraries.absolutePath
+            )
+            NativeLibrary.addSearchPath(
+                RuntimeUtil.getLibVlcCoreLibraryName(),
+                bundle.libraries.absolutePath
+            )
             MediaPlayerFactory(null as NativeDiscovery?, LIBVLC_ARGS)
         } else {
             MediaPlayerFactory(NativeDiscovery(), LIBVLC_ARGS)
